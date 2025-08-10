@@ -36,8 +36,9 @@ public class AuthFilters implements GlobalFilter, Ordered {
 
     @NonFinal
     private String[] publicEndpoints = {
-            "/auth/auth/.*",
-            "/auth/users/register"
+        "/auth/auth/.*",
+        "/auth/users/register",
+        "/notification/email/.*"
     };
 
     @Value("${app.api-prefix}")
@@ -74,9 +75,9 @@ public class AuthFilters implements GlobalFilter, Ordered {
 
     Mono<Void> unauthenticated(ServerHttpResponse response){
         ApiResponse<?> apiResponse = ApiResponse.builder()
-                .code(1401)
-                .message("Unauthenticated")
-                .build();
+            .code(1401)
+            .message("Unauthenticated")
+            .build();
 
         String body = null;
         try {
