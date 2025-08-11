@@ -1,8 +1,8 @@
 package com.tlaq.main_service.repositories.httpClient;
 
-import com.tlaq.main_service.dto.identity.TokenExchangeParam;
-import com.tlaq.main_service.dto.identity.TokenExchangeResponse;
-import com.tlaq.main_service.dto.identity.UserCreationParam;
+import com.tlaq.main_service.dto.keycloak.*;
+import com.tlaq.main_service.dto.responses.IntrospectResponse;
+import com.tlaq.main_service.dto.responses.TokenResponse;
 import feign.QueryMap;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
@@ -20,4 +20,12 @@ public interface KeyCloakClient {
 
     @PostMapping(value = "/admin/realms/anhqui/users", consumes = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<?> createUser(@RequestHeader("authorization") String token, @RequestBody UserCreationParam param);
+
+    @PostMapping(value = "/realms/anhqui/protocol/openid-connect/token",
+            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    TokenResponse login(@QueryMap Authenticated request);
+
+    @PostMapping(value = "/realms/anhqui/protocol/openid-connect/token/introspect",
+            consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+    IntrospectResponse introspect(@RequestBody IntrospectRequest request);
 }

@@ -1,7 +1,7 @@
 server:
     port: 8080
     servlet:
-        context-path: /auth
+        context-path: /ecommer-car-web
 
 spring:
     application:
@@ -35,10 +35,6 @@ cloudinary:
     api-key: 947875495844325
     api-secret: evQEPk5TbxIMpCWbbXl8sLMbo6A
 
-#jwt:
-#    signerKey: "1TjXchw5FloESb63Kc+DFhTARvpWL4jUGCwfGWxuG5SIf/1y/LgJxHnMqaF6A/ij"
-#    valid-duration: 3600
-#    refreshable-duration: 36000
 
 idp:
     url: http://localhost:8180

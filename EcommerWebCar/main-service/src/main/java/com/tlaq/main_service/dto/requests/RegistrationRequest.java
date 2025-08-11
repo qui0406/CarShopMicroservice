@@ -1,6 +1,5 @@
 package com.tlaq.main_service.dto.requests;
 
-//import com.tlaq.auth.validator.DobConstraint;
 import com.tlaq.main_service.validators.DobConstraint;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -33,7 +32,6 @@ public class RegistrationRequest {
     boolean sex;
     String phone;
 
-    MultipartFile avatar;
     @DobConstraint(min = 10, message = "INVALID_DOB")
     LocalDate dob;
 

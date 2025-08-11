@@ -12,13 +12,16 @@ import java.time.LocalDate;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ProfileResponse {
-    String profileId;
-    String userId;
+    String id;
+    String userKeyCloakId;
     String email;
     String username;
     String firstName;
     String lastName;
+    String phone;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     LocalDate dob;
+    String address;
+    String avatar;
 }

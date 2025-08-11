@@ -1,5 +1,6 @@
 package com.tlaq.main_service.entity;
 
+import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -13,13 +14,24 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-@Document("profile")
+@Entity
+@Table(name="profile")
 public class Profile {
-    String profileId;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    String id;
+    @Column(unique = true)
     String userKeyCloakId;
+    @Column(unique = true)
     String email;
+    @Column(unique = true)
     String username;
     String firstName;
     String lastName;
+    String phone;
     LocalDate dob;
+    boolean sex;
+    String avatar;
+    String address;
+    boolean active;
 }
