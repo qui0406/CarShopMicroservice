@@ -1,10 +1,12 @@
 package com.tlaq.main_service.services.impl;
 
-import com.tlaq.main_service.dto.identity.Credential;
-import com.tlaq.main_service.dto.identity.TokenExchangeParam;
-import com.tlaq.main_service.dto.identity.UserCreationParam;
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
+import com.tlaq.main_service.dto.keycloak.*;
 import com.tlaq.main_service.dto.requests.RegistrationRequest;
+import com.tlaq.main_service.dto.responses.IntrospectResponse;
 import com.tlaq.main_service.dto.responses.ProfileResponse;
+import com.tlaq.main_service.dto.responses.TokenResponse;
 import com.tlaq.main_service.exceptions.AppException;
 import com.tlaq.main_service.exceptions.ErrorCode;
 import com.tlaq.main_service.exceptions.ErrorNormalizer;
@@ -22,8 +24,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @Slf4j
@@ -34,6 +39,7 @@ public class ProfileServiceImpl implements ProfileService {
     ProfileMapper profileMapper;
     KeyCloakClient identityClient;
     ErrorNormalizer errorNormalizer;
+    Cloudinary cloudinary;
 
     @Value("${idp.client-id}")
     @NonFinal
@@ -47,10 +53,29 @@ public class ProfileServiceImpl implements ProfileService {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         String userId = authentication.getName();
 
-        var profile = profileRepository.findByUserId(userId).orElseThrow(
+        var profile = profileRepository.findByUserKeyCloakId(userId).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
+        log.info("hfshaf :{}",profile.getUserKeyCloakId());
+
         return profileMapper.toProfileResponse(profile);
+    }
+
+    @Override
+    public TokenResponse login(LoginRequest request) {
+        Authenticated auth = Authenticated.builder()
+                .client_id(clientId)
+                .client_secret(clientSecret)
+                .grant_type("password")
+                .username(request.getUsername())
+                .password(request.getPassword())
+                .build();
+        return identityClient.login(auth);
+    }
+
+    @Override
+    public IntrospectResponse introspect(IntrospectRequest request) {
+        return identityClient.introspect(request);
     }
 
     public List<ProfileResponse> getAllProfiles() {
@@ -58,10 +83,12 @@ public class ProfileServiceImpl implements ProfileService {
         return profiles.stream().map(profileMapper::toProfileResponse).toList();
     }
 
-    public ProfileResponse register(RegistrationRequest request) {
+
+    @Override
+    public ProfileResponse register(RegistrationRequest request, MultipartFile avatar) {
         try {
-            // Create account in KeyCloak
-            // Exchange client Token
+
+
             var token = identityClient.exchangeToken(TokenExchangeParam.builder()
                     .grant_type("client_credentials")
                     .client_id(clientId)
@@ -92,12 +119,27 @@ public class ProfileServiceImpl implements ProfileService {
             String userId = extractUserId(creationResponse);
             log.info("UserId {}", userId);
 
+
+
             var profile = profileMapper.toProfile(request);
             profile.setUserKeyCloakId(userId);
+            profile.setAddress(request.getAddress());
+
+            if (!avatar.isEmpty()) {
+                try {
+                    Map res = cloudinary.uploader().upload(avatar.getBytes(), ObjectUtils.asMap("resource_type", "auto"));
+                    profile.setAvatar(res.get("secure_url").toString());
+                } catch (IOException ex) {
+                    return null;
+                }
+            }
+
 
             profile = profileRepository.save(profile);
 
-            return profileMapper.toProfileResponse(profile);
+            ProfileResponse profileResponse = profileMapper.toProfileResponse(profile);
+
+            return profileResponse;
         } catch (FeignException exception) {
             throw errorNormalizer.handleKeyCloakException(exception);
         }

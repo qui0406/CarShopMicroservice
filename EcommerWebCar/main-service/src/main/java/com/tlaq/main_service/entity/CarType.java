@@ -1,0 +1,20 @@
+package com.tlaq.main_service.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+@Entity
+@Table(name="car_type")
+public class CarType {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    String id;
+    String name;
+}

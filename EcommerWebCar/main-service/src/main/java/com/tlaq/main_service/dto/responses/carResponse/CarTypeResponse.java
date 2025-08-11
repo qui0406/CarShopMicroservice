@@ -1,4 +1,4 @@
-package com.tlaq.main_service.dto.responses;
+package com.tlaq.main_service.dto.responses.carResponse;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -7,8 +7,8 @@ import lombok.experimental.FieldDefaults;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class IntrospectResponse {
-    boolean isValid;
+public class CarTypeResponse {
+    String id;
+    String name;
 }

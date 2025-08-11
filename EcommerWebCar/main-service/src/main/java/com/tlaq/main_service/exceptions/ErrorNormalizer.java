@@ -2,7 +2,7 @@ package com.tlaq.main_service.exceptions;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tlaq.main_service.dto.identity.KeyCloakError;
+import com.tlaq.main_service.dto.keycloak.KeyCloakError;
 import feign.FeignException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

@@ -35,10 +35,9 @@ public class AuthFilters implements GlobalFilter, Ordered {
     ObjectMapper objectMapper;
 
     @NonFinal
-    private String[] publicEndpoints = {
-        "/auth/auth/.*",
-        "/auth/users/register",
-        "/notification/email/.*"
+    private final String[] PUBLIC_ENDPOINTS = {
+        "/ecommer-car-web/profile/register", "/ecommer-car-web/profile/login",
+            "/ecommer-car-web/profile/profiles",
     };
 
     @Value("${app.api-prefix}")
@@ -94,7 +93,7 @@ public class AuthFilters implements GlobalFilter, Ordered {
     }
 
     private boolean isPublicEndpoint(ServerHttpRequest request){
-        return Arrays.stream(publicEndpoints)
+        return Arrays.stream(PUBLIC_ENDPOINTS)
                 .anyMatch(s -> request.getURI().getPath().matches(apiPrefix + s));
     }
 }

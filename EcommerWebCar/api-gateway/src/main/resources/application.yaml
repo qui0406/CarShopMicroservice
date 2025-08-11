@@ -13,11 +13,11 @@ spring:
             - id: main-service
               uri: http://localhost:8080
               predicates:
-                - Path=${app.api-prefix}/auth/**
+                - Path=${app.api-prefix}/ecommer-car-web/**
               filters:
                 - StripPrefix=2
             - id: notification-service
-              uri: http://localhost:8082
+              uri: http://localhost:8081
               predicates:
                 - Path=${app.api-prefix}/notification/**
               filters:

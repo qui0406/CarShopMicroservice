@@ -1,19 +1,21 @@
 package com.tlaq.main_service.controllers;
 
 import com.tlaq.main_service.dto.ApiResponse;
-import com.tlaq.main_service.dto.identity.AuthenticationRequest;
+import com.tlaq.main_service.dto.keycloak.IntrospectRequest;
+import com.tlaq.main_service.dto.keycloak.LoginRequest;
 import com.tlaq.main_service.dto.requests.RegistrationRequest;
+import com.tlaq.main_service.dto.responses.IntrospectResponse;
 import com.tlaq.main_service.dto.responses.ProfileResponse;
+import com.tlaq.main_service.dto.responses.TokenResponse;
 import com.tlaq.main_service.services.ProfileService;
 import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -21,23 +23,32 @@ import java.util.List;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
+@RequestMapping("/profile")
 public class ProfileController {
     ProfileService profileService;
 
     @PostMapping("/register")
-    public ApiResponse<ProfileResponse> register(@RequestBody @Valid RegistrationRequest request) {
+    public ApiResponse<ProfileResponse> register(@ModelAttribute @Valid RegistrationRequest request, MultipartFile avatar) {
         return ApiResponse.<ProfileResponse>builder()
-                .result(profileService.register(request))
+                .result(profileService.register(request, avatar))
                 .build();
     }
 
     @PostMapping("/login")
-    public ApiResponse<?> login(@RequestBody AuthenticationRequest request){
-        return ApiResponse.builder()
-                .result(true)
+    public ApiResponse<TokenResponse> login(@RequestBody LoginRequest request) {
+        return ApiResponse.<TokenResponse>builder()
+                .result(profileService.login(request))
                 .build();
     }
 
+    @PostMapping("/introspect")
+    public ApiResponse<IntrospectResponse> introspect(@RequestBody IntrospectRequest request) {
+        return ApiResponse.<IntrospectResponse>builder()
+                .result(profileService.introspect(request))
+                .build();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/profiles")
     public ApiResponse<List<ProfileResponse>> getAllProfiles() {
         return ApiResponse.<List<ProfileResponse>>builder()
