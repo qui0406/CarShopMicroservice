@@ -6,8 +6,10 @@
     <file url="file://$PROJECT_DIR$/auth-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/config-server/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/eureka-server/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/fraud-detection-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/main-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/notification-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/payment-service/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/profile-service/src/main/java" charset="UTF-8" />
   </component>
 </project>

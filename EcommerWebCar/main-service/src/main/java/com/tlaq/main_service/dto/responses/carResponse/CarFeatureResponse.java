@@ -9,7 +9,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CarFeatureResponse {
-    String id;
+    Long id;
     String mayDieuHoa;
     String manHinh;
     String ghe;

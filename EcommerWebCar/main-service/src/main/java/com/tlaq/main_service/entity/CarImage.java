@@ -15,6 +15,6 @@ import lombok.experimental.FieldDefaults;
 public class CarImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    String id;
+    Long id;
     String image;
 }

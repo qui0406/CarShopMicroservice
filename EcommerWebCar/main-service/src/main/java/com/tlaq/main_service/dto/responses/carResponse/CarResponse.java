@@ -4,7 +4,9 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Data
 @NoArgsConstructor
@@ -15,8 +17,10 @@ public class CarResponse {
      String id;
      String name;
      LocalDate year;
+     LocalDateTime createdAt;
+     LocalDateTime updatedAt;
      CarTypeResponse carType;
      CarFeatureResponse carFeature;
      CarServiceResponse carService;
-     List<CarImageResponse> carImage;
+     List<String> carImage;
 }

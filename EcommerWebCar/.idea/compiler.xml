@@ -29,8 +29,9 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="eureka-server" />
+        <module name="fraud-detection-service" />
       </profile>
-      <profile name="Annotation profile for notification-service" enabled="true">
+      <profile name="Annotation profile for payment-service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -39,6 +40,7 @@
         </processorPath>
         <module name="config-server" />
         <module name="notification-service" />
+        <module name="payment-service" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
@@ -55,7 +57,9 @@
       <module name="auth-service (1)" options="-parameters" />
       <module name="config-server" options="-parameters" />
       <module name="eureka-server" options="-parameters" />
+      <module name="fraud-detection-service" options="-parameters" />
       <module name="notification-service" options="-parameters" />
+      <module name="payment-service" options="-parameters" />
       <module name="profile-service" options="-parameters" />
     </option>
   </component>

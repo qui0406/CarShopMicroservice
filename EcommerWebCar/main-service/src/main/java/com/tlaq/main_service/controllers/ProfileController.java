@@ -28,7 +28,8 @@ public class ProfileController {
     ProfileService profileService;
 
     @PostMapping("/register")
-    public ApiResponse<ProfileResponse> register(@ModelAttribute @Valid RegistrationRequest request, MultipartFile avatar) {
+    public ApiResponse<ProfileResponse> register(@ModelAttribute @Valid RegistrationRequest request,
+                                                 MultipartFile avatar) {
         return ApiResponse.<ProfileResponse>builder()
                 .result(profileService.register(request, avatar))
                 .build();
@@ -60,6 +61,13 @@ public class ProfileController {
     public ApiResponse<ProfileResponse> getMyProfiles() {
         return ApiResponse.<ProfileResponse>builder()
                 .result(profileService.getMyProfile())
+                .build();
+    }
+
+    @GetMapping("/get-profile/{userKeyCloakId}")
+    public ApiResponse<ProfileResponse> getProfile(@PathVariable String userKeyCloakId) {
+        return ApiResponse.<ProfileResponse>builder()
+                .result(profileService.getProfileByKeyCloakId(userKeyCloakId))
                 .build();
     }
 }
