@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatusCode;
 @Getter
 public enum ErrorCode {
     UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
-    INVALID_KEY(1001, "Uncategorized error", HttpStatus.BAD_REQUEST),
+    INVALID_KEY(1001, "Invalid key", HttpStatus.BAD_REQUEST),
     USER_EXISTED(1002, "User existed", HttpStatus.BAD_REQUEST),
     USERNAME_INVALID(1003, "Username must be at least {min} characters", HttpStatus.BAD_REQUEST),
     INVALID_PASSWORD(1004, "Password must be at least {min} characters", HttpStatus.BAD_REQUEST),
@@ -22,6 +22,17 @@ public enum ErrorCode {
     ROLE_NOT_FOUND(1012, "Role not found", HttpStatus.NOT_FOUND),
     PERMISSION_NOT_FOUND(1013, "Permission not found", HttpStatus.NOT_FOUND),
     USERNAME_IS_MISSING(1014, "Enter username", HttpStatus.BAD_REQUEST),
+    REQUEST_CAR_IS_EMPTY(1015, "Car is empty", HttpStatus.BAD_REQUEST),
+    CAR_TYPE_NOT_EXISTED(1016, "Car type not existed", HttpStatus.BAD_REQUEST),
+    IMAGE_IS_EMPTY(1017, "Image is empty", HttpStatus.BAD_REQUEST),
+    UPLOAD_IMAGE_ERROR(1018, "Error upload image", HttpStatus.BAD_REQUEST),
+    INVALID_PARAMETER(1019, "Invalid parameter", HttpStatus.BAD_REQUEST),
+    CAR_NOT_FOUND(1020, "Car not found", HttpStatus.NOT_FOUND),
+    SHOW_ROOM_IS_EMPTY(1021, "Show room is empty", HttpStatus.BAD_REQUEST),
+    USER_HAS_SHOW_ROOM(1022, "User has show room", HttpStatus.BAD_REQUEST),
+    SHOW_ROOM_NOT_FOUND(1023, "Show room not found", HttpStatus.NOT_FOUND),
+    VOUCHER_IS_EMPTY(1024, "Voucher is empty", HttpStatus.BAD_REQUEST),
+    NEWS_IS_EMPTY(1025, "News is empty", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

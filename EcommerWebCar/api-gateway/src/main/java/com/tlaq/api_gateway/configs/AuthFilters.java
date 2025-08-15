@@ -3,6 +3,7 @@ package com.tlaq.api_gateway.configs;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tlaq.api_gateway.dto.ApiResponse;
+import com.tlaq.api_gateway.dto.responses.IntrospectResponse;
 import com.tlaq.api_gateway.services.AuthService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -35,9 +36,10 @@ public class AuthFilters implements GlobalFilter, Ordered {
     ObjectMapper objectMapper;
 
     @NonFinal
-    private final String[] PUBLIC_ENDPOINTS = {
-        "/ecommer-car-web/profile/register", "/ecommer-car-web/profile/login",
-            "/ecommer-car-web/profile/profiles",
+    private static final String[] PUBLIC_ENDPOINTS = {
+//        "/profile/register", "/profile/login",
+//            "/profile/profiles",
+            "/payment/checkout/vnpay_ipn"
     };
 
     @Value("${app.api-prefix}")
@@ -51,7 +53,6 @@ public class AuthFilters implements GlobalFilter, Ordered {
         if (isPublicEndpoint(exchange.getRequest()))
             return chain.filter(exchange);
 
-        // Get token from authorization header
         List<String> authHeader = exchange.getRequest().getHeaders().get(HttpHeaders.AUTHORIZATION);
         if (CollectionUtils.isEmpty(authHeader))
             return unauthenticated(exchange.getResponse());
@@ -59,8 +60,9 @@ public class AuthFilters implements GlobalFilter, Ordered {
         String token = authHeader.getFirst().replace("Bearer ", "");
         log.info("Token: {}", token);
 
+
         return authService.introspect(token).flatMap(introspectResponse -> {
-            if (introspectResponse.getResult().isValid())
+            if (introspectResponse.isActive())
                 return chain.filter(exchange);
             else
                 return unauthenticated(exchange.getResponse());

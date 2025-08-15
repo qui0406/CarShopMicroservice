@@ -15,7 +15,7 @@ import lombok.experimental.FieldDefaults;
 public class CarFeature {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    String id;
+    Long id;
     String mayDieuHoa;
     String manHinh;
     String ghe;

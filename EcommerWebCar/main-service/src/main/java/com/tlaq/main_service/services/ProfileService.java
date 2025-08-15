@@ -16,4 +16,5 @@ public interface ProfileService {
     ProfileResponse register(RegistrationRequest request, MultipartFile avatar);
     TokenResponse login(LoginRequest request);
     IntrospectResponse introspect(IntrospectRequest request);
+    ProfileResponse getProfileByKeyCloakId(String userKeyCloakId);
 }

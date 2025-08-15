@@ -15,8 +15,7 @@ import java.util.List;
 public class CarRequest {
      String name;
      LocalDate year;
-     CarTypeRequest carType;
+     Long carTypeId;
      CarFeatureRequest carFeature;
      CarServiceRequest carService;
-     List<CarImageRequest> carImages;
 }

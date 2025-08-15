@@ -3,8 +3,14 @@ package com.tlaq.main_service.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Setter
@@ -20,15 +26,25 @@ public class Car {
     String id;
     String name;
     LocalDate year;
-    @OneToOne(cascade = CascadeType.ALL)
+
+    @CreationTimestamp
+    LocalDateTime createdAt;
+    @UpdateTimestamp
+    LocalDateTime updatedAt;
+
+    @ManyToOne
+    @JoinColumn(name = "car_type_id", referencedColumnName = "id")
     CarType carType;
 
     @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "car_feature_id", referencedColumnName = "id")
     CarFeature carFeature;
 
     @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "car_service_id", referencedColumnName = "id")
     CarService carService;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    CarImage carImage;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "car_id")
+    List<CarImage> carImages;
 }

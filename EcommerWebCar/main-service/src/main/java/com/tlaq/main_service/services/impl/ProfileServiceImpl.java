@@ -7,6 +7,7 @@ import com.tlaq.main_service.dto.requests.RegistrationRequest;
 import com.tlaq.main_service.dto.responses.IntrospectResponse;
 import com.tlaq.main_service.dto.responses.ProfileResponse;
 import com.tlaq.main_service.dto.responses.TokenResponse;
+import com.tlaq.main_service.entity.Profile;
 import com.tlaq.main_service.exceptions.AppException;
 import com.tlaq.main_service.exceptions.ErrorCode;
 import com.tlaq.main_service.exceptions.ErrorNormalizer;
@@ -149,5 +150,12 @@ public class ProfileServiceImpl implements ProfileService {
         String location = response.getHeaders().get("Location").getFirst();
         String[] splitedStr = location.split("/");
         return splitedStr[splitedStr.length - 1];
+    }
+
+    @Override
+    public ProfileResponse getProfileByKeyCloakId(String userId) {
+        Profile profile = profileRepository.findByUserKeyCloakId(userId)
+                .orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTED));
+        return profileMapper.toProfileResponse(profile);
     }
 }

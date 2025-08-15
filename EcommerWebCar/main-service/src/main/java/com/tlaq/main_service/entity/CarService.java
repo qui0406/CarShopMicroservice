@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 public class CarService {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    String id;
+    Long id;
     String dongCo;
     String hopSo;
     BigDecimal congSuat;
