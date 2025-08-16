@@ -10,7 +10,9 @@ import com.tlaq.notification_service.services.SendGridMailService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
@@ -21,6 +23,9 @@ import java.util.Collections;
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class NotificationController {
+    @NonFinal
+    @Value("${spring.sendgrid.from-email}")
+    private String sendGridFromEmail;
 
     SendGridMailService sendGridMailService;
 
@@ -28,7 +33,7 @@ public class NotificationController {
     public void listenNotificationDelivery(NotificationEvent message) {
         EmailRequest emailRequest = EmailRequest.builder()
                 .sender(Sender.builder()
-                        .email("anhqui04062004@gmail.com")
+                        .email(sendGridFromEmail)
                         .build())
             .subject(message.getSubject())
             .content(message.getBody())

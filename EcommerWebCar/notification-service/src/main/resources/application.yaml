@@ -19,31 +19,37 @@ spring:
                 spring.json.value.default.type: com.tlaq.event.dto.NotificationEvent
 
 
-    send_grid:
-        api_key: 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
-        from_email: anhqui04062004@gmail.com
-        from_name: ecommer_car
+    send-grid:
+        api-key: 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
+        from-email: anhqui04062004@gmail.com
+        from-name: ecommer_car
 
-management:
-    endpoints:
-        web:
-            exposure:
-                include: health, info, metrics, prometheus
-    metrics:
-        distribution:
-            percentiles-histogram:
-                http:
-                    server:
-                        requests: true
-    observations:
-        key-values:
-            application: loan-service
-    tracing:
-        sampling:
-            probability: 1.0
+    security:
+        oauth2:
+            resourceserver:
+                jwt:
+                    issuer-uri: http://localhost:8180/realms/anhqui
+
+#management:
+#    endpoints:
+#        web:
+#            exposure:
+#                include: health, info, metrics, prometheus
+#    metrics:
+#        distribution:
+#            percentiles-histogram:
+#                http:
+#                    server:
+#                        requests: true
+#    observations:
+#        key-values:
+#            application: loan-service
+#    tracing:
+#        sampling:
+#            probability: 1.0
 
 logging:
     level:
         org.springframework.security.web: DEBUG
-    pattern:
-        correlation: "[${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+#    pattern:
+#        correlation: "[${spring.application.name:},%X{traceId:-},%X{spanId:-}]"

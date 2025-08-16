@@ -2,6 +2,7 @@ package com.tlaq.main_service.services.impl;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.tlaq.event.dto.NotificationEvent;
 import com.tlaq.main_service.dto.keycloak.*;
 import com.tlaq.main_service.dto.requests.RegistrationRequest;
 import com.tlaq.main_service.dto.responses.IntrospectResponse;
@@ -23,6 +24,7 @@ import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,6 +43,7 @@ public class ProfileServiceImpl implements ProfileService {
     KeyCloakClient identityClient;
     ErrorNormalizer errorNormalizer;
     Cloudinary cloudinary;
+    KafkaTemplate<String, Object> kafkaTemplate;
 
     @Value("${idp.client-id}")
     @NonFinal
@@ -88,8 +91,6 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     public ProfileResponse register(RegistrationRequest request, MultipartFile avatar) {
         try {
-
-
             var token = identityClient.exchangeToken(TokenExchangeParam.builder()
                     .grant_type("client_credentials")
                     .client_id(clientId)
@@ -137,6 +138,15 @@ public class ProfileServiceImpl implements ProfileService {
 
 
             profile = profileRepository.save(profile);
+
+            NotificationEvent notificationEvent= NotificationEvent.builder()
+                    .body("Tao tai khoan thanh cong")
+                    .channel("notification")
+                    .subject("Tao tai khoan thanh cong")
+                    .recipient(request.getEmail())
+                    .build();
+
+            kafkaTemplate.send("notification-delivery", notificationEvent);
 
             ProfileResponse profileResponse = profileMapper.toProfileResponse(profile);
 

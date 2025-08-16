@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 @RestController
 @RequestMapping("/checkout")
@@ -27,7 +28,7 @@ public class PaymentController {
 
     @PostMapping("/url")
     public ResponseEntity<ApiResponse> checkout(@RequestBody PaymentRequest paymentRequest) {
-        PaymentResponse paymentResponse = paymentService.init(paymentRequest);
+        CompletableFuture<PaymentResponse> paymentResponse = paymentService.init(paymentRequest);
         ApiResponse apiResponse = ApiResponse.builder()
                 .code(1000)
                 .message("url")

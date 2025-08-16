@@ -1,7 +1,10 @@
 package com.tlaq.dto.request;
 
+import com.tlaq.entity.enums.PaymentStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.math.BigDecimal;
 
 
 @Data
@@ -11,6 +14,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class PaymentRequest {
     private String txnRef; //orderId
-    private Integer amount; //totalOrderIdAmount
-    private String ipAddress; //ipaddress
+    private BigDecimal amount; //totalOrderIdAmount
+    private PaymentStatus ipAddress; //ipaddress
 }

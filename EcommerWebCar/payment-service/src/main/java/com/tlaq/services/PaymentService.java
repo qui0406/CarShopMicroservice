@@ -11,6 +11,10 @@ import com.tlaq.utils.DateUtils;
 import com.tlaq.utils.ResponseCodeVNPayUtils;
 import com.tlaq.utils.VNPayParams;
 import com.tlaq.utils.VNPayUtils;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
+import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
@@ -24,7 +28,9 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.concurrent.CompletableFuture;
 
+@Slf4j
 @Service
 @PropertySource("classpath:application.yml")
 public class PaymentService {
@@ -34,7 +40,6 @@ public class PaymentService {
     public static final String VERSION = "2.1.0";
     public static final String COMMAND = "pay";
     public static final String ORDER_TYPE = "190000";
-    public static long DEFAULT_MULTIPLIER = 100L;
 
     @Value("${payment.vnpay.tmn-code}")
     private String tmnCode;
@@ -42,45 +47,64 @@ public class PaymentService {
     @Value("${payment.vnpay.timeout}")
     private Integer paymentTimeout;
 
-    public PaymentResponse init(PaymentRequest request) {
-        var amount = request.getAmount() * DEFAULT_MULTIPLIER;  // 1. amount * 100
-        var txnRef = request.getTxnRef();                       // 2. registerId
-        var returnUrl = VNPayUtils.buildReturnUrl(txnRef);                 // 3. FE redirect by returnUrl
+    @CircuitBreaker(name = "vnpayCircuitBreaker", fallbackMethod = "fallbackInit")
+    @Retry(name = "vnpayRetry")
+    @TimeLimiter(name = "vnpayTimeLimiter")
+    public CompletableFuture<PaymentResponse> init(PaymentRequest request) {
+        return CompletableFuture.supplyAsync(() -> {
+            var amount = request.getAmount();
+            var txnRef = request.getTxnRef();
+            var returnUrl = VNPayUtils.buildReturnUrl(txnRef);
+            var vnCalendar = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+            var createdDate = DateUtils.formatVnTime(vnCalendar);
+            vnCalendar.add(Calendar.MINUTE, paymentTimeout);
+            var expiredDate = DateUtils.formatVnTime(vnCalendar);
 
-        var vnCalendar = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
-        var createdDate = DateUtils.formatVnTime(vnCalendar);
-        vnCalendar.add(Calendar.MINUTE, paymentTimeout);
-        var expiredDate = DateUtils.formatVnTime(vnCalendar);  // 4. expiredDate for secure
+            var ipAddress = request.getIpAddress();
+            var orderInfo = VNPayUtils.buildPaymentDetail(txnRef);
 
-        var ipAddress = request.getIpAddress();
-        var orderInfo = VNPayUtils.buildPaymentDetail(txnRef);
+            Map<String, String> params = new HashMap<>();
 
-        Map<String, String> params = new HashMap<>();
+            params.put(VNPayParams.VERSION, VERSION);
+            params.put(VNPayParams.COMMAND, COMMAND);
 
-        params.put(VNPayParams.VERSION, VERSION);
-        params.put(VNPayParams.COMMAND, COMMAND);
+            params.put(VNPayParams.TMN_CODE, tmnCode);
+            params.put(VNPayParams.AMOUNT, String.valueOf(amount));
+            params.put(VNPayParams.CURRENCY, "VND");
 
-        params.put(VNPayParams.TMN_CODE, tmnCode);
-        params.put(VNPayParams.AMOUNT, String.valueOf(amount));
-        params.put(VNPayParams.CURRENCY, "VND");
+            params.put(VNPayParams.TXN_REF, txnRef);
+            params.put(VNPayParams.RETURN_URL, returnUrl);
 
-        params.put(VNPayParams.TXN_REF, txnRef);
-        params.put(VNPayParams.RETURN_URL, returnUrl);
+            params.put(VNPayParams.CREATED_DATE, createdDate);
+            params.put(VNPayParams.EXPIRE_DATE, expiredDate);
 
-        params.put(VNPayParams.CREATED_DATE, createdDate);
-        params.put(VNPayParams.EXPIRE_DATE, expiredDate);
 
-        params.put(VNPayParams.IP_ADDRESS, ipAddress);
+            params.put(VNPayParams.LOCALE, "vn");
 
-        params.put(VNPayParams.LOCALE, "vn");
+            params.put(VNPayParams.ORDER_INFO, txnRef);
+            params.put(VNPayParams.ORDER_TYPE, ORDER_TYPE);
 
-        params.put(VNPayParams.ORDER_INFO, txnRef);
-        params.put(VNPayParams.ORDER_TYPE, ORDER_TYPE);
+            var initPaymentUrl = VNPayUtils.buildInitPaymentUrl(params);
 
-        var initPaymentUrl = VNPayUtils.buildInitPaymentUrl(params);
-        return PaymentResponse.builder()
-                .vnpUrl(initPaymentUrl).build();
+            PaymentResponse paymentResponse = PaymentResponse.builder()
+                    .vnpUrl(initPaymentUrl).build();
+
+            log.info("initPaymentUrl: {}", paymentResponse.getVnpUrl());
+            return PaymentResponse.builder()
+                    .vnpUrl(initPaymentUrl)
+                    .build();
+        });
     }
+
+    public CompletableFuture<PaymentResponse> fallbackInit(PaymentRequest request, Throwable ex) {
+        log.error("VNPay init failed, fallback triggered: {}", ex.toString());
+        return CompletableFuture.completedFuture(
+                PaymentResponse.builder()
+                        .vnpUrl("https://vnpay-unavailable.example.com")
+                        .build()
+        );
+    }
+
 
     public ResponseCodeVNPay process(Map<String, String> params) {
         if(!VNPayUtils.verifyIpn(params)) {
@@ -92,17 +116,10 @@ public class PaymentService {
         BigDecimal amount = new BigDecimal(amountStr)
                 .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
 
-//        Optional<Register> optionalRegister = registerRepository.findById(registerId);
-//
-//        if(optionalRegister.isEmpty())
-//            return ResponseCodeVNPayUtils.ORDER_NOT_FOUND;
-
-
         if(vnpResponseCode.equals("00")) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
             LocalDateTime dateTime = LocalDateTime.parse(params.get("vnp_PayDate"), formatter);
 
-//            Register register = optionalRegister.get();
             Payment payment = Payment
                     .builder()
                     .price(amount)
@@ -112,11 +129,7 @@ public class PaymentService {
                     .orderId(orderId)
                     .build();
 
-//            register.addPayment(payment);
-//            register.setStatus(RegisterStatus.SUCCESS);
-
             paymentRepository.save(payment);
-//            registerRepository.update(register);
 
             return ResponseCodeVNPayUtils.SUCCESS;
         } else {

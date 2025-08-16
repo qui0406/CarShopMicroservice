@@ -1,13 +1,15 @@
 package com.tlaq.notification_service.configs;
 
 import com.sendgrid.SendGrid;
+import feign.RequestInterceptor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
+@Configuration
 public class SendGridConfig {
     @Bean
-    public SendGrid sendGrid(@Value("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") String apiKey) {
+    public SendGrid sendGrid(@Value("${spring.send-grid.api-key}") String apiKey) {
         return new SendGrid(apiKey);
     }
-
 }

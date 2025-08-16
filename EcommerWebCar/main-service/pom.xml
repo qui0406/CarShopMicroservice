@@ -110,6 +110,11 @@
 			<artifactId>spring-security-crypto</artifactId>
 		</dependency>
 
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-amqp</artifactId>
+		</dependency>
+
 		<!-- Lombok + MapStruct binding -->
 		<dependency>
 			<groupId>org.projectlombok</groupId>

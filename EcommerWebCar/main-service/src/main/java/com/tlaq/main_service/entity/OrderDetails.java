@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
+
 @Getter
 @Setter
 @Builder
@@ -17,5 +19,11 @@ public class OrderDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
+    @Column(name = "unit_price")
+    BigDecimal unitPrice;
 
+    int quantity;
+
+    @Column(name ="total_amount")
+    BigDecimal totalAmount;
 }

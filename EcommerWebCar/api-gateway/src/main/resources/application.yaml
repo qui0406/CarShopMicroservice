@@ -35,26 +35,26 @@ idp:
   client-secret: z9CS4HlptoirirLWCOcsS9wj3T11l9Y3
 
 
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health, info, metrics, prometheus
-  metrics:
-    distribution:
-      percentiles-histogram:
-        http:
-          server:
-            requests: true
-  observations:
-    key-values:
-      application: loan-service
-  tracing:
-    sampling:
-      probability: 1.0
+#management:
+#  endpoints:
+#    web:
+#      exposure:
+#        include: health, info, metrics, prometheus
+#  metrics:
+#    distribution:
+#      percentiles-histogram:
+#        http:
+#          server:
+#            requests: true
+#  observations:
+#    key-values:
+#      application: loan-service
+#  tracing:
+#    sampling:
+#      probability: 1.0
 
 logging:
   level:
     org.springframework.security.web: DEBUG
-  pattern:
-    correlation: "[${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+#  pattern:
+#    correlation: "[${spring.application.name:},%X{traceId:-},%X{spanId:-}]"

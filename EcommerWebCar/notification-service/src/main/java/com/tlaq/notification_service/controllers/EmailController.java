@@ -24,8 +24,6 @@ import java.util.Collections;
 public class EmailController {
     SendGridMailService sendGridMailService;
 
-//    private SendGridMailService sendGridMailService;
-
     @PostMapping("/send-email")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ApiResponse<EmailResponse> testSendEmail(@RequestBody EmailRequest emailRequest) {

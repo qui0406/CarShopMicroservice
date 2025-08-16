@@ -3,6 +3,7 @@ package com.tlaq.main_service.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -16,9 +17,12 @@ import java.time.LocalDateTime;
 @Table(name="inventory")
 public class Inventory {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    String id;
+
     int quantity;
+
+    @CreationTimestamp
     @Column(name = "created_at")
     LocalDateTime createdAt;
 

@@ -33,6 +33,10 @@ public enum ErrorCode {
     SHOW_ROOM_NOT_FOUND(1023, "Show room not found", HttpStatus.NOT_FOUND),
     VOUCHER_IS_EMPTY(1024, "Voucher is empty", HttpStatus.BAD_REQUEST),
     NEWS_IS_EMPTY(1025, "News is empty", HttpStatus.BAD_REQUEST),
+    INVENTORY_IS_EMPTY(1026, "Inventory is empty", HttpStatus.BAD_REQUEST),
+    INVENTORY_CAR_EXISTS(1027, "Inventory car is exists", HttpStatus.BAD_REQUEST),
+    ORDER_IS_EMPTY(1028, "Order is empty", HttpStatus.BAD_REQUEST),
+    QUANTITY_NOT_ENOUGH(1029, "Quantity not enough", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
