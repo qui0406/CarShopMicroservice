@@ -22,7 +22,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfigs  {
     private static final String[] PUBLIC_ENDPOINTS = {
-            "/profile/register"
+            "/ecommer-car-web/profile/register"
     };
 
     @Bean

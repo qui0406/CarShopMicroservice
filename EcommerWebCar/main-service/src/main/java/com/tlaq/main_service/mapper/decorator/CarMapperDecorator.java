@@ -36,6 +36,7 @@ public abstract class CarMapperDecorator implements CarMapper {
         );
 
         return Car.builder()
+                .price(carRequest.getPrice())
                 .name(carRequest.getName())
                 .year(carRequest.getYear())
                 .carType(carType)

@@ -6,8 +6,8 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "main-service", url = "${app.services.main.url}")
+@FeignClient(name = "main", url = "${app.services.main.url}")
 public interface ProfileClient {
-    @GetMapping("/internal/profile/get-profile/{userKeyCloakId}")
+    @GetMapping("/profile/get-profile/{userKeyCloakId}")
     ApiResponse<UserProfileResponse> getProfile(@PathVariable String userKeyCloakId);
 }
