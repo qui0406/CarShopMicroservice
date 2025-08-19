@@ -10,20 +10,24 @@ import com.tlaq.main_service.exceptions.ErrorCode;
 import com.tlaq.main_service.mapper.InventoryMapper;
 import com.tlaq.main_service.repositories.CarRepository;
 import com.tlaq.main_service.repositories.InventoryRepository;
+import com.tlaq.main_service.repositories.OrdersRepository;
 import com.tlaq.main_service.services.InventoryService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class InventoryServiceImpl implements InventoryService {
     InventoryMapper inventoryMapper;
     InventoryRepository inventoryRepository;
+    OrdersRepository ordersRepository;
     CarRepository carRepository;
 
     @Override
@@ -55,5 +59,22 @@ public class InventoryServiceImpl implements InventoryService {
         Inventory inventory = inventoryRepository.findById(inventoryId)
                 .orElseThrow(()-> new AppException(ErrorCode.INVENTORY_IS_EMPTY));
         inventoryRepository.delete(inventory);
+    }
+
+    @Override
+    public void updateInventoryAfterPay(String orderId) {
+        String carId= String.valueOf(ordersRepository.findById(orderId)
+                .orElseThrow(()-> new AppException(ErrorCode.ORDER_IS_EMPTY)).getCar().getId());
+
+        Inventory inventory= inventoryRepository.findInventoryByCarId(carId)
+                .orElseThrow(()-> new AppException(ErrorCode.INVENTORY_IS_EMPTY));
+
+        int quantity = ordersRepository.findById(orderId)
+                .orElseThrow(()-> new AppException(ErrorCode.INVENTORY_IS_EMPTY))
+                .getOrderDetails().getQuantity();
+
+        inventory.setQuantity(inventory.getQuantity() - quantity);
+        log.info("Cap nhat thanh cong");
+        inventoryRepository.save(inventory);
     }
 }

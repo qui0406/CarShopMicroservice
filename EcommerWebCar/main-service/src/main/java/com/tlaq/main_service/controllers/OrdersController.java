@@ -5,7 +5,7 @@ import com.tlaq.main_service.dto.ApiResponse;
 import com.tlaq.main_service.dto.requests.OrdersRequest;
 import com.tlaq.main_service.dto.responses.OrdersResponse;
 import com.tlaq.main_service.entity.Orders;
-import com.tlaq.main_service.message.OrdersProducer;
+//import com.tlaq.main_service.message.OrdersProducer;
 import com.tlaq.main_service.services.OrdersService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -23,7 +23,7 @@ import java.util.UUID;
 @RequestMapping("/orders")
 public class OrdersController {
     OrdersService ordersService;
-    OrdersProducer ordersProducer;
+//    OrdersProducer ordersProducer;
 
     @GetMapping("/orders-car/{orderId}")
     public ApiResponse<OrdersResponse> getOrder(@PathVariable String orderId) {
@@ -36,7 +36,6 @@ public class OrdersController {
     public ApiResponse<OrdersResponse> createOrder(@RequestBody OrdersRequest ordersRequest) {
         ordersRequest.setId(UUID.randomUUID().toString());
         OrdersResponse ordersResponse = ordersService.createOrder(ordersRequest);
-        ordersProducer.sendOrders(ordersRequest);
         return ApiResponse.<OrdersResponse>builder()
                 .result(ordersResponse)
                 .build();

@@ -53,7 +53,7 @@ public class SendGridMailServiceImpl implements SendGridMailService {
 
     private void send(Mail mail) {
         SendGrid sg = new SendGrid(sendGridApiKey);
-//        sg.addRequestHeader(KEY_X_MOCK, "true");
+        sg.addRequestHeader(KEY_X_MOCK, "true");
 
         Request request = new Request();
         try {
@@ -63,7 +63,6 @@ public class SendGridMailServiceImpl implements SendGridMailService {
             Response response = sg.api(request);
             System.out.println(response.getStatusCode());
             System.out.println(response.getBody());
-            log.info("Gui thanh cong");
         } catch (IOException ex) {
             ex.printStackTrace();
         }

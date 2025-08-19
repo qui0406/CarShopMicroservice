@@ -41,6 +41,8 @@ payment:
     return-url: http://localhost:8888/api/v1/payment/checkout/vnpay_ipn
     secret-key: LDELTSZERUCS745OLFK8OJI1X1JGFI5L
     time-out: 10
+    username: anhqui04062004@gmail.com
+    password: NU#f.8HjkmSL3c5
 
 resilience4j:
   circuitbreaker:
@@ -61,3 +63,9 @@ resilience4j:
     instances:
       vnpayTimeLimiter:
         timeoutDuration: 5s
+
+
+idp:
+  url: http://localhost:8180/realms/anhqui/protocol/openid-connect/token
+  client-id: ecommer_app
+  client-secret: z9CS4HlptoirirLWCOcsS9wj3T11l9Y3

@@ -12,4 +12,6 @@ public interface InventoryService {
     InventoryResponse createInventory(InventoryRequest request);
     InventoryResponse updateInventory(InventoryUpdateRequest request, String inventoryId);
     void deleteInventory(String inventoryId);
+
+    void updateInventoryAfterPay(String orderId);
 }
