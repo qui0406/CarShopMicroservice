@@ -70,4 +70,11 @@ public class ProfileController {
                 .result(profileService.getProfileByKeyCloakId(userKeyCloakId))
                 .build();
     }
+
+    @GetMapping("/get-profile-by-id/{id}")
+    public ApiResponse<ProfileResponse> getProfileById(@PathVariable String id) {
+        return ApiResponse.<ProfileResponse>builder()
+                .result(profileService.getProfileById(id))
+                .build();
+    }
 }

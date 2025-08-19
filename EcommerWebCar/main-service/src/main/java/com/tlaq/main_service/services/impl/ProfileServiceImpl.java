@@ -139,18 +139,20 @@ public class ProfileServiceImpl implements ProfileService {
 
             profile = profileRepository.save(profile);
 
-            NotificationEvent notificationEvent= NotificationEvent.builder()
-                    .body("Tao tai khoan thanh cong")
+            NotificationEvent notificationEvent = NotificationEvent.builder()
+                    .body("Xin chào " + request.getUsername()
+                            + ",\n\nTài khoản của bạn đã được tạo thành công. "
+                            + "Chúc bạn có những trải nghiệm tuyệt vời cùng chúng tôi!\n\n"
+                            + "Trân trọng,\nĐội ngũ hỗ trợ")
                     .channel("notification")
-                    .subject("Tao tai khoan thanh cong")
+                    .subject("🎉 Chúc mừng! Tạo tài khoản thành công")
                     .recipient(request.getEmail())
                     .build();
 
+
             kafkaTemplate.send("notification-delivery", notificationEvent);
 
-            ProfileResponse profileResponse = profileMapper.toProfileResponse(profile);
-
-            return profileResponse;
+            return profileMapper.toProfileResponse(profile);
         } catch (FeignException exception) {
             throw errorNormalizer.handleKeyCloakException(exception);
         }
@@ -165,6 +167,13 @@ public class ProfileServiceImpl implements ProfileService {
     @Override
     public ProfileResponse getProfileByKeyCloakId(String userId) {
         Profile profile = profileRepository.findByUserKeyCloakId(userId)
+                .orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTED));
+        return profileMapper.toProfileResponse(profile);
+    }
+
+    @Override
+    public ProfileResponse getProfileById(String id) {
+        Profile profile = profileRepository.findById(id)
                 .orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTED));
         return profileMapper.toProfileResponse(profile);
     }

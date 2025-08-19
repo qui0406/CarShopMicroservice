@@ -17,4 +17,5 @@ public interface ProfileService {
     TokenResponse login(LoginRequest request);
     IntrospectResponse introspect(IntrospectRequest request);
     ProfileResponse getProfileByKeyCloakId(String userKeyCloakId);
+    ProfileResponse getProfileById(String id);
 }

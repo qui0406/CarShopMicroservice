@@ -11,5 +11,6 @@ public interface InventoryRepository extends JpaRepository<Inventory, String> {
 
     boolean existsByCarId(String carId);
 
+
     boolean existsByCarIdAndQuantityGreaterThanEqual(String carId, int quantity);
 }

@@ -20,7 +20,7 @@ spring:
 
 
     send-grid:
-        api-key: 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
+        api-key: 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
         from-email: anhqui04062004@gmail.com
         from-name: ecommer_car
 
