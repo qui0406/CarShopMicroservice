@@ -16,12 +16,21 @@ spring:
                 - Path=${app.api-prefix}/ecommer-car-web/**
               filters:
                 - StripPrefix=2
+
             - id: notification-service
               uri: http://localhost:8081
               predicates:
                 - Path=${app.api-prefix}/notification/**
               filters:
                 - StripPrefix=2
+
+            - id: chat-service
+              uri: http://localhost:8082
+              predicates:
+                - Path=${app.api-prefix}/chat/**
+              filters:
+                - StripPrefix=2
+
             - id: payment-service
               uri: http://localhost:8083
               predicates:
