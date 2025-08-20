@@ -1,0 +1,29 @@
+server:
+  port: 8082
+  servlet:
+    context-path: /chat
+
+spring:
+  application:
+    name: chat-service
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/chat-service
+      auto-index-creation: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/anhqui
+
+app:
+  services:
+    main:
+      url: http://localhost:8080/ecommer-car-web
+
+
+idp:
+  url: http://localhost:8180/realms/anhqui/protocol/openid-connect/token
+  client-id: ecommer_app
+  client-secret: z9CS4HlptoirirLWCOcsS9wj3T11l9Y3
