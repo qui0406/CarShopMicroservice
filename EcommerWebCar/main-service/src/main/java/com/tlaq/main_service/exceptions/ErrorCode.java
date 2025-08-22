@@ -37,6 +37,9 @@ public enum ErrorCode {
     INVENTORY_CAR_EXISTS(1027, "Inventory car is exists", HttpStatus.BAD_REQUEST),
     ORDER_IS_EMPTY(1028, "Order is empty", HttpStatus.BAD_REQUEST),
     QUANTITY_NOT_ENOUGH(1029, "Quantity not enough", HttpStatus.BAD_REQUEST),
+    BRANCH_IS_EMPTY(1030, "Branch is empty", HttpStatus.BAD_REQUEST),
+    MODEL_CAR_IS_EMPTY(1031, "Model car is empty", HttpStatus.BAD_REQUEST),
+    CAR_CATEGORY_IS_EMPTY(1032, "Car category is empty", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

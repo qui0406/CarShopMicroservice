@@ -1,8 +1,11 @@
 package com.tlaq.main_service.entity;
 
+
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -11,13 +14,18 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name="car_image")
-public class CarImage {
+@Table(name="car_model")
+public class CarModel {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    String image;
+    String name;
 
-    @Column(name = "car_id")
-    String carId;
+    @JoinColumn(name = "category_id")
+    @ManyToOne
+    CarCategory category;
+
+    @ManyToOne
+    @JoinColumn(name = "car_branch_id", referencedColumnName = "id")
+    CarBranch carBranch;
 }

@@ -9,9 +9,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -35,8 +33,8 @@ public class Car {
     LocalDateTime updatedAt;
 
     @ManyToOne
-    @JoinColumn(name = "car_type_id", referencedColumnName = "id")
-    CarType carType;
+    @JoinColumn(name = "car_model_id", referencedColumnName = "id")
+    CarModel carModel;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "car_feature_id", referencedColumnName = "id")

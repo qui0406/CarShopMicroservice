@@ -8,6 +8,14 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CarTypeRequest {
-    String name;
+public class CarComfortRequest {
+    boolean mayDieuHoa;
+    String manHinh;
+    String ghe;
+    boolean sacKhongDay;
+    boolean copDien;
+    String cuaSo;
+    boolean bluetooth;
+    String loa;
+    boolean gps;
 }

@@ -1,5 +1,6 @@
 package com.tlaq.main_service.dto.responses.carResponse;
 
+import com.tlaq.main_service.entity.enums.Phanh;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -8,9 +9,12 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CarFeatureResponse {
+public class FeatureSafetyResponse {
     Long id;
-    CarComfortResponse carComfortResponse;
-    CarExteriorResponse carExteriorResponse;
-    FeatureSafetyResponse featureSafetyResponse;
+    boolean tuiKhi;
+    Phanh phanh;
+    boolean canBangDienTu;
+    boolean hoTroGiuLan;
+    boolean camera;
+    boolean camBienDoXe;
 }

@@ -13,14 +13,16 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CarResponse {
-     String id;
-     String name;
-     BigDecimal price;
-     LocalDate year;
-     LocalDateTime createdAt;
-     LocalDateTime updatedAt;
-     String carBranch;
-     String carModel;
-     String carImage;
+public class CarDetailsResponse {
+    String id;
+    String name;
+    BigDecimal price;
+    LocalDate year;
+    LocalDateTime createdAt;
+    LocalDateTime updatedAt;
+    String carBranch;
+    String carModel;
+    CarFeatureResponse carFeature;
+    CarServiceResponse carService;
+    List<String> images;
 }
