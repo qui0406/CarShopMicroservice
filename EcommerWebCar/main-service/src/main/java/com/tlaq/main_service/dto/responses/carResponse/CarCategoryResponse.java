@@ -8,7 +8,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CarTypeResponse {
+public class CarCategoryResponse {
     Long id;
     String name;
 }

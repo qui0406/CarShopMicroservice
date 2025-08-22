@@ -11,10 +11,18 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name="car_type")
-public class CarType {
+@Table(name="car_exterior")
+public class CarExterior {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    String name;
+
+    String den;
+    String gatMua;
+
+    @Builder.Default
+    boolean smartKey= true;
+
+    @Builder.Default
+    boolean guongDien=true;
 }

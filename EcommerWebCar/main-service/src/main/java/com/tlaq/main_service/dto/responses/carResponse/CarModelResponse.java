@@ -1,5 +1,6 @@
 package com.tlaq.main_service.dto.responses.carResponse;
 
+import com.tlaq.main_service.entity.CarCategory;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -8,9 +9,9 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CarFeatureResponse {
+public class CarModelResponse {
     Long id;
-    CarComfortResponse carComfortResponse;
-    CarExteriorResponse carExteriorResponse;
-    FeatureSafetyResponse featureSafetyResponse;
+    String name;
+    String category;
+    String brand;
 }

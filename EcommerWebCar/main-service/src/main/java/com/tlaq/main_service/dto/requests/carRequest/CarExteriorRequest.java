@@ -1,0 +1,16 @@
+package com.tlaq.main_service.dto.requests.carRequest;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class CarExteriorRequest {
+    String den;
+    String gatMua;
+    boolean smartKey;
+    boolean guongDien;
+}

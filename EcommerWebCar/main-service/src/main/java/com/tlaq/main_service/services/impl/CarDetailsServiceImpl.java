@@ -4,6 +4,7 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.tlaq.main_service.dto.PageResponse;
 import com.tlaq.main_service.dto.requests.carRequest.CarRequest;
+import com.tlaq.main_service.dto.responses.carResponse.CarDetailsResponse;
 import com.tlaq.main_service.dto.responses.carResponse.CarResponse;
 import com.tlaq.main_service.entity.Car;
 import com.tlaq.main_service.entity.CarImage;
@@ -39,7 +40,7 @@ public class CarDetailsServiceImpl implements CarDetailsService {
     Cloudinary cloudinary;
 
     @Override
-    public PageResponse<CarResponse> getCarDetails(int page, int size) {
+    public PageResponse<CarResponse> getCar(int page, int size) {
         Sort sort= Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable pageable= PageRequest.of(page- 1, size, sort);
         var pageData = carRepository.findAll(pageable);
@@ -54,7 +55,13 @@ public class CarDetailsServiceImpl implements CarDetailsService {
     }
 
     @Override
-    public CarResponse createCarDetail(CarRequest request, List<MultipartFile> images) {
+    public CarDetailsResponse getCarDetails(String carId) {
+        Car car = carRepository.findById(carId).orElseThrow(()-> new AppException(ErrorCode.CAR_NOT_FOUND));
+        return carMapper.toCarDetailsResponse(car);
+    }
+
+    @Override
+    public void createCarDetail(CarRequest request, List<MultipartFile> images) {
         Car car= carMapper.toCar(request);
         List<CarImage> carImageList = new ArrayList<>();
 
@@ -77,7 +84,6 @@ public class CarDetailsServiceImpl implements CarDetailsService {
         }
         car.setCarImages(carImageList);
         carRepository.save(car);
-        return carMapper.toCarResponse(car);
     }
 
 

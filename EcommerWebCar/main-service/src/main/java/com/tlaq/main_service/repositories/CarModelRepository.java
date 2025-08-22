@@ -1,10 +1,10 @@
 package com.tlaq.main_service.repositories;
 
-import com.tlaq.main_service.entity.CarBranch;
+import com.tlaq.main_service.entity.CarModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface CarTypeRepository extends JpaRepository<CarBranch, Long> {
-    CarBranch findById(long id);
+public interface CarModelRepository extends JpaRepository<CarModel,Long> {
+
 }

@@ -1,5 +1,11 @@
 package com.tlaq.main_service.dto.requests.carRequest;
 
+import com.tlaq.main_service.entity.CarComfort;
+import com.tlaq.main_service.entity.CarExterior;
+import com.tlaq.main_service.entity.FeatureSafety;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToOne;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -9,15 +15,7 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CarFeatureRequest {
-    String mayDieuHoa;
-    String manHinh;
-    String ghe;
-    boolean sacKhongDay;
-    boolean copDien;
-    String cuaSo;
-    String hoTroPhanh;
-    boolean bluetooth;
-    boolean camera;
-    String phanhKhanCap;
-    boolean hoTroGiuLan;
+    CarComfortRequest carComfort;
+    CarExteriorRequest carExterior;
+    FeatureSafetyRequest featureSafety;
 }

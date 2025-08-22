@@ -16,8 +16,8 @@ import java.util.List;
 public class CarRequest {
      String name;
      LocalDate year;
-     Long carTypeId;
      BigDecimal price;
+     Long carModel;
      CarFeatureRequest carFeature;
      CarServiceRequest carService;
 }

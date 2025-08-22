@@ -8,9 +8,15 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class CarFeatureResponse {
+public class CarComfortResponse {
     Long id;
-    CarComfortResponse carComfortResponse;
-    CarExteriorResponse carExteriorResponse;
-    FeatureSafetyResponse featureSafetyResponse;
+    boolean mayDieuHoa;
+    String manHinh;
+    String ghe;
+    boolean sacKhongDay;
+    boolean copDien;
+    String cuaSo;
+    boolean bluetooth;
+    String loa;
+    boolean gps;
 }

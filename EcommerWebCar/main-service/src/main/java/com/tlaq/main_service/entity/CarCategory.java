@@ -11,13 +11,10 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name="car_image")
-public class CarImage {
+@Table(name="car_category")
+public class CarCategory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    String image;
-
-    @Column(name = "car_id")
-    String carId;
+    String name;
 }

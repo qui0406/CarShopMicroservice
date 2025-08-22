@@ -16,15 +16,16 @@ public class CarFeature {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
-    String mayDieuHoa;
-    String manHinh;
-    String ghe;
-    boolean sacKhongDay;
-    boolean copDien;
-    String cuaSo;
-    String hoTroPhanh;
-    boolean bluetooth;
-    boolean camera;
-    String phanhKhanCap;
-    boolean hoTroGiuLan;
+
+    @JoinColumn(name ="car_comfort_id", nullable = false)
+    @OneToOne(cascade = CascadeType.ALL)
+    CarComfort carComfort;
+
+    @JoinColumn(name = "car_exterior_id", nullable = false)
+    @OneToOne(cascade = CascadeType.ALL)
+    CarExterior carExterior;
+
+    @JoinColumn(name = "feature_safety_id", nullable = false)
+    @OneToOne(cascade = CascadeType.ALL)
+    FeatureSafety featureSafety;
 }
