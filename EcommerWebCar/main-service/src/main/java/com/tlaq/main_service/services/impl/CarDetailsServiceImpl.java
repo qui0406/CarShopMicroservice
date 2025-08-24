@@ -13,6 +13,7 @@ import com.tlaq.main_service.exceptions.ErrorCode;
 import com.tlaq.main_service.mapper.CarMapper;
 import com.tlaq.main_service.repositories.CarRepository;
 import com.tlaq.main_service.services.CarDetailsService;
+import com.tlaq.main_service.specifications.CarSpecification;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -20,11 +21,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -91,6 +94,38 @@ public class CarDetailsServiceImpl implements CarDetailsService {
     public void deleteCarDetail(String carId) {
         Car car=  carRepository.findById(carId).orElseThrow(() -> new AppException(ErrorCode.CAR_NOT_FOUND));
         carRepository.delete(car);
+    }
+
+    @Override
+    public PageResponse<CarResponse> filterCar(Map<String, String> filter) {
+        String branch = filter.getOrDefault("branch", null);
+        String model = filter.getOrDefault("model", null);
+        String category = filter.getOrDefault("category", null);
+
+        BigDecimal fromPrice = filter.containsKey("fromPrice") ? new BigDecimal(filter.get("fromPrice")) : null;
+        BigDecimal toPrice = filter.containsKey("toPrice") ? new BigDecimal(filter.get("toPrice")) : null;
+
+        int page= filter.containsKey("page") ? Integer.parseInt(filter.get("page")) : 1;
+        int size= filter.containsKey("size") ? Integer.parseInt(filter.get("size")) : 10;
+
+        Specification<Car> spec = Specification.allOf(
+                CarSpecification.hasBranch(branch),
+                CarSpecification.hasModel(model),
+                CarSpecification.hasCategory(category),
+                CarSpecification.priceBetween(fromPrice, toPrice));
+
+        Sort sort= Sort.by(Sort.Direction.DESC, "createdAt");
+        Pageable pageable= PageRequest.of(page- 1, size, sort);
+
+        var pageData= carRepository.findAll(spec, pageable);
+
+        return PageResponse.<CarResponse>builder()
+                .currentPage(page)
+                .pageSize(pageData.getSize())
+                .totalPages(pageData.getTotalPages())
+                .totalElements(pageData.getTotalElements())
+                .data(pageData.getContent().stream().map(carMapper::toCarResponse).toList())
+            .build();
     }
 
     private String uploadImage(MultipartFile img) {

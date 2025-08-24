@@ -33,12 +33,10 @@ public interface CarMapper {
         return carModel;
     }
 
-    // CarModel -> String
     default String map(CarModel carModel) {
         return carModel != null ? carModel.getName() : null;
     }
 
-    // CarCategory -> String
     default String map(CarCategory category) {
         return category != null ? category.getName() : null;
     }
