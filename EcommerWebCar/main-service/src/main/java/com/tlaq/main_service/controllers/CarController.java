@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -72,6 +73,13 @@ public class CarController {
         carDetailsService.deleteCarDetail(carId);
         return ApiResponse.<Void>builder()
                 .message("Car deleted successfully")
+                .build();
+    }
+
+    @GetMapping("/filter-car")
+    public ApiResponse<PageResponse<CarResponse>> filterCar(@RequestParam Map<String,String> filter){
+        return ApiResponse.<PageResponse<CarResponse>>builder()
+                .result(carDetailsService.filterCar(filter))
                 .build();
     }
 

@@ -30,6 +30,12 @@ public class ShowRoom {
     String zalo;
     String facebook;
 
+    @Column(columnDefinition = "TEXT")
+    String about;
+
+    @Column(columnDefinition = "TEXT")
+    String description;
+
     @Column(name="created_at")
     @CreationTimestamp
     LocalDateTime createdAt;
