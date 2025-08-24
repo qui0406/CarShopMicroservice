@@ -1,0 +1,155 @@
+/* Home.css */
+
+/* Style cho overlay */
+.overlay {
+  position: absolute;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 0; /* Đảm bảo overlay nằm dưới nội dung */
+}
+
+/* Style cho text chung */
+.text-white {
+  color: #ffffff;
+}
+
+/* Style cho button tabs */
+.tab-button {
+  padding: 0.5rem 1rem;
+  transition: border-bottom 0.3s ease;
+}
+
+.tab-button:hover {
+  border-bottom: 2px solid #ffffff;
+}
+
+/* Style cho select input */
+/* Style cho select input */
+/* Style cho select input */
+.custom-select {
+  background: #1f2937; /* Nền xám đậm */
+  border: 1px solid #3b82f6; /* Viền xanh dương */
+  outline: none;
+  color: #ffffff; /* Text trắng */
+  padding: 0.5rem;
+  flex-grow: 1; /* Cho phép co giãn */
+  min-width: 0; /* Ngăn chặn tràn */
+  border-radius: 9999px;
+  opacity: 0.9; /* Giữ opacity */
+}
+
+.custom-select option {
+  background: #111827; /* Nền xám tối cho option */
+  color: #ffffff; /* Text trắng cho option */
+}
+
+/* Style cho search form */
+.search-form {
+  background: #f3f4f6; /* Nền xám nhạt */
+  border: 2px solid #3b82f6; /* Viền xanh dương */
+  border-radius: 9999px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  opacity: 0.9; /* Giữ opacity */
+  gap: 1rem;
+  width: 100%;
+  max-width: 4xl; /* Giữ max-width từ Tailwind */
+}
+
+@media (min-width: 768px) {
+  .search-form {
+    flex-direction: row;
+    align-items: center;
+  }
+}
+
+/* Style cho search button */
+.search-button {
+  background: #1f2937; /* Nền xám đậm */
+  border: 1px solid #3b82f6; /* Viền xanh dương */
+  padding: 0.5rem 1.5rem;
+  border-radius: 9999px;
+  color: #ffffff; /* Text trắng */
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+  opacity: 0.9; /* Giữ opacity */
+  white-space: nowrap; /* Ngăn nút bị ngắt dòng */
+}
+
+.search-button:hover {
+  background: #111827; /* Nền xám tối khi hover */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .search-form {
+    padding: 0.75rem;
+  }
+
+  .custom-select {
+    max-width: none; /* Loại bỏ giới hạn max-width trên mobile */
+  }
+
+  .search-button {
+    padding: 0.25rem 1rem;
+  }
+}
+
+/* Style cho category items */
+.category-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background-color: rgba(255, 255, 255, 0.8);
+  border-radius: 9999px;
+  color: #000000;
+  transition: background-color 0.3s ease;
+  cursor: pointer;
+}
+
+.category-item:hover {
+  background-color: rgba(255, 255, 255, 1);
+}
+
+/* Style cho search button */
+.search-button {
+  background-color: #2563eb;
+  padding: 0.5rem 1.5rem;
+  border-radius: 9999px;
+  color: #ffffff;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.search-button:hover {
+  background-color: #047857; /* Xanh lá đậm khi hover */
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .search-form {
+    padding: 0.75rem;
+  }
+
+  .custom-select {
+    max-width: 150px;
+  }
+
+  .tab-button {
+    padding: 0.25rem 0.75rem;
+  }
+
+  .category-item {
+    padding: 0.25rem 0.75rem;
+  }
+}
+
+.car-container{
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 4px 4px;
+}
+
