@@ -51,25 +51,14 @@ const Header = () => {
               Trang chủ
             </NavLink>
 
-            <NavDropdown
-              title={<span style={{ color: "white" }}>Xe ô tô</span>}
-              id="basic-nav-dropdown"
-              menuVariant="dark"
-              className="text-white"
+            <NavLink
+              to= "/car"
+              className={({ isActive }) =>
+                `nav-link ${isActive ? "active fw-bold text-warning" : "text-white"}`
+              }
             >
-              <NavDropdown.Item as={Link} to="/cars/suv">
-                SUV
-              </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/cars/sedan">
-                Sedan
-              </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/cars/hatchback">
-                Hatchback
-              </NavDropdown.Item>
-              <NavDropdown.Item as={Link} to="/cars/coupe">
-                Coupe
-              </NavDropdown.Item>
-            </NavDropdown>
+              Xe ô tô
+            </NavLink>
 
             <NavLink
               to="/blog"
@@ -123,13 +112,11 @@ const Header = () => {
                   className="nav-link text-info d-flex align-items-center"
                 >
                   <img
-                    src={user.avatar}
-                    width={35}
-                    height={35}
+                    src={user.result.avatar}
                     alt="avatar"
-                    className="rounded-circle"
+                    style={{ borderRadius: "100%", height: "35px", width: "35px" }}
                   />
-                  <span className="ms-2">{user.username}</span>
+                  <span className="ms-2">{user.result.username}</span>
                 </Link>
                 <Button className="btn btn-danger ms-3" onClick={logout}>
                   Đăng xuất

@@ -5,7 +5,7 @@ import { IoMdSpeedometer } from "react-icons/io";
 import { useParams } from "react-router-dom";
 import { Card, Button, Row, Col, Spinner, Badge, Container } from "react-bootstrap";
 import Hero from "./Layouts/Hero";
-import { authApis, endpoints } from "./../configs/APIs";
+import axios, { authApis, endpoints } from "./../configs/APIs";
 import "./../styles/Home.css";
 import { Link } from 'react-router-dom';
 
@@ -21,7 +21,7 @@ export default function CarDetails() {
 
   const fetchCarDetails = async () => {
     try {
-      const res = await authApis().get(endpoints["get-car-by-id"](id));
+      const res = await axios.get(endpoints["get-car-by-id"](id));
       console.log("Response from API:", res);
       console.log("Car details fetched:", res.data);
       setCar(res.data.result);
@@ -101,7 +101,7 @@ export default function CarDetails() {
     <div className="car-details">
       <Container className="my-5">
         <Row>
-          <Col md={8}>
+          <Col md={8} className="col-left">
             <Card className="mb-4">
               <div className="car-image-main" style={{height: "400px", overflow: "hidden"}}>
                 <img 
@@ -345,7 +345,7 @@ export default function CarDetails() {
             </Card>
           </Col>
           
-          <Col md={4}>
+          <Col md={4} className="col-right">
             <Card className="sticky-top" style={{ top: "20px" }}>
               <Card.Body>
                 <Card.Title className="text-primary">{formatPrice(car.price)}</Card.Title>

@@ -80,7 +80,7 @@ cloudinary:
 idp:
     url: http://localhost:8180
     client-id: ecommer_app
-    client-secret: z9CS4HlptoirirLWCOcsS9wj3T11l9Y3
+    client-secret: WKnFf5PHkolShqwY8CnVrYP7bHhYph4H
 
 
 

@@ -16,32 +16,31 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequestMapping("/car-category")
 public class CarCategoryController {
     CarCategoryService carCategoryService;
 
-    @GetMapping("/get-all-car-category")
+    @GetMapping("/car-category/get-all-car-category")
     public ApiResponse<List<CarCategoryResponse>> getCarCategories() {
         return ApiResponse.<List<CarCategoryResponse>>builder()
                 .result(carCategoryService.getCarCategories())
                 .build();
     }
 
-    @GetMapping("/get-car-category-by-id/{carCategoryId}")
+    @GetMapping("/car-category/get-car-category-by-id/{carCategoryId}")
     public ApiResponse<CarCategoryResponse> getCarCategoryById(@PathVariable Long carCategoryId) {
         return ApiResponse.<CarCategoryResponse>builder()
                 .result(carCategoryService.getCarCategoryById(carCategoryId))
                 .build();
     }
 
-    @PostMapping("/create-category")
+    @PostMapping("/api-secure/car-category/create-category")
     public ApiResponse<CarCategoryResponse> createCarCategory(@RequestBody CarCategoryRequest carCategoryRequest) {
         return ApiResponse.<CarCategoryResponse>builder()
                 .result(carCategoryService.create(carCategoryRequest))
                 .build();
     }
 
-    @DeleteMapping("/delete-caterory/{carCategoryId}")
+    @DeleteMapping("/api-secure/car-category/delete-caterory/{carCategoryId}")
     public ApiResponse<CarCategoryResponse> deleteCarCategory(@PathVariable Long carCategoryId) {
         carCategoryService.delete(carCategoryId);
         return ApiResponse.<CarCategoryResponse>builder()

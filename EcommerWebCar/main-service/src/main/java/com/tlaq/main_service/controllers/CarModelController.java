@@ -16,32 +16,31 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequestMapping("/car-model")
 public class CarModelController {
     CarModelService carModelService;
 
-    @GetMapping("/get-all-car-model")
+    @GetMapping("/car-model/get-all-car-model")
     public ApiResponse<List<CarModelResponse>> getAllCarModel(){
         return ApiResponse.<List<CarModelResponse>>builder()
                 .result(carModelService.getAll())
                 .build();
     }
 
-    @GetMapping("/get-car-model-by-id/{carModelId}")
+    @GetMapping("/car-model/get-car-model-by-id/{carModelId}")
     public ApiResponse<CarModelResponse> getCarModelById(@PathVariable("carModelId") Long carModelId){
         return ApiResponse.<CarModelResponse>builder()
                 .result(carModelService.getById(carModelId))
                 .build();
     }
 
-    @PostMapping("/create-car-model")
+    @PostMapping("/api-secure/car-model/create-car-model")
     public ApiResponse<CarModelResponse> createCarModel(@RequestBody CarModelRequest carModelRequest){
         return ApiResponse.<CarModelResponse>builder()
                 .result(carModelService.create(carModelRequest))
                 .build();
     }
 
-    @DeleteMapping("/delete-car-model/{carModelId}")
+    @DeleteMapping("/api-secure/car-model/delete-car-model/{carModelId}")
     public ApiResponse<CarModelResponse> deleteCarModel(@PathVariable("carModelId") Long carModelId){
         carModelService.deleteById(carModelId);
         return ApiResponse.<CarModelResponse>builder()

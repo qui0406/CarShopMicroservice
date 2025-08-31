@@ -14,7 +14,8 @@ const Profile = () => {
         const loadProfile = async () => {
             try {
                 const response = await authApis().get(endpoints['my-profile']);
-                setProfile(response.data);
+                console.log(response.data.result)
+                setProfile(response.data.result);
             } catch (error) {
                 setMsg("Không thể tải thông tin cá nhân.");
             } finally {
@@ -26,17 +27,14 @@ const Profile = () => {
     }, []);
 
     return (
-        <Container className="mt-5">
+        <Container className="mt-5" style={{paddingTop : "70px"}}>
             <Card>
                 <Card.Body>
                     <Row>
                         <Col md={3} className="text-center mb-3">
                             <Image
                                 src={profile?.avatar}
-                                roundedCircle
-                                width={120}
-                                height={120}
-                                alt="Avatar"
+                                style={{ borderRadius: "100%", height: "120px", width: "120px" }}
                             />
                         </Col>
                         <Col md={9}>
@@ -46,20 +44,11 @@ const Profile = () => {
                             <hr />
                             <Row>
                                 <Col md={6}><b>Tên đăng nhập:</b> {profile?.username}</Col>
-                                <Col md={6}><b>Role:</b> {profile?.role}</Col>
-
                                 {profile?.mssv && <Col md={6}><b>MSSV:</b> {profile?.mssv}</Col>}
                                 {profile?.msgv && <Col md={6}><b>MSGV:</b> {profile?.msgv}</Col>}
                                 <Col md={6}><b>Email:</b> {profile?.email}</Col>
                                 <Col md={6}><b>Điện thoại:</b> {profile?.phone}</Col>
                                 <Col md={6}><b>Giới tính:</b> {profile?.gender === true ? "Nam" : "Nữ"}</Col>
-                                {profile?.dob && <Col md={6}><b>Ngày sinh:</b> {profile?.dob}</Col>}
-                                {profile?.address && <Col md={6}><b>Địa chỉ:</b> {profile?.address}</Col>}
-                                {profile?.classroom && <Col md={6}><b>Lớp:</b> {profile?.classroom.name}</Col>}
-                                {profile?.schoolYear && <Col md={6}><b>Niên khóa:</b> {profile?.schoolYear}</Col>}
-                                {profile?.position && <Col md={6}><b>Chức vụ:</b> {profile?.position}</Col>}
-                                {profile?.experience && <Col md={6}><b>Kinh nghiệm:</b> {profile?.experience}</Col>}
-                                {profile?.faculty && <Col md={6}><b>Khoa:</b> {profile?.faculty.name}</Col>}
                             </Row>
                         </Col>
                     </Row>
