@@ -26,6 +26,19 @@ services:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: root
 
+  mysql:
+    image: bitnami/mysql:8.0.29
+    container_name: mysql-8.0.29
+    hostname: mysql
+    restart: always
+    ports:
+      - '3307:3306'
+    environment:
+      MYSQL_ROOT_PASSWORD: 12345678
+      MYSQL_DATABASE: mysql
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 12345678
+
   keycloak:
     image: quay.io/keycloak/keycloak:25.0.0
     container_name: keycloak-25.0.0

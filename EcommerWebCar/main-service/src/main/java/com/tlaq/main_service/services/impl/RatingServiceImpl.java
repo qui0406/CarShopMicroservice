@@ -36,9 +36,10 @@ public class RatingServiceImpl implements RatingService {
                 .orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTED)).getId();
         request.setProfileId(profileId);
 
-        Rating rating = ratingMapper.toRating(request);
-        ratingRepository.save(rating);
-        return ratingMapper.toRatingResponse(rating);
+//        Rating rating = ratingMapper.toRating(request);
+//        ratingRepository.save(rating);
+//        return ratingMapper.toRatingResponse(rating);
+        return null;
     }
 
     @Override
@@ -59,7 +60,8 @@ public class RatingServiceImpl implements RatingService {
         rating.setRating(request.getRating());
         rating.setContent(request.getContent());
         ratingRepository.save(rating);
-        return ratingMapper.toRatingResponse(rating);
+//        return ratingMapper.toRatingResponse(rating);
+        return null;
     }
 
     @Override
@@ -74,7 +76,7 @@ public class RatingServiceImpl implements RatingService {
                 .pageSize(pageData.getSize())
                 .totalPages(pageData.getTotalPages())
                 .totalElements(pageData.getTotalElements())
-                .data(pageData.getContent().stream().map(ratingMapper::toRatingResponse).toList())
+//                .data(pageData.getContent().stream().map(ratingMapper::toRatingResponse).toList())
             .build();
     }
 

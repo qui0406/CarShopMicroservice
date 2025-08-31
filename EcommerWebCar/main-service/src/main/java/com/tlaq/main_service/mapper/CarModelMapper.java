@@ -15,7 +15,9 @@ import java.util.List;
 @DecoratedWith(CarModelMapperDecorator.class)
 public interface CarModelMapper {
     CarModel toCarModel(CarModelRequest carModelRequest);
+
     List<CarModelResponse> toCarBranchResponse(List<CarModel> request);
+
     @Mapping(target = "category", ignore = true)
     CarModelResponse toCarModelResponse(CarModel carModel);
 

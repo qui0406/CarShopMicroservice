@@ -26,11 +26,10 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequestMapping("/car")
 public class CarController {
     CarDetailsService carDetailsService;
 
-    @GetMapping(value = "/get-products")
+    @GetMapping(value = "/car/get-products")
     public ApiResponse<PageResponse<CarResponse>> getCars(
             @RequestParam(value ="page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "size", required = false, defaultValue = "12") int size
@@ -40,15 +39,21 @@ public class CarController {
                 .build();
     }
 
-    @GetMapping(value ="/get-product-by-id/{carId}")
+    @GetMapping(value ="/car/get-product-by-id/{carId}")
     public ApiResponse<CarDetailsResponse> getCarById(@PathVariable String carId){
         return ApiResponse.<CarDetailsResponse>builder()
                 .result(carDetailsService.getCarDetails(carId))
                 .build();
     }
 
+    @GetMapping("/car/filter-car")
+    public ApiResponse<PageResponse<CarResponse>> filterCar(@RequestParam Map<String,String> filter){
+        return ApiResponse.<PageResponse<CarResponse>>builder()
+                .result(carDetailsService.filterCar(filter))
+                .build();
+    }
 
-    @PostMapping(value = "/create-product", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/api-secure/car/create-product", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<CarResponse> createCar(@ModelAttribute CarRequest carRequest,
                                               @RequestParam("images") @Valid
                                               @ImageConstraint(min = 1, max = 5, message = "Chọn từ 1 tới 5 ảnh")
@@ -64,22 +69,14 @@ public class CarController {
                     .message(e.getMessage())
                     .build();
         }
-
     }
 
 
-    @DeleteMapping("/delete-product/{carId}")
+    @DeleteMapping("/api-secure/car/delete-product/{carId}")
     public ApiResponse<Void> deleteCar(@PathVariable("carId") String carId){
         carDetailsService.deleteCarDetail(carId);
         return ApiResponse.<Void>builder()
                 .message("Car deleted successfully")
-                .build();
-    }
-
-    @GetMapping("/filter-car")
-    public ApiResponse<PageResponse<CarResponse>> filterCar(@RequestParam Map<String,String> filter){
-        return ApiResponse.<PageResponse<CarResponse>>builder()
-                .result(carDetailsService.filterCar(filter))
                 .build();
     }
 
