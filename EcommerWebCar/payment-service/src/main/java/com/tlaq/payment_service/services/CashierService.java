@@ -23,7 +23,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class CashierService {
     @Autowired
-    private MainClient mainClient;
+    MainClient mainClient;
 
     @Autowired
     CashPaymentRepository cashPaymentRepository;

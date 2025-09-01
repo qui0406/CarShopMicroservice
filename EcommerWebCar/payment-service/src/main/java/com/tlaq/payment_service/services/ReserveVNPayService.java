@@ -19,11 +19,12 @@ import com.tlaq.payment_service.utils.DateUtils;
 import com.tlaq.payment_service.utils.LocaleUtils;
 import com.tlaq.payment_service.utils.VNPayParams;
 import com.tlaq.payment_service.utils.VNPayUtils;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
+import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.producer.KafkaProducer;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
@@ -31,27 +32,18 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
 
 @Slf4j
 @Service
-@PropertySource("classpath:application.yml")
+@RequiredArgsConstructor
 public class ReserveVNPayService {
-    @Autowired
-    private PaymentRepository paymentRepository;
 
-    @Autowired
-    private ReserveVNPayRepository reserveVNPayRepository;
-
-    @Autowired
-    private MainClient mainClient;
-
-    @Autowired
-    KafkaTemplate<String, Object> kafkaTemplate;
-
+    private final PaymentRepository paymentRepository;
+    private final ReserveVNPayRepository reserveVNPayRepository;
+    private final MainClient mainClient;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     public static final String VERSION = "2.1.0";
     public static final String COMMAND = "pay";
@@ -64,49 +56,121 @@ public class ReserveVNPayService {
     @Value("${payment.vnpay.time-out}")
     private Integer paymentTimeout;
 
-    public PaymentResponse init(OnlinePaymentRequest request){
-        var amount = request.getAmount() * DEFAULT_MULTIPLIER;
-        var txnRef = request.getTxnRef();
-        var returnUrl = VNPayUtils.buildReturnUrl(txnRef);
+    /**
+     * Khởi tạo thanh toán VNPay
+     */
+    @CircuitBreaker(name = "vnpayCircuitBreaker", fallbackMethod = "initFallback")
+    @Retry(name = "vnpayRetry")
+    @TimeLimiter(name = "vnpayTimeLimiter")
+    public CompletableFuture<PaymentResponse> init(OnlinePaymentRequest request) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                long amount = request.getAmount() * DEFAULT_MULTIPLIER;
+                String txnRef = request.getTxnRef();
+                String returnUrl = VNPayUtils.buildReturnUrl(txnRef);
 
-        var vnCalendar = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
-        var createdDate = DateUtils.formatVnTime(vnCalendar);
-        vnCalendar.add(Calendar.MINUTE, paymentTimeout);
-        var expiredDate = DateUtils.formatVnTime(vnCalendar);
+                Calendar vnCalendar = Calendar.getInstance(TimeZone.getTimeZone("Etc/GMT+7"));
+                String createdDate = DateUtils.formatVnTime(vnCalendar);
+                vnCalendar.add(Calendar.MINUTE, paymentTimeout);
+                String expiredDate = DateUtils.formatVnTime(vnCalendar);
 
-        var ipAddress = request.getIpAddress();
+                Map<String, String> params = new HashMap<>();
+                params.put(VNPayParams.VERSION, VERSION);
+                params.put(VNPayParams.COMMAND, COMMAND);
+                params.put(VNPayParams.TMN_CODE, tmnCode);
+                params.put(VNPayParams.AMOUNT, String.valueOf(amount));
+                params.put(VNPayParams.CURRENCY, "vnd");
+                params.put(VNPayParams.TXN_REF, txnRef);
+                params.put(VNPayParams.RETURN_URL, returnUrl);
+                params.put(VNPayParams.CREATED_DATE, createdDate);
+                params.put(VNPayParams.EXPIRE_DATE, expiredDate);
+                params.put(VNPayParams.IP_ADDRESS, request.getIpAddress());
+                params.put(VNPayParams.LOCALE, LocaleUtils.VIETNAM.getCode());
+                params.put(VNPayParams.ORDER_INFO, txnRef);
+                params.put(VNPayParams.ORDER_TYPE, ORDER_TYPE);
 
-        Map<String, String> params = new HashMap<>();
+                String initPaymentUrl = VNPayUtils.buildInitPaymentUrl(params);
+                log.info("VNPay init URL generated for order {}", txnRef);
 
-        params.put(VNPayParams.VERSION, VERSION);
-        params.put(VNPayParams.COMMAND, COMMAND);
-
-        params.put(VNPayParams.TMN_CODE, tmnCode);
-        params.put(VNPayParams.AMOUNT, String.valueOf(amount));
-        params.put(VNPayParams.CURRENCY, "vnd");
-
-        params.put(VNPayParams.TXN_REF, txnRef);
-        params.put(VNPayParams.RETURN_URL, returnUrl);
-
-        params.put(VNPayParams.CREATED_DATE, createdDate);
-        params.put(VNPayParams.EXPIRE_DATE, expiredDate);
-
-        params.put(VNPayParams.IP_ADDRESS, ipAddress);
-
-        params.put(VNPayParams.LOCALE, LocaleUtils.VIETNAM.getCode());
-
-        params.put(VNPayParams.ORDER_INFO, txnRef);
-        params.put(VNPayParams.ORDER_TYPE, ORDER_TYPE);
-        var initPaymentUrl = VNPayUtils.buildInitPaymentUrl(params);
-        return PaymentResponse.builder()
-                .vnpUrl(initPaymentUrl).build();
+                return PaymentResponse.builder()
+                        .vnpUrl(initPaymentUrl)
+                        .build();
+            } catch (Exception e) {
+                log.error("Error initiating VNPay payment for order {}: {}", request.getTxnRef(), e.getMessage());
+                throw new AppException(ErrorCode.PAYMENT_INIT_FAILED);
+            }
+        });
     }
 
+    public CompletableFuture<PaymentResponse> initFallback(OnlinePaymentRequest request, Throwable t) {
+        log.error("Fallback triggered for VNPay init, order: {}, error: {}", request.getTxnRef(), t.getMessage());
+        return CompletableFuture.failedFuture(new AppException(ErrorCode.PAYMENT_INIT_FAILED));
+    }
 
-    public DepositResponse getDeposit(String orderId){
-        OrdersResponse ordersResponse= mainClient.getOrder(orderId).getResult();
+    /**
+     * Xử lý callback từ VNPay (IPN)
+     */
+    @CircuitBreaker(name = "vnpayCircuitBreaker", fallbackMethod = "processFallback")
+    @Retry(name = "vnpayRetry")
+    @TimeLimiter(name = "vnpayTimeLimiter")
+    public CompletableFuture<ResVNPayEvent> process(Map<String, String> params) {
+        return CompletableFuture.supplyAsync(() -> {
+            String orderId = params.get("vnp_TxnRef");
+            String vnpResponseCode = params.get("vnp_ResponseCode");
+            String amountStr = params.get("vnp_Amount");
+            String vnpBankTranNo = params.get("vnp_BankTranNo");
+
+            BigDecimal amount = new BigDecimal(amountStr)
+                    .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
+
+            if (!VNPayUtils.verifyIpn(params)) {
+                return new ResVNPayEvent("97", "Signature fail", orderId);
+            }
+
+            OrdersResponse ordersResponse = mainClient.getOrder(orderId).getResult();
+            String profileId = ordersResponse.getProfile().getId();
+            BigDecimal price = ordersResponse.getOrderDetails().getTotalAmount();
+
+            if ("00".equals(vnpResponseCode)) {
+                savePayment(orderId, vnpBankTranNo, profileId, price, amount, PaymentStatus.SUCCESS, params.get("vnp_PayDate"));
+                return new ResVNPayEvent("00", "Success", orderId);
+            } else {
+                savePayment(orderId, vnpBankTranNo, profileId, amount, amount, PaymentStatus.FAIL, params.get("vnp_PayDate"));
+                return new ResVNPayEvent(vnpResponseCode, "Payment failed", orderId);
+            }
+        });
+    }
+
+    public CompletableFuture<ResVNPayEvent> processFallback(Map<String, String> params, Throwable t) {
+        String orderId = params.get("vnp_TxnRef");
+        log.error("Fallback triggered for VNPay process, order: {}, error: {}", orderId, t.getMessage());
+        return CompletableFuture.completedFuture(new ResVNPayEvent("99", "System error", orderId));
+    }
+
+    private void savePayment(String orderId, String vnpBankTranNo, String profileId, BigDecimal price,
+                             BigDecimal depositAmount, PaymentStatus status, String payDate) {
+        LocalDateTime dateTime = LocalDateTime.parse(payDate, DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        ReservePaymentVNPay payment = ReservePaymentVNPay.builder()
+                .price(price)
+                .status(status)
+                .createdAt(dateTime)
+                .paymentMethod(PaymentMethod.BANK_TRANSFER)
+                .orderId(orderId)
+                .depositAmount(depositAmount)
+                .remainingAmount(price.subtract(depositAmount))
+                .active(true)
+                .profileId(profileId)
+                .type(PaymentType.DEPOSIT)
+                .transactionVNPayId(vnpBankTranNo)
+                .build();
+        paymentRepository.save(payment);
+        log.info("Payment record saved for order {}, status {}", orderId, status);
+    }
+
+    public DepositResponse getDeposit(String orderId) {
+        OrdersResponse ordersResponse = mainClient.getOrder(orderId).getResult();
         ReservePaymentVNPay reservePaymentVNPay = reserveVNPayRepository.findByOrderId(orderId)
-                .orElseThrow(()-> new AppException(ErrorCode.ORDER_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         return DepositResponse.builder()
                 .orders(ordersResponse)
@@ -117,93 +181,4 @@ public class ReserveVNPayService {
                 .createdAt(reservePaymentVNPay.getCreatedAt())
                 .build();
     }
-
-
-    public ResVNPayEvent process(Map<String, String> params) {
-        String vnpResponseCode = params.get("vnp_ResponseCode");
-        String orderId = params.get("vnp_TxnRef");
-        String amountStr = params.get("vnp_Amount");
-        String vnpBankTranNo = params.get("vnp_BankTranNo");
-
-        BigDecimal amount = new BigDecimal(amountStr)
-                .divide(BigDecimal.valueOf(100), 2, RoundingMode.HALF_UP);
-        if(!VNPayUtils.verifyIpn(params)) {
-            return new ResVNPayEvent("97", "Signature fail", orderId);
-        }
-
-        OrdersResponse ordersResponse = mainClient.getOrder(orderId).getResult();
-
-        String profileId = ordersResponse.getProfile().getId();
-        BigDecimal price = ordersResponse.getOrderDetails().getTotalAmount();
-
-        String emailClient= mainClient.getProfileById(profileId).getResult().getEmail();
-
-
-        if(vnpResponseCode.equals("00")) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-            LocalDateTime dateTime = LocalDateTime.parse(params.get("vnp_PayDate"), formatter);
-            ReservePaymentVNPay payment = ReservePaymentVNPay.builder()
-                    .price(price)
-                    .status(PaymentStatus.SUCCESS)
-                    .createdAt(dateTime)
-                    .paymentMethod(PaymentMethod.BANK_TRANSFER)
-                    .orderId(orderId)
-                    .depositAmount(amount)
-                    .remainingAmount(price.subtract(amount))
-                    .active(true)
-                    .profileId(profileId)
-                    .type(PaymentType.DEPOSIT)
-                    .transactionVNPayId(vnpBankTranNo)
-                    .build();
-
-            paymentRepository.save(payment);
-
-
-            NotificationEvent notificationEvent = NotificationEvent.builder()
-                    .body("Chúc mừng bạn đã đặt cọc thành công với số tiền "+ amount
-                            + "\nSố tiền còn lại mà quý khách thanh toán là: " + price.subtract(amount)
-                    )
-                    .channel("notification")
-                    .subject("Thông báo về việc đặt cọc xe")
-                    .recipient(emailClient)
-                    .build();
-
-            kafkaTemplate.send("notification-delivery", notificationEvent);
-
-            return new ResVNPayEvent("00", "Success", orderId);
-        }
-
-        if(vnpResponseCode.equals("97")) {
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
-            LocalDateTime dateTime = LocalDateTime.parse(params.get("vnp_PayDate"), formatter);
-
-            ReservePaymentVNPay payment = ReservePaymentVNPay.builder()
-                    .price(amount)
-                    .status(PaymentStatus.FAIL)
-                    .createdAt(dateTime)
-                    .paymentMethod(PaymentMethod.BANK_TRANSFER)
-                    .orderId(orderId)
-                    .active(true)
-                    .profileId(profileId)
-                    .type(PaymentType.DEPOSIT)
-                    .transactionVNPayId(vnpBankTranNo)
-                    .build();
-
-            paymentRepository.save(payment);
-
-            NotificationEvent notificationEvent = NotificationEvent.builder()
-                    .body("Bạn đã thanh toán không thành công. Vui lòng xem lại")
-                    .channel("notification")
-                    .subject("Thông báo về việc đặt cọc xe")
-                    .recipient(emailClient)
-                    .build();
-
-            kafkaTemplate.send("notification-delivery", notificationEvent);
-
-            return new ResVNPayEvent("97", "Signature", orderId);
-        }
-        return new  ResVNPayEvent("97", "Signature fail", orderId);
-    }
 }
-
-

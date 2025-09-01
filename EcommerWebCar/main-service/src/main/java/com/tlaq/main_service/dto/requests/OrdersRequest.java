@@ -15,8 +15,7 @@ import java.math.BigDecimal;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrdersRequest {
     String id;
-    @NotBlank
-    String profileId;
+
     @NotBlank
     String carId;
     BigDecimal unitPrice;
@@ -24,4 +23,6 @@ public class OrdersRequest {
     @Min(1)
     @Max(100)
     int quantity;
+
+    OrderDetailsRequest orderDetailsRequest;
 }

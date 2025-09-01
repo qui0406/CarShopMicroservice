@@ -86,6 +86,25 @@ const Header = () => {
             >
               Liên hệ
             </NavLink>
+
+            <NavLink
+              to="/ordered"
+              className={({ isActive }) =>
+                `nav-link ${isActive ? "active fw-bold text-warning" : "text-white"}`
+              }
+            >
+              Đã đặt
+            </NavLink>
+            
+            <NavLink
+              to="/history"
+              className={({ isActive }) =>
+                `nav-link ${isActive ? "active fw-bold text-warning" : "text-white"}`
+              }
+            >
+              Lịch sử
+            </NavLink>
+
           </Nav>
           <div className="d-flex align-items-center gap-2 ms-auto">
             {user === null ? (

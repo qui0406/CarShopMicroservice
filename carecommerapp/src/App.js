@@ -12,6 +12,11 @@ import Register from "./components/Auth/Register";
 import Login from "./components/Auth/Login";
 import Profile from "./components/Auth/Profile";
 import CarDetails from "./components/CarDetails";
+import Car from "./components/Car"
+import Reserve from './components/Reserve';
+import FormConfirm from './components/FormConfirm';
+import PaymentCompleted from './components/PaymentCompleted';
+
 
 
 import { MyDispatchContext, MyUserContext } from "./configs/MyContexts";
@@ -50,6 +55,11 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/home" element={<Home />} />
             <Route path="/get-car-by-id/:id" element={<CarDetails />} />
+            <Route path="/car" element={<Car/>} />
+            <Route path="/reserve" element={<Reserve/>} />
+            <Route path="/confirm" element={<FormConfirm/>} />
+            <Route path="/payment-result" element={<PaymentCompleted />} />
+
           </Routes>
           <Footer />
         </BrowserRouter>

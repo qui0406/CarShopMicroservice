@@ -4,8 +4,10 @@ import com.tlaq.main_service.entity.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -34,4 +36,7 @@ public class Orders {
     @JoinColumn(name = "order_details_id", referencedColumnName = "id")
     @OneToOne(cascade = CascadeType.ALL)
     OrderDetails orderDetails;
+
+    @CreationTimestamp
+    LocalDateTime createdAt;
 }
