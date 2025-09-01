@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { FaCarSide, FaGasPump, FaSpinner, FaCalendarAlt, FaMapMarkerAlt, FaKey, FaSnowflake, FaBluetooth, FaCamera, FaShieldAlt } from "react-icons/fa";
 import { GiCarSeat, GiGearStick } from "react-icons/gi";
 import { IoMdSpeedometer } from "react-icons/io";
@@ -8,14 +8,17 @@ import Hero from "./Layouts/Hero";
 import axios, { authApis, endpoints } from "./../configs/APIs";
 import "./../styles/Home.css";
 import { Link } from 'react-router-dom';
-
+import { useNavigate } from "react-router-dom";
+import {MyUserContext } from "./../configs/MyContexts"
 
 export default function CarDetails() {
+  const navigate = useNavigate();
   const { id } = useParams();
   const [car, setCar] = useState(null);
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
   const [carImages, setCarImages] = useState([]);
+  const user = useContext(MyUserContext);
 
 
 
@@ -47,6 +50,20 @@ export default function CarDetails() {
   const formatYear = (dateString) => {
     return new Date(dateString).getFullYear();
   };
+
+  const handleBookNow = () => {
+    sessionStorage.setItem("car", JSON.stringify(car));
+
+    if (!user) {
+      // Nếu chưa đăng nhập → chuyển đến login và thêm next param
+      navigate(`/login?next=/reserve`, { state: { car } });
+    } else {
+      // Nếu đã đăng nhập → đi thẳng đến reserve
+      navigate("/reserve", { state: { car } });
+    }
+  };
+
+
 
   if (loading) {
     return (
@@ -352,7 +369,7 @@ export default function CarDetails() {
                 <div className="text-muted mb-3">Price</div>
                 
                 <div className="d-grid gap-2 mb-3">
-                  <Button variant="primary" size="lg">
+                  <Button variant="primary" size="lg" onClick={handleBookNow}>
                     Book Now
                   </Button>
                   <Button variant="outline-primary">

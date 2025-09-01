@@ -31,6 +31,9 @@ public abstract class OrderMapperDecorator implements OrdersMapper {
     @Autowired
     private CarRepository carRepository;
 
+    @Autowired
+    private OrdersRepository ordersRepository;
+
 
     @Override
     public Orders toOrdersEntity(OrdersRequest request) {
@@ -39,9 +42,12 @@ public abstract class OrderMapperDecorator implements OrdersMapper {
             .paymentStatus(PaymentStatus.PENDING)
             .car(carRepository.findById(request.getCarId())
                     .orElseThrow(()-> new AppException(ErrorCode.CAR_NOT_FOUND)))
-            .profile(profileRepository.findById(request.getProfileId())
-                    .orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTED)))
             .orderDetails(OrderDetails.builder()
+                    .fullName(request.getOrderDetailsRequest().getFullName())
+                    .dob(request.getOrderDetailsRequest().getDob())
+                    .cccd(request.getOrderDetailsRequest().getCccd())
+                    .phoneNumber(request.getOrderDetailsRequest().getPhoneNumber())
+                    .address(request.getOrderDetailsRequest().getAddress())
                     .unitPrice(request.getUnitPrice())
                     .quantity(request.getQuantity())
                     .totalAmount(request.getUnitPrice().multiply(new BigDecimal(request.getQuantity())))

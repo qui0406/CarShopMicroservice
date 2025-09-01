@@ -11,7 +11,15 @@ export const endpoints = {
     "car-category": "/ecommer-car-web/car-category/get-all-car-category",
     "get-cars": "/ecommer-car-web/car/get-products",
     "filter-cars": "/ecommer-car-web/car/filter-car",
-    "get-car-by-id": id => `/ecommer-car-web/car/get-product-by-id/${id}`
+    "get-car-by-id": id => `/ecommer-car-web/car/get-product-by-id/${id}`,
+
+    "get-order": orderId => `/ecommer-car-web/orders/orders-car/${orderId}`,
+    "create-orders": "/ecommer-car-web/orders/create-order",
+
+    
+    "checkout-vnpay": "/payment/checkout/url",
+    "vnpay": "/payment/checkout/vnpay_ipn",
+    "payment-response": orderId => `/payment/installment/${orderId}`
 };
 
 export const authApis = () => {

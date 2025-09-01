@@ -7,10 +7,14 @@ import com.tlaq.main_service.mapper.decorator.OrderMapperDecorator;
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 @DecoratedWith(OrderMapperDecorator.class)
 public interface OrdersMapper {
     OrdersResponse toOrdersResponse(Orders orders);
 
     Orders toOrdersEntity(OrdersRequest ordersRequest);
+
+    List<OrdersResponse> toOrdersResponseList(List<Orders> ordersList);
 }

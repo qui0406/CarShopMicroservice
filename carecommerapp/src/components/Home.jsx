@@ -19,6 +19,7 @@ const Home = () => {
   const [totalPagesCategory, setTotalPagesCategory] = useState(1);
   const [pageModel, setPageModel] = useState(1);
   const [totalPagesModel, setTotalPagesModel] = useState(1);
+  
   const [carPage, setCarPage] = useState(1);
   const [carTotalPages, setCarTotalPages] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);

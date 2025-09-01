@@ -1,11 +1,19 @@
 package com.tlaq.main_service.services;
 
+import com.tlaq.main_service.dto.PageResponse;
 import com.tlaq.main_service.dto.requests.OrdersRequest;
 import com.tlaq.main_service.dto.responses.OrdersResponse;
 
+import java.util.List;
+
 public interface OrdersService {
     OrdersResponse getOrders(String id);
-    OrdersResponse createOrder(OrdersRequest request);
+    OrdersResponse createOrder(OrdersRequest request, String userKeyCloakId);
     void markSuccess(String id);
     void markFail(String id);
+
+    List<OrdersResponse> getOrdersResponseByProfileIdAndStatus(String useKeyCloakId);
+    List<OrdersResponse> getHistoryResponseByProfileId(String useKeyCloakId);
+
+    PageResponse<OrdersResponse> getAll(int page, int size);
 }

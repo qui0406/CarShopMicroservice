@@ -1,0 +1,14 @@
+.car-container{
+    padding-top: 70px;
+}
+
+.car-card{
+   border-radius: 10%;
+}
+
+.car-image {
+    width: 100%;
+    height: 200px;
+    border-radius: 10% 10% 0 0;
+}
+

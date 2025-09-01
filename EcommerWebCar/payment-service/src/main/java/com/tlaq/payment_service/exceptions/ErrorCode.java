@@ -36,6 +36,9 @@ public enum ErrorCode {
     ORDER_WAS_PAYMENT(1026, "Order was payment", HttpStatus.BAD_REQUEST),
     BILL_NOT_FOUND(1027, "Bill not found", HttpStatus.NOT_FOUND),
     ORDER_NOT_FOUND(1028, "Order not found", HttpStatus.NOT_FOUND),
+
+    PAYMENT_INIT_FAILED(1029, "Payment init failed", HttpStatus.INTERNAL_SERVER_ERROR),
+    PAYMENT_PROCESSING_FAILED(1030, "Payment processing failed", HttpStatus.INTERNAL_SERVER_ERROR),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
