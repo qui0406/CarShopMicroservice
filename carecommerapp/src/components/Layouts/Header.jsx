@@ -29,11 +29,7 @@ const Header = () => {
     >
       <Container fluid>
         {/* Logo */}
-        <Navbar.Brand
-          as={Link}
-          to="/home"
-          className={`fw-bold fs-4 ${isHome ? "text-white" : "text-light"}`}
-        >
+        <Navbar.Brand as={Link} to="/home" className={`fw-bold fs-4 ${isHome ? "text-white" : "text-light"}`}>
           CarShop
         </Navbar.Brand>
 
@@ -42,94 +38,66 @@ const Header = () => {
 
         <Navbar.Collapse id="navbarScroll" className="w-100">
           <Nav className="me-auto my-2 my-lg-0 flex-grow-1" navbarScroll>
-            <NavLink
-              to="/home"
-              className={({ isActive }) =>
+            <NavLink to="/home" className={({ isActive }) =>
                 `nav-link ${isActive ? "active fw-bold text-warning" : "text-white"}`
-              }
-            >
+              }>
               Trang chủ
             </NavLink>
 
-            <NavLink
-              to= "/car"
-              className={({ isActive }) =>
+            <NavLink to= "/car" className={({ isActive }) =>
                 `nav-link ${isActive ? "active fw-bold text-warning" : "text-white"}`
-              }
-            >
+              }>
               Xe ô tô
             </NavLink>
 
-            <NavLink
-              to="/blog"
-              className={({ isActive }) =>
+            <NavLink to="/blog" className={({ isActive }) =>
                 `nav-link ${isActive ? "active fw-bold text-warning" : "text-white"}`
-              }
-            >
-              Blog
+              }>
+              Voucher
             </NavLink>
 
-            <NavLink
-              to="/about"
-              className={({ isActive }) =>
+            <NavLink to="/contact" className={({ isActive }) =>
                 `nav-link ${isActive ? "active fw-bold text-warning" : "text-white"}`
-              }
-            >
-              Giới thiệu
+              }>
+              Tin tức xe
             </NavLink>
 
-            <NavLink
-              to="/contact"
-              className={({ isActive }) =>
+            <NavLink to="/all-my-reserve" className={({ isActive }) =>
                 `nav-link ${isActive ? "active fw-bold text-warning" : "text-white"}`
-              }
-            >
-              Liên hệ
-            </NavLink>
-
-            <NavLink
-              to="/ordered"
-              className={({ isActive }) =>
-                `nav-link ${isActive ? "active fw-bold text-warning" : "text-white"}`
-              }
-            >
+              }>
               Đã đặt
             </NavLink>
             
-            <NavLink
-              to="/history"
-              className={({ isActive }) =>
+            <NavLink to="/all-my-deposit" className={({ isActive }) =>
                 `nav-link ${isActive ? "active fw-bold text-warning" : "text-white"}`
-              }
-            >
+              }>
               Lịch sử
+            </NavLink>
+
+            <NavLink to="/about" className={({ isActive }) =>
+                `nav-link ${isActive ? "active fw-bold text-warning" : "text-white"}`
+              }>
+              Về chúng tôi
             </NavLink>
 
           </Nav>
           <div className="d-flex align-items-center gap-2 ms-auto">
             {user === null ? (
               <>
-                <NavLink
-                  to="/login"
-                  className={({ isActive }) =>
+                <NavLink to="/login" className={({ isActive }) =>
                     `btn ${isActive ? "btn-warning fw-bold" : "btn-outline-light"}`
-                  }
-                >
+                  }>
                   Đăng nhập
                 </NavLink>
-                <NavLink
-                  to="/register"
-                  className="btn btn-light text-dark fw-semibold"
-                >
+
+                <NavLink to="/register" className="btn btn-light text-dark fw-semibold">
                   Đăng ký
                 </NavLink>
               </>
-            ) : (
-              <div className="d-flex align-items-center">
-                <Link
-                  to="/profile"
-                  className="nav-link text-info d-flex align-items-center"
-                >
+            ) : <>
+              
+             (<div className="d-flex align-items-center">
+                <Link to="/profile" className="nav-link text-info d-flex align-items-center">
                   <img
                     src={user.result.avatar}
                     alt="avatar"
@@ -141,7 +109,8 @@ const Header = () => {
                   Đăng xuất
                 </Button>
               </div>
-            )}
+              
+            ) </>}
           </div>
         </Navbar.Collapse>
       </Container>

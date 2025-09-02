@@ -24,6 +24,13 @@ import java.util.List;
 public class ShowRoomController {
     ShowRoomService showRoomService;
 
+    @GetMapping("/get-info-showroom")
+    public ApiResponse<ShowRoomResponse> getInfo(){
+        return ApiResponse.<ShowRoomResponse>builder()
+                .result(showRoomService.getShowRoom())
+                .build();
+    }
+
     @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<ShowRoomResponse> createCar(@ModelAttribute ShowRoomRequest request,
                                                    @RequestParam("images") @Valid

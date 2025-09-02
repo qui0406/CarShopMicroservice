@@ -52,6 +52,11 @@ app:
     kafka:
         notificationTopic: notification-topic
 
+    services:
+      pay:
+        url: http://localhost:8083/payment
+
+
 
 management:
     endpoints:

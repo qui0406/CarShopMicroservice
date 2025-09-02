@@ -26,10 +26,6 @@ const Register = () => {
         label: "Họ",
         type: "text",
         field: "lastName"
-    }, {
-        label: "Mã số sinh viên",
-        type: "text",
-        field: "mssv"
     }, 
     {
         label: "Email address",
@@ -109,9 +105,9 @@ const Register = () => {
     };
 
     return (
-         <div
-        className="d-flex justify-content-center align-items-center"
-        style={{ minHeight: "150vh", background: "#f6f8fa" }}
+        <div
+            className="d-flex justify-content-center align-items-center"
+            style={{ minHeight: "150vh", background: "#f6f8fa", paddingTop: "70px" }}
         >
         <div
             style={{

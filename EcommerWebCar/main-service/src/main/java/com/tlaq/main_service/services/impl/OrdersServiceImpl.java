@@ -2,9 +2,13 @@ package com.tlaq.main_service.services.impl;
 
 import com.tlaq.main_service.dto.PageResponse;
 import com.tlaq.main_service.dto.requests.OrdersRequest;
+import com.tlaq.main_service.dto.responses.OrderDetailsResponse;
+import com.tlaq.main_service.dto.responses.OrderHistoryResponse;
+import com.tlaq.main_service.dto.responses.OrderPaymentResponse;
 import com.tlaq.main_service.dto.responses.OrdersResponse;
 import com.tlaq.main_service.dto.responses.carResponse.CarResponse;
 import com.tlaq.main_service.entity.Inventory;
+import com.tlaq.main_service.entity.OrderDetails;
 import com.tlaq.main_service.entity.Orders;
 import com.tlaq.main_service.entity.Profile;
 import com.tlaq.main_service.entity.enums.PaymentStatus;
@@ -14,6 +18,7 @@ import com.tlaq.main_service.mapper.OrdersMapper;
 import com.tlaq.main_service.repositories.InventoryRepository;
 import com.tlaq.main_service.repositories.OrdersRepository;
 import com.tlaq.main_service.repositories.ProfileRepository;
+import com.tlaq.main_service.repositories.httpClient.PaymentClient;
 import com.tlaq.main_service.services.OrdersService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +29,12 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -35,6 +45,7 @@ public class OrdersServiceImpl implements OrdersService {
     OrdersRepository ordersRepository;
     InventoryRepository inventoryRepository;
     ProfileRepository profileRepository;
+    PaymentClient paymentClient;
 
     @Override
     public OrdersResponse getOrders(String id) {
@@ -73,24 +84,66 @@ public class OrdersServiceImpl implements OrdersService {
 
 
     @Override
-    public List<OrdersResponse> getOrdersResponseByProfileIdAndStatus(String userKeyCloakId) {
-        Profile profile= profileRepository.findByUserKeyCloakId(userKeyCloakId)
-                .orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTED));
+    public List<OrderHistoryResponse> getOrdersResponseByProfileIdAndStatus(String userKeyCloakId) {
+        Profile profile = profileRepository.findByUserKeyCloakId(userKeyCloakId)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        List<Orders> listOrderProfileIdAndStatusPending= ordersRepository
+        List<Orders> listOrderProfileIdAndStatusPending = ordersRepository
                 .findByProfileIdAndPaymentStatus(profile.getId(), PaymentStatus.PENDING);
 
-        return ordersMapper.toOrdersResponseList(listOrderProfileIdAndStatusPending);
+        List<OrderPaymentResponse> orderPaymentResponses = paymentClient.orderPayment().getResult();
+
+        Map<String, OrderPaymentResponse> paymentMap = orderPaymentResponses.stream()
+                .collect(Collectors.toMap(OrderPaymentResponse::getOrderId, Function.identity()));
+
+        return listOrderProfileIdAndStatusPending.stream()
+            .map(order -> {
+                OrderPaymentResponse payment = paymentMap.get(order.getId());
+                return new AbstractMap.SimpleEntry<>(order, payment);
+            })
+            .filter(entry -> entry.getValue() != null) // chỉ lấy những order có payment
+            .map(entry -> {
+                Orders order = entry.getKey();
+                OrderPaymentResponse payment = entry.getValue();
+
+                return OrderHistoryResponse.builder()
+                        .orderId(order.getId())
+                        .fullName(order.getOrderDetails().getFullName())
+                        .address(order.getOrderDetails().getAddress())
+                        .quantity(order.getOrderDetails().getQuantity())
+                        .paymentStatus(order.getPaymentStatus())
+                        .username(payment.getProfileId())
+                        .totalAmount(payment.getPrice())
+                        .disposableAmount(payment.getDisposableAmount())
+                        .remainAmount(payment.getRemainAmount())
+                        .transactionId(payment.getTransactionId())
+                        .createdAt(payment.getCreatedAt())
+                        .build();
+            })
+            .collect(Collectors.toList());
     }
 
     @Override
-    public List<OrdersResponse> getHistoryResponseByProfileId(String userKeyCloakId) {
+    public List<OrderDetailsResponse> getHistoryResponseByProfileId(String userKeyCloakId) {
         Profile profile= profileRepository.findByUserKeyCloakId(userKeyCloakId)
                 .orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         List<Orders> listOrderProfileIdAndStatusPending= ordersRepository
                 .findByProfileId(profile.getId());
-        return ordersMapper.toOrdersResponseList(listOrderProfileIdAndStatusPending);
+
+        List<OrderDetailsResponse> orderDetailsResponses= new ArrayList<>();
+
+        for(Orders orders: listOrderProfileIdAndStatusPending){
+            OrderDetailsResponse res = new OrderDetailsResponse();
+            res.setOrderId(orders.getId());
+            res.setTotalAmount(orders.getOrderDetails().getTotalAmount());
+            res.setFullName(orders.getOrderDetails().getFullName());
+            res.setAddress(orders.getOrderDetails().getAddress());
+            res.setPaymentStatus(orders.getPaymentStatus());
+            res.setQuantity(orders.getOrderDetails().getQuantity());
+            orderDetailsResponses.add(res);
+        }
+        return orderDetailsResponses;
     }
 
     @Override
