@@ -16,7 +16,11 @@ import Car from "./components/Car"
 import Reserve from './components/Reserve';
 import FormConfirm from './components/FormConfirm';
 import PaymentCompleted from './components/PaymentCompleted';
+import MyReserve from './components/MyReserve';
+import MyDeposit from "./components/MyDeposit"
+import About from "./components/About";
 
+import HomeStaff from "./components/Staff/HomeStaff"
 
 
 import { MyDispatchContext, MyUserContext } from "./configs/MyContexts";
@@ -59,7 +63,11 @@ function App() {
             <Route path="/reserve" element={<Reserve/>} />
             <Route path="/confirm" element={<FormConfirm/>} />
             <Route path="/payment-result" element={<PaymentCompleted />} />
+            <Route path="/all-my-reserve" element={<MyReserve/>} />
+            <Route path="/all-my-deposit" element= {<MyDeposit/>} />
+            <Route path="/about" element= {<About/>} />
 
+            <Route path="/staff/home" element= {<HomeStaff/>} />
           </Routes>
           <Footer />
         </BrowserRouter>

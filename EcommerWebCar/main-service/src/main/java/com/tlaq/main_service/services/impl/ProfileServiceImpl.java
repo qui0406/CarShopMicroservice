@@ -9,6 +9,7 @@ import com.tlaq.main_service.dto.responses.IntrospectResponse;
 import com.tlaq.main_service.dto.responses.ProfileResponse;
 import com.tlaq.main_service.dto.responses.TokenResponse;
 import com.tlaq.main_service.entity.Profile;
+import com.tlaq.main_service.entity.enums.Role;
 import com.tlaq.main_service.exceptions.AppException;
 import com.tlaq.main_service.exceptions.ErrorCode;
 import com.tlaq.main_service.exceptions.ErrorNormalizer;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 

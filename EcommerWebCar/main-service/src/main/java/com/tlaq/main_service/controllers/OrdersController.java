@@ -4,6 +4,8 @@ import com.tlaq.main_service.configs.RabbitMQConfig;
 import com.tlaq.main_service.dto.ApiResponse;
 import com.tlaq.main_service.dto.PageResponse;
 import com.tlaq.main_service.dto.requests.OrdersRequest;
+import com.tlaq.main_service.dto.responses.OrderDetailsResponse;
+import com.tlaq.main_service.dto.responses.OrderHistoryResponse;
 import com.tlaq.main_service.dto.responses.OrdersResponse;
 import com.tlaq.main_service.entity.Orders;
 //import com.tlaq.main_service.message.OrdersProducer;
@@ -52,17 +54,17 @@ public class OrdersController {
     }
 
     @GetMapping("/get-history-order")
-    public ApiResponse<List<OrdersResponse>> getHistoryOrder(Principal principal) {
+    public ApiResponse<List<OrderDetailsResponse>> getHistoryOrder(Principal principal) {
         String userKeyCloakId = principal.getName();
-        return ApiResponse.<List<OrdersResponse>>builder()
+        return ApiResponse.<List<OrderDetailsResponse>>builder()
                 .result(ordersService.getHistoryResponseByProfileId(userKeyCloakId))
                 .build();
     }
 
-    @GetMapping("/get-order-pending")
-    public ApiResponse<List<OrdersResponse>> getOrderPending(Principal principal) {
+    @GetMapping("/get-order-deposit")
+    public ApiResponse<List<OrderHistoryResponse>> getOrderPending(Principal principal) {
         String userKeyCloakId = principal.getName();
-        return ApiResponse.<List<OrdersResponse>>builder()
+        return ApiResponse.<List<OrderHistoryResponse>>builder()
                 .result(ordersService.getOrdersResponseByProfileIdAndStatus(userKeyCloakId))
                 .build();
     }

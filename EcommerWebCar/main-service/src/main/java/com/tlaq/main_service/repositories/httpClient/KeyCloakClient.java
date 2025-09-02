@@ -1,5 +1,6 @@
 package com.tlaq.main_service.repositories.httpClient;
 
+import com.tlaq.main_service.dto.RoleRepresentation;
 import com.tlaq.main_service.dto.keycloak.*;
 import com.tlaq.main_service.dto.responses.IntrospectResponse;
 import com.tlaq.main_service.dto.responses.TokenResponse;
@@ -7,9 +8,12 @@ import feign.QueryMap;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
+
+import java.util.List;
 
 @FeignClient(name = "key-cloak-client", url = "${idp.url}")
 public interface KeyCloakClient {

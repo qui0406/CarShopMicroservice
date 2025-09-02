@@ -1,5 +1,6 @@
 package com.tlaq.main_service.dto.keycloak;
 
+import com.tlaq.main_service.entity.enums.Role;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -17,5 +18,6 @@ public class UserCreationParam {
     boolean emailVerified;
     String firstName;
     String lastName;
+    List<Role> roles;
     List<Credential> credentials;
 }
