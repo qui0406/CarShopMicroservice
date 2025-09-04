@@ -1,6 +1,7 @@
 package com.tlaq.chat_service.repository;
 
 import com.tlaq.chat_service.entity.Conversation;
+import com.tlaq.chat_service.entity.enums.ConversationStatus;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -10,8 +11,12 @@ import java.util.Optional;
 
 @Repository
 public interface ConversationRepository extends MongoRepository<Conversation, String> {
-    Optional<Conversation> findByParticipantsHash(String hash);
+    boolean existsByCustomerId(String customerId);
 
-    @Query("{'participants.userId' : ?0}")
-    List<Conversation> findAllByParticipantIdsContains(String userId);
+    Optional<Conversation> findByCustomerId(String customerId);
+
+    List<Conversation> findByStaffIdsContaining(String staffId);
+
+    long countByStatus(ConversationStatus status);
+
 }

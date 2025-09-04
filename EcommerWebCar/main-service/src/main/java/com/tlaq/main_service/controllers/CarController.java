@@ -59,7 +59,7 @@ public class CarController {
                                               @ImageConstraint(min = 1, max = 5, message = "Chọn từ 1 tới 5 ảnh")
                                               List<MultipartFile> images) {
         try{
-            carDetailsService.createCarDetail(carRequest, images);
+             carDetailsService.createCarDetail(carRequest, images);
             return ApiResponse.<CarResponse>builder()
                     .message("Car created successfully")
                     .build();

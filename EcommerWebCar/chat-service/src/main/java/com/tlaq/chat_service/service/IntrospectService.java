@@ -10,6 +10,9 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -17,7 +20,12 @@ import org.springframework.stereotype.Service;
 public class IntrospectService {
     KeyCloakClient keycloakClient;
 
-    public IntrospectResponse introspect(IntrospectRequest introspectRequest) {
-        return keycloakClient.introspect(introspectRequest);
+    public IntrospectResponse introspect(String token) {
+        Map<String, String> form = new HashMap<>();
+        form.put("token", token);
+        form.put("client_id", "ecommer_app");
+        form.put("client_secret", "WKnFf5PHkolShqwY8CnVrYP7bHhYph4H");
+
+        return keycloakClient.introspect(form);
     }
 }

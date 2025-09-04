@@ -29,7 +29,7 @@ public class ChatMessageController {
                 .build();
     }
 
-    @GetMapping
+    @GetMapping("get-all-message")
     ApiResponse<List<ChatMessageResponse>> getMessages(
             @RequestParam("conversationId") String conversationId) {
         return ApiResponse.<List<ChatMessageResponse>>builder()

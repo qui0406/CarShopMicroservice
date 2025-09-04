@@ -36,12 +36,12 @@ public class Profile {
     String avatar;
     String address;
     boolean active;
-
-    @ManyToMany
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "profile_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    Set<Role> roles;
+//
+//    @ManyToMany
+//    @JoinTable(
+//            name = "user_roles",
+//            joinColumns = @JoinColumn(name = "profile_id"),
+//            inverseJoinColumns = @JoinColumn(name = "role_id")
+//    )
+//    Set<Role> roles;
 }

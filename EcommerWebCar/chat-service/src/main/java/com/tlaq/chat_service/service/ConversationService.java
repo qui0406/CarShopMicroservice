@@ -1,10 +1,12 @@
 package com.tlaq.chat_service.service;
 
 import com.sun.tools.javac.Main;
+import com.tlaq.chat_service.dto.PageResponse;
 import com.tlaq.chat_service.dto.request.ConversationRequest;
 import com.tlaq.chat_service.dto.response.ConversationResponse;
 import com.tlaq.chat_service.entity.Conversation;
 import com.tlaq.chat_service.entity.ParticipantInfo;
+import com.tlaq.chat_service.entity.enums.ConversationStatus;
 import com.tlaq.chat_service.exceptions.AppException;
 import com.tlaq.chat_service.exceptions.ErrorCode;
 import com.tlaq.chat_service.mapper.ConversationMapper;
@@ -14,6 +16,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -30,92 +35,112 @@ import java.util.StringJoiner;
 public class ConversationService {
     ConversationRepository conversationRepository;
     MainClient mainClient;
-
     ConversationMapper conversationMapper;
 
-    public List<ConversationResponse> myConversations() {
-        String userId = SecurityContextHolder.getContext().getAuthentication().getName();
-        List<Conversation> conversations = conversationRepository.findAllByParticipantIdsContains(userId);
 
-        return conversations.stream().map(this::toConversationResponse).toList();
+    public PageResponse<ConversationResponse> getAllConversations(int page, int size){
+        Sort sort= Sort.by(Sort.Direction.DESC, "createdAt");
+        Pageable pageable= PageRequest.of(page- 1, size, sort);
+        var pageData = conversationRepository.findAll(pageable);
+
+        return PageResponse.<ConversationResponse>builder()
+                .currentPage(page)
+                .pageSize(pageData.getSize())
+                .totalPages(pageData.getTotalPages())
+                .totalElements(pageData.getTotalElements())
+                .data(pageData.getContent().stream()
+                        .map(conversationMapper::toConversationResponse).toList())
+                .build();
     }
 
-    public ConversationResponse create(ConversationRequest request) {
-        // Fetch user infos
+    public ConversationResponse getCustomerConversation() {
         String userKeyCloakId = SecurityContextHolder.getContext().getAuthentication().getName();
         var userInfoResponse = mainClient.getProfile(userKeyCloakId);
-        var participantInfoResponse = mainClient.getProfileById(
-                request.getParticipantIds().getFirst());
 
-        if (Objects.isNull(userInfoResponse) || Objects.isNull(participantInfoResponse)) {
+        if (Objects.isNull(userInfoResponse)) {
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
 
         var userInfo = userInfoResponse.getResult();
-        var participantInfo = participantInfoResponse.getResult();
+        var conversation = conversationRepository.findByCustomerId(userInfo.getId())
+                .orElseThrow(()-> new AppException(ErrorCode.CONVERSATION_NOT_FOUND));
 
-        List<String> userIds = new ArrayList<>();
-        userIds.add(userKeyCloakId);
-        userIds.add(participantInfo.getId());
-
-        var sortedIds = userIds.stream().sorted().toList();
-        String userIdHash = generateParticipantHash(sortedIds);
-
-        var conversation = conversationRepository.findByParticipantsHash(userIdHash)
-                .orElseGet(() -> {
-                    List<ParticipantInfo> participantInfos = List.of(
-                            ParticipantInfo.builder()
-                                    .id(userInfo.getId())
-                                    .username(userInfo.getUsername())
-                                    .firstName(userInfo.getFirstName())
-                                    .lastName(userInfo.getLastName())
-                                    .avatar(userInfo.getAvatar())
-                                    .build(),
-                            ParticipantInfo.builder()
-                                    .id(participantInfo.getId())
-                                    .username(participantInfo.getUsername())
-                                    .firstName(participantInfo.getFirstName())
-                                    .lastName(participantInfo.getLastName())
-                                    .avatar(participantInfo.getAvatar())
-                                    .build()
-                    );
-
-                    // Build conversation info
-                    Conversation newConversation = Conversation.builder()
-                            .type(request.getType())
-                            .participantsHash(userIdHash)
-                            .createdDate(Instant.now())
-                            .modifiedDate(Instant.now())
-                            .participants(participantInfos)
-                            .build();
-
-                    return conversationRepository.save(newConversation);
-                });
-
-        return toConversationResponse(conversation);
+        return toCustomerConversationResponse(conversation);
     }
 
-    private String generateParticipantHash(List<String> ids) {
-        StringJoiner stringJoiner = new StringJoiner("_");
-        ids.forEach(stringJoiner::add);
+    private ConversationResponse toCustomerConversationResponse(Conversation conversation) {
+        String userKeyCloakId = SecurityContextHolder.getContext().getAuthentication().getName();
+        var userInfoResponse = mainClient.getProfile(userKeyCloakId);
 
-        // SHA 256
+        if (Objects.isNull(userInfoResponse)) {
+            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
+        }
 
-        return stringJoiner.toString();
+        var userInfo = userInfoResponse.getResult();
+        return ConversationResponse.builder()
+                .id(conversation.getId())
+                .customerId(conversation.getCustomerId())
+                .customerInfo(ParticipantInfo.builder()
+                        .id(userInfo.getId())
+                        .userKeycloakId(userInfo.getUserKeyCloakId())
+                        .avatar(userInfo.getAvatar())
+                        .firstName(userInfo.getFirstName())
+                        .lastName(userInfo.getLastName())
+                        .username(userInfo.getUsername())
+                        .build())
+                .status(conversation.getStatus())
+                .createdAt(conversation.getCreatedAt())
+                .build();
     }
 
-    private ConversationResponse toConversationResponse(Conversation conversation) {
-        String currentUserId = SecurityContextHolder.getContext().getAuthentication().getName();
+    public ConversationResponse createOrGetConversation() {
+        String userKeyCloakId = SecurityContextHolder.getContext().getAuthentication().getName();
+        var userInfoResponse = mainClient.getProfile(userKeyCloakId);
 
-        ConversationResponse conversationResponse = conversationMapper.toConversationResponse(conversation);
+        if (Objects.isNull(userInfoResponse)) {
+            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
+        }
 
-        conversation.getParticipants().stream()
-                .filter(participantInfo -> !participantInfo.getId().equals(currentUserId))
-                .findFirst().ifPresent(participantInfo -> {
-                    conversationResponse.setConversationName(participantInfo.getUsername());
-                    conversationResponse.setConversationAvatar(participantInfo.getAvatar());
-                });
+        var userInfo = userInfoResponse.getResult();
 
-        return conversationResponse;
+        var existingConversation = conversationRepository.findByCustomerId(userInfo.getId());
+        if (existingConversation.isPresent()) {
+            var conversation = existingConversation.get();
+            conversationRepository.save(conversation);
+
+            return toCustomerConversationResponse(conversation);
+        }
+
+        ParticipantInfo customerInfo = ParticipantInfo.builder()
+                .id(userInfo.getId())
+                .userKeycloakId(userInfo.getUserKeyCloakId())
+                .username(userInfo.getUsername())
+                .firstName(userInfo.getFirstName())
+                .lastName(userInfo.getLastName())
+                .avatar(userInfo.getAvatar())
+                .build();
+
+        Conversation newConversation = Conversation.builder()
+                .customerId(userInfo.getId())
+                .customerInfo(customerInfo)
+                .staffIds(new ArrayList<>()) // Chưa có nhân viên nào
+                .status(ConversationStatus.WAITING) // Đang chờ hỗ trợ
+                .createdAt(Instant.now())
+                .build();
+
+        var savedConversation = conversationRepository.save(newConversation);
+
+        // TODO: Trigger notification to available staff
+        notifyAvailableStaff(savedConversation);
+
+        return toCustomerConversationResponse(savedConversation);
     }
+
+    private void notifyAvailableStaff(Conversation conversation) {
+        // TODO: Send notification to available staff about new conversation
+        log.info("New conversation created: {} for customer: {}",
+                conversation.getId(), conversation.getCustomerInfo().getUsername());
+    }
+
+
 }

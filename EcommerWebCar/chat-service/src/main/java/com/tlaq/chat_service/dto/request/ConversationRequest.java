@@ -13,8 +13,6 @@ import java.util.List;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ConversationRequest {
-    String type;
-
     @Size(min = 1)
     @NotNull
     List<String> participantIds;

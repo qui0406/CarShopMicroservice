@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class CarModelMapperDecorator implements CarModelMapper {
@@ -61,6 +62,18 @@ public class CarModelMapperDecorator implements CarModelMapper {
 
     @Override
     public List<CarModelResponse> toCarBranchResponse(List<CarModel> request) {
-        return delegate.toCarBranchResponse(request);
+        return request.stream()
+                .map(carModel -> {
+                    CarModel model = carModelRepository.findById(carModel.getId())
+                            .orElseThrow(() -> new AppException(ErrorCode.MODEL_CAR_IS_EMPTY));
+
+                    return CarModelResponse.builder()
+                            .id(model.getId())
+                            .name(model.getName())
+                            .category(model.getCategory().getName())
+                            .brand(model.getCarBranch().getName())
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 }

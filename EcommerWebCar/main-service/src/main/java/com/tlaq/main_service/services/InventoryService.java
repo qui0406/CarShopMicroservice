@@ -14,4 +14,6 @@ public interface InventoryService {
     void deleteInventory(String inventoryId);
 
     void updateInventoryAfterPay(String orderId);
+
+    InventoryResponse getInventoryByCarId(String carId);
 }

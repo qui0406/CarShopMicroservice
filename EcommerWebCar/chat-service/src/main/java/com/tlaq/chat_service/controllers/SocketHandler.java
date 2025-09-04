@@ -24,27 +24,24 @@ import java.time.Instant;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class SocketHandler {
     SocketIOServer server;
-//    IdentityService identityService;
     WebSocketSessionService webSocketSessionService;
     IntrospectService introspectService;
 
     @OnConnect
     public void clientConnected(SocketIOClient client) {
-        // Get Token from request param
         String token = client.getHandshakeData().getSingleUrlParam("token");
 
         // Verify token
-        var introspectResponse = introspectService.introspect(IntrospectRequest.builder()
-                        .token(token)
-                .build());
+        var introspectResponse = introspectService.introspect(token);
 
-        // If Token is invalid disconnect
-        if (introspectResponse.isValid()) {
+        log.info("IntrospectResponse: {}", introspectResponse);
+
+        if (introspectResponse.isActive()) {
             log.info("Client connected: {}", client.getSessionId());
             // Persist webSocketSession
             WebSocketSession webSocketSession = WebSocketSession.builder()
                     .socketSessionId(client.getSessionId().toString())
-                    .userId(introspectResponse.getUserId())
+                    .userId(introspectResponse.getSub())
                     .createdAt(Instant.now())
                     .build();
             webSocketSession = webSocketSessionService.create(webSocketSession);
