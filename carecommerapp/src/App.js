@@ -19,6 +19,8 @@ import PaymentCompleted from './components/PaymentCompleted';
 import MyReserve from './components/MyReserve';
 import MyDeposit from "./components/MyDeposit"
 import About from "./components/About";
+import Chat from "./components/Chat";
+
 
 import HomeStaff from "./components/Staff/HomeStaff"
 
@@ -29,6 +31,11 @@ import cookie from "react-cookies";
 import { useEffect } from "react";
 import { useReducer } from "react";
 import MyUserReducer from "./reducer/MyUserReducer";
+import Branch from './components/Staff/Branch';
+import Category from './components/Staff/Category';
+import Model from './components/Staff/Model';
+import ChatStaff from "./components/Staff/StaffChat"
+
 
 function App() {
   const [user, dispatch] = useReducer(MyUserReducer, null);
@@ -66,8 +73,14 @@ function App() {
             <Route path="/all-my-reserve" element={<MyReserve/>} />
             <Route path="/all-my-deposit" element= {<MyDeposit/>} />
             <Route path="/about" element= {<About/>} />
+            <Route path="/chat" element= {<Chat/>} />
 
             <Route path="/staff/home" element= {<HomeStaff/>} />
+            <Route path="/staff/home/branch" element= {<Branch/>} />
+            <Route path="/staff/home/category" element= {<Category/>} />
+            <Route path="/staff/home/model" element= {<Model/>} />
+            <Route path="/staff/home/chat" element= {<ChatStaff/>} />
+
           </Routes>
           <Footer />
         </BrowserRouter>

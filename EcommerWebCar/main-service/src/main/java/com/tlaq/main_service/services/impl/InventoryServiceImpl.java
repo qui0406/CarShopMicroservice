@@ -77,4 +77,12 @@ public class InventoryServiceImpl implements InventoryService {
         log.info("Cap nhat thanh cong");
         inventoryRepository.save(inventory);
     }
+
+    @Override
+    public InventoryResponse getInventoryByCarId(String carId) {
+        Inventory inventory= inventoryRepository.findInventoryByCarId(carId)
+                .orElseThrow(()-> new AppException(ErrorCode.INVENTORY_IS_EMPTY));
+
+        return inventoryMapper.toInventoryResponse(inventoryRepository.save(inventory));
+    }
 }

@@ -1,6 +1,7 @@
 package com.tlaq.chat_service.controllers;
 
 import com.tlaq.chat_service.dto.ApiResponse;
+import com.tlaq.chat_service.dto.PageResponse;
 import com.tlaq.chat_service.dto.request.ConversationRequest;
 import com.tlaq.chat_service.dto.response.ConversationResponse;
 import com.tlaq.chat_service.service.ConversationService;
@@ -19,17 +20,27 @@ import java.util.List;
 public class ConversationController {
     ConversationService conversationService;
 
-    @PostMapping("/create")
-    ApiResponse<ConversationResponse> createConversation(@RequestBody @Valid ConversationRequest request) {
+    @PostMapping("/create-or-get")
+    ApiResponse<ConversationResponse> createConversation() {
         return ApiResponse.<ConversationResponse>builder()
-                .result(conversationService.create(request))
+            .result(conversationService.createOrGetConversation())
+            .build();
+    }
+
+
+    @GetMapping("/get-all-conversation")
+    public ApiResponse<PageResponse<ConversationResponse>> getAllConversation(
+            @RequestParam(value ="page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "12") int size){
+        return ApiResponse.<PageResponse<ConversationResponse>>builder()
+                .result(conversationService.getAllConversations(page, size))
                 .build();
     }
 
-    @GetMapping("/my-conversations")
-    ApiResponse<List<ConversationResponse>> myConversations() {
-        return ApiResponse.<List<ConversationResponse>>builder()
-                .result(conversationService.myConversations())
+    @GetMapping("/customer-get-conversation")
+    public ApiResponse<ConversationResponse> getCustomerConversation(){
+        return ApiResponse.<ConversationResponse>builder()
+                .result(conversationService.getCustomerConversation())
                 .build();
     }
 }

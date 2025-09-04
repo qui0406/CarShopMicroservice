@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import { Card, Button, Row, Col, Spinner } from "react-bootstrap";
 import  axios ,{ authApis, endpoints } from "./../configs/APIs";
 import "./../styles/Home.css";
+import Chat from "./Chat"
 
 const Home = () => {
   // Initialize state as arrays to prevent undefined errors
@@ -364,6 +365,33 @@ const Home = () => {
           </Row>
         )}
       </div>
+
+
+      <div className="w-full">
+        {/* Hero Section */}
+        <div
+          className="relative h-[90vh] bg-cover bg-center flex flex-col items-center justify-center text-white"
+          style={{
+            backgroundImage:
+              "url('https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=1400&q=80')",
+          }}
+        >
+          {/* ... tất cả code hero section cũ ... */}
+        </div>
+      </div>
+
+      {/* Cars Section */}
+      <div className="car-container my-4">
+        {/* ... tất cả code cars section cũ ... */}
+      </div>
+
+      {/* Brands Section */}
+      <div className="brand-container my-4">
+        {/* ... tất cả code brands section cũ ... */}
+      </div>
+
+      {/* Thêm Chat Widget ở đây */}
+      <Chat />
 
     </>
   );

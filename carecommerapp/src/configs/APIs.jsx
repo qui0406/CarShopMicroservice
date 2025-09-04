@@ -26,10 +26,29 @@ export const endpoints = {
     "vnpay": "/payment/checkout/vnpay_ipn",
     "payment-response": orderId => `/payment/installment/${orderId}`,
 
+    "get-or-create-conversation": "/chat/conversations/create-or-get",
+    "my-conversation": "/chat/conversations/my-coversation",
+    "create-message": "/chat/messages/create",
+    "get-message": "/chat/messages/get-all-message",
 
-
+    
     "create-car": "/ecommer-car-web/api-secure/car/create-product",
-    "delete-car": carId => `/ecommer-car-web/api-secure/car/delete-product/${carId}`
+    "delete-car": carId => `/ecommer-car-web/api-secure/car/delete-product/${carId}`,
+
+    "get-all-model": "/ecommer-car-web/car-model/get-all-car-model",
+    "create-model": "/ecommer-car-web/api-secure/car-model/create-car-model",
+    "delete-model": carModelId => `/ecommer-car-web/api-secure/car-model/delete-car-model/${carModelId}`,
+
+    "create-branch": "/ecommer-car-web/api-secure/car-branch/create-branch",
+    "delete-branch": branchId => `/ecommer-car-web/api-secure/delete-branch/${branchId}`,
+
+    "create-category": "/ecommer-car-web/api-secure/car-category/create-category",
+    "delete-category": carCategoryId => `/ecommer-car-web/api-secure/car-category/delete-caterory/${carCategoryId}`,
+
+    "get-inventory-by-car-id":  carId => `/ecommer-car-web/inventory/get-inventory-by-carId/${carId}`,
+    "create-inventory": "/ecommer-car-web/inventory/create-inventory",
+    "update-inventory": inventoryId => `/ecommer-car-web/inventory/update-inventory/${inventoryId}`,
+    "delete-inventory": inventoryId => `/ecommer-car-web/inventory/delete-inventory/${inventoryId}`,
 
 };
 

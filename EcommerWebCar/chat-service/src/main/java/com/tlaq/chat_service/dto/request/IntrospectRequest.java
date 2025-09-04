@@ -10,4 +10,6 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class IntrospectRequest {
     String token;
+    String client_id;
+    String client_secret;
 }

@@ -1,6 +1,7 @@
 package com.tlaq.chat_service.dto.response;
 
 import com.tlaq.chat_service.entity.ParticipantInfo;
+import com.tlaq.chat_service.entity.enums.ConversationStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -14,11 +15,11 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ConversationResponse {
     String id;
-    String type; // GROUP, DIRECT
-    String participantsHash;
-    String conversationAvatar;
-    String conversationName;
-    List<ParticipantInfo> participants;
-    Instant createdDate;
-    Instant modifiedDate;
+    String customerId;
+    ParticipantInfo customerInfo;
+
+    List<ParticipantInfo> staff;
+    ConversationStatus status;
+
+    Instant createdAt;
 }

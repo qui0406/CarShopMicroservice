@@ -11,6 +11,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class ParticipantInfo {
     String id;
+    String userKeycloakId;
     String username;
     String firstName;
     String lastName;
