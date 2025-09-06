@@ -18,10 +18,25 @@ public class RabbitMQConfig {
     public static final String Q_PAYMENT_COMPLETED_ORDER = "payment.completed.order";
     public static final String Q_PAYMENT_FAILED_ORDER    = "payment.failed.order";
 
-    // routing keys
     public static final String RK_ORDER_CREATED     = "order.created";
     public static final String RK_PAYMENT_COMPLETED = "payment.completed";
     public static final String RK_PAYMENT_FAILED    = "payment.failed";
+
+
+    public static final String Q_CAR_UPDATED = "car.updated.queue";
+    public static final String RK_CAR_UPDATED = "car.updated";
+
+    @Bean
+    Queue qCarUpdated() {
+        return new Queue(Q_CAR_UPDATED, true);
+    }
+
+    @Bean
+    Binding bCarUpdated(TopicExchange exchange) {
+        return BindingBuilder.bind(qCarUpdated())
+                .to(exchange)
+                .with(RK_CAR_UPDATED);
+    }
 
     @Bean TopicExchange exchange() { return new TopicExchange(EXCHANGE, true, false); }
 

@@ -2,6 +2,8 @@ package com.tlaq.main_service.services.impl;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tlaq.main_service.dto.PageResponse;
 import com.tlaq.main_service.dto.requests.carRequest.CarRequest;
 import com.tlaq.main_service.dto.responses.carResponse.CarDetailsResponse;
@@ -13,6 +15,7 @@ import com.tlaq.main_service.exceptions.ErrorCode;
 import com.tlaq.main_service.mapper.CarMapper;
 import com.tlaq.main_service.repositories.CarRepository;
 import com.tlaq.main_service.services.CarDetailsService;
+import com.tlaq.main_service.services.RedisService;
 import com.tlaq.main_service.specifications.CarSpecification;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +25,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,6 +33,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 
 @Slf4j
@@ -41,21 +44,49 @@ public class CarDetailsServiceImpl implements CarDetailsService {
     CarMapper carMapper;
     CarRepository carRepository;
     Cloudinary cloudinary;
+    RedisService redisService;
+    ObjectMapper objectMapper;
+
 
     @Override
     public PageResponse<CarResponse> getCar(int page, int size) {
-        Sort sort= Sort.by(Sort.Direction.DESC, "createdAt");
-        Pageable pageable= PageRequest.of(page- 1, size, sort);
+        String cacheKey = "car:" + page + ":" + size;
+
+        try {
+            String cachedJson = redisService.getValue(cacheKey).toString();
+            if (cachedJson != null) {
+                log.info("Retrieved cars from cache for key: {}", cacheKey);
+                return objectMapper.readValue(cachedJson, new TypeReference<PageResponse<CarResponse>>() {});
+            }
+        } catch (Exception e) {
+            log.warn("Failed to retrieve from Redis cache for key: {}, will fetch from database", cacheKey, e);
+        }
+
+        // Fetch from database
+        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
+        Pageable pageable = PageRequest.of(page - 1, size, sort);
         var pageData = carRepository.findAll(pageable);
 
-        return PageResponse.<CarResponse>builder()
+        PageResponse<CarResponse> cars = PageResponse.<CarResponse>builder()
                 .currentPage(page)
                 .pageSize(pageData.getSize())
                 .totalPages(pageData.getTotalPages())
                 .totalElements(pageData.getTotalElements())
                 .data(pageData.getContent().stream().map(carMapper::toCarResponse).toList())
-            .build();
+                .build();
+
+        // Lưu vào cache
+        try {
+            String json = objectMapper.writeValueAsString(cars);
+            redisService.setValue(cacheKey, json, 30, TimeUnit.MINUTES);
+            log.info("Cached cars for key: {}", cacheKey);
+        } catch (Exception e) {
+            log.warn("Failed to cache cars for key: {}", cacheKey, e);
+        }
+
+        return cars;
     }
+
 
     @Override
     public CarDetailsResponse getCarDetails(String carId) {
@@ -76,7 +107,7 @@ public class CarDetailsServiceImpl implements CarDetailsService {
                     String imageUrl = res.get("secure_url").toString();
                     CarImage carImage = CarImage.builder()
                             .image(imageUrl)
-                        .build();
+                            .build();
                     carImageList.add(carImage);
                 } catch (IOException ex) {
                     throw new AppException(ErrorCode.UPLOAD_IMAGE_ERROR);
@@ -125,7 +156,7 @@ public class CarDetailsServiceImpl implements CarDetailsService {
                 .totalPages(pageData.getTotalPages())
                 .totalElements(pageData.getTotalElements())
                 .data(pageData.getContent().stream().map(carMapper::toCarResponse).toList())
-            .build();
+                .build();
     }
 
     private String uploadImage(MultipartFile img) {

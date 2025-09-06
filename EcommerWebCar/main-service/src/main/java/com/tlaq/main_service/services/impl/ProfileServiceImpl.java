@@ -9,12 +9,13 @@ import com.tlaq.main_service.dto.responses.IntrospectResponse;
 import com.tlaq.main_service.dto.responses.ProfileResponse;
 import com.tlaq.main_service.dto.responses.TokenResponse;
 import com.tlaq.main_service.entity.Profile;
-import com.tlaq.main_service.entity.enums.Role;
+import com.tlaq.main_service.entity.Role;
 import com.tlaq.main_service.exceptions.AppException;
 import com.tlaq.main_service.exceptions.ErrorCode;
 import com.tlaq.main_service.exceptions.ErrorNormalizer;
 import com.tlaq.main_service.mapper.ProfileMapper;
 import com.tlaq.main_service.repositories.ProfileRepository;
+import com.tlaq.main_service.repositories.RoleRepository;
 import com.tlaq.main_service.repositories.httpClient.KeyCloakClient;
 import com.tlaq.main_service.services.ProfileService;
 import feign.FeignException;
@@ -26,14 +27,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -46,6 +47,7 @@ public class ProfileServiceImpl implements ProfileService {
     ErrorNormalizer errorNormalizer;
     Cloudinary cloudinary;
     KafkaTemplate<String, Object> kafkaTemplate;
+    RoleRepository roleRepository;
 
     @Value("${idp.client-id}")
     @NonFinal
@@ -58,6 +60,14 @@ public class ProfileServiceImpl implements ProfileService {
     public ProfileResponse getMyProfile() {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
         String userId = authentication.getName();
+
+        var roles = new ArrayList<>();
+        for (GrantedAuthority grantedAuthority : authentication.getAuthorities()) {
+            String authority = grantedAuthority.getAuthority();
+            roles.add(authority);
+        }
+
+        log.info(roles.toString());
 
         var profile = profileRepository.findByUserKeyCloakId(userId).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -76,7 +86,12 @@ public class ProfileServiceImpl implements ProfileService {
                 .username(request.getUsername())
                 .password(request.getPassword())
                 .build();
-        return identityClient.login(auth);
+        try{
+            return identityClient.login(auth);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     @Override
@@ -101,7 +116,6 @@ public class ProfileServiceImpl implements ProfileService {
                     .build());
 
             log.info("TokenInfo {}", token);
-            // Create user with client Token and given info
 
             // Get userId of keyCloak account
             var creationResponse = identityClient.createUser(
@@ -123,11 +137,12 @@ public class ProfileServiceImpl implements ProfileService {
             String userId = extractUserId(creationResponse);
             log.info("UserId {}", userId);
 
+            Role userRole = roleRepository.findByName("USER");
 
-
-            var profile = profileMapper.toProfile(request);
+            Profile profile = profileMapper.toProfile(request);
             profile.setUserKeyCloakId(userId);
             profile.setAddress(request.getAddress());
+            profile.setRoles(Set.of(userRole));
 
             if (!avatar.isEmpty()) {
                 try {

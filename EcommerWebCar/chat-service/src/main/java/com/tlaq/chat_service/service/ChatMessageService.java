@@ -43,7 +43,6 @@ public class ChatMessageService {
     ObjectMapper objectMapper;
     ChatMessageMapper chatMessageMapper;
 
-
     public List<ChatMessageResponse> getMessages(String conversationId) {
         String userKeyCloakId = SecurityContextHolder.getContext().getAuthentication().getName();
         var userInfoResponse = mainClient.getProfile(userKeyCloakId);
@@ -57,7 +56,7 @@ public class ChatMessageService {
                 .orElseThrow(() -> new AppException(ErrorCode.CONVERSATION_NOT_FOUND));
 
         // Kiểm tra quyền truy cập
-        validateUserAccessToConversation(conversation, userInfo.getId());
+//        validateUserAccessToConversation(conversation, userInfo.getId());
 
         var messages = chatMessageRepository.findAllByConversationIdOrderByCreatedDateAsc(conversationId);
 
@@ -66,9 +65,7 @@ public class ChatMessageService {
                 .toList();
     }
 
-    /**
-     * Tạo tin nhắn mới
-     */
+
     public ChatMessageResponse create(ChatMessageRequest request) throws JsonProcessingException {
         String userKeyCloakId = SecurityContextHolder.getContext().getAuthentication().getName();
         var userInfoResponse = mainClient.getProfile(userKeyCloakId);
@@ -78,11 +75,12 @@ public class ChatMessageService {
         }
 
         var userInfo = userInfoResponse.getResult();
+
         Conversation conversation = conversationRepository.findById(request.getConversationId())
                 .orElseThrow(() -> new AppException(ErrorCode.CONVERSATION_NOT_FOUND));
 
         // Kiểm tra quyền gửi tin nhắn
-        validateUserAccessToConversation(conversation, userInfo.getId());
+//        validateUserAccessToConversation(conversation, userInfo.getId());
 
         // Auto-assign staff nếu chưa có ai được assign và người gửi là staff
         if (isStaffUser(userInfo.getId(), conversation) &&
@@ -97,8 +95,8 @@ public class ChatMessageService {
         // Update conversation activity
         updateConversationActivity(conversation, request.getMessage());
 
-        // Gửi tin nhắn qua WebSocket
-        broadcastMessage(conversation, chatMessage, userInfo.getId());
+        // Gửi tin nhắn qua WebSocket - FIX: Improved broadcast method
+        broadcastMessageToConversation(conversation, chatMessage, userInfo.getId());
 
         return toChatMessageResponse(chatMessage, userInfo.getId());
     }
@@ -132,14 +130,8 @@ public class ChatMessageService {
                 conversation.getStaffIds().add(staffId);
             }
 
-//            // Set as assigned staff if not set
-//            if (conversation.getAssignedStaffId() == null) {
-//                conversation.setAssignedStaffId(staffId);
-//                conversation.setStatus(ConversationStatus.ACTIVE);
-//                log.info("Auto-assigned staff {} to conversation {}", staffId, conversation.getId());
-//            }
-
             conversationRepository.save(conversation);
+            log.info("Auto-assigned staff {} to conversation {}", staffId, conversation.getId());
         } catch (Exception e) {
             log.error("Failed to auto-assign staff to conversation: {}", e.getMessage());
         }
@@ -169,52 +161,92 @@ public class ChatMessageService {
     /**
      * Update conversation activity
      */
-    private void updateConversationActivity(Conversation conversation, String lastMessage) {// Giới hạn độ dài preview
-        conversationRepository.save(conversation);
+    private void updateConversationActivity(Conversation conversation, String lastMessage) {
+        try {
+
+            conversationRepository.save(conversation);
+        } catch (Exception e) {
+            log.error("Failed to update conversation activity: {}", e.getMessage());
+        }
     }
 
     /**
-     * Broadcast tin nhắn qua WebSocket
+     * FIXED: Improved broadcast method using rooms
      */
-    private void broadcastMessage(Conversation conversation, ChatMessage chatMessage, String senderId) {
+    private void broadcastMessageToConversation(Conversation conversation, ChatMessage chatMessage, String senderId) {
         try {
-            // Lấy tất cả user ID cần gửi tin nhắn
-            Set<String> recipientIds = new HashSet<>();
-            recipientIds.add(conversation.getCustomerId());
-            recipientIds.addAll(conversation.getStaffIds());
+            String conversationRoom = conversation.getId();
 
-            // Lấy các WebSocket session đang active
+            // Get all participants
+            Set<String> participantIds = new HashSet<>();
+            participantIds.add(conversation.getCustomerId());
+            participantIds.addAll(conversation.getStaffIds());
+
+            log.info("Broadcasting message to conversation {} with {} participants",
+                    conversation.getId(), participantIds.size());
+
+            // Method 1: Broadcast to room (recommended)
+            socketIOServer.getRoomOperations(conversationRoom).sendEvent("message",
+                    toChatMessageResponseMap(chatMessage, conversation.getId()));
+
+            // Method 2: Direct broadcast to specific users (fallback)
             Map<String, WebSocketSession> webSocketSessions = webSocketSessionRepository
-                    .findAllByUserIdIn(new ArrayList<>(recipientIds))
+                    .findAllByUserIdIn(new ArrayList<>(participantIds))
                     .stream()
                     .collect(Collectors.toMap(
                             WebSocketSession::getSocketSessionId,
                             Function.identity()
                     ));
 
-            // Gửi tin nhắn đến tất cả client
+            log.info("Found {} active websocket sessions", webSocketSessions.size());
+
             socketIOServer.getAllClients().forEach(client -> {
                 try {
-                    var webSocketSession = webSocketSessions.get(client.getSessionId().toString());
-
-                    if (Objects.nonNull(webSocketSession)) {
-                        ChatMessageResponse response = toChatMessageResponse(chatMessage, webSocketSession.getUserId());
+                    WebSocketSession session = webSocketSessions.get(client.getSessionId().toString());
+                    if (session != null) {
+                        ChatMessageResponse response = toChatMessageResponse(chatMessage, session.getUserId());
                         response.setConversationId(conversation.getId());
-                        String messageJson = objectMapper.writeValueAsString(response);
 
-                        client.sendEvent("message", messageJson);
-                        log.debug("Sent message to client: {}", client.getSessionId());
+                        client.sendEvent("message", response);
+                        log.debug("Sent message to client: {} (user: {})",
+                                client.getSessionId(), session.getUserId());
                     }
-                } catch (JsonProcessingException e) {
-                    log.error("Failed to send message to client {}: {}", client.getSessionId(), e.getMessage());
+                } catch (Exception e) {
+                    log.error("Failed to send message to client {}: {}",
+                            client.getSessionId(), e.getMessage());
                 }
             });
 
         } catch (Exception e) {
-            log.error("Failed to broadcast message: {}", e.getMessage());
+            log.error("Failed to broadcast message: {}", e.getMessage(), e);
         }
     }
 
+    /**
+     * Convert ChatMessage to response map for room broadcast
+     */
+    private Map<String, Object> toChatMessageResponseMap(ChatMessage chatMessage, String conversationId) {
+        try {
+            Map<String, Object> response = new HashMap<>();
+            response.put("id", chatMessage.getId());
+            response.put("conversationId", conversationId);
+            response.put("message", chatMessage.getMessage());
+            response.put("createdDate", chatMessage.getCreatedDate().toString());
+
+            // Sender info
+            Map<String, Object> senderInfo = new HashMap<>();
+            senderInfo.put("id", chatMessage.getSender().getId());
+            senderInfo.put("name", chatMessage.getSender().getFirstName() + " " + chatMessage.getSender().getLastName());
+            senderInfo.put("username", chatMessage.getSender().getUsername());
+            senderInfo.put("avatar", chatMessage.getSender().getAvatar());
+            response.put("sender", senderInfo);
+
+            return response;
+        } catch (Exception e) {
+            log.error("Error converting message to response map: {}", e.getMessage());
+            return new HashMap<>();
+        }
+    }
 
     private ChatMessageResponse toChatMessageResponse(ChatMessage chatMessage, String currentUserId) {
         ChatMessageResponse response = chatMessageMapper.toChatMessageResponse(chatMessage);
@@ -222,12 +254,10 @@ public class ChatMessageService {
         return response;
     }
 
-
     private String truncateMessage(String message, int maxLength) {
         if (message == null) return "";
         return message.length() > maxLength ? message.substring(0, maxLength) + "..." : message;
     }
-
 
     public List<ChatMessageResponse> getMessagesWithPagination(String conversationId, int page, int size) {
         String userKeyCloakId = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -241,7 +271,7 @@ public class ChatMessageService {
         Conversation conversation = conversationRepository.findById(conversationId)
                 .orElseThrow(() -> new AppException(ErrorCode.CONVERSATION_NOT_FOUND));
 
-        validateUserAccessToConversation(conversation, userInfo.getId());
+//        validateUserAccessToConversation(conversation, userInfo.getId());
 
         var messages = chatMessageRepository.findByConversationIdWithPagination(
                 conversationId, page, size);
@@ -252,7 +282,7 @@ public class ChatMessageService {
     }
 
     /**
-     * Đánh dấu tin nhắn đã đọc (nếu cần implement read status)
+     * Đánh dấu tin nhắn đã đọc
      */
     public void markMessagesAsRead(String conversationId) {
         String userKeyCloakId = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -268,49 +298,30 @@ public class ChatMessageService {
 
         validateUserAccessToConversation(conversation, userInfo.getId());
 
-        // TODO: Implement read status tracking if needed
         log.info("User {} marked messages as read in conversation {}", userInfo.getId(), conversationId);
 
-        // Broadcast read status to other participants
+        // Broadcast read status to conversation room
         broadcastReadStatus(conversation, userInfo.getId());
     }
 
     /**
-     * Broadcast read status
+     * Broadcast read status using rooms
      */
     private void broadcastReadStatus(Conversation conversation, String userId) {
         try {
-            Set<String> recipientIds = new HashSet<>();
-            recipientIds.add(conversation.getCustomerId());
-            recipientIds.addAll(conversation.getStaffIds());
-            recipientIds.remove(userId); // Không gửi lại cho người đánh dấu
-
-            Map<String, WebSocketSession> webSocketSessions = webSocketSessionRepository
-                    .findAllByUserIdIn(new ArrayList<>(recipientIds))
-                    .stream()
-                    .collect(Collectors.toMap(
-                            WebSocketSession::getSocketSessionId,
-                            Function.identity()
-                    ));
+            String conversationRoom = conversation.getId();
 
             Map<String, Object> readStatusEvent = Map.of(
+                    "type", "read_status",
                     "conversationId", conversation.getId(),
                     "userId", userId,
                     "readAt", Instant.now().toString()
             );
 
-            socketIOServer.getAllClients().forEach(client -> {
-                try {
-                    var webSocketSession = webSocketSessions.get(client.getSessionId().toString());
+            // Broadcast to room
+            socketIOServer.getRoomOperations(conversationRoom).sendEvent("read_status", readStatusEvent);
 
-                    if (Objects.nonNull(webSocketSession)) {
-                        String eventJson = objectMapper.writeValueAsString(readStatusEvent);
-                        client.sendEvent("message", eventJson);
-                    }
-                } catch (JsonProcessingException e) {
-                    log.error("Failed to send read status to client {}: {}", client.getSessionId(), e.getMessage());
-                }
-            });
+            log.debug("Broadcasted read status for user {} in conversation {}", userId, conversation.getId());
 
         } catch (Exception e) {
             log.error("Failed to broadcast read status: {}", e.getMessage());

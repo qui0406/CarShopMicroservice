@@ -28,6 +28,7 @@ export const endpoints = {
 
     "get-or-create-conversation": "/chat/conversations/create-or-get",
     "my-conversation": "/chat/conversations/my-coversation",
+    "get-all-conversation": "/chat/conversations/get-all-conversation",
     "create-message": "/chat/messages/create",
     "get-message": "/chat/messages/get-all-message",
 

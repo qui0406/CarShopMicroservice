@@ -23,9 +23,16 @@ const Chat = () => {
   const loadConversation = async () => {
     try {
       const res = await authApis().post(endpoints["get-or-create-conversation"]);
+      
       if (res.status === 200 || res.status === 201) {
         setConversation(res.data.result);
         console.log("Conversation loaded:", res.data.result);
+
+        if (socketRef.current) {
+          socketRef.current.emit("join-room", { conversationId: res.data.result.id });
+          console.log("Emit join-room:", res.data.result.id);
+        }
+
         loadMessage(res.data.result.id);
       }
     } catch (error) {
@@ -110,6 +117,7 @@ const Chat = () => {
 
       socketRef.current.on("connect", () => {
         console.log("Socket connected");
+
       });
 
       socketRef.current.on("disconnect", () => {

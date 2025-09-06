@@ -23,10 +23,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.StringJoiner;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -52,6 +49,38 @@ public class ConversationService {
                         .map(conversationMapper::toConversationResponse).toList())
                 .build();
     }
+
+    public boolean userHasAccessToConversation(String userId, String conversationId) {
+        try {
+            Optional<Conversation> conversationOpt = conversationRepository.findById(conversationId);
+
+            if (conversationOpt.isEmpty()) {
+                log.warn("Conversation not found: {}", conversationId);
+                return false;
+            }
+
+            Conversation conversation = conversationOpt.get();
+
+            // Check if user is customer or staff member in this conversation
+            boolean isCustomer = userId.equals(conversation.getCustomerId());
+            boolean isStaff = conversation.getStaffIds().contains(userId);
+
+            if (isCustomer || isStaff) {
+                log.debug("User {} has access to conversation {}", userId, conversationId);
+                return true;
+            }
+
+            log.warn("User {} does not have access to conversation {}", userId, conversationId);
+            return false;
+
+        } catch (Exception e) {
+            log.error("Error checking conversation access for user {} and conversation {}: {}",
+                    userId, conversationId, e.getMessage(), e);
+            return false;
+        }
+    }
+
+
 
     public ConversationResponse getCustomerConversation() {
         String userKeyCloakId = SecurityContextHolder.getContext().getAuthentication().getName();
