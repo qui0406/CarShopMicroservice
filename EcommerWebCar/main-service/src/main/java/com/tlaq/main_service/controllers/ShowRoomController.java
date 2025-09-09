@@ -20,18 +20,17 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequestMapping("/showroom")
 public class ShowRoomController {
     ShowRoomService showRoomService;
 
-    @GetMapping("/get-info-showroom")
+    @GetMapping("/showroom/get-info-showroom")
     public ApiResponse<ShowRoomResponse> getInfo(){
         return ApiResponse.<ShowRoomResponse>builder()
                 .result(showRoomService.getShowRoom())
                 .build();
     }
 
-    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/admin/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<ShowRoomResponse> createCar(@ModelAttribute ShowRoomRequest request,
                                                    @RequestParam("images") @Valid
                                                    @ImageConstraint(min = 1, max = 5, message = "Chọn từ 1 tới 5 ảnh")
@@ -41,7 +40,7 @@ public class ShowRoomController {
                 .build();
     }
 
-    @PutMapping(value= "/update-showroom/{showroomId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value= "/admin/update-showroom/{showroomId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<ShowRoomResponse> updateShowRoom(@ModelAttribute ShowRoomRequest showRoomRequest,
                                                         @RequestParam("images") @Valid List<MultipartFile> images,
                                                         @ImageConstraint(min = 1, max = 5, message = "Chọn từ 1 tới 5 ảnh")
@@ -51,7 +50,7 @@ public class ShowRoomController {
                 .build();
     }
 
-    @DeleteMapping("/delete-showroom/{showroomId}")
+    @DeleteMapping("/admin/delete-showroom/{showroomId}")
     public ApiResponse<Void> deleteShowRoom(@PathVariable(value="showroomId") String showroomId) {
         showRoomService.deleteShowRoom(showroomId);
         return ApiResponse.<Void>builder()

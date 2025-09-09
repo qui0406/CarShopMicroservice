@@ -38,12 +38,8 @@ public class RedisConfig {
     @Bean
     public ObjectMapper redisObjectMapper() {
         ObjectMapper mapper = new ObjectMapper();
-        // Hỗ trợ Java 8 date/time API
         mapper.registerModule(new JavaTimeModule());
-        // Tránh việc lưu date dưới dạng timestamp
         mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
-
-        // ❌ Không bật default typing => sẽ không có @class trong JSON
         return mapper;
     }
 
@@ -54,8 +50,6 @@ public class RedisConfig {
 
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(connectionFactory);
-
-        // Serializer
         StringRedisSerializer stringSerializer = new StringRedisSerializer();
         GenericJackson2JsonRedisSerializer jsonSerializer =
                 new GenericJackson2JsonRedisSerializer(redisObjectMapper);

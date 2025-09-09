@@ -79,6 +79,22 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
+    public void restoreInventory(String orderId) {
+        String carId= String.valueOf(ordersRepository.findById(orderId)
+                .orElseThrow(()-> new AppException(ErrorCode.ORDER_IS_EMPTY)).getCar().getId());
+
+        Inventory inventory= inventoryRepository.findInventoryByCarId(carId)
+                .orElseThrow(()-> new AppException(ErrorCode.INVENTORY_IS_EMPTY));
+
+        int quantity = ordersRepository.findById(orderId)
+                .orElseThrow(()-> new AppException(ErrorCode.INVENTORY_IS_EMPTY))
+                .getOrderDetails().getQuantity();
+
+        inventory.setQuantity(inventory.getQuantity() + quantity);
+        inventoryRepository.save(inventory);
+    }
+
+    @Override
     public InventoryResponse getInventoryByCarId(String carId) {
         Inventory inventory= inventoryRepository.findInventoryByCarId(carId)
                 .orElseThrow(()-> new AppException(ErrorCode.INVENTORY_IS_EMPTY));

@@ -22,21 +22,21 @@ public class CashierController {
 
     ReserveVNPayService reserveVNPayService;
 
-    @GetMapping("/get-bill/{id}")
+    @GetMapping("/staff/get-bill/{id}")
     public ApiResponse<CashPaymentResponse> getBill(@PathVariable String id){
         return ApiResponse.<CashPaymentResponse>builder()
                 .result(cashierService.getBill(id))
                 .build();
     }
 
-    @GetMapping("/get-bill-deposit/{orderId}")
+    @GetMapping("/staff/get-bill-deposit/{orderId}")
     public ApiResponse<DepositResponse> getBillDeposit(@PathVariable String orderId){
         return ApiResponse.<DepositResponse>builder()
                 .result(reserveVNPayService.getDeposit(orderId))
                 .build();
     }
 
-    @PostMapping("/payment")
+    @PostMapping("/staff/payment")
     public ApiResponse<CashPaymentResponse> payment(@RequestBody CashPaymentRequest request) {
         return ApiResponse.<CashPaymentResponse>builder()
                 .result(cashierService.create(request))

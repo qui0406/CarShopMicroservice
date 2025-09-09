@@ -39,7 +39,7 @@ public class CarBranchController {
                 .build();
     }
 
-    @PostMapping(value = "/api-secure/car-branch/create-branch", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/staff/car-branch/create-branch", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<CarBranchResponse> create(@ModelAttribute CarBranchRequest request,
                                                  MultipartFile imageBranch) {
         return ApiResponse.<CarBranchResponse>builder()
@@ -47,7 +47,7 @@ public class CarBranchController {
                 .build();
     }
 
-    @DeleteMapping("/api-secure/delete-branch/{branchId}")
+    @DeleteMapping("/staff/delete-branch/{branchId}")
     public ApiResponse<CarBranchResponse> delete(@PathVariable Long branchId){
         carBranchService.deleteById(branchId);
         return ApiResponse.<CarBranchResponse>builder()

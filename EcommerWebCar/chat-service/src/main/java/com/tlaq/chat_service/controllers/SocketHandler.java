@@ -39,15 +39,15 @@ public class SocketHandler {
         server.addEventListener("join-room", JoinRoomRequest.class, (client, data, ackSender) -> {
             String conversationId = data.getConversationId();
             client.joinRoom(conversationId);
-            System.out.println("✅ Client " + client.getSessionId() + " joined room: " + conversationId);
+            System.out.println("Client " + client.getSessionId() + " joined room: " + conversationId);
         });
 
         server.addConnectListener(client ->
-                System.out.println("🔌 Client connected: " + client.getSessionId())
+                System.out.println("Client connected: " + client.getSessionId())
         );
 
         server.addDisconnectListener(client ->
-                System.out.println("❌ Client disconnected: " + client.getSessionId())
+                System.out.println("Client disconnected: " + client.getSessionId())
         );
     }
 

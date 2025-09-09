@@ -22,4 +22,10 @@ public class PaymentStatusProducer {
             rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE, RabbitMQConfig.RK_PAYMENT_FAILED, event);
         }
     }
+
+    public void failPaymentCash(ResVNPayEvent event){
+        if(event.getCode().equals("97")) {
+            rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE, RabbitMQConfig.Q_PAYMENT_FAILED_CASH);
+        }
+    }
 }

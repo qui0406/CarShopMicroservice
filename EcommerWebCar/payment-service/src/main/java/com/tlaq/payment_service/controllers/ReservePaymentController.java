@@ -6,6 +6,7 @@ import com.tlaq.payment_service.dto.request.OnlinePaymentRequest;
 import com.tlaq.payment_service.dto.response.PaymentResponse;
 import com.tlaq.payment_service.exceptions.AppException;
 import com.tlaq.payment_service.exceptions.ErrorCode;
+import com.tlaq.payment_service.message.PaymentStatusProducer;
 import com.tlaq.payment_service.services.ReserveVNPayService;
 import com.tlaq.payment_service.utils.VNPayPartialsUtils;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -52,12 +53,13 @@ public class ReservePaymentController {
 
     ReserveVNPayService reserveVNPayService;
 
+    PaymentStatusProducer paymentStatusProducer;
+
     @PostMapping("/url")
     @CircuitBreaker(name = "vnpayCircuitBreaker", fallbackMethod = "checkoutFallback")
     @Retry(name = "vnpayRetry")
     @TimeLimiter(name = "vnpayTimeLimiter")
     public CompletableFuture<ResponseEntity<ApiResponse<PaymentResponse>>> checkout(@RequestBody OnlinePaymentRequest onlinePaymentRequest) {
-        log.info("Received checkout request for order: {}", onlinePaymentRequest.getTxnRef());
         return reserveVNPayService.init(onlinePaymentRequest)
                 .thenApply(paymentResponse -> {
                     log.info("Checkout URL generated successfully for order: {}", onlinePaymentRequest.getTxnRef());
@@ -68,12 +70,10 @@ public class ReservePaymentController {
                     return new ResponseEntity<>(apiResponse, HttpStatus.OK);
                 })
                 .exceptionally(throwable -> {
-                    log.error("Error during checkout for order {}: {}", onlinePaymentRequest.getTxnRef(), throwable.getMessage());
                     throw new AppException(ErrorCode.PAYMENT_INIT_FAILED);
                 });
     }
 
-    // Fallback method for checkout
     public CompletableFuture<ResponseEntity<ApiResponse<PaymentResponse>>> checkoutFallback(OnlinePaymentRequest onlinePaymentRequest, Throwable t) {
         log.error("Fallback triggered for checkout, order: {}, error: {}", onlinePaymentRequest.getTxnRef(), t.getMessage());
         ApiResponse<PaymentResponse> apiResponse = ApiResponse.<PaymentResponse>builder()
@@ -89,31 +89,30 @@ public class ReservePaymentController {
     @TimeLimiter(name = "vnpayTimeLimiter")
     public CompletableFuture<Void> payCallbackHandler(@RequestParam Map<String, String> params, HttpServletResponse response) {
         String orderId = params.get("vnp_TxnRef");
-        log.info("Received VNPay IPN callback for order: {}", orderId);
 
         return reserveVNPayService.process(params)
                 .thenAccept(resVNPayEvent -> {
-                    log.info("VNPay IPN processed for order: {}, status: {}", orderId, resVNPayEvent.getCode());
                     try {
-                        // ✅ Build query string từ tất cả params
                         String queryString = params.entrySet().stream()
                                 .map(entry -> entry.getKey() + "=" + entry.getValue())
                                 .collect(Collectors.joining("&"));
 
-                        // ✅ Thêm code vào query string
                         queryString += "&code=" + resVNPayEvent.getCode();
 
                         String redirectUrl = "http://localhost:3001/payment-result?" + queryString;
                         response.sendRedirect(redirectUrl);
+                        paymentStatusProducer.sendStatusCodeVNPay(ResVNPayEvent.builder()
+                                        .code("00")
+                                        .message("Successful")
+                                        .orderId(orderId)
+                                .build());
                     } catch (IOException e) {
-                        log.error("Failed to redirect after VNPay IPN for order {}: {}", orderId, e.getMessage());
                         throw new RuntimeException(e);
                     }
                 })
                 .exceptionally(throwable -> {
-                    log.error("Error processing VNPay IPN for order {}: {}", orderId, throwable.getMessage());
                     try {
-                        response.sendRedirect("http://localhost:3000/payment-result?code=500");
+                        response.sendRedirect("http://localhost:3001/payment-result?code=500");
                     } catch (IOException e) {
                         log.error("Failed to redirect to error page for order {}: {}", orderId, e.getMessage());
                     }
@@ -154,7 +153,6 @@ public class ReservePaymentController {
         }
     }
 
-    // Fallback method for createInstallmentPayment
     public CompletableFuture<ResponseEntity<ApiResponse<String>>> installmentFallback(
             String orderId, long amount, String bankCode, Throwable t) {
         log.error("Fallback triggered for installment payment, order: {}, error: {}", orderId, t.getMessage());

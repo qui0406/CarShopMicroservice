@@ -33,14 +33,14 @@ public class CarModelController {
                 .build();
     }
 
-    @PostMapping("/api-secure/car-model/create-car-model")
+    @PostMapping("/staff/car-model/create-car-model")
     public ApiResponse<CarModelResponse> createCarModel(@RequestBody CarModelRequest carModelRequest){
         return ApiResponse.<CarModelResponse>builder()
                 .result(carModelService.create(carModelRequest))
                 .build();
     }
 
-    @DeleteMapping("/api-secure/car-model/delete-car-model/{carModelId}")
+    @DeleteMapping("/staff/car-model/delete-car-model/{carModelId}")
     public ApiResponse<CarModelResponse> deleteCarModel(@PathVariable("carModelId") Long carModelId){
         carModelService.deleteById(carModelId);
         return ApiResponse.<CarModelResponse>builder()

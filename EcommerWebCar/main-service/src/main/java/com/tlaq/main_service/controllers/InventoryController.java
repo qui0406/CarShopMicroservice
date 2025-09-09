@@ -15,32 +15,31 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequestMapping("/inventory")
 public class InventoryController {
     InventoryService inventoryService;
 
-    @GetMapping("/get-inventory/{inventoryId}")
+    @GetMapping("/inventory/get-inventory/{inventoryId}")
     public ApiResponse<InventoryResponse> getInventory(@PathVariable String inventoryId) {
         return ApiResponse.<InventoryResponse>builder()
                 .result(inventoryService.getInventory(inventoryId))
                 .build();
     }
 
-    @GetMapping("/get-inventory-by-carId/{carId}")
+    @GetMapping("/inventory/get-inventory-by-carId/{carId}")
     public ApiResponse<InventoryResponse> getInventoryByCarId(@PathVariable String carId) {
         return ApiResponse.<InventoryResponse>builder()
                 .result(inventoryService.getInventoryByCarId(carId))
                 .build();
     }
 
-    @PostMapping("/create-inventory")
+    @PostMapping("/staff/inventory/create-inventory")
     public ApiResponse<InventoryResponse> createInventory(@RequestBody InventoryRequest inventoryRequest) {
         return ApiResponse.<InventoryResponse>builder()
                 .result(inventoryService.createInventory(inventoryRequest))
                 .build();
     }
 
-    @PutMapping("/update-inventory/{inventoryId}")
+    @PutMapping("/staff/inventory/update-inventory/{inventoryId}")
     public ApiResponse<InventoryResponse> updateInventory(@PathVariable String inventoryId,
                                                           @RequestBody InventoryUpdateRequest request) {
         return ApiResponse.<InventoryResponse>builder()
@@ -48,7 +47,7 @@ public class InventoryController {
                 .build();
     }
 
-    @DeleteMapping("/delete-inventory/{inventoryId}")
+    @DeleteMapping("/staff/inventory/delete-inventory/{inventoryId}")
     public ApiResponse<InventoryResponse> deleteInventory(@PathVariable String inventoryId) {
         inventoryService.deleteInventory(inventoryId);
         return ApiResponse.<InventoryResponse>builder()

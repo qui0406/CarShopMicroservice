@@ -52,23 +52,37 @@ public class CashierService {
             }
         }
 
-        CashierPayment cashierPayment = CashierPayment.builder()
-                .orderId(request.getOrderId())
-                .profileId(ordersResponse.getProfile().getId())
-                .paymentMethod(PaymentMethod.CASHIER_TRANSFER)
-                .staffId(staff.getId())
-                .price(ordersResponse.getOrderDetails().getTotalAmount())
-                .status(PaymentStatus.SUCCESS)
-                .build();
-            cashPaymentRepository.save(cashierPayment);
+        if(request.isSuccess()) {
 
-        ResVNPayEvent resVNPayEvent = ResVNPayEvent.builder()
-                .code("00")
-                .message("Successful")
-                .orderId(request.getOrderId())
-                .build();
-        paymentStatusProducer.sendStatusCodeVNPay(resVNPayEvent);
-        return toCashPaymentResponse(cashierPayment);
+            CashierPayment cashierPayment = CashierPayment.builder()
+                    .orderId(request.getOrderId())
+                    .profileId(ordersResponse.getProfile().getId())
+                    .paymentMethod(PaymentMethod.CASHIER_TRANSFER)
+                    .staffId(staff.getId())
+                    .price(ordersResponse.getOrderDetails().getTotalAmount())
+                    .status(PaymentStatus.SUCCESS)
+                    .build();
+            cashPaymentRepository.save(cashierPayment);
+            return toCashPaymentResponse(cashierPayment);
+
+        }else{
+            CashierPayment cashierPayment = CashierPayment.builder()
+                    .orderId(request.getOrderId())
+                    .profileId(ordersResponse.getProfile().getId())
+                    .paymentMethod(PaymentMethod.CASHIER_TRANSFER)
+                    .staffId(staff.getId())
+                    .price(ordersResponse.getOrderDetails().getTotalAmount())
+                    .status(PaymentStatus.FAIL)
+                    .build();
+            cashPaymentRepository.save(cashierPayment);
+            ResVNPayEvent resVNPayEvent = ResVNPayEvent.builder()
+                    .code("97")
+                    .message("fail")
+                    .orderId(request.getOrderId())
+                    .build();
+            paymentStatusProducer.failPaymentCash(resVNPayEvent);
+            return toCashPaymentResponse(cashierPayment);
+        }
     }
 
 

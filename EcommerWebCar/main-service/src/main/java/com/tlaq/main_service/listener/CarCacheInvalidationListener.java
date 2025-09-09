@@ -45,14 +45,7 @@ public class CarCacheInvalidationListener {
 
     private void invalidateCarListingCaches() {
         try {
-//            // Clear all car listing caches (pagination)
-//            long deletedListingKeys = redisService.deleteKeysByPattern(CAR_CACHE_PREFIX + "*");
-//
-//            // Clear all filter caches
-//            long deletedFilterKeys = redisService.deleteKeysByPattern(CAR_FILTER_CACHE_PREFIX + "*");
 
-//            log.info("Invalidated {} car listing cache keys and {} filter cache keys",
-//                    deletedListingKeys, deletedFilterKeys);
 
         } catch (Exception e) {
             log.error("Failed to invalidate car listing caches", e);

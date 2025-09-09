@@ -33,6 +33,14 @@ app:
     main:
       url: http://localhost:8080/ecommer-car-web
 
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
+    hostname: localhost
+
 
 payment:
   vnpay:
