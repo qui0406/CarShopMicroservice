@@ -55,10 +55,16 @@ export default function About() {
     return new Date(dateString).getFullYear();
   };
 
-  const handleBookNow = () => {
+    const handleBookNow = () => {
     sessionStorage.setItem("car", JSON.stringify(car));
-    // Replace with your actual user check and navigation
-    navigate("/reserve", { state: { car } });
+
+    if (!user) {
+      // Nếu chưa đăng nhập → chuyển đến login và thêm next param
+      navigate(`/login?next=/reserve`, { state: { car } });
+    } else {
+      // Nếu đã đăng nhập → đi thẳng đến reserve
+      navigate("/reserve", { state: { car } });
+    }
   };
 
   if (loading) {

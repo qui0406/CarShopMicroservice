@@ -1,7 +1,7 @@
-package com.tlaq.api_gateway;
-
-
-
-class ApiGatewayApplicationTests {
-
-}
+//package com.tlaq.api_gateway;
+//
+//
+//
+//class ApiGatewayApplicationTests {
+//
+//}

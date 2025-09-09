@@ -24,11 +24,10 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequestMapping("/news")
 public class NewsController {
     NewsService newsService;
 
-    @GetMapping(value = "/get-news/{showroomId}")
+    @GetMapping(value = "/news/get-news/{showroomId}")
     public ApiResponse<PageResponse<NewsResponse>> getNews(
                                 @PathVariable(value = "showroomId") String showroomId,
                                 @RequestParam(value ="page", required = false, defaultValue = "1") int page,
@@ -39,7 +38,7 @@ public class NewsController {
                 .build();
     }
 
-    @PostMapping(value = "/create/{showroomId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/staff/news/create/{showroomId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<NewsResponse> createNews(@ModelAttribute NewsRequest request,
                                                 @PathVariable(value = "showroomId")  String showroomId,
                                                 @RequestParam("images") @Valid
@@ -50,7 +49,7 @@ public class NewsController {
                 .build();
     }
 
-    @PutMapping(value ="/update-news/{newsId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PutMapping(value ="/staff/news/update-news/{newsId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<NewsResponse> updateNews(@ModelAttribute NewsRequest request,
                                                 @PathVariable(value = "newsId")  Long newsId,
                                                 @RequestParam(value= "images", required = false)
@@ -60,7 +59,7 @@ public class NewsController {
                 .build();
     }
 
-    @DeleteMapping("/delete-news/{newsId}")
+    @DeleteMapping("/staff/news/delete-news/{newsId}")
     public ApiResponse<Void> deleteNews(@PathVariable(value = "newsId")  Long newsId){
         newsService.deleteNews(newsId);
         return ApiResponse.<Void>builder()

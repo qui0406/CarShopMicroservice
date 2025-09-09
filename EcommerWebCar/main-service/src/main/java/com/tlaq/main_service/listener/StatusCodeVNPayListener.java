@@ -31,4 +31,11 @@ public class StatusCodeVNPayListener {
     public void consumeStatusCodeVNPayFailed(ResVNPayEvent event) {
         ordersService.markFail(event.getOrderId());
     }
+
+    @RabbitListener(queues = RabbitMQConfig.Q_PAYMENT_FAILED_CASH)
+    public void consumeStatusFailCashPayment(ResVNPayEvent event) {
+        ordersService.markFail(event.getOrderId());
+        inventoryService.updateInventoryAfterPay(event.getOrderId());
+
+    }
 }

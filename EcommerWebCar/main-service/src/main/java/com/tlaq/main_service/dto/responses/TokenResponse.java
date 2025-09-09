@@ -1,5 +1,6 @@
 package com.tlaq.main_service.dto.responses;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -9,6 +10,7 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TokenResponse {
     @JsonProperty("access_token")
     String accessToken;

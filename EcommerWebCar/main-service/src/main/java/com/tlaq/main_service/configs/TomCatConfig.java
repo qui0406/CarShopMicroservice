@@ -10,7 +10,7 @@ public class TomCatConfig implements WebServerFactoryCustomizer<TomcatServletWeb
     @Override
     public void customize(TomcatServletWebServerFactory factory) {
         factory.addConnectorCustomizers(connector -> {
-            connector.setMaxPartCount(1000);
+//            connector.setMaxPartCount(1000);
 
             connector.setProperty("maxPostSize", String.valueOf(2L * 1024 * 1024 * 1024)); // 2GB
             connector.setProperty("maxSwallowSize", String.valueOf(2L * 1024 * 1024 * 1024)); // 2GB

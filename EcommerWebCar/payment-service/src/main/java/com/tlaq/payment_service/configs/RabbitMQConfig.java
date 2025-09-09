@@ -17,11 +17,14 @@ public class RabbitMQConfig {
     public static final String Q_ORDER_CREATED_PAYMENT = "order.created.payment";
     public static final String Q_PAYMENT_COMPLETED_ORDER = "payment.completed.order";
     public static final String Q_PAYMENT_FAILED_ORDER    = "payment.failed.order";
+    public static final String Q_PAYMENT_FAILED_CASH = "fail.cash";
 
     // routing keys
     public static final String RK_ORDER_CREATED     = "order.created";
     public static final String RK_PAYMENT_COMPLETED = "payment.completed";
     public static final String RK_PAYMENT_FAILED    = "payment.failed";
+
+    public static final String RK_PAYMENT_FAILED_CASH = "payment.failed.cash";
 
     @Bean TopicExchange exchange() { return new TopicExchange(EXCHANGE, true, false); }
 
@@ -40,7 +43,11 @@ public class RabbitMQConfig {
         return new Queue(Q_PAYMENT_FAILED_ORDER, true);
     }
 
-    // binding
+    @Bean
+    Queue qFailPaymentCash() {
+        return new Queue(Q_PAYMENT_FAILED_CASH, true);
+    }
+
     @Bean
     Binding bOrderCreatedPayment(TopicExchange exchange) {
         return BindingBuilder.bind(qOrderCreatedPayment())
@@ -60,6 +67,13 @@ public class RabbitMQConfig {
         return BindingBuilder.bind(qPaymentFailedOrder())
                 .to(ex)
                 .with(RK_PAYMENT_FAILED);
+    }
+
+    @Bean
+    Binding bFailedPayment(TopicExchange exchange) {
+        return BindingBuilder.bind(qFailPaymentCash())
+                .to(exchange)
+                .with(RK_PAYMENT_FAILED_CASH);
     }
 
 

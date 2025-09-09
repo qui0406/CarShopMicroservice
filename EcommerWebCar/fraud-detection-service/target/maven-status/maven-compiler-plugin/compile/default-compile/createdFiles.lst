@@ -1,0 +1,8 @@
+com\tlaq\entity\FraudRecord$FraudRecordBuilder.class
+com\tlaq\repository\FraudRecordRepository.class
+com\tlaq\service\FraudDetectionService.class
+com\tlaq\FraudDetectionServiceApplication.class
+com\tlaq\entity\FraudRecord.class
+com\tlaq\entity\LoanStatus.class
+com\tlaq\config\ObservationConfig.class
+com\tlaq\controller\FraudDetectionController.class

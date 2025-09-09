@@ -33,14 +33,14 @@ public class CarCategoryController {
                 .build();
     }
 
-    @PostMapping("/api-secure/car-category/create-category")
+    @PostMapping("/staff/car-category/create-category")
     public ApiResponse<CarCategoryResponse> createCarCategory(@RequestBody CarCategoryRequest carCategoryRequest) {
         return ApiResponse.<CarCategoryResponse>builder()
                 .result(carCategoryService.create(carCategoryRequest))
                 .build();
     }
 
-    @DeleteMapping("/api-secure/car-category/delete-caterory/{carCategoryId}")
+    @DeleteMapping("/staff/car-category/delete-category/{carCategoryId}")
     public ApiResponse<CarCategoryResponse> deleteCarCategory(@PathVariable Long carCategoryId) {
         carCategoryService.delete(carCategoryId);
         return ApiResponse.<CarCategoryResponse>builder()

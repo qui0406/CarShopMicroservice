@@ -53,7 +53,7 @@ public class CarController {
                 .build();
     }
 
-    @PostMapping(value = "/api-secure/car/create-product", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/staff/car/create-product", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<CarResponse> createCar(@ModelAttribute CarRequest carRequest,
                                               @RequestParam("images") @Valid
                                               @ImageConstraint(min = 1, max = 5, message = "Chọn từ 1 tới 5 ảnh")
@@ -72,7 +72,7 @@ public class CarController {
     }
 
 
-    @DeleteMapping("/api-secure/car/delete-product/{carId}")
+    @DeleteMapping("/staff/car/delete-product/{carId}")
     public ApiResponse<Void> deleteCar(@PathVariable("carId") String carId){
         carDetailsService.deleteCarDetail(carId);
         return ApiResponse.<Void>builder()

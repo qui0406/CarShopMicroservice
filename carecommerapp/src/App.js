@@ -21,6 +21,9 @@ import MyDeposit from "./components/MyDeposit"
 import About from "./components/About";
 import Chat from "./components/Chat";
 
+import '@n8n/chat/style.css';
+import { createChat } from '@n8n/chat';
+
 
 import HomeStaff from "./components/Staff/HomeStaff"
 
@@ -55,6 +58,12 @@ function App() {
     };
     loadUser();
   }, []);
+
+  useEffect(() => {
+		createChat({
+			webhookUrl: 'https://qui0406.app.n8n.cloud/webhook/5f1c0c82-0ff9-40c7-9e2e-b1a96ffe24cd/chat'
+		});
+	}, []);
   return (
     <MyUserContext.Provider value={user}>
       <MyDispatchContext.Provider value={dispatch}>

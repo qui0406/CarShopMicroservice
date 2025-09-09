@@ -69,7 +69,7 @@ public class OrdersController {
                 .build();
     }
 
-    @GetMapping("/get-all-order")
+    @GetMapping("/staff/get-all-order")
     public ApiResponse<PageResponse<OrdersResponse>> getAll(@RequestParam(value ="page", required = false, defaultValue = "1") int page,
                                                             @RequestParam(value = "size", required = false, defaultValue = "12") int size){
         return ApiResponse.<PageResponse<OrdersResponse>>builder()

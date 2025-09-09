@@ -22,25 +22,24 @@ import java.util.List;
 @Slf4j
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequestMapping("/voucher")
 public class VoucherController {
     VoucherService voucherService;
 
-    @GetMapping(value= "/get-all-voucher/{showroomId}")
+    @GetMapping(value= "/voucher/get-all-voucher/{showroomId}")
     public ApiResponse<List<VoucherResponse>> getVouchers(@PathVariable String showroomId) {
         return ApiResponse.<List<VoucherResponse>> builder()
                 .result(voucherService.getVouchers(showroomId))
                 .build();
     }
 
-    @GetMapping(value ="/get-voucher/{voucherId}")
+    @GetMapping(value ="/voucher/get-voucher/{voucherId}")
     public ApiResponse<VoucherResponse> getVoucher(@PathVariable Long voucherId) {
         return ApiResponse.<VoucherResponse> builder()
                 .result(voucherService.getVoucher(voucherId))
                 .build();
     }
 
-    @PostMapping(value = "/create/{showroomId}")
+    @PostMapping(value = "/staff/voucher/create/{showroomId}")
     public ApiResponse<VoucherResponse> createVoucher(@RequestBody VoucherRequest request,
                                                   @PathVariable(value = "showroomId") String showroomId) {
         return ApiResponse.<VoucherResponse>builder()
@@ -48,7 +47,7 @@ public class VoucherController {
                 .build();
     }
 
-    @PutMapping(value = "/update/{voucherId}")
+    @PutMapping(value = "/staff/voucher/update/{voucherId}")
     public ApiResponse<VoucherResponse> updateVoucher(@RequestBody VoucherRequest request,
                                                       @PathVariable Long voucherId) {
         return ApiResponse.<VoucherResponse>builder()
@@ -56,7 +55,7 @@ public class VoucherController {
                 .build();
     }
 
-    @DeleteMapping(value = "/delete/{voucherId}")
+    @DeleteMapping(value = "/staff/voucher/delete/{voucherId}")
     public ApiResponse<Void> deleteVoucher(@PathVariable Long voucherId) {
         voucherService.deleteVoucher(voucherId);
         return ApiResponse.<Void> builder()

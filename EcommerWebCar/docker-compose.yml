@@ -105,3 +105,22 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: root
       RABBITMQ_DEFAULT_PASS: 123456
+
+
+  redis:
+    image: redis:7.0-alpine
+    container_name: car_redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --requirepass 12345678
+    networks:
+      - car_network
+
+volumes:
+  redis_data:
+networks:
+  car_network:
+    driver: bridge
