@@ -32,7 +32,8 @@ export const endpoints = {
     "create-message": "/chat/messages/create",
     "get-message": "/chat/messages/get-all-message",
 
-    
+    "my-payment": "/get-my-payment",
+
     "create-car": "/ecommer-car-web/api-secure/car/create-product",
     "delete-car": carId => `/ecommer-car-web/api-secure/car/delete-product/${carId}`,
 
@@ -50,6 +51,10 @@ export const endpoints = {
     "create-inventory": "/ecommer-car-web/inventory/create-inventory",
     "update-inventory": inventoryId => `/ecommer-car-web/inventory/update-inventory/${inventoryId}`,
     "delete-inventory": inventoryId => `/ecommer-car-web/inventory/delete-inventory/${inventoryId}`,
+
+    "get-bill": id => `/staff/get-bill/${id}`,
+    "get-bill-by-order-id": orderId => `/staff/get-bill-deposit/${orderId}`,
+    "payment-cashier": "/staff/payment"
 
 };
 

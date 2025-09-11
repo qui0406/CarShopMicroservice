@@ -81,7 +81,6 @@ export default function Reserve() {
   return (
     <Container className="my-5 form-reserve">
       <Row>
-        {/* Thông tin xe */}
         <Col md={6}>
           <Card className="mb-4">
             <Card.Img

@@ -4,7 +4,7 @@ import { authApis, endpoints } from "./../../configs/APIs";
 import Apis from "./../../configs/APIs";
 import cookie from "react-cookies";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import { MyUserContext, MyDispatchContext } from "./../../configs/MyContexts";
+import {MyDispatchContext } from "./../../configs/MyContexts";
 
 const Login = () => {
     const info = [
@@ -45,7 +45,8 @@ const Login = () => {
             className="d-flex align-items-center justify-content-center"
             style={{
                 minHeight: "85vh",
-                background: "linear-gradient(135deg, #e3f0ff 0%, #cfe2ff 100%)"
+                background: "linear-gradient(135deg, #e3f0ff 0%, #cfe2ff 100%)",
+                padding: "70px"
             }}
         >
             <div

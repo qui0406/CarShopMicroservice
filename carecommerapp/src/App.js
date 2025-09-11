@@ -38,6 +38,7 @@ import Branch from './components/Staff/Branch';
 import Category from './components/Staff/Category';
 import Model from './components/Staff/Model';
 import ChatStaff from "./components/Staff/StaffChat"
+import Cashier from "./components/Staff/Cashier"
 
 
 function App() {
@@ -89,6 +90,7 @@ function App() {
             <Route path="/staff/home/category" element= {<Category/>} />
             <Route path="/staff/home/model" element= {<Model/>} />
             <Route path="/staff/home/chat" element= {<ChatStaff/>} />
+            <Route path="/staff/home/cashier" element= {<Cashier />} />
 
           </Routes>
           <Footer />

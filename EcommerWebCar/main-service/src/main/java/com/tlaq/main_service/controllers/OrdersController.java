@@ -47,7 +47,6 @@ public class OrdersController {
         String userKeyCloakId = principal.getName();
 
         OrdersResponse ordersResponse = ordersService.createOrder(ordersRequest, userKeyCloakId);
-        inventoryService.updateInventoryAfterPay(orderId);
         return ApiResponse.<OrdersResponse>builder()
                 .result(ordersResponse)
                 .build();
@@ -76,5 +75,4 @@ public class OrdersController {
                 .result(ordersService.getAll(page, size))
                 .build();
     }
-
 }

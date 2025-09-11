@@ -61,7 +61,6 @@ public class ConversationService {
 
             Conversation conversation = conversationOpt.get();
 
-            // Check if user is customer or staff member in this conversation
             boolean isCustomer = userId.equals(conversation.getCustomerId());
             boolean isStaff = conversation.getStaffIds().contains(userId);
 
@@ -79,8 +78,6 @@ public class ConversationService {
             return false;
         }
     }
-
-
 
     public ConversationResponse getCustomerConversation() {
         String userKeyCloakId = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -107,19 +104,19 @@ public class ConversationService {
 
         var userInfo = userInfoResponse.getResult();
         return ConversationResponse.builder()
-                .id(conversation.getId())
-                .customerId(conversation.getCustomerId())
-                .customerInfo(ParticipantInfo.builder()
-                        .id(userInfo.getId())
-                        .userKeycloakId(userInfo.getUserKeyCloakId())
-                        .avatar(userInfo.getAvatar())
-                        .firstName(userInfo.getFirstName())
-                        .lastName(userInfo.getLastName())
-                        .username(userInfo.getUsername())
-                        .build())
-                .status(conversation.getStatus())
-                .createdAt(conversation.getCreatedAt())
-                .build();
+            .id(conversation.getId())
+            .customerId(conversation.getCustomerId())
+            .customerInfo(ParticipantInfo.builder()
+                .id(userInfo.getId())
+                .userKeycloakId(userInfo.getUserKeyCloakId())
+                .avatar(userInfo.getAvatar())
+                .firstName(userInfo.getFirstName())
+                .lastName(userInfo.getLastName())
+                .username(userInfo.getUsername())
+                .build())
+            .status(conversation.getStatus())
+            .createdAt(conversation.getCreatedAt())
+            .build();
     }
 
     public ConversationResponse createOrGetConversation() {
@@ -141,35 +138,31 @@ public class ConversationService {
         }
 
         ParticipantInfo customerInfo = ParticipantInfo.builder()
-                .id(userInfo.getId())
-                .userKeycloakId(userInfo.getUserKeyCloakId())
-                .username(userInfo.getUsername())
-                .firstName(userInfo.getFirstName())
-                .lastName(userInfo.getLastName())
-                .avatar(userInfo.getAvatar())
-                .build();
+            .id(userInfo.getId())
+            .userKeycloakId(userInfo.getUserKeyCloakId())
+            .username(userInfo.getUsername())
+            .firstName(userInfo.getFirstName())
+            .lastName(userInfo.getLastName())
+            .avatar(userInfo.getAvatar())
+        .build();
 
         Conversation newConversation = Conversation.builder()
-                .customerId(userInfo.getId())
-                .customerInfo(customerInfo)
-                .staffIds(new ArrayList<>()) // Chưa có nhân viên nào
-                .status(ConversationStatus.WAITING) // Đang chờ hỗ trợ
-                .createdAt(Instant.now())
-                .build();
+            .customerId(userInfo.getId())
+            .customerInfo(customerInfo)
+            .staffIds(new ArrayList<>())
+            .status(ConversationStatus.WAITING)
+            .createdAt(Instant.now())
+        .build();
 
         var savedConversation = conversationRepository.save(newConversation);
 
-        // TODO: Trigger notification to available staff
         notifyAvailableStaff(savedConversation);
 
         return toCustomerConversationResponse(savedConversation);
     }
 
     private void notifyAvailableStaff(Conversation conversation) {
-        // TODO: Send notification to available staff about new conversation
         log.info("New conversation created: {} for customer: {}",
                 conversation.getId(), conversation.getCustomerInfo().getUsername());
     }
-
-
 }
