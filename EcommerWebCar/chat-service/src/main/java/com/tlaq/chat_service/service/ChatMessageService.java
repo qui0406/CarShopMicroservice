@@ -40,7 +40,6 @@ public class ChatMessageService {
     ConversationRepository conversationRepository;
     WebSocketSessionRepository webSocketSessionRepository;
     MainClient mainClient;
-    ObjectMapper objectMapper;
     ChatMessageMapper chatMessageMapper;
 
     public List<ChatMessageResponse> getMessages(String conversationId) {
@@ -55,8 +54,7 @@ public class ChatMessageService {
         Conversation conversation = conversationRepository.findById(conversationId)
                 .orElseThrow(() -> new AppException(ErrorCode.CONVERSATION_NOT_FOUND));
 
-        // Kiểm tra quyền truy cập
-//        validateUserAccessToConversation(conversation, userInfo.getId());
+        validateUserAccessToConversation(conversation, userInfo.getId());
 
         var messages = chatMessageRepository.findAllByConversationIdOrderByCreatedDateAsc(conversationId);
 
@@ -79,31 +77,20 @@ public class ChatMessageService {
         Conversation conversation = conversationRepository.findById(request.getConversationId())
                 .orElseThrow(() -> new AppException(ErrorCode.CONVERSATION_NOT_FOUND));
 
-        // Kiểm tra quyền gửi tin nhắn
-//        validateUserAccessToConversation(conversation, userInfo.getId());
-
-        // Auto-assign staff nếu chưa có ai được assign và người gửi là staff
         if (isStaffUser(userInfo.getId(), conversation) &&
                 conversation.getStatus() == ConversationStatus.WAITING) {
             autoAssignStaffToConversation(conversation, userInfo.getId());
         }
 
-        // Tạo tin nhắn
         ChatMessage chatMessage = buildChatMessage(request, userInfo);
         chatMessage = chatMessageRepository.save(chatMessage);
-
-        // Update conversation activity
         updateConversationActivity(conversation, request.getMessage());
-
-        // Gửi tin nhắn qua WebSocket - FIX: Improved broadcast method
         broadcastMessageToConversation(conversation, chatMessage, userInfo.getId());
 
         return toChatMessageResponse(chatMessage, userInfo.getId());
     }
 
-    /**
-     * Kiểm tra quyền truy cập conversation
-     */
+
     private void validateUserAccessToConversation(Conversation conversation, String userId) {
         boolean isCustomer = conversation.getCustomerId().equals(userId);
         boolean isStaff = conversation.getStaffIds().contains(userId);
@@ -113,19 +100,13 @@ public class ChatMessageService {
         }
     }
 
-    /**
-     * Kiểm tra user có phải staff không
-     */
     private boolean isStaffUser(String userId, Conversation conversation) {
         return !conversation.getCustomerId().equals(userId);
     }
 
-    /**
-     * Auto assign staff vào conversation
-     */
+
     private void autoAssignStaffToConversation(Conversation conversation, String staffId) {
         try {
-            // Add staff to conversation if not already added
             if (!conversation.getStaffIds().contains(staffId)) {
                 conversation.getStaffIds().add(staffId);
             }
@@ -137,9 +118,7 @@ public class ChatMessageService {
         }
     }
 
-    /**
-     * Tạo ChatMessage object
-     */
+
     private ChatMessage buildChatMessage(ChatMessageRequest request, UserProfileResponse userInfo) {
         ParticipantInfo sender = ParticipantInfo.builder()
                 .id(userInfo.getId())
@@ -158,9 +137,7 @@ public class ChatMessageService {
                 .build();
     }
 
-    /**
-     * Update conversation activity
-     */
+
     private void updateConversationActivity(Conversation conversation, String lastMessage) {
         try {
 
@@ -170,26 +147,18 @@ public class ChatMessageService {
         }
     }
 
-    /**
-     * FIXED: Improved broadcast method using rooms
-     */
+
     private void broadcastMessageToConversation(Conversation conversation, ChatMessage chatMessage, String senderId) {
         try {
             String conversationRoom = conversation.getId();
 
-            // Get all participants
             Set<String> participantIds = new HashSet<>();
             participantIds.add(conversation.getCustomerId());
             participantIds.addAll(conversation.getStaffIds());
 
-            log.info("Broadcasting message to conversation {} with {} participants",
-                    conversation.getId(), participantIds.size());
-
-            // Method 1: Broadcast to room (recommended)
             socketIOServer.getRoomOperations(conversationRoom).sendEvent("message",
                     toChatMessageResponseMap(chatMessage, conversation.getId()));
 
-            // Method 2: Direct broadcast to specific users (fallback)
             Map<String, WebSocketSession> webSocketSessions = webSocketSessionRepository
                     .findAllByUserIdIn(new ArrayList<>(participantIds))
                     .stream()
@@ -198,7 +167,6 @@ public class ChatMessageService {
                             Function.identity()
                     ));
 
-            log.info("Found {} active websocket sessions", webSocketSessions.size());
 
             socketIOServer.getAllClients().forEach(client -> {
                 try {
@@ -208,8 +176,6 @@ public class ChatMessageService {
                         response.setConversationId(conversation.getId());
 
                         client.sendEvent("message", response);
-                        log.debug("Sent message to client: {} (user: {})",
-                                client.getSessionId(), session.getUserId());
                     }
                 } catch (Exception e) {
                     log.error("Failed to send message to client {}: {}",
@@ -222,9 +188,7 @@ public class ChatMessageService {
         }
     }
 
-    /**
-     * Convert ChatMessage to response map for room broadcast
-     */
+
     private Map<String, Object> toChatMessageResponseMap(ChatMessage chatMessage, String conversationId) {
         try {
             Map<String, Object> response = new HashMap<>();
@@ -233,7 +197,6 @@ public class ChatMessageService {
             response.put("message", chatMessage.getMessage());
             response.put("createdDate", chatMessage.getCreatedDate().toString());
 
-            // Sender info
             Map<String, Object> senderInfo = new HashMap<>();
             senderInfo.put("id", chatMessage.getSender().getId());
             senderInfo.put("name", chatMessage.getSender().getFirstName() + " " + chatMessage.getSender().getLastName());
@@ -252,79 +215,5 @@ public class ChatMessageService {
         ChatMessageResponse response = chatMessageMapper.toChatMessageResponse(chatMessage);
         response.setMe(currentUserId.equals(chatMessage.getSender().getId()));
         return response;
-    }
-
-    private String truncateMessage(String message, int maxLength) {
-        if (message == null) return "";
-        return message.length() > maxLength ? message.substring(0, maxLength) + "..." : message;
-    }
-
-    public List<ChatMessageResponse> getMessagesWithPagination(String conversationId, int page, int size) {
-        String userKeyCloakId = SecurityContextHolder.getContext().getAuthentication().getName();
-        var userInfoResponse = mainClient.getProfile(userKeyCloakId);
-
-        if (Objects.isNull(userInfoResponse)) {
-            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
-        }
-
-        var userInfo = userInfoResponse.getResult();
-        Conversation conversation = conversationRepository.findById(conversationId)
-                .orElseThrow(() -> new AppException(ErrorCode.CONVERSATION_NOT_FOUND));
-
-//        validateUserAccessToConversation(conversation, userInfo.getId());
-
-        var messages = chatMessageRepository.findByConversationIdWithPagination(
-                conversationId, page, size);
-
-        return messages.stream()
-                .map(message -> toChatMessageResponse(message, userInfo.getId()))
-                .toList();
-    }
-
-    /**
-     * Đánh dấu tin nhắn đã đọc
-     */
-    public void markMessagesAsRead(String conversationId) {
-        String userKeyCloakId = SecurityContextHolder.getContext().getAuthentication().getName();
-        var userInfoResponse = mainClient.getProfile(userKeyCloakId);
-
-        if (Objects.isNull(userInfoResponse)) {
-            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
-        }
-
-        var userInfo = userInfoResponse.getResult();
-        Conversation conversation = conversationRepository.findById(conversationId)
-                .orElseThrow(() -> new AppException(ErrorCode.CONVERSATION_NOT_FOUND));
-
-        validateUserAccessToConversation(conversation, userInfo.getId());
-
-        log.info("User {} marked messages as read in conversation {}", userInfo.getId(), conversationId);
-
-        // Broadcast read status to conversation room
-        broadcastReadStatus(conversation, userInfo.getId());
-    }
-
-    /**
-     * Broadcast read status using rooms
-     */
-    private void broadcastReadStatus(Conversation conversation, String userId) {
-        try {
-            String conversationRoom = conversation.getId();
-
-            Map<String, Object> readStatusEvent = Map.of(
-                    "type", "read_status",
-                    "conversationId", conversation.getId(),
-                    "userId", userId,
-                    "readAt", Instant.now().toString()
-            );
-
-            // Broadcast to room
-            socketIOServer.getRoomOperations(conversationRoom).sendEvent("read_status", readStatusEvent);
-
-            log.debug("Broadcasted read status for user {} in conversation {}", userId, conversation.getId());
-
-        } catch (Exception e) {
-            log.error("Failed to broadcast read status: {}", e.getMessage());
-        }
     }
 }

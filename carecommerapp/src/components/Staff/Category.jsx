@@ -17,21 +17,14 @@ export default function Category() {
     const [totalPages, setTotalPages] = useState(1);
     const [pageSize] = useState(5);
 
-    // Fetch categories from API
     const fetchCategories = async (page = 1) => {
         setLoading(true);
         try {
             const res = await axios.get(endpoints["car-category"]);
-            setCategories(res.data.result);
-            console.log(res.data.result);
-            
-            // If your API supports pagination, update these
-            // setTotalPages(res.data.result.totalPages);
-            // setCurrentPage(res.data.result.currentPage);
+            setCategories(res.data.result);            
             setLoading(false);
         } catch (error) {
             showAlert('Lỗi khi tải danh sách danh mục xe!', 'danger');
-            console.error('Error fetching categories:', error);
             setLoading(false);
         }
     };

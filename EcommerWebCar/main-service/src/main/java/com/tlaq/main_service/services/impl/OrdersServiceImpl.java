@@ -67,7 +67,6 @@ public class OrdersServiceImpl implements OrdersService {
         Profile profile= profileRepository.findByUserKeyCloakId(userKeyCloakId)
                 .orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-
         Orders orders = ordersMapper.toOrdersEntity(request);
         orders.setProfile(profile);
         Orders save = ordersRepository.save(orders);
