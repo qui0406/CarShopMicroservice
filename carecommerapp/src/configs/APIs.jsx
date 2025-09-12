@@ -54,8 +54,10 @@ export const endpoints = {
 
     "get-bill": id => `/staff/get-bill/${id}`,
     "get-bill-by-order-id": orderId => `/staff/get-bill-deposit/${orderId}`,
-    "payment-cashier": "/staff/payment"
+    "payment-cashier": "/staff/payment",
 
+
+    "search-by-image": "localhost:5000/predict"
 };
 
 export const authApis = () => {

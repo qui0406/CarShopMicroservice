@@ -19,6 +19,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -38,8 +40,12 @@ public class ConversationService {
     public PageResponse<ConversationResponse> getAllConversations(int page, int size){
         Sort sort= Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable pageable= PageRequest.of(page- 1, size, sort);
-        var pageData = conversationRepository.findAll(pageable);
 
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        checkValidStaff(authentication);
+
+        var pageData = conversationRepository.findAll(pageable);
         return PageResponse.<ConversationResponse>builder()
                 .currentPage(page)
                 .pageSize(pageData.getSize())
@@ -50,34 +56,6 @@ public class ConversationService {
                 .build();
     }
 
-    public boolean userHasAccessToConversation(String userId, String conversationId) {
-        try {
-            Optional<Conversation> conversationOpt = conversationRepository.findById(conversationId);
-
-            if (conversationOpt.isEmpty()) {
-                log.warn("Conversation not found: {}", conversationId);
-                return false;
-            }
-
-            Conversation conversation = conversationOpt.get();
-
-            boolean isCustomer = userId.equals(conversation.getCustomerId());
-            boolean isStaff = conversation.getStaffIds().contains(userId);
-
-            if (isCustomer || isStaff) {
-                log.debug("User {} has access to conversation {}", userId, conversationId);
-                return true;
-            }
-
-            log.warn("User {} does not have access to conversation {}", userId, conversationId);
-            return false;
-
-        } catch (Exception e) {
-            log.error("Error checking conversation access for user {} and conversation {}: {}",
-                    userId, conversationId, e.getMessage(), e);
-            return false;
-        }
-    }
 
     public ConversationResponse getCustomerConversation() {
         String userKeyCloakId = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -95,7 +73,10 @@ public class ConversationService {
     }
 
     private ConversationResponse toCustomerConversationResponse(Conversation conversation) {
-        String userKeyCloakId = SecurityContextHolder.getContext().getAuthentication().getName();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        String userKeyCloakId = authentication.getName();
+
         var userInfoResponse = mainClient.getProfile(userKeyCloakId);
 
         if (Objects.isNull(userInfoResponse)) {
@@ -121,6 +102,7 @@ public class ConversationService {
 
     public ConversationResponse createOrGetConversation() {
         String userKeyCloakId = SecurityContextHolder.getContext().getAuthentication().getName();
+
         var userInfoResponse = mainClient.getProfile(userKeyCloakId);
 
         if (Objects.isNull(userInfoResponse)) {
@@ -132,8 +114,6 @@ public class ConversationService {
         var existingConversation = conversationRepository.findByCustomerId(userInfo.getId());
         if (existingConversation.isPresent()) {
             var conversation = existingConversation.get();
-            conversationRepository.save(conversation);
-
             return toCustomerConversationResponse(conversation);
         }
 
@@ -164,5 +144,22 @@ public class ConversationService {
     private void notifyAvailableStaff(Conversation conversation) {
         log.info("New conversation created: {} for customer: {}",
                 conversation.getId(), conversation.getCustomerInfo().getUsername());
+    }
+
+    private void checkValidStaff(Authentication authentication){
+        authentication = SecurityContextHolder.getContext().getAuthentication();
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+
+        boolean hasStaffRole = false;
+        for (GrantedAuthority authority : authorities) {
+            if (authority.getAuthority().equals("ROLE_STAFF")) {
+                hasStaffRole = true;
+                break;
+            }
+        }
+
+        if (!hasStaffRole) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
     }
 }
