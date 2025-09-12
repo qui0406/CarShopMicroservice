@@ -22,6 +22,8 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -54,7 +56,10 @@ public class ChatMessageService {
         Conversation conversation = conversationRepository.findById(conversationId)
                 .orElseThrow(() -> new AppException(ErrorCode.CONVERSATION_NOT_FOUND));
 
-        validateUserAccessToConversation(conversation, userInfo.getId());
+        if(!conversation.getCustomerId().equals(userInfo.getId())){
+            Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
+            checkValidStaff(authentication);
+        }
 
         var messages = chatMessageRepository.findAllByConversationIdOrderByCreatedDateAsc(conversationId);
 
@@ -77,10 +82,15 @@ public class ChatMessageService {
         Conversation conversation = conversationRepository.findById(request.getConversationId())
                 .orElseThrow(() -> new AppException(ErrorCode.CONVERSATION_NOT_FOUND));
 
-        if (isStaffUser(userInfo.getId(), conversation) &&
-                conversation.getStatus() == ConversationStatus.WAITING) {
+        log.info(conversation.getCustomerId());
+        log.info(userInfo.getId());
+
+        if(!conversation.getCustomerId().equals(userInfo.getId())){
+            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+            checkValidStaff(authentication);
             autoAssignStaffToConversation(conversation, userInfo.getId());
         }
+
 
         ChatMessage chatMessage = buildChatMessage(request, userInfo);
         chatMessage = chatMessageRepository.save(chatMessage);
@@ -91,18 +101,9 @@ public class ChatMessageService {
     }
 
 
-    private void validateUserAccessToConversation(Conversation conversation, String userId) {
-        boolean isCustomer = conversation.getCustomerId().equals(userId);
-        boolean isStaff = conversation.getStaffIds().contains(userId);
 
-        if (!isCustomer && !isStaff) {
-            throw new AppException(ErrorCode.UNAUTHORIZED);
-        }
-    }
 
-    private boolean isStaffUser(String userId, Conversation conversation) {
-        return !conversation.getCustomerId().equals(userId);
-    }
+
 
 
     private void autoAssignStaffToConversation(Conversation conversation, String staffId) {
@@ -213,7 +214,37 @@ public class ChatMessageService {
 
     private ChatMessageResponse toChatMessageResponse(ChatMessage chatMessage, String currentUserId) {
         ChatMessageResponse response = chatMessageMapper.toChatMessageResponse(chatMessage);
+
+        Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        for (GrantedAuthority authority : authorities) {
+            if (authority.getAuthority().equals("ROLE_STAFF")) {
+                response.getSender().setRole("ROLE_STAFF");
+                break;
+            }
+            if (authority.getAuthority().equals("ROLE_USER")) {
+                response.getSender().setRole("ROLE_USER");
+            }
+        }
+
         response.setMe(currentUserId.equals(chatMessage.getSender().getId()));
+
         return response;
+    }
+
+    private void checkValidStaff(Authentication authentication){
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+
+        boolean hasStaffRole = false;
+        for (GrantedAuthority authority : authorities) {
+            if (authority.getAuthority().equals("ROLE_STAFF")) {
+                hasStaffRole = true;
+                break;
+            }
+        }
+
+        if (!hasStaffRole) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
     }
 }

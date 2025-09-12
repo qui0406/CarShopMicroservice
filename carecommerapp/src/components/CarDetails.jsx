@@ -15,6 +15,7 @@ export default function About() {
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
   const [carImages, setCarImages] = useState([]);
+  const [products, setProducts]= useState(true)
   const user = useContext(MyUserContext);
 
   const Link = ({ to, children, className }) => (
@@ -148,35 +149,31 @@ export default function About() {
               )}
             </div>
 
-            {/* Overview */}
             <div className="bg-white rounded-3xl shadow-xl p-8">
               <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
                 <span className="text-3xl">🔍</span>
-                Overview
+                Tổng quan
               </h2>
               
               <div className="grid md:grid-cols-2 gap-8">
                 <div className="space-y-4">
                   <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-                    <span className="text-2xl">📅</span>
                     <div>
-                      <p className="text-gray-600 text-sm">Year</p>
+                      <p className="text-gray-600 text-sm">Năm sản xuất</p>
                       <p className="font-semibold text-lg">{formatYear(car.year)}</p>
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-                    <span className="text-2xl">⚙️</span>
                     <div>
-                      <p className="text-gray-600 text-sm">Transmission</p>
+                      <p className="text-gray-600 text-sm">Hộp số</p>
                       <p className="font-semibold text-lg">{car.carService?.hopSo || "N/A"}</p>
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-                    <span className="text-2xl">⛽</span>
                     <div>
-                      <p className="text-gray-600 text-sm">Fuel Type</p>
+                      <p className="text-gray-600 text-sm">Loại nhiên liệu</p>
                       <p className="font-semibold text-lg">{car.carService?.loaiNhienLieu || "N/A"}</p>
                     </div>
                   </div>
@@ -184,25 +181,22 @@ export default function About() {
                 
                 <div className="space-y-4">
                   <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-                    <span className="text-2xl">🚗</span>
                     <div>
-                      <p className="text-gray-600 text-sm">Engine</p>
+                      <p className="text-gray-600 text-sm">Động cơ</p>
                       <p className="font-semibold text-lg">{car.carService?.dongCo || "N/A"}</p>
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-                    <span className="text-2xl">🪑</span>
                     <div>
-                      <p className="text-gray-600 text-sm">Seat Material</p>
+                      <p className="text-gray-600 text-sm">Loại ghế</p>
                       <p className="font-semibold text-lg">{car.carFeature?.carComfortResponse?.ghe || "N/A"}</p>
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl">
-                    <span className="text-2xl">📍</span>
                     <div>
-                      <p className="text-gray-600 text-sm">Branch</p>
+                      <p className="text-gray-600 text-sm">Thương hiệu</p>
                       <p className="font-semibold text-lg">{car.carBranch}</p>
                     </div>
                   </div>
@@ -210,19 +204,18 @@ export default function About() {
               </div>
             </div>
 
-            {/* Technical Specifications */}
             <div className="bg-white rounded-3xl shadow-xl p-8">
               <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
                 <span className="text-3xl">⚡</span>
-                Technical Specifications
+                Công nghệ chi tiết
               </h2>
               
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-3">
                   {[
-                    { label: "Engine Capacity", value: car.carService?.dungTichXiLanh ? `${car.carService.dungTichXiLanh}L` : "N/A" },
-                    { label: "Power", value: car.carService?.congSuat ? `${car.carService.congSuat} HP` : "N/A" },
-                    { label: "Torque", value: car.carService?.momenXoan ? `${car.carService.momenXoan} Nm` : "N/A" }
+                    { label: "Dung tích xi lanh", value: car.carService?.dungTichXiLanh ? `${car.carService.dungTichXiLanh}L` : "N/A" },
+                    { label: "Công suất", value: car.carService?.congSuat ? `${car.carService.congSuat} HP` : "N/A" },
+                    { label: "Momen xoắn", value: car.carService?.momenXoan ? `${car.carService.momenXoan} Nm` : "N/A" }
                   ].map((spec, index) => (
                     <div key={index} className="flex justify-between items-center py-3 border-b border-gray-200">
                       <span className="text-gray-600">{spec.label}</span>
@@ -233,9 +226,9 @@ export default function About() {
                 
                 <div className="space-y-3">
                   {[
-                    { label: "Fuel Tank Capacity", value: car.carService?.dungTichXang ? `${car.carService.dungTichXang}L` : "N/A" },
-                    { label: "Max Speed", value: car.carService?.tocDoToiDa ? `${car.carService.tocDoToiDa} km/h` : "N/A" },
-                    { label: "Payload", value: car.carService?.taiTrong ? `${car.carService.taiTrong} kg` : "N/A" }
+                    { label: "Dung tích bình xăng", value: car.carService?.dungTichXang ? `${car.carService.dungTichXang}L` : "N/A" },
+                    { label: "Tốc độ tối đa", value: car.carService?.tocDoToiDa ? `${car.carService.tocDoToiDa} km/h` : "N/A" },
+                    { label: "Tải trọng", value: car.carService?.taiTrong ? `${car.carService.taiTrong} kg` : "N/A" }
                   ].map((spec, index) => (
                     <div key={index} className="flex justify-between items-center py-3 border-b border-gray-200">
                       <span className="text-gray-600">{spec.label}</span>
@@ -250,23 +243,22 @@ export default function About() {
             <div className="bg-white rounded-3xl shadow-xl p-8">
               <h2 className="text-2xl font-bold text-gray-800 mb-6 flex items-center gap-3">
                 <span className="text-3xl">✨</span>
-                Features
+                Đặc tính
               </h2>
               
               {/* Comfort Features */}
               <div className="mb-8">
                 <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                  <span className="text-2xl">🛋️</span>
-                  Comfort
+                  Nội thất
                 </h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   {[
-                    { check: car.carFeature?.carComfortResponse?.mayDieuHoa, label: "Air Conditioning", icon: "❄️" },
+                    { check: car.carFeature?.carComfortResponse?.mayDieuHoa, label: "Máy điều hòa", icon: "❄️" },
                     { check: car.carFeature?.carComfortResponse?.manHinh, label: `${car.carFeature?.carComfortResponse?.manHinh || "Display"} Screen`, icon: "📺" },
-                    { check: car.carFeature?.carComfortResponse?.sacKhongDay, label: "Wireless Charging", icon: "🔋" },
-                    { check: car.carFeature?.carComfortResponse?.copDien, label: "Power Outlet", icon: "🔌" },
+                    { check: car.carFeature?.carComfortResponse?.sacKhongDay, label: "Sạc điện thoại", icon: "🔋" },
+                    { check: car.carFeature?.carComfortResponse?.copDien, label: "Cốp xe", icon: "🔌" },
                     { check: car.carFeature?.carComfortResponse?.bluetooth, label: "Bluetooth", icon: "📱" },
-                    { check: car.carFeature?.carComfortResponse?.gps, label: "GPS Navigation", icon: "🗺️" }
+                    { check: car.carFeature?.carComfortResponse?.gps, label: "Định vị GPS", icon: "🗺️" }
                   ].filter(feature => feature.check).map((feature, index) => (
                     <div key={index} className="flex items-center gap-3 p-3 bg-green-50 rounded-xl">
                       <span className="text-xl">{feature.icon}</span>
@@ -279,14 +271,13 @@ export default function About() {
               {/* Exterior Features */}
               <div className="mb-8">
                 <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                  <span className="text-2xl">🚙</span>
-                  Exterior
+                  Ngoại thất
                 </h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   {[
                     { check: car.carFeature?.carExteriorResponse?.den, label: `${car.carFeature?.carExteriorResponse?.den || "Headlights"}`, icon: "💡" },
                     { check: car.carFeature?.carExteriorResponse?.smartKey, label: "Smart Key", icon: "🔑" },
-                    { check: car.carFeature?.carExteriorResponse?.guongDien, label: "Electric Mirrors", icon: "🪞" }
+                    { check: car.carFeature?.carExteriorResponse?.guongDien, label: "Gương", icon: "🪞" }
                   ].filter(feature => feature.check).map((feature, index) => (
                     <div key={index} className="flex items-center gap-3 p-3 bg-blue-50 rounded-xl">
                       <span className="text-xl">{feature.icon}</span>
@@ -299,16 +290,15 @@ export default function About() {
               {/* Safety Features */}
               <div>
                 <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-                  <span className="text-2xl">🛡️</span>
-                  Safety
+                  Các tính năng an toàn
                 </h3>
                 <div className="grid md:grid-cols-2 gap-4">
                   {[
-                    { check: car.carFeature?.featureSafetyResponse?.tuiKhi, label: "Airbags", icon: "🎈" },
-                    { check: car.carFeature?.featureSafetyResponse?.camera, label: "Rear Camera", icon: "📷" },
-                    { check: car.carFeature?.featureSafetyResponse?.camBienDoXe, label: "Parking Sensors", icon: "📡" },
-                    { check: car.carFeature?.featureSafetyResponse?.canBangDienTu, label: "Electronic Stability Control", icon: "⚖️" },
-                    { check: car.carFeature?.featureSafetyResponse?.hoTroGiuLan, label: "Lane Keep Assist", icon: "🛣️" }
+                    { check: car.carFeature?.featureSafetyResponse?.tuiKhi, label: "Túi khí", icon: "🎈" },
+                    { check: car.carFeature?.featureSafetyResponse?.camera, label: "Camera sau", icon: "📷" },
+                    { check: car.carFeature?.featureSafetyResponse?.camBienDoXe, label: "Cảm biến đổ xe", icon: "📡" },
+                    { check: car.carFeature?.featureSafetyResponse?.canBangDienTu, label: "Cân bằng điện tử", icon: "⚖️" },
+                    { check: car.carFeature?.featureSafetyResponse?.hoTroGiuLan, label: "Hỗ trợ giữ làng", icon: "🛣️" }
                   ].filter(feature => feature.check).map((feature, index) => (
                     <div key={index} className="flex items-center gap-3 p-3 bg-red-50 rounded-xl">
                       <span className="text-xl">{feature.icon}</span>
@@ -320,14 +310,12 @@ export default function About() {
             </div>
           </div>
           
-          {/* Right Column - Booking Card */}
           <div className="lg:sticky lg:top-8 h-fit">
             <div className="bg-white rounded-3xl shadow-xl p-8">
               <div className="text-center mb-6">
                 <div className="text-4xl font-bold text-blue-600 mb-2">
                   {formatPrice(car.price)}
                 </div>
-                <div className="text-gray-500">Starting Price</div>
               </div>
               
               <div className="space-y-4 mb-8">
@@ -335,24 +323,24 @@ export default function About() {
                   onClick={handleBookNow}
                   className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 rounded-xl font-semibold text-lg hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg"
                 >
-                  🚗 Book Now
+                  Đặt hàng
                 </button>
                 <button className="w-full border-2 border-blue-600 text-blue-600 py-4 rounded-xl font-semibold hover:bg-blue-50 transition-colors">
-                  📞 Contact Dealer
+                  Liên hệ
                 </button>
               </div>
               
               <div className="border-t border-gray-200 pt-6">
-                <h3 className="text-xl font-semibold text-gray-800 mb-4">Quick Specs</h3>
+                <h3 className="text-xl font-semibold text-gray-800 mb-4">Thông tin</h3>
                 
                 <div className="space-y-3">
                   {[
-                    { icon: "🚗", label: "Model", value: car.carModel },
-                    { icon: "📅", label: "Year", value: formatYear(car.year) },
-                    { icon: "⚙️", label: "Transmission", value: car.carService?.hopSo || "N/A" },
-                    { icon: "⛽", label: "Fuel Type", value: car.carService?.loaiNhienLieu || "N/A" },
-                    { icon: "🔧", label: "Engine", value: car.carService?.dongCo || "N/A" },
-                    { icon: "📍", label: "Branch", value: car.carBranch }
+                    { label: "Dòng xe", value: car.carModel },
+                    { label: "Năm sản xuất", value: formatYear(car.year) },
+                    { label: "Hộp số", value: car.carService?.hopSo || "N/A" },
+                    { label: "Loại nhiên liệu", value: car.carService?.loaiNhienLieu || "N/A" },
+                    { label: "Động cơ", value: car.carService?.dongCo || "N/A" },
+                    { label: "Thương hiệu", value: car.carBranch }
                   ].map((spec, index) => (
                     <div key={index} className="flex items-center gap-3">
                       <span className="text-xl">{spec.icon}</span>
@@ -368,7 +356,7 @@ export default function About() {
               <div className="mt-6 text-center">
                 <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-full font-medium">
                   <span className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
-                  Available for Purchase
+                  {products ? "Còn hàng" : "Hết hàng"}
                 </div>
               </div>
             </div>

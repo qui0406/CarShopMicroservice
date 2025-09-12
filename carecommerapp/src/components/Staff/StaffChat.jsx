@@ -35,18 +35,20 @@ export default function CustomerStaffChat() {
       if (token) {
         // Decode token to get user info or set default
         setCurrentUser({ 
-          id: "current_staff_id", 
-          name: "Staff User", 
-          role: "STAFF" 
+          id: "47ce16a3-c6cc-4dc3-8993-187b29330b3b", // Use actual user ID from API response
+          name: "Quí Trần", 
+          role: "STAFF",
+          avatar: "https://res.cloudinary.com/do43r8nr0/image/upload/v1756799591/vat312ywtm80gsm23ige.png"
         });
       }
     } catch (error) {
       console.error("Error getting current user:", error);
       // Set default user
       setCurrentUser({ 
-        id: "current_staff_id", 
-        name: "Staff User", 
-        role: "STAFF" 
+        id: "47ce16a3-c6cc-4dc3-8993-187b29330b3b", 
+        name: "Quí Trần", 
+        role: "STAFF",
+        avatar: "https://res.cloudinary.com/do43r8nr0/image/upload/v1756799591/vat312ywtm80gsm23ige.png"
       });
     }
   }, []);
@@ -133,15 +135,17 @@ export default function CustomerStaffChat() {
         
         const fetchedMessages = messages.map((msg) => ({
           id: msg.id,
-          message: msg.message || msg.content, // Handle different field names
+          message: msg.message || msg.content,
           sender: {
-            id: msg.senderId || (msg.me ? currentUser?.id : "support"),
-            name: msg.senderName || (msg.me ? currentUser?.name : "Support"),
-            role: msg.senderRole || (msg.me ? "STAFF" : "CUSTOMER")
+            id: msg.sender?.id || msg.senderId,
+            name: msg.sender ? `${msg.sender.firstName || ''} ${msg.sender.lastName || ''}`.trim() : (msg.senderName || "Unknown"),
+            role: msg.sender?.role || msg.senderRole || "USER",
+            avatar: msg.sender?.avatar || null
           },
           createdDate: msg.createdDate || msg.createdAt,
           conversationId: msg.conversationId || conversationId,
-          isTemporary: false
+          isTemporary: false,
+          me: msg.me || false
         }));
 
         setMessagesMap((prev) => {
@@ -190,7 +194,7 @@ export default function CustomerStaffChat() {
         if (messageData.tempId) {
           const updatedMessages = existingMessages.map((msg) =>
             msg.tempId === messageData.tempId
-              ? { ...messageData}
+              ? { ...messageData }
               : msg
           );
           return {
@@ -230,10 +234,13 @@ export default function CustomerStaffChat() {
       sender: {
         id: currentUser.id,
         name: currentUser.name,
-        role: currentUser.role
+        role: currentUser.role,
+        avatar: currentUser.avatar
       },
       createdDate: new Date().toISOString(),
       conversationId: selectedConversation.id,
+      me: true,
+      isTemporary: true
     };
 
     addMessageToUI(selectedConversation.id, tempMessage);
@@ -247,19 +254,24 @@ export default function CustomerStaffChat() {
       if (res.status === 200 || res.status === 201) {
         console.log("Message sent successfully:", res.data.result);
         
+        // Create server message from API response
         const serverMessage = {
           id: res.data.result.id,
           tempId: tempId,
-          message: res.data.result.message || res.data.result.content,
+          message: res.data.result.message,
           sender: {
-            id: res.data.result.senderId || currentUser.id,
-            name: res.data.result.senderName || currentUser.name,
-            role: res.data.result.senderRole || currentUser.role
+            id: res.data.result.sender.id,
+            name: `${res.data.result.sender.firstName || ''} ${res.data.result.sender.lastName || ''}`.trim(),
+            role: res.data.result.sender.role,
+            avatar: res.data.result.sender.avatar
           },
-          createdDate: res.data.result.createdDate || res.data.result.createdAt,
-          conversationId: selectedConversation.id,
+          createdDate: res.data.result.createdDate,
+          conversationId: res.data.result.conversationId,
+          me: res.data.result.me,
+          isTemporary: false
         };
 
+        // Update the temporary message with server data
         addMessageToUI(selectedConversation.id, serverMessage);
       }
     } catch (error) {
@@ -312,18 +324,26 @@ export default function CustomerStaffChat() {
           
           const newMessage = {
             id: messageObject.id,
-            message: messageObject.message || messageObject.content,
+            message: messageObject.message,
             sender: {
-              id: messageObject.senderId || (messageObject.me ? currentUser.id : "customer"),
-              name: messageObject.senderName || (messageObject.me ? currentUser.name : "Customer"),
-              role: messageObject.senderRole || (messageObject.me ? "STAFF" : "CUSTOMER")
+              id: messageObject.sender?.id || messageObject.senderId,
+              name: messageObject.sender ? 
+                `${messageObject.sender.firstName || ''} ${messageObject.sender.lastName || ''}`.trim() : 
+                (messageObject.senderName || "Unknown"),
+              role: messageObject.sender?.role || messageObject.senderRole || "USER",
+              avatar: messageObject.sender?.avatar || null
             },
             createdDate: messageObject.createdDate || messageObject.createdAt,
             conversationId: conversationId,
+            me: messageObject.me || false
           };
 
+          console.log("Processed socket message:", newMessage);
+          console.log("Current user ID:", currentUser.id);
+          console.log("Message sender ID:", newMessage.sender.id);
+          
           // Only add message if it's not from current user (avoid duplicates)
-          if (newMessage.sender.id !== currentUser.id) {
+          if (newMessage.sender.id !== currentUser.id && !newMessage.me) {
             addMessageToUI(conversationId, newMessage);
           }
 
@@ -500,7 +520,15 @@ export default function CustomerStaffChat() {
                   <div className="flex items-center space-x-3">
                     <div className="relative">
                       <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-medium">
-                        {otherParticipant?.avatar || otherParticipant?.name?.charAt(0) || "U"}
+                        {otherParticipant?.avatar ? (
+                          <img 
+                            src={otherParticipant.avatar} 
+                            alt={otherParticipant.name}
+                            className="w-12 h-12 rounded-full object-cover"
+                          />
+                        ) : (
+                          otherParticipant?.name?.charAt(0) || "U"
+                        )}
                       </div>
                       {conversation.unread > 0 && (
                         <div className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center">
@@ -546,8 +574,15 @@ export default function CustomerStaffChat() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-purple-500 rounded-full flex items-center justify-center text-white font-medium">
-                    {getOtherParticipant(selectedConversation)?.avatar || 
-                     getOtherParticipant(selectedConversation)?.name?.charAt(0) || "U"}
+                    {getOtherParticipant(selectedConversation)?.avatar ? (
+                      <img 
+                        src={getOtherParticipant(selectedConversation).avatar} 
+                        alt={getOtherParticipant(selectedConversation).name}
+                        className="w-10 h-10 rounded-full object-cover"
+                      />
+                    ) : (
+                      getOtherParticipant(selectedConversation)?.name?.charAt(0) || "U"
+                    )}
                   </div>
                   <div>
                     <h2 className="font-medium text-gray-900">
@@ -578,7 +613,7 @@ export default function CustomerStaffChat() {
               className="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50"
             >
               {currentMessages.map((msg) => {
-                const isCurrentUser = msg.sender.id === currentUser.id;
+                const isCurrentUser = msg.me || msg.sender.id === currentUser.id;
                 const uniqueKey = msg.tempId || msg.id;
 
                 return (
@@ -592,20 +627,27 @@ export default function CustomerStaffChat() {
                       }`}
                     >
                       {!isCurrentUser && (
-                        <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                          {msg.sender.name?.charAt(0) || "U"}
+                        <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium overflow-hidden">
+                          {msg.sender.avatar ? (
+                            <img 
+                              src={msg.sender.avatar} 
+                              alt={msg.sender.name}
+                              className="w-8 h-8 rounded-full object-cover"
+                            />
+                          ) : (
+                            msg.sender.name?.charAt(0) || "U"
+                          )}
                         </div>
                       )}
                       <div className="flex flex-col space-y-1">
                         <div
                           className={`px-4 py-2 rounded-2xl ${
                             isCurrentUser
-                              ? `bg-blue-500 text-white rounded-br-sm `
+                              ? `bg-blue-500 text-white rounded-br-sm ${msg.isTemporary ? 'opacity-70' : ''}`
                               : "bg-white text-gray-800 rounded-bl-sm shadow-sm border border-gray-100"
                           }`}
                         >
                           <p className="text-sm whitespace-pre-wrap">{msg.message}</p>
-                          
                         </div>
                         <div
                           className={`text-xs text-gray-500 ${
@@ -613,6 +655,9 @@ export default function CustomerStaffChat() {
                           }`}
                         >
                           {formatTime(msg.createdDate)}
+                          {msg.isTemporary && (
+                            <span className="ml-1 text-gray-400">Đang gửi...</span>
+                          )}
                         </div>
                       </div>
                     </div>

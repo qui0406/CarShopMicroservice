@@ -1,17 +1,19 @@
-import React, { useState, useEffect } from "react";
-import { FaCarSide, FaTruckPickup } from "react-icons/fa";
+import React, { useState, useEffect, useRef } from "react";
+import { FaCarSide, FaTruckPickup, FaCamera, FaSearch, FaFilter, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { GiCarSeat, GiGearStick } from "react-icons/gi";
 import { Link } from "react-router-dom";
-import { Card, Button, Row, Col, Spinner } from "react-bootstrap";
-import  axios ,{ authApis, endpoints } from "./../configs/APIs";
+import { Card, Button, Row, Col, Spinner, Modal, Form } from "react-bootstrap";
+import axios, { authApis, endpoints } from "./../configs/APIs";
 import "./../styles/Home.css";
+import Chat from "./Chat";
 
-const Home = () => {
+export default function Home (){
   // Initialize state as arrays to prevent undefined errors
   const [branches, setBranches] = useState([]);
   const [categories, setCategories] = useState([]);
   const [models, setModels] = useState([]);
   const [cars, setCars] = useState([]);
+  const [nameCarPredict, setNameCarPredict]= useState([])
   
   const [pageBranch, setPageBranch] = useState(1);
   const [totalPagesBranch, setTotalPagesBranch] = useState(1);
@@ -27,6 +29,13 @@ const Home = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Image search states
+  const [showImageSearch, setShowImageSearch] = useState(false);
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState("");
+  const [imageSearchLoading, setImageSearchLoading] = useState(false);
+  const fileInputRef = useRef(null);
+
   const cardsPerPage = 5;
   const indexOfLastCard = currentPage * cardsPerPage;
   const indexOfFirstCard = indexOfLastCard - cardsPerPage;
@@ -34,8 +43,7 @@ const Home = () => {
 
   const [selectedBranch, setSelectedBranch] = useState("");
   const [selectedModel, setSelectedModel] = useState("");
-  const [selectedPriceRange, setSelectedPriceRange] = useState(""); // dạng "10000-20000"
-
+  const [selectedPriceRange, setSelectedPriceRange] = useState(""); 
 
   // Fetch branches
   const fetchBranches = async (pageNum) => {
@@ -136,7 +144,6 @@ const Home = () => {
       if (selectedCategory) params.category = selectedCategory;
 
       if (selectedPriceRange) {
-        // Ví dụ selectedPriceRange = "$10k - $20k" hoặc "10000-20000"
         const cleanRange = selectedPriceRange.replace(/\$/g, "").replace(/k/g, "000").replace(/\s/g, "");
         const [from, to] = cleanRange.split("-");
         
@@ -161,154 +168,343 @@ const Home = () => {
     }
   };
 
+  // Image search handlers
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setImagePreview(e.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
+  const handleImageSearch = async () => {
+    if (!selectedImage) return;
+
+    try {
+      setImageSearchLoading(true);
+      const formData = new FormData();
+      formData.append('image', selectedImage);
+
+      // Replace with your actual image search endpoint
+      const res = await axios.post(endpoints["search-by-image"], formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      const result = {
+        "predicted_class": "Toyota Innova",
+        "confidence": 0.9876,
+        "class_index": 6,
+        "image_path": "static/uploads/example.jpg"
+      }
+
+      console.log("Kết quả: ", result)
+
+      setCars(Array.isArray(result) ? result : []);
+      setNameCarPredict(result)
+      setShowImageSearch(false);
+      
+    } catch (error) {
+      console.error("Error searching by image:", error);
+      setError("Failed to search by image. Please try again.");
+    } finally {
+      setImageSearchLoading(false);
+    }
+  };
+
+  const resetImageSearch = () => {
+    setSelectedImage(null);
+    setImagePreview("");
+    setShowImageSearch(false);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
 
   return (
     <>
       <div className="w-full">
         {/* Hero Section */}
-        <div
-          className="relative h-[90vh] bg-cover bg-center flex flex-col items-center justify-center text-white"
-          style={{
-            backgroundImage:
-              "url('https://images.unsplash.com/photo-1502877338535-766e1452684a?auto=format&fit=crop&w=1400&q=80')",
-          }}
-        >
-          <div className="overlay"></div>
-          <div className="relative z-10 text-center px-4">
-            <h2 className="text-white text-lg mb-3">
-              Find cars for sale and rent near you
-            </h2>
-            <h1 className="text-white text-4xl md:text-6xl font-bold mb-6">
-              Find Your Perfect Car
-            </h1>
-
-            {/* Search Form */}
-            <div className="search-form max-w-4xl mx-auto">
-              <select className="custom-select" onChange={(e) => setSelectedBranch(e.target.value)}>
-                <option value="">Hãng xe: Tất cả</option>
-                {branches.length > 0 ? (
-                  branches.map((branch) => (
-                    <option key={branch.id} value={branch.name}>
-                      {branch.name}
-                    </option>
-                  ))
-                ) : (
-                  <option disabled>No branches available</option>
-                )}
-              </select>
-              <select className="custom-select" onChange={(e) => setSelectedModel(e.target.value)}>
-                <option value="">Dòng xe: Tất cả</option>
-                {models.length > 0 ? (
-                  models.map((model) => (
-                    <option key={model.id} value={model.name}>
-                      {model.name}
-                    </option>
-                  ))
-                ) : (
-                  <option disabled>No models available</option>
-                )}
-              </select>
-              <select className="custom-select" onChange={(e) => setSelectedPriceRange(e.target.value)}>
-                <option value="">Giá: Tất cả</option>
-                <option value="30000000-500000000">300 triệu - 500 triệu</option>
-                <option value="500000000-1000000000">500 triệu - 1 tỷ</option>
-                <option value="1000000000-5000000000">1 tỷ - 5 tỷ</option>
-                <option value="5000000000+">Trên 5 tỷ</option>
-              </select>
-              <button className="search-button" onClick={() => handleSearch(1)}>Tìm kiếm</button>
+        <div className="hero-section">
+          <div className="hero-overlay"></div>
+          <div className="hero-content">
+            <div className="hero-text">
+              <span className="hero-subtitle">Tìm xe ô tô mua bán và cho thuê gần bạn</span>
+              <h1 className="hero-title">
+                Tìm Chiếc Xe <span className="hero-highlight">Hoàn Hảo</span> Của Bạn
+              </h1>
+              <p className="hero-description">
+                Khám phá hàng nghìn xe ô tô chất lượng cao từ các thương hiệu hàng đầu
+              </p>
             </div>
 
-           <div className="mt-10 flex flex-wrap justify-center gap-4">
-            {categories.map((cat) => (
-              <div
-                key={cat.id}
-                className={`category-item ${selectedCategory === cat.name ? "active" : ""}`}
-                onClick={() => {
-                  setSelectedCategory(cat.name);
-                  handleSearch(1); 
-                }}
-              >
-                {cat.name === "SUV" && <FaCarSide />}
-                {cat.name === "Sedan" && <GiCarSeat />}
-                {cat.name === "Hatchback" && <GiGearStick />}
-                {cat.name === "Coupe" && <FaTruckPickup />}
-                {cat.name === "Hybrid" && <span>Hybrid</span>}
-                {cat.name}
+            {/* Modern Search Form */}
+            <div className="search-container">
+              <div className="search-form-modern">
+                <div className="search-row">
+                  <div className="search-field">
+                    <label>Hãng xe</label>
+                    <select 
+                      className="modern-select" 
+                      value={selectedBranch}
+                      onChange={(e) => setSelectedBranch(e.target.value)}
+                    >
+                      <option value="">Tất cả hãng xe</option>
+                      {branches.map((branch) => (
+                        <option key={branch.id} value={branch.name}>
+                          {branch.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div className="search-field">
+                    <label>Dòng xe</label>
+                    <select 
+                      className="modern-select"
+                      value={selectedModel}
+                      onChange={(e) => setSelectedModel(e.target.value)}
+                    >
+                      <option value="">Tất cả dòng xe</option>
+                      {models.map((model) => (
+                        <option key={model.id} value={model.name}>
+                          {model.name}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  
+                  <div className="search-field">
+                    <label>Khoảng giá</label>
+                    <select 
+                      className="modern-select"
+                      value={selectedPriceRange}
+                      onChange={(e) => setSelectedPriceRange(e.target.value)}
+                    >
+                      <option value="">Tất cả mức giá</option>
+                      <option value="30000000-500000000">300 triệu - 500 triệu</option>
+                      <option value="500000000-1000000000">500 triệu - 1 tỷ</option>
+                      <option value="1000000000-5000000000">1 tỷ - 5 tỷ</option>
+                      <option value="5000000000+">Trên 5 tỷ</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div className="search-actions">
+                  <button 
+                    className="search-btn primary"
+                    onClick={() => handleSearch(1)}
+                    disabled={loading}
+                  >
+                    <FaSearch className="me-2" />
+                    {loading ? 'Đang tìm...' : 'Tìm kiếm'}
+                  </button>
+                  
+                  <button 
+                    className="search-btn secondary"
+                    onClick={() => setShowImageSearch(true)}
+                  >
+                    <FaCamera className="me-2" />
+                    Tìm bằng ảnh
+                  </button>
+                </div>
               </div>
-            ))}
-          </div>
+            </div>
 
-
+            {/* Category Pills */}
+            <div className="category-pills">
+              {categories.map((cat) => (
+                <div
+                  key={cat.id}
+                  className={`category-pill ${selectedCategory === cat.name ? "active" : ""}`}
+                  onClick={() => {
+                    setSelectedCategory(cat.name);
+                    handleSearch(1); 
+                  }}
+                >
+                  <div className="category-icon">
+                    {cat.name === "SUV" && <FaCarSide />}
+                    {cat.name === "Sedan" && <GiCarSeat />}
+                    {cat.name === "Hatchback" && <GiGearStick />}
+                    {cat.name === "Coupe" && <FaTruckPickup />}
+                  </div>
+                  <span>{cat.name}</span>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
+
+        {/* Image Search Modal */}
+        <Modal show={showImageSearch} onHide={resetImageSearch} centered size="md">
+          <Modal.Header closeButton className="border-0">
+            <Modal.Title className="fw-bold">Tìm kiếm bằng hình ảnh</Modal.Title>
+          </Modal.Header>
+          <Modal.Body className="p-4">
+            <div className="image-upload-area">
+              {!imagePreview ? (
+                <div 
+                  className="upload-placeholder"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <FaCamera size={48} className="text-muted mb-3" />
+                  <h5 className="mb-2">Tải lên ảnh xe</h5>
+                  <p className="text-muted">Chọn ảnh để tìm những chiếc xe tương tự</p>
+                  <Button variant="outline-primary" className="mt-2">
+                    Chọn ảnh
+                  </Button>
+                </div>
+              ) : (
+                <div className="image-preview-container">
+                  <img src={imagePreview} alt="Preview" className="image-preview" />
+                  <div className="image-actions">
+                    <Button 
+                      variant="outline-secondary" 
+                      size="sm"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      Đổi ảnh
+                    </Button>
+                  </div>
+                </div>
+              )}
+              
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleImageUpload}
+                accept="image/*"
+                className="d-none"
+              />
+            </div>
+          </Modal.Body>
+          <Modal.Footer className="border-0">
+            <Button variant="outline-secondary" onClick={resetImageSearch}>
+              Hủy
+            </Button>
+            <Button 
+              variant="primary" 
+              onClick={handleImageSearch}
+              disabled={!selectedImage || imageSearchLoading}
+            >
+              {imageSearchLoading ? (
+                <>
+                  <Spinner size="sm" className="me-2" />
+                  Đang tìm...
+                </>
+              ) : (
+                <>
+                  <FaSearch className="me-2" />
+                  Tìm kiếm
+                </>
+              )}
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </div>
 
       {/* Cars Section */}
-      <div className="car-container my-4">
-        <h2 className="car-title mb-4 text-center">Explore All Vehicles</h2>
+      <div className="cars-section">
+        <div className="section-header">
+          <h2 className="section-title">Khám Phá Tất Cả Xe</h2>
+          <p className="section-subtitle">Tìm chiếc xe phù hợp nhất với nhu cầu của bạn</p>
+        </div>
 
         {loading ? (
-          <div className="text-center">
-            <Spinner animation="border" variant="primary" />
+          <div className="loading-container">
+            <Spinner animation="border" variant="primary" size="lg" />
+            <p className="mt-3">Đang tải dữ liệu...</p>
           </div>
         ) : error ? (
-          <div className="text-center text-danger">{error}</div>
+          <div className="error-container">
+            <div className="error-message">{error}</div>
+          </div>
         ) : cars.length === 0 ? (
-          <div className="text-center">No cars available</div>
+          <div className="no-results">
+            <h4>Không tìm thấy xe nào</h4>
+            <p>Hãy thử thay đổi bộ lọc tìm kiếm</p>
+          </div>
         ) : (
           <>
-            <Row>
+            <div className="cars-grid">
               {cars.map((car) => (
-                <Col md={3} sm={6} xs={12} key={car.id} className="mb-3">
-                  <Link to={`/get-car-by-id/${car.id}`} style={{ textDecoration: "none" }}>
-                    <Card className="car-card shadow-sm">
-                      <Card.Img
-                        variant="top"
-                        src={car.carImage || "https://via.placeholder.com/300"}
+                <Link to={`/get-car-by-id/${car.id}`} key={car.id} className="car-card-link">
+                  <div className="car-card-modern">
+                    <div className="car-image-container">
+                      <img
+                        src={car.carImage || "https://via.placeholder.com/400x250"}
                         alt={car.name}
                         className="car-image"
                       />
-                      <Card.Body className="text-center">
-                        <Card.Title className="car-name">{car.name || "Unknown Car"}</Card.Title>
-                        <Card.Text className="car-type">{car.type || "N/A"}</Card.Text>
-                        <Card.Text className="car-year">
-                          Năm sản xuất: {car.year ? new Date(car.year).getFullYear() : "N/A"}
-                        </Card.Text>
-                        <Card.Text className="car-price">
-                          Giá: {car.price ? car.price.toLocaleString("vi-VN") + " VND" : "N/A"}
-                        </Card.Text>
-                      </Card.Body>
-                    </Card>
-                  </Link>
-                </Col>
+                      <div className="car-overlay">
+                        <span className="view-details">Xem chi tiết</span>
+                      </div>
+                    </div>
+                    <div className="car-content">
+                      <div className="car-header">
+                        <h3 className="car-name">{car.name || "Unknown Car"}</h3>
+                        <span className="car-type">{car.type || "N/A"}</span>
+                      </div>
+                      <div className="car-info">
+                        <div className="car-year">
+                          Năm: {car.year ? new Date(car.year).getFullYear() : "N/A"}
+                        </div>
+                        <div className="car-price">
+                          {car.price ? car.price.toLocaleString("vi-VN") + " VND" : "Liên hệ"}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
               ))}
-            </Row>
+            </div>
 
-            {/* Pagination for Cars */}
-            <div className="pagination d-flex justify-content-center mt-4">
+            {/* Modern Pagination */}
+            <div className="modern-pagination">
               <button
                 onClick={() => handleCarPageChange(carPage - 1)}
                 disabled={carPage === 1}
-                className="btn btn-outline-primary me-2"
+                className="pagination-btn"
               >
-                Previous
+                <FaChevronLeft />
               </button>
-              {Array.from({ length: carTotalPages }, (_, i) => i + 1).map((pageNum) => (
-                <button
-                  key={pageNum}
-                  onClick={() => handleCarPageChange(pageNum)}
-                  className={`btn ${carPage === pageNum ? "btn-primary" : "btn-outline-primary"} me-2`}
-                >
-                  {pageNum}
-                </button>
-              ))}
+              
+              <div className="pagination-numbers">
+                {Array.from({ length: Math.min(5, carTotalPages) }, (_, i) => {
+                  let pageNum;
+                  if (carTotalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (carPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (carPage >= carTotalPages - 2) {
+                    pageNum = carTotalPages - 4 + i;
+                  } else {
+                    pageNum = carPage - 2 + i;
+                  }
+                  
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => handleCarPageChange(pageNum)}
+                      className={`pagination-number ${carPage === pageNum ? "active" : ""}`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
+              
               <button
                 onClick={() => handleCarPageChange(carPage + 1)}
                 disabled={carPage === carTotalPages}
-                className="btn btn-outline-primary"
+                className="pagination-btn"
               >
-                Next
+                <FaChevronRight />
               </button>
             </div>
           </>
@@ -316,57 +512,38 @@ const Home = () => {
       </div>
 
       {/* Brands Section */}
-      <div className="brand-container my-4">
-        <h2 className="brand-title mb-4 text-center">Explore Our Premium Brands</h2>
+      <div className="brands-section">
+        <div className="section-header">
+          <h2 className="section-title">Thương Hiệu Hàng Đầu</h2>
+          <p className="section-subtitle">Khám phá các thương hiệu xe hơi uy tín nhất</p>
+        </div>
 
-        {loading ? (
-          <div className="text-center">
-            <Spinner animation="border" variant="primary" />
-          </div>
-        ) : error ? (
-          <div className="text-center text-danger">{error}</div>
-        ) : currentBranches.length === 0 ? (
-          <div className="text-center">No brands available</div>
-        ) : (
-          <Row className="g-4 justify-content-center">
-            {currentBranches.map((branch) => {
-              const isSelected = selectedBranch === branch.id;
-              return (
-                <Col
-                  key={branch.id}
-                  md={2}
-                  sm={6}
-                  xs={12}
-                  className="mb-4"
-                  onClick={() => {setSelectedBranch(branch.name); handleSearch(1);}}
-                >
-                  <Card
-                    className={`brand-card shadow-sm h-100 d-flex flex-column ${isSelected ? "border-primary" : ""}`}
-                    style={{ cursor: "pointer" }}
-                  >
-                    <Card.Img
-                      variant="top"
-                      src={branch.imageBranch || "https://via.placeholder.com/200"}
-                      alt={branch.name || "Brand"}
-                      className="brand-image"
-                      style={{ objectFit: "cover", height: "200px" }}
-                    />
-                    <Card.Body className="text-center d-flex flex-column justify-content-between">
-                      <div>
-                        <Card.Title className="brand-name">{branch.name || "Unknown Brand"}</Card.Title>
-                        <Card.Text className="brand-country">{branch.country || "N/A"}</Card.Text>
-                      </div>
-                    </Card.Body>
-                  </Card>
-                </Col>
-              );
-            })}
-          </Row>
-        )}
+        <div className="brands-grid">
+          {currentBranches.map((branch) => (
+            <div
+              key={branch.id}
+              className={`brand-card-modern ${selectedBranch === branch.name ? "selected" : ""}`}
+              onClick={() => {setSelectedBranch(branch.name); handleSearch(1);}}
+            >
+              <div className="brand-image-container">
+                <img
+                  src={branch.imageBranch || "https://via.placeholder.com/200"}
+                  alt={branch.name}
+                  className="brand-image"
+                />
+              </div>
+              <div className="brand-info">
+                <h4 className="brand-name">{branch.name}</h4>
+                <p className="brand-country">{branch.country || "N/A"}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
-    </>
-  );
-};
+      <Chat />
 
-export default Home;
+    </>
+  )
+
+}

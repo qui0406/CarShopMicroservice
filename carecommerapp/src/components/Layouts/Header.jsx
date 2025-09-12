@@ -24,9 +24,10 @@ const Header = () => {
     <Navbar
       expand="lg"
       className={`shadow-sm fixed-top ${
-        isHome ? "bg-transparent" : "bg-dark"
-      } ${!isHome && "navbar-dark"}`}
+        isHome ? "bg-dark bg-opacity-50 navbar-dark" : "bg-dark navbar-dark"
+      }`}
     >
+
       <Container fluid>
         {/* Logo */}
         <Navbar.Brand as={Link} to="/home" className={`fw-bold fs-4 ${isHome ? "text-white" : "text-light"}`}>
