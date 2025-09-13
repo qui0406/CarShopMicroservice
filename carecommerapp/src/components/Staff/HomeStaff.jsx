@@ -60,6 +60,7 @@ export default function CarForm() {
   const handleChange = (e, path) => {
     const value = e.target.type === "checkbox" ? e.target.checked : e.target.value;
 
+
     if (!path) {
       setCar({ ...car, [e.target.name]: value });
     } else {
@@ -236,7 +237,7 @@ export default function CarForm() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Dòng xe</label>
                 <select
                   value={car.carModel}
-                  onChange={(e) => handleChange(e, "car.carModel")}
+                  onChange={(e) => handleChange(e, "carModel")}
                 > 
                   
                     <option value="">-- Chọn mẫu xe --</option>

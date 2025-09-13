@@ -34,18 +34,18 @@ export const endpoints = {
 
     "my-payment": "/get-my-payment",
 
-    "create-car": "/ecommer-car-web/api-secure/car/create-product",
-    "delete-car": carId => `/ecommer-car-web/api-secure/car/delete-product/${carId}`,
+    "create-car": "/ecommer-car-web/staff/car/create-product",
+    "delete-car": carId => `/ecommer-car-web/staff/car/delete-product/${carId}`,
 
     "get-all-model": "/ecommer-car-web/car-model/get-all-car-model",
-    "create-model": "/ecommer-car-web/api-secure/car-model/create-car-model",
-    "delete-model": carModelId => `/ecommer-car-web/api-secure/car-model/delete-car-model/${carModelId}`,
+    "create-model": "/ecommer-car-web/staff/car-model/create-car-model",
+    "delete-model": carModelId => `/ecommer-car-web/staff/car-model/delete-car-model/${carModelId}`,
 
-    "create-branch": "/ecommer-car-web/api-secure/car-branch/create-branch",
-    "delete-branch": branchId => `/ecommer-car-web/api-secure/delete-branch/${branchId}`,
+    "create-branch": "/ecommer-car-web/staff/car-branch/create-branch",
+    "delete-branch": branchId => `/ecommer-car-web/staff/delete-branch/${branchId}`,
 
-    "create-category": "/ecommer-car-web/api-secure/car-category/create-category",
-    "delete-category": carCategoryId => `/ecommer-car-web/api-secure/car-category/delete-caterory/${carCategoryId}`,
+    "create-category": "/ecommer-car-web/staff/car-category/create-category",
+    "delete-category": carCategoryId => `/ecommer-car-web/staff/car-category/delete-caterory/${carCategoryId}`,
 
     "get-inventory-by-car-id":  carId => `/ecommer-car-web/inventory/get-inventory-by-carId/${carId}`,
     "create-inventory": "/ecommer-car-web/inventory/create-inventory",
@@ -55,6 +55,8 @@ export const endpoints = {
     "get-bill": id => `/staff/get-bill/${id}`,
     "get-bill-by-order-id": orderId => `/staff/get-bill-deposit/${orderId}`,
     "payment-cashier": "/staff/payment",
+    "get-all-deposit": "/payment/staff/get-all-deposit",
+
 
 
     "search-by-image": "localhost:5000/predict"

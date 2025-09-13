@@ -16,6 +16,7 @@ export default function About() {
   const [selectedImage, setSelectedImage] = useState(0);
   const [carImages, setCarImages] = useState([]);
   const [products, setProducts]= useState(true)
+  const [inventory, setInventory] = useState()
   const user = useContext(MyUserContext);
 
   const Link = ({ to, children, className }) => (
@@ -39,9 +40,33 @@ export default function About() {
     }
   };
 
-  useEffect(() => {
-    fetchCarDetails();
+  const fetchInventory = async () =>{
+    try{
+      const res = await axios.get(endpoints["get-inventory-by-car-id"](car.id))
+      setInventory(res.data.result.quantity)
+    
+    }
+    catch{
+      console.error("Lỗi")
+    }
+  }
+
+ useEffect(() => {
+  fetchCarDetails();
   }, [id]);
+
+  useEffect(() => {
+    if (car && car.id) {
+      fetchInventory();
+    }
+  }, [car]);
+
+  // Theo dõi inventory khi thay đổi
+  useEffect(() => {
+    if (inventory !== undefined) {
+      console.log("Inventory updated:", inventory);
+    }
+  }, [inventory]);
 
 
   const formatPrice = (price) => {
@@ -354,11 +379,21 @@ export default function About() {
               </div>
               
               <div className="mt-6 text-center">
-                <div className="inline-flex items-center gap-2 bg-green-100 text-green-800 px-4 py-2 rounded-full font-medium">
-                  <span className="w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
-                  {products ? "Còn hàng" : "Hết hàng"}
+                <div
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-full font-medium
+                    ${inventory > 0 
+                      ? "bg-green-100 text-green-800" 
+                      : "bg-red-100 text-red-800"}`}
+                >
+                  
+                  <span
+                    className={`w-3 h-3 rounded-full animate-pulse 
+                      ${inventory> 0 ? "bg-green-500" : "bg-red-500"}`}
+                  ></span>
+                  {inventory > 0 ? `Còn ${inventory}` : "Hết hàng"}
                 </div>
               </div>
+
             </div>
           </div>
         </div>

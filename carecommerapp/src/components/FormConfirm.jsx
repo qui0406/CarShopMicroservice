@@ -12,7 +12,6 @@ export default function FormConfirm() {
 
   const handlePay = async () => {
     try {
-      // Call backend API to get VNPay payment URL
       const response = await authApis().post("http://localhost:8888/api/v1/payment/checkout/url", {
         txnRef: orders.id,
         amount: 5000000,
@@ -24,7 +23,6 @@ export default function FormConfirm() {
         alert("Không thể tạo URL thanh toán. Vui lòng thử lại!");
       }
     };
-
   useEffect(() => {
     if (car && orders) {
       console.log("Car:", car);
@@ -34,9 +32,9 @@ export default function FormConfirm() {
 
   if (!car || !orders) {
     return (
-      <Container className="my-5 text-center">
+      <Container className="my-5 text-center" style={{padding: "70px"}}>
         <h2>Không có thông tin đơn hàng</h2>
-        <Button variant="primary" onClick={() => navigate("/")}>
+        <Button variant="primary" onClick={() => navigate("/home")}>
           Quay về trang chủ
         </Button>
       </Container>

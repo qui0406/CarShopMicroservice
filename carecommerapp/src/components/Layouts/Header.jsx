@@ -6,40 +6,78 @@ import { type } from "@testing-library/user-event/dist/type";
 import { FaShoppingCart, FaUser, FaSearch } from "react-icons/fa";
 import Hero from "./Hero";
 import { useLocation } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 
 const Header = () => {
-    const user = useContext(MyUserContext);
-    const dispatch = useContext(MyDispatchContext);
-    const nav = useNavigate();
-    const location = useLocation();
-    const logout = () => {
-        dispatch({type:"logout"});
-        nav("/login");
-    }
+  const user = useContext(MyUserContext);
+  const dispatch = useContext(MyDispatchContext);
+  const nav = useNavigate();
+  const location = useLocation();
 
-    const isHome = location.pathname === "/home";
+  const logout = () => {
+    dispatch({ type: "logout" });
+    nav("/login");
+  };
 
+  const isHome = location.pathname === "/home";
 
-    return (
+  // check nếu user có role STAFF
+  const isStaff = user?.result?.roles?.includes("STAFF");
+
+  return (
     <Navbar
       expand="lg"
       className={`shadow-sm fixed-top ${
         isHome ? "bg-dark bg-opacity-50 navbar-dark" : "bg-dark navbar-dark"
       }`}
     >
-
       <Container fluid>
         {/* Logo */}
         <Navbar.Brand as={Link} to="/home" className={`fw-bold fs-4 ${isHome ? "text-white" : "text-light"}`}>
           CarShop
         </Navbar.Brand>
 
-        {/* Toggle menu mobile */}
         <Navbar.Toggle aria-controls="navbarScroll" />
-
         <Navbar.Collapse id="navbarScroll" className="w-100">
           <Nav className="me-auto my-2 my-lg-0 flex-grow-1" navbarScroll>
-            <NavLink to="/home" className={({ isActive }) =>
+            {isStaff ? (
+              <>
+                {/* Menu staff */}
+               <NavLink to="/staff/home" className={({ isActive }) =>
+                `nav-link ${isActive ? "active fw-bold text-warning" : "text-white"}`
+              }>
+                  Trang chủ
+                </NavLink>
+                <NavLink to="/staff/home/branch" className={({ isActive }) =>
+                `nav-link ${isActive ? "active fw-bold text-warning" : "text-white"}`
+              }>
+                  Quản lý hãng xe
+                </NavLink>
+                <NavLink to="/staff/home/category" className={({ isActive }) =>
+                `nav-link ${isActive ? "active fw-bold text-warning" : "text-white"}`
+              }>
+                  Quản lý dòng xe
+                </NavLink>
+                <NavLink to="/staff/home/model" className={({ isActive }) =>
+                `nav-link ${isActive ? "active fw-bold text-warning" : "text-white"}`
+              }>
+                  Quản lý mẫu xe
+                </NavLink>
+                <NavLink to="/staff/home/chat" className={({ isActive }) =>
+                `nav-link ${isActive ? "active fw-bold text-warning" : "text-white"}`
+              }>
+                  Chat
+                </NavLink>
+                <NavLink to="/staff/home/cashier" className={({ isActive }) =>
+                `nav-link ${isActive ? "active fw-bold text-warning" : "text-white"}`
+              } >
+                  Thu ngân
+                </NavLink>
+              </>
+            ) : (
+              <>
+                {/* Menu user */}
+                <NavLink to="/home" className={({ isActive }) =>
                 `nav-link ${isActive ? "active fw-bold text-warning" : "text-white"}`
               }>
               Trang chủ
@@ -80,24 +118,22 @@ const Header = () => {
               }>
               Về chúng tôi
             </NavLink>
-
+              </>
+            )}
           </Nav>
+
           <div className="d-flex align-items-center gap-2 ms-auto">
             {user === null ? (
               <>
-                <NavLink to="/login" className={({ isActive }) =>
-                    `btn ${isActive ? "btn-warning fw-bold" : "btn-outline-light"}`
-                  }>
+                <NavLink to="/login" className="btn btn-outline-light">
                   Đăng nhập
                 </NavLink>
-
                 <NavLink to="/register" className="btn btn-light text-dark fw-semibold">
                   Đăng ký
                 </NavLink>
               </>
-            ) : <>
-              
-             (<div className="d-flex align-items-center">
+            ) : (
+              <div className="d-flex align-items-center">
                 <Link to="/profile" className="nav-link text-info d-flex align-items-center">
                   <img
                     src={user.result.avatar}
@@ -110,13 +146,13 @@ const Header = () => {
                   Đăng xuất
                 </Button>
               </div>
-              
-            ) </>}
+            )}
           </div>
         </Navbar.Collapse>
       </Container>
     </Navbar>
-
   );
-}
+};
+
 export default Header;
+

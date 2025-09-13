@@ -6,21 +6,27 @@ import { Card, Button, Row, Col, Spinner, Modal, Form } from "react-bootstrap";
 import axios, { authApis, endpoints } from "./../configs/APIs";
 import "./../styles/Home.css";
 import Chat from "./Chat";
+import { MyUserContext, MyDispatchContext } from "./../configs/MyContexts";
+import { useContext } from "react";
+
 
 export default function Home (){
   // Initialize state as arrays to prevent undefined errors
+  const user = useContext(MyUserContext);
+
   const [branches, setBranches] = useState([]);
   const [categories, setCategories] = useState([]);
   const [models, setModels] = useState([]);
   const [cars, setCars] = useState([]);
   const [nameCarPredict, setNameCarPredict]= useState([])
+  const [showModal, setShowModal] = useState(false);
+  const [predictCar, setPredictedCar]= useState([])
   
   const [pageBranch, setPageBranch] = useState(1);
   const [totalPagesBranch, setTotalPagesBranch] = useState(1);
   const [pageCategory, setPageCategory] = useState(1);
   const [totalPagesCategory, setTotalPagesCategory] = useState(1);
   const [pageModel, setPageModel] = useState(1);
-  const [totalPagesModel, setTotalPagesModel] = useState(1);
   
   const [carPage, setCarPage] = useState(1);
   const [carTotalPages, setCarTotalPages] = useState(1);
@@ -39,22 +45,38 @@ export default function Home (){
   const cardsPerPage = 5;
   const indexOfLastCard = currentPage * cardsPerPage;
   const indexOfFirstCard = indexOfLastCard - cardsPerPage;
-  const currentBranches = branches.slice(indexOfFirstCard, indexOfLastCard);
+
 
   const [selectedBranch, setSelectedBranch] = useState("");
   const [selectedModel, setSelectedModel] = useState("");
   const [selectedPriceRange, setSelectedPriceRange] = useState(""); 
 
+
+  const [currentPageBranch, setCurrentPageBranch] = useState(1);
+  const itemsPerPage = 4; // số thương hiệu mỗi trang
+
+  // Tính toán dữ liệu trang hiện tại
+  const indexOfLast = currentPageBranch * itemsPerPage;
+  const indexOfFirst = indexOfLast - itemsPerPage;
+  const currentBranches = branches.slice(indexOfFirst, indexOfLast);
+
+  const totalPages = Math.ceil(branches.length / itemsPerPage);
+
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPageBranch(page);
+    }
+  };
+
   // Fetch branches
-  const fetchBranches = async (pageNum) => {
+  const fetchBranches = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(endpoints["car-branch"], {
-        params: { page: pageNum },
-      });
+      const res = await axios.get(endpoints["car-branch"]);
       const result = res.data?.result || {};
-      setBranches(Array.isArray(result.data) ? result.data : []);
-      setTotalPagesBranch(result.totalPagesBranch || 1);
+
+      console.log("Branch", res.data?.result)
+      setBranches(res.data?.result);
     } catch (error) {
       console.error("Error fetching branches:", error);
       setError("Failed to fetch branches. Please try again.");
@@ -101,6 +123,8 @@ export default function Home (){
         params: { page: pageNum },
       });
       const result = res.data?.result || {};
+
+      console.log(result)
       setCars(Array.isArray(result.data) ? result.data : []);
       setCarTotalPages(result.totalPages || 1);
     } catch (error) {
@@ -154,7 +178,7 @@ export default function Home (){
       }
 
       const res = await axios.get(endpoints["filter-cars"], { params });
-      console.log(params)
+
       const result = res.data?.result || {};
 
       setCars(Array.isArray(result.data) ? result.data : []);
@@ -182,6 +206,7 @@ export default function Home (){
   };
 
   const handleImageSearch = async () => {
+    
     if (!selectedImage) return;
 
     try {
@@ -189,12 +214,12 @@ export default function Home (){
       const formData = new FormData();
       formData.append('image', selectedImage);
 
-      // Replace with your actual image search endpoint
-      const res = await axios.post(endpoints["search-by-image"], formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      // // Replace with your actual image search endpoint
+      // const res = await axios.post(endpoints["search-by-image"], formData, {
+      //   headers: {
+      //     'Content-Type': 'multipart/form-data',
+      //   },
+      // });
 
       const result = {
         "predicted_class": "Toyota Innova",
@@ -203,9 +228,24 @@ export default function Home (){
         "image_path": "static/uploads/example.jpg"
       }
 
-      console.log("Kết quả: ", result)
+      setShowModal(true);
+      setPredictedCar(result.predicted_class);
+      setNameCarPredict(result);
 
-      setCars(Array.isArray(result) ? result : []);
+      const [carBranch = "", category = ""] = result.predicted_class.split(" ");
+
+      const res = await axios.get(endpoints["filter-cars"], { 
+        params: { carBranch, category },
+      });
+
+      const resultData = res.data?.result || {};
+
+      setCars(Array.isArray(resultData.data) ? resultData.data : []);
+      setCarTotalPages(resultData.totalPages || 1);
+
+
+
+      // setCars(Array.isArray(result) ? result : []);
       setNameCarPredict(result)
       setShowImageSearch(false);
       
@@ -408,6 +448,24 @@ export default function Home (){
         </Modal>
       </div>
 
+      {/* Prediction Result Modal */}
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered size="md">
+        <Modal.Header closeButton>
+          <Modal.Title>Kết quả dự đoán</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <h5>Xe được dự đoán là: <span className="fw-bold">{nameCarPredict.predicted_class}</span></h5>
+          <p>Độ tin cậy: {(nameCarPredict.confidence * 100).toFixed(2)}%</p>
+          
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Đóng
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+
       {/* Cars Section */}
       <div className="cars-section">
         <div className="section-header">
@@ -513,33 +571,56 @@ export default function Home (){
 
       {/* Brands Section */}
       <div className="brands-section">
-        <div className="section-header">
-          <h2 className="section-title">Thương Hiệu Hàng Đầu</h2>
-          <p className="section-subtitle">Khám phá các thương hiệu xe hơi uy tín nhất</p>
+      <div className="section-header">
+        <h2 className="section-title">Thương Hiệu Hàng Đầu</h2>
+        <p className="section-subtitle">Khám phá các thương hiệu xe hơi uy tín nhất</p>
+      </div>
+
+      <div className="brands-grid">
+        {currentBranches.map((branch) => (
+          <div
+            key={branch.id}
+            className="brand-card-modern"
+            onClick={() => console.log("Chọn:", branch.name)}
+          >
+            <div className="brand-image-container">
+              <img
+                src={branch.imageBranch || "https://via.placeholder.com/200"}
+                alt={branch.name}
+                className="brand-image"
+              />
+            </div>
+            <div className="brand-info">
+              <h4 className="brand-name">{branch.name}</h4>
+              <p className="brand-country">{branch.country || "N/A"}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Pagination */}
+      <div className="modern-pagination">
+        <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="pagination-btn">
+          <FaChevronLeft />
+        </button>
+        <div className="pagination-numbers">
+
+        {Array.from({ length: totalPages }, (_, i) => (
+          <button
+            key={i + 1}
+            onClick={() => handlePageChange(i + 1)}
+            className={`pagination-number${currentPage === i + 1 ? "active" : ""}`}
+          >
+            {i + 1}
+          </button>
+        ))}
         </div>
 
-        <div className="brands-grid">
-          {currentBranches.map((branch) => (
-            <div
-              key={branch.id}
-              className={`brand-card-modern ${selectedBranch === branch.name ? "selected" : ""}`}
-              onClick={() => {setSelectedBranch(branch.name); handleSearch(1);}}
-            >
-              <div className="brand-image-container">
-                <img
-                  src={branch.imageBranch || "https://via.placeholder.com/200"}
-                  alt={branch.name}
-                  className="brand-image"
-                />
-              </div>
-              <div className="brand-info">
-                <h4 className="brand-name">{branch.name}</h4>
-                <p className="brand-country">{branch.country || "N/A"}</p>
-              </div>
-            </div>
-          ))}
-        </div>
+        <button className="pagination-btn" onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages}>
+          <FaChevronRight />
+        </button>
       </div>
+    </div>
 
       <Chat />
 
