@@ -117,7 +117,7 @@ export default function Model() {
         
         try {
             if (modalMode === 'create') {
-                const res = await authApis().post(endpoints["create-car-model"], {
+                const res = await authApis().post(endpoints["create-model"], {
                     name: formData.name,
                     categoryId: parseInt(formData.categoryId),
                     carBranchId: parseInt(formData.carBranchId)
@@ -162,7 +162,7 @@ export default function Model() {
 
         setLoading(true);
         try {
-            const res = await authApis().delete(endpoints["delete-car-model"](carModelId));
+            const res = await authApis().delete(endpoints["delete-model"](carModelId));
 
             if (res.status === 200) {
                 setCarModels(prev => prev.filter(model => model.id !== carModelId));

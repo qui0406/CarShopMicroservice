@@ -7,7 +7,7 @@ import  axios ,{ authApis, endpoints } from "./../configs/APIs";
 
 export default function Reserve() {
   const location = useLocation();
-  const car = location.state?.car || JSON.parse(sessionStorage.getItem("car"));
+  const car = location.state?.car 
   const navigate = useNavigate();
   
 
@@ -56,12 +56,11 @@ export default function Reserve() {
       const response = await authApis().post(endpoints["create-orders"], orders);
       
       if (response.status === 200 || response.status === 201) {
-        console.log("Order created:", response.data);
-        alert("Đặt hàng thành công!");
+        alert("Đặt hàng thành công!")
+
         navigate("/confirm", { state: { car, orders: response.data.result } }); 
       } else {
         console.error("Error:", response.data);
-        alert("Đặt hàng thất bại!");
       }
     } catch (error) {
       console.error("Error:", error);

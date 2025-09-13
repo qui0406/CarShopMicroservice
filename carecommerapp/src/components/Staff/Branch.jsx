@@ -20,16 +20,11 @@ export default function Branch() {
     const [pageSize] = useState(5);
 
     // Simulate API calls - replace with actual API calls
-    const fetchBranches = async (page = 1) => {
+    const fetchBranches = async () => {
         setLoading(true);
         try {
                 const res = await axios.get(endpoints["car-branch"]);
-                setBranches(res.data.result.data);
-
-                console.log(res.data.result.data)
-
-                setTotalPages(res.data.result.totalPages);
-                setCurrentPage(res.data.result.currentPage);
+                setBranches(res.data.result);
                 setLoading(false);
             
         } catch (error) {

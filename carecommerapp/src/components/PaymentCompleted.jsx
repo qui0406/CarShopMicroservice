@@ -2,6 +2,7 @@ import React from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Card, Container, Row, Col } from "react-bootstrap";
 import "./../styles/FormConfirm.css";
+import { authApis, endpoints } from "../configs/APIs";
 
 export default function PaymentCompleted() {
     const location = useLocation();
@@ -11,6 +12,20 @@ export default function PaymentCompleted() {
     const data = {};
     for (let [key, value] of params.entries()) {
         data[key] = value;
+    }
+
+    const createOrder = async()=>{
+        try{
+            const ordersFromStorage = localStorage.getItem('orders');
+            const res= await authApis().post(endpoints["create-orders"], ordersFromStorage)
+            
+            if(res.status === 200 || res.status === 201){
+                console.log("Tạo đơn hàng thành công")
+            }
+        }
+        catch{
+            console.error("Lỗi")
+        }
     }
 
     // Translation map for VNPay keys to Vietnamese
