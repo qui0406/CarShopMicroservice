@@ -8,7 +8,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.util.List;
 
 public interface CarBranchService {
-    PageResponse<CarBranchResponse> getAll(int page, int size);
+    List<CarBranchResponse> getAll();
     CarBranchResponse getById(Long id);
     CarBranchResponse create(CarBranchRequest request, MultipartFile imageBranch);
     void deleteById(Long id);

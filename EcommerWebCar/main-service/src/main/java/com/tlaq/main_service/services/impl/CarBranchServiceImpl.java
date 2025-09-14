@@ -36,17 +36,10 @@ public class CarBranchServiceImpl implements CarBranchService {
     Cloudinary cloudinary;
 
     @Override
-    public PageResponse<CarBranchResponse> getAll(int page, int size) {
-        Pageable pageable= PageRequest.of(page- 1, size);
-        var pageData = carBranchRepository.findAll(pageable);
+    public List<CarBranchResponse> getAll() {
+        List<CarBranch> carBranches = carBranchRepository.findAll();
 
-        return PageResponse.<CarBranchResponse>builder()
-                .currentPage(page)
-                .pageSize(pageData.getSize())
-                .totalPages(pageData.getTotalPages())
-                .totalElements(pageData.getTotalElements())
-                .data(pageData.getContent().stream().map(carBranchMapper::toDto).toList())
-                .build();
+        return carBranchMapper.toDto(carBranches);
     }
 
     @Override

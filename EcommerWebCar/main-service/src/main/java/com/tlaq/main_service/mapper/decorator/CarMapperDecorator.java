@@ -38,7 +38,6 @@ public abstract class CarMapperDecorator implements CarMapper {
 
         return Car.builder()
                 .price(carRequest.getPrice())
-                .name(carRequest.getName())
                 .year(carRequest.getYear())
                 .carFeature(CarFeature.builder()
                     .carComfort(CarComfort.builder()
@@ -89,7 +88,9 @@ public abstract class CarMapperDecorator implements CarMapper {
     public CarResponse toCarResponse(Car car) {
         return CarResponse.builder()
                 .id(car.getId())
-                .name(car.getName())
+                .name(car.getCarModel().getCarBranch().getName() + " " +
+                        car.getCarModel().getCategory().getName()+ " " +
+                        car.getCarModel().getName() + " " + car.getYear().toString().split("-")[0])
                 .price(car.getPrice())
                 .year(car.getYear())
                 .carBranch(car.getCarModel().getCarBranch().getName())

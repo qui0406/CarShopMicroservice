@@ -27,7 +27,8 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfigs  {
     private static final String[] PUBLIC_ENDPOINTS = {
             "/profile/register", "/profile/login", "/car/**",
-            "/car-category/**", "car-branch/**", "/car-model/**"
+            "/car-category/**", "car-branch/**", "/car-model/**",
+            "/inventory/**"
     };
 
     private static final String[] STAFF_ENDPOINTS = {

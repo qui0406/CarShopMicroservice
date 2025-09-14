@@ -28,7 +28,7 @@ const Header = () => {
     <Navbar
       expand="lg"
       className={`shadow-sm fixed-top ${
-        isHome ? "bg-dark bg-opacity-50 navbar-dark" : "bg-dark navbar-dark"
+        isHome ? "bg-dark bg-opacity navbar-dark" : "bg-dark navbar-dark"
       }`}
     >
       <Container fluid>
@@ -89,13 +89,13 @@ const Header = () => {
               Xe ô tô
             </NavLink>
 
-            <NavLink to="/blog" className={({ isActive }) =>
+            <NavLink to="/voucher" className={({ isActive }) =>
                 `nav-link ${isActive ? "active fw-bold text-warning" : "text-white"}`
               }>
               Voucher
             </NavLink>
 
-            <NavLink to="/contact" className={({ isActive }) =>
+            <NavLink to="/news" className={({ isActive }) =>
                 `nav-link ${isActive ? "active fw-bold text-warning" : "text-white"}`
               }>
               Tin tức xe

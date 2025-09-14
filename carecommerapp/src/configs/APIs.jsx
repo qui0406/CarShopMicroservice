@@ -52,12 +52,12 @@ export const endpoints = {
     "update-inventory": inventoryId => `/ecommer-car-web/inventory/update-inventory/${inventoryId}`,
     "delete-inventory": inventoryId => `/ecommer-car-web/inventory/delete-inventory/${inventoryId}`,
 
-    "get-bill": id => `/staff/get-bill/${id}`,
-    "get-bill-by-order-id": orderId => `/staff/get-bill-deposit/${orderId}`,
-    "payment-cashier": "/staff/payment",
+    "get-bill": id => `/payment/staff/get-bill/${id}`,
+    "get-bill-by-order-id": orderId => `/payment/staff/get-bill-deposit/${orderId}`,
+    "payment-cashier": "/payment/staff/payment",
     "get-all-deposit": "/payment/staff/get-all-deposit",
 
-
+    "create-order-by-staff": "/paymeny/staff/create-order",
 
     "search-by-image": "localhost:5000/predict"
 };

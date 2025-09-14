@@ -1,7 +1,9 @@
 package com.tlaq.main_service.mapper.decorator;
 
 import com.tlaq.main_service.dto.requests.OrdersRequest;
+import com.tlaq.main_service.dto.responses.OrderDetailsResponse;
 import com.tlaq.main_service.dto.responses.OrdersResponse;
+import com.tlaq.main_service.dto.responses.ProfileResponse;
 import com.tlaq.main_service.entity.OrderDetails;
 import com.tlaq.main_service.entity.Orders;
 import com.tlaq.main_service.entity.Profile;
@@ -33,6 +35,31 @@ public abstract class OrderMapperDecorator implements OrdersMapper {
 
     @Autowired
     private OrdersRepository ordersRepository;
+
+    @Override
+    public OrdersResponse toOrdersResponse(Orders orders) {
+        return OrdersResponse.builder()
+                .id(orders.getId())
+                .paymentStatus(PaymentStatus.PENDING)
+                .orderDetails(OrderDetailsResponse.builder()
+                        .orderId(orders.getId())
+                        .username(orders.getProfile().getUsername())
+                        .totalAmount(orders.getOrderDetails().getTotalAmount())
+                        .address(orders.getOrderDetails().getAddress())
+                        .fullName(orders.getOrderDetails().getFullName())
+                        .quantity(orders.getOrderDetails().getQuantity())
+                        .phone(orders.getOrderDetails().getPhoneNumber())
+                        .dob(orders.getOrderDetails().getDob())
+                        .cccd(orders.getOrderDetails().getCccd())
+                        .build())
+                .profile(OrdersResponse.ProfileResponse.builder()
+                        .id(orders.getProfile().getId())
+                        .username(orders.getProfile().getUsername())
+                        .address(orders.getProfile().getAddress())
+                        .phone(orders.getProfile().getPhone())
+                        .build())
+                .build();
+    }
 
 
     @Override

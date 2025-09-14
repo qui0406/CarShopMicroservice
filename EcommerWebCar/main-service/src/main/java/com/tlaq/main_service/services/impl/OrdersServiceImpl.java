@@ -69,9 +69,9 @@ public class OrdersServiceImpl implements OrdersService {
 
         Orders orders = ordersMapper.toOrdersEntity(request);
         orders.setProfile(profile);
-        Orders save = ordersRepository.save(orders);
+        ordersRepository.save(orders);
 
-        return ordersMapper.toOrdersResponse(save);
+        return ordersMapper.toOrdersResponse(orders);
     }
 
     public void markSuccess(String id) { updateStatus(id, PaymentStatus.SUCCESS); }

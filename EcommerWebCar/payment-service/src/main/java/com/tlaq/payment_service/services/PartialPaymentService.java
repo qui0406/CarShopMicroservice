@@ -1,13 +1,10 @@
 package com.tlaq.payment_service.services;
 
 import com.tlaq.payment_service.dto.response.OrderHistoryResponse;
-import com.tlaq.payment_service.dto.response.PaymentResponse;
-import com.tlaq.payment_service.dto.response.Profile;
-import com.tlaq.payment_service.entity.ReservePaymentVNPay;
-import com.tlaq.payment_service.repository.ReserveVNPayRepository;
+import com.tlaq.payment_service.entity.Deposit;
+import com.tlaq.payment_service.repository.DepositRepository;
 import com.tlaq.payment_service.repository.httpClient.MainClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -18,7 +15,7 @@ import java.util.List;
 @Service
 public class PartialPaymentService {
     @Autowired
-    private ReserveVNPayRepository  reserveVNPayRepository;
+    private DepositRepository depositRepository;
 
     @Autowired
     private MainClient mainClient;
@@ -28,11 +25,11 @@ public class PartialPaymentService {
         String userKeyCloakId= authentication.getName();
 
         String profileId= mainClient.getProfile(userKeyCloakId).getResult().getId();
-        List<ReservePaymentVNPay> reservePaymentVNPays= reserveVNPayRepository.findByProfileId(profileId);
+        List<Deposit> deposits = depositRepository.findByProfileId(profileId);
 
         List<OrderHistoryResponse> orderHistoryResponse = new ArrayList<>();
 
-        for(ReservePaymentVNPay r: reservePaymentVNPays){
+        for(Deposit r: deposits){
             OrderHistoryResponse response=  new OrderHistoryResponse();
 
             response.setCreatedAt(r.getCreatedAt());

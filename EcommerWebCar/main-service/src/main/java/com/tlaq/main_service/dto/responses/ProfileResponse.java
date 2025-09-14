@@ -1,10 +1,12 @@
 package com.tlaq.main_service.dto.responses;
 
+import com.tlaq.main_service.entity.Role;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -24,4 +26,6 @@ public class ProfileResponse {
     LocalDate dob;
     String address;
     String avatar;
+
+    Set<String> roles;
 }

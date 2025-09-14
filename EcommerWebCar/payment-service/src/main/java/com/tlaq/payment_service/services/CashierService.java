@@ -2,23 +2,28 @@ package com.tlaq.payment_service.services;
 
 import com.tlaq.payment_service.dto.event.ResVNPayEvent;
 import com.tlaq.payment_service.dto.request.CashPaymentRequest;
-import com.tlaq.payment_service.dto.response.CashPaymentResponse;
-import com.tlaq.payment_service.dto.response.OrdersResponse;
-import com.tlaq.payment_service.dto.response.Profile;
-import com.tlaq.payment_service.dto.response.UserProfileResponse;
-import com.tlaq.payment_service.entity.CashierPayment;
+import com.tlaq.payment_service.dto.response.*;
+import com.tlaq.payment_service.entity.Cashier;
+import com.tlaq.payment_service.entity.CashierNotDeposit;
+import com.tlaq.payment_service.entity.Deposit;
 import com.tlaq.payment_service.entity.enums.PaymentMethod;
 import com.tlaq.payment_service.entity.enums.PaymentStatus;
+import com.tlaq.payment_service.entity.enums.PaymentType;
 import com.tlaq.payment_service.exceptions.AppException;
 import com.tlaq.payment_service.exceptions.ErrorCode;
+import com.tlaq.payment_service.mapper.CashierNotDepositMapper;
 import com.tlaq.payment_service.message.PaymentStatusProducer;
-import com.tlaq.payment_service.repository.CashPaymentRepository;
-import com.tlaq.payment_service.repository.PaymentRepository;
+import com.tlaq.payment_service.repository.CashierNotDepositRepository;
+import com.tlaq.payment_service.repository.CashierRepository;
+import com.tlaq.payment_service.repository.DepositRepository;
 import com.tlaq.payment_service.repository.httpClient.MainClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class CashierService {
@@ -26,18 +31,24 @@ public class CashierService {
     MainClient mainClient;
 
     @Autowired
-    CashPaymentRepository cashPaymentRepository;
+    CashierRepository cashierRepository;
 
     @Autowired
-    PaymentRepository paymentRepository;
+    CashierNotDepositRepository cashierNotDepositRepository;
+
+    @Autowired
+    DepositRepository depositRepository;
 
     @Autowired
     PaymentStatusProducer paymentStatusProducer;
 
+    @Autowired
+    CashierNotDepositMapper cashierNotDepositMapper;
+
     public CashPaymentResponse getBill(String id) {
-        CashierPayment cashierPayment = cashPaymentRepository.findById(id)
+        Cashier cashier = cashierRepository.findById(id)
                 .orElseThrow(()-> new AppException(ErrorCode.BILL_NOT_FOUND));
-        return toCashPaymentResponse(cashierPayment);
+        return toCashPaymentResponse(cashier);
     }
 
     public CashPaymentResponse create(CashPaymentRequest request) {
@@ -46,61 +57,78 @@ public class CashierService {
         UserProfileResponse staff = mainClient.getProfile(userKeyCloakId).getResult();
 
         OrdersResponse ordersResponse = mainClient.getOrder(request.getOrderId()).getResult();
-        if(paymentRepository.existsByOrderId(request.getOrderId())) {
-            if(paymentRepository.getPaymentStatusByOrderId(request.getOrderId()).equals(PaymentStatus.SUCCESS)) {
-                throw new AppException(ErrorCode.ORDER_WAS_PAYMENT);
-            }
+
+
+        Cashier cashier = cashierRepository.findByOrderId(request.getOrderId())
+                .orElseThrow(() -> new RuntimeException("CashierPayment not found for orderId: " + request.getOrderId()));
+
+            cashier.getDeposit().setProfileId(ordersResponse.getProfile().getId());
+            cashier.setStaffId(staff.getId());
+            cashier.getDeposit().setPaymentMethod(PaymentMethod.CASHIER_TRANSFER);
+            cashier.getDeposit().setPrice(ordersResponse.getOrderDetails().getTotalAmount());
+
+        if (request.isSuccess()) {
+            cashier.getDeposit().setStatus(PaymentStatus.SUCCESS);
+            cashier.getDeposit().setType(PaymentType.PAID);
+        } else {
+            cashier.getDeposit().setStatus(PaymentStatus.FAIL);
+            cashier.getDeposit().setType(PaymentType.CANCEL);
+
+            paymentStatusProducer.failPaymentCash(
+                    ResVNPayEvent.builder()
+                            .code("97")
+                            .message("fail")
+                            .orderId(request.getOrderId())
+                            .build()
+            );
         }
 
-        if(request.isSuccess()) {
+        cashierRepository.save(cashier);
+        return toCashPaymentResponse(cashier);
+    }
 
-            CashierPayment cashierPayment = CashierPayment.builder()
-                    .orderId(request.getOrderId())
-                    .profileId(ordersResponse.getProfile().getId())
-                    .paymentMethod(PaymentMethod.CASHIER_TRANSFER)
-                    .staffId(staff.getId())
-                    .price(ordersResponse.getOrderDetails().getTotalAmount())
-                    .status(PaymentStatus.SUCCESS)
-                    .build();
-            cashPaymentRepository.save(cashierPayment);
-            return toCashPaymentResponse(cashierPayment);
 
-        }else{
-            CashierPayment cashierPayment = CashierPayment.builder()
-                    .orderId(request.getOrderId())
-                    .profileId(ordersResponse.getProfile().getId())
-                    .paymentMethod(PaymentMethod.CASHIER_TRANSFER)
-                    .staffId(staff.getId())
-                    .price(ordersResponse.getOrderDetails().getTotalAmount())
-                    .status(PaymentStatus.FAIL)
-                    .build();
-            cashPaymentRepository.save(cashierPayment);
-            ResVNPayEvent resVNPayEvent = ResVNPayEvent.builder()
-                    .code("97")
-                    .message("fail")
-                    .orderId(request.getOrderId())
-                    .build();
-            paymentStatusProducer.failPaymentCash(resVNPayEvent);
-            return toCashPaymentResponse(cashierPayment);
+    public List<DepositResponse> getAllReserver(){
+
+        List<Deposit> getAllReserve= depositRepository.findAllExcludePaymentTypeSuccess(PaymentType.PAID);
+
+        List<DepositResponse> listDepositResponse = new ArrayList<>();
+        for (Deposit deposit : getAllReserve) {
+            DepositResponse depositResponse = new DepositResponse();
+            UserProfileResponse profile = mainClient.getProfileById
+                    (deposit.getProfileId()).getResult();
+            String fullName= profile.getLastName()+ " " + profile.getFirstName();
+
+            depositResponse.setDepositAmount(deposit.getDepositAmount());
+            depositResponse.setPrice(deposit.getPrice());
+            depositResponse.setFullName(fullName);
+            depositResponse.setPaymentMethod(deposit.getPaymentMethod());
+            depositResponse.setOrderId(deposit.getOrderId());
+            depositResponse.setRemainingAmount(deposit.getRemainingAmount());
+            depositResponse.setCreatedAt(deposit.getCreatedAt());
+            depositResponse.setTransactionId(deposit.getTransactionVNPayId());
+            listDepositResponse.add(depositResponse);
         }
+        return listDepositResponse;
+
     }
 
 
 
-    private CashPaymentResponse toCashPaymentResponse(CashierPayment cashierPayment) {
-        UserProfileResponse client = mainClient.getProfileById(cashierPayment.getProfileId()).getResult();
+    private CashPaymentResponse toCashPaymentResponse(Cashier cashier) {
+        UserProfileResponse client = mainClient.getProfileById(cashier.getDeposit().getProfileId()).getResult();
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userKeyCloakId = authentication.getName();
         UserProfileResponse staff = mainClient.getProfile(userKeyCloakId).getResult();
 
         return CashPaymentResponse.builder()
-                .id(cashierPayment.getId())
-                .orderId(cashierPayment.getOrderId())
-                .price(cashierPayment.getPrice())
-                .paymentMethod(cashierPayment.getPaymentMethod())
-                .status(cashierPayment.getStatus())
-                .createdAt(cashierPayment.getCreatedAt())
+                .id(cashier.getId())
+                .orderId(cashier.getDeposit().getOrderId())
+                .price(cashier.getDeposit().getPrice())
+                .paymentMethod(cashier.getDeposit().getPaymentMethod())
+                .status(cashier.getDeposit().getStatus())
+                .createdAt(cashier.getDeposit().getCreatedAt())
                 .profileId(Profile.builder()
                         .id(client.getId())
                         .username(client.getUsername())
@@ -119,5 +147,31 @@ public class CashierService {
                         .build())
                 .build();
     }
+
+
+
+    public CashierNotDepositResponse createOrderByStaff(String orderId){
+        OrdersResponse ordersResponse = mainClient.getOrder(orderId).getResult();
+
+        Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
+        String userKeycloakId = authentication.getName();
+        UserProfileResponse staff = mainClient.getProfile(userKeycloakId).getResult();
+
+        CashierNotDeposit cashierNotDeposit = CashierNotDeposit.builder()
+                .orderId(orderId)
+                .type(PaymentType.PENDING)
+                .price(ordersResponse.getOrderDetails().getTotalAmount())
+                .paymentMethod(PaymentMethod.STAFF)
+                .staffId(staff.getId())
+                .profileId(ordersResponse.getProfile().getId())
+                .build();
+
+        cashierNotDepositRepository.save(cashierNotDeposit);
+        return cashierNotDepositMapper.toCashierNotDepositResponse(cashierNotDeposit);
+    }
+
+
+
+
 
 }
