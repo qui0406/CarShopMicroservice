@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
 import { MapPin, Phone, Mail, MessageCircle, Facebook, Clock, Star, Navigation } from "lucide-react";
-import { authApis, endpoints } from "../configs/APIs";
 
 export default function About() {
   const mapRef = useRef(null);
@@ -8,30 +7,26 @@ export default function About() {
   const userMarkerRef = useRef(null);
   const leafletMapRef = useRef(null);
 
-  const [shop, setShop] = useState(null);
-  const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState(0);
 
+  // Hard-coded shop data
+  const shop = {
+    name: "Car Shop",
+    address: "123 Nguyễn Văn Linh, Quận 7, TP. Hồ Chí Minh",
+    latitude: 10.7769,
+    longitude: 106.7009,
+    phone: "0337518997",
+    email: "anhqui04062004@gmail.com",
+    zalo: "0337518997",
+    facebook: "https://facebook.com/showabc",
+    images: [
+      "https://res.cloudinary.com/do43r8nr0/image/upload/v1756657071/zqslq4veb7atmxkzhuph.jpg",
+      "https://res.cloudinary.com/do43r8nr0/image/upload/v1756657037/gnup3nsyopydcpar4lei.jpg",
+      "https://res.cloudinary.com/do43r8nr0/image/upload/v1756656947/gtzxits4r0msl3veph7x.jpg"
+    ]
+  };
 
   const userPosition = { latitude: 10.7769, longitude: 106.7009 };
-
-  useEffect(() => {
-    // Simulate API call
-    const fetchShop = async () => {
-      try {
-        const res = await authApis().get(endpoints["showroom-info"]);
-        if(res.status === 200 || res.status === 201){
-          setShop(res.data.result)
-        }
-      } catch (error) {
-        console.error("Lỗi khi lấy showroom:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchShop();
-  }, []);
 
   useEffect(() => {
     if (!shop || typeof window === 'undefined') return;
@@ -89,31 +84,7 @@ export default function About() {
     };
 
     initMap();
-  }, [shop]);
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-lg text-gray-600 font-medium">Đang tải thông tin showroom...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!shop) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-red-50 to-orange-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4 mx-auto">
-            <MapPin className="w-8 h-8 text-red-500" />
-          </div>
-          <p className="text-lg text-red-600 font-medium">Không có thông tin showroom</p>
-        </div>
-      </div>
-    );
-  }
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-purple-50" style={{paddingTop :"70px"}}>

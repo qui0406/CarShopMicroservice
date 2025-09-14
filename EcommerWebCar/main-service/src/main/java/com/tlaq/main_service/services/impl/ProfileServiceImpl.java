@@ -72,9 +72,15 @@ public class ProfileServiceImpl implements ProfileService {
         var profile = profileRepository.findByUserKeyCloakId(userId).orElseThrow(
                 () -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
-        log.info("hfshaf :{}",profile.getUserKeyCloakId());
 
-        return profileMapper.toProfileResponse(profile);
+        Set<Role> setRoles = roleRepository.findRolesByProfileId(profile.getId());
+
+        ProfileResponse profileResponse = profileMapper.toProfileResponse(profile);
+        profileResponse.setRoles(
+                setRoles.stream().map(Role::getName).collect(Collectors.toSet())
+        );
+
+        return profileResponse;
     }
 
     @Override

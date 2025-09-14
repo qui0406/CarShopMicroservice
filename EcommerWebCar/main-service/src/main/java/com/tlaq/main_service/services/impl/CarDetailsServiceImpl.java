@@ -91,7 +91,12 @@ public class CarDetailsServiceImpl implements CarDetailsService {
     @Override
     public CarDetailsResponse getCarDetails(String carId) {
         Car car = carRepository.findById(carId).orElseThrow(()-> new AppException(ErrorCode.CAR_NOT_FOUND));
-        return carMapper.toCarDetailsResponse(car);
+        CarDetailsResponse carDetailsResponse= carMapper.toCarDetailsResponse(car);
+        carDetailsResponse.setName(car.getCarModel().getCarBranch().getName() + " " +
+                car.getCarModel().getCategory().getName()+ " " +
+                car.getCarModel().getName() + " " + car.getYear().toString().split("-")[0]);
+
+        return carDetailsResponse;
     }
 
     @Override

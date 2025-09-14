@@ -5,6 +5,8 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -17,6 +19,9 @@ public class OrderDetailsResponse {
     String fullName;
     String address;
     int quantity;
+    String phone;
     BigDecimal totalAmount;
     PaymentStatus paymentStatus;
+    String cccd;
+    LocalDate dob;
 }

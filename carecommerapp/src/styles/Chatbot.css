@@ -1,0 +1,206 @@
+/* Chat Widget Customization */
+.chat-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000; /* Ensure it appears above other elements */
+}
+
+/* Override n8n/chat toggle icon styles */
+:root {
+  --chat--toggle--background: var(--accent-gradient); /* Matches .search-btn.primary */
+  --chat--toggle--hover--background: var(--primary-gradient); /* Gradient shift on hover */
+  --chat--toggle--active--background: var(--secondary-gradient); /* Gradient for active state */
+  --chat--toggle--color: var(--background-white); /* White icon color */
+  --chat--toggle--size: 60px; /* Slightly smaller than default (64px) */
+  --chat--border-radius: 50%; /* Circular icon */
+  --chat--transition-duration: 0.3s; /* Matches Home.css transitions */
+  --chat--shadow: var(--shadow-medium); /* Matches .search-btn shadow */
+  --chat--window--width: 350px; /* Smaller chat window width */
+  --chat--window--height: 500px; /* Smaller chat window height */
+}
+
+/* Chat toggle button */
+#n8n-chat .chat-toggle {
+  box-shadow: var(--shadow-medium);
+  transition: all 0.3s ease;
+  border-radius: 50%;
+  display: flex; /* Ensure icon is centered */
+  align-items: center;
+  justify-content: center;
+  background: var(--chat--toggle--background);
+  width: var(--chat--toggle--size);
+  height: var(--chat--toggle--size);
+}
+
+/* Add a chat icon (e.g., chat bubble) using pseudo-element */
+#n8n-chat .chat-toggle::before {
+  content: '\1F4AC'; /* Unicode for speech bubble emoji */
+  font-size: 1.5rem;
+  color: var(--chat--toggle--color);
+}
+
+/* Hover effect for toggle */
+#n8n-chat .chat-toggle:hover {
+  box-shadow: var(--shadow-large);
+  transform: translateY(-3px); /* Matches .search-btn.primary:hover */
+  background: var(--chat--toggle--hover--background);
+}
+
+/* Active state for toggle */
+#n8n-chat .chat-toggle:active {
+  background: var(--chat--toggle--active--background);
+}
+
+/* Chat window */
+#n8n-chat .chat-window {
+  background: var(--background-white);
+  border-radius: 20px; /* Matches .car-card-modern */
+  box-shadow: var(--shadow-large);
+  border: 1px solid var(--border-color);
+  font-family: var(--font-secondary);
+  color: var(--text-primary);
+  width: var(--chat--window--width);
+  height: var(--chat--window--height);
+}
+
+/* Chat header */
+#n8n-chat .chat-header {
+  background: var(--primary-gradient);
+  color: var(--background-white);
+  padding: var(--chat--spacing);
+  border-radius: 20px 20px 0 0;
+  font-family: var(--font-primary);
+  font-weight: 600;
+  font-size: 1.2rem;
+}
+
+/* Chat messages */
+#n8n-chat .chat-message--bot {
+  background: var(--background-light);
+  color: var(--text-primary);
+  border-radius: var(--chat--border-radius);
+  padding: var(--chat--spacing);
+  font-family: var(--font-secondary);
+}
+
+#n8n-chat .chat-message--user {
+  background: var(--accent-gradient);
+  color: var(--background-white);
+  border-radius: var(--chat--border-radius);
+  padding: var(--chat--spacing);
+  font-family: var(--font-secondary);
+}
+
+/* Chat input */
+#n8n-chat .chat-input {
+  background: rgba(255, 255, 255, 0.9);
+  border: 2px solid var(--border-color);
+  border-radius: 12px; /* Matches .modern-select */
+  padding: 0.875rem 1rem;
+  font-family: var(--font-secondary);
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  transition: all 0.3s ease;
+}
+
+#n8n-chat .chat-input:focus {
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 4px rgba(79, 172, 254, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .chat-container {
+    bottom: 15px;
+    right: 15px;
+  }
+  --chat--toggle--size: 50px;
+  --chat--window--width: 300px; /* Smaller for tablets */
+  --chat--window--height: 450px;
+}
+
+@media (max-width: 480px) {
+  .chat-container {
+    bottom: 10px;
+    right: 10px;
+  }
+  --chat--toggle--size: 45px;
+  --chat--window--width: 260px; /* Smaller for mobile */
+  --chat--window--height: 400px;
+}
+
+#n8n-chat .chat-window-toggle svg {
+  display: none;
+}
+
+#n8n-chat .chat-window-toggle {
+  background: url('C:/Users/MyHome/CarShopMicroservice/carecommerapp/src/static/AIicon.png') no-repeat center center;
+  background-size: 40px 40px;
+
+  width: 60px;  
+  height: 60px;
+  border: 2px solid #007bff;  
+  border-radius: 50%;   
+  background-color: white;
+  opacity: 0.5;
+}
+#n8n-chat .chat-window-toggle:hover{
+    opacity: 1
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  #n8n-chat .chat-window {
+    background: var(--background-light);
+    border-color: var(--border-color);
+    color: var(--text-primary);
+  }
+  #n8n-chat .chat-message--bot {
+    background: var(--background-white);
+    color: var(--text-primary);
+  }
+  #n8n-chat .chat-message--user {
+    background: var(--accent-gradient);
+    color: var(--text-light);
+  }
+  #n8n-chat .chat-input {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-light);
+    border-color: var(--border-color);
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  #n8n-chat .chat-window {
+    border: 2px solid var(--text-primary);
+  }
+  #n8n-chat .chat-message--bot,
+  #n8n-chat .chat-message--user {
+    border: 1px solid var(--text-primary);
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  #n8n-chat .chat-toggle,
+  #n8n-chat .chat-input,
+  #n8n-chat .chat-window {
+    transition: none;
+    transform: none;
+  }
+}
+
+/* Hạ toàn bộ cửa sổ chat xuống 50px */
+#n8n-chat .chat-window-wrapper {
+  position: fixed !important;
+  right: 20px !important;
+  bottom: 20px !important;  
+  z-index: 9999 !important;
+}
+
+#n8n-chat .chat-window {
+  margin-bottom: -10px;
+}

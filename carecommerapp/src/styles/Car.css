@@ -1,14 +1,153 @@
-.car-container{
-    padding-top: 70px;
+/* Car Container */
+.car-container {
+  padding: 5rem 0;
+  background: var(--background-white);
+  position: relative;
 }
 
-.car-card{
-   border-radius: 10%;
+/* Optional decorative gradient at the top, similar to cars-section */
+.car-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: linear-gradient(180deg, var(--background-light) 0%, transparent 100%);
 }
 
+/* Car Card */
+.car-card {
+  background: var(--background-white);
+  border-radius: 20px; /* Slightly softer than 10% for consistency with Home.css */
+  overflow: hidden;
+  box-shadow: var(--shadow-light);
+  transition: all 0.4s ease;
+  position: relative;
+  border: 1px solid var(--border-color);
+}
+
+/* Hover effect to match car-card-modern */
+.car-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-large);
+  border-color: var(--primary-color);
+}
+
+/* Car Image */
 .car-image {
-    width: 100%;
-    height: 200px;
-    border-radius: 10% 10% 0 0;
+  width: 100%;
+  height: 220px; /* Slightly taller than 200px to match car-image-container */
+  object-fit: cover; /* Ensures image fills container properly */
+  border-radius: 20px 20px 0 0; /* Matches car-card's rounded top corners */
+  transition: transform 0.4s ease;
 }
 
+/* Image scaling on hover, consistent with car-card-modern */
+.car-card:hover .car-image {
+  transform: scale(1.1);
+}
+
+/* Optional overlay for view details, similar to car-card-modern */
+.car-image-container {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
+}
+
+.car-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--primary-gradient);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.car-card:hover .car-overlay {
+  opacity: 1;
+}
+
+.view-details {
+  color: white;
+  font-family: var(--font-primary);
+  font-weight: 600;
+  font-size: 1.1rem;
+  transform: translateY(20px);
+  transition: transform 0.3s ease 0.1s;
+}
+
+.car-card:hover .view-details {
+  transform: translateY(0);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .car-container {
+    padding: 4rem 0;
+  }
+}
+
+@media (max-width: 768px) {
+  .car-container {
+    padding: 3rem 0;
+  }
+  
+  .car-image {
+    height: 200px; /* Adjust height for smaller screens */
+  }
+}
+
+@media (max-width: 480px) {
+  .car-container {
+    padding: 2rem 0;
+  }
+  
+  .car-image {
+    height: 180px; /* Further adjust for very small screens */
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .car-container {
+    background: var(--background-light);
+  }
+  
+  .car-card {
+    background: var(--background-white);
+    border-color: var(--border-color);
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .car-card {
+    border: 2px solid var(--text-primary);
+  }
+  
+  .car-overlay {
+    background: rgba(0, 0, 0, 0.8);
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  .car-card:hover {
+    transform: none;
+  }
+  
+  .car-image {
+    transition: none;
+  }
+  
+  .car-overlay,
+  .view-details {
+    transition: none;
+  }
+}

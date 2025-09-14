@@ -5,9 +5,11 @@ import com.tlaq.main_service.dto.responses.OrderDetailsResponse;
 import com.tlaq.main_service.dto.responses.OrdersResponse;
 import com.tlaq.main_service.entity.OrderDetails;
 import com.tlaq.main_service.entity.Orders;
+import com.tlaq.main_service.entity.Role;
 import com.tlaq.main_service.mapper.decorator.OrderMapperDecorator;
 import org.mapstruct.DecoratedWith;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 import java.util.List;
 
@@ -17,11 +19,5 @@ public interface OrdersMapper {
     OrdersResponse toOrdersResponse(Orders orders);
 
     Orders toOrdersEntity(OrdersRequest ordersRequest);
-
-    List<OrdersResponse> toOrdersResponseList(List<Orders> ordersList);
-
-    OrderDetailsResponse toOrderDetailsResponse(Orders orderDetailsList);
-
-    List<OrderDetailsResponse> toOrderDetailsResponseList(List<Orders> orderDetailsList);
 
 }

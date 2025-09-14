@@ -56,8 +56,6 @@ export default function Reserve() {
       const response = await authApis().post(endpoints["create-orders"], orders);
       
       if (response.status === 200 || response.status === 201) {
-        alert("Đặt hàng thành công!")
-
         navigate("/confirm", { state: { car, orders: response.data.result } }); 
       } else {
         console.error("Error:", response.data);

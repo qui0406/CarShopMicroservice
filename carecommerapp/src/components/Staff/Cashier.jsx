@@ -29,7 +29,25 @@ export default function Cashier() {
   const formatDateTime = (dateStr) => new Date(dateStr).toLocaleString("vi-VN");
 
   const handleConfirmPayment = async (orderId) => {
-    // Thêm logic gọi API để xác nhận thanh toán nếu cần
+    const order ={
+      orderId: orderId,
+      success: true
+    }
+
+    try{
+      setLoading(true)
+      const res = await authApis().post(endpoints["payment-cashier"], order)
+
+      if(res.status === 200 || res.status === 201){
+        alert("Thanh toán thành công")
+      }
+    }catch{
+      console.error("Thanh toán thất bại")
+    }
+    finally{
+      setLoading(false)
+    }
+
     setOrders(prevOrders => 
       prevOrders.map(order => 
         order.orderId === orderId 
@@ -42,6 +60,24 @@ export default function Cashier() {
 
   const handleCancelOrder = async (orderId) => {
     if (window.confirm("Bạn có chắc chắn muốn hủy đơn hàng này?")) {
+      const order ={
+        orderId: orderId,
+        success: false
+      }
+
+      try{
+        setLoading(true)
+        const res = await authApis().post(endpoints["payment-cashier"], order)
+
+        if(res.status === 200 || res.status === 201){
+          alert("Hủy đơn hàng thành công")
+        }
+      }catch{
+        console.error("Thanh toán thất bại")
+      }
+      finally{
+        setLoading(false)
+      }
       // Thêm logic gọi API để hủy đơn hàng nếu cần
       setOrders(prevOrders => 
         prevOrders.map(order => 
@@ -106,12 +142,10 @@ export default function Cashier() {
             <table className="w-full">
               <thead className="bg-gray-100 border-b">
                 <tr>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Mã đơn hàng</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Phương thức thanh toán</th>
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Họ và tên</th>
                   <th className="text-left py-3 px-4 font-semibold text-gray-700">Tổng tiền</th>
                   <th className="text-left py-3 px-4 font-semibold text-gray-700">Đã đặt cọc</th>
                   <th className="text-left py-3 px-4 font-semibold text-gray-700">Còn lại</th>
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">Trạng thái</th>
                   <th className="text-left py-3 px-4 font-semibold text-gray-700">Hành động</th>
                 </tr>
               </thead>
@@ -124,12 +158,9 @@ export default function Cashier() {
                   </tr>
                 ) : (
                   orders.map((order, index) => (
-                    <tr key={order.orderId} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+                    <tr key={order.fullName + `${index}`} className={index % 2 === 0 ? "bg-white" : "bg-gray-50"}>
                       <td className="py-3 px-4 font-medium text-gray-900">
-                        {order.orderId.substring(0, 8)}...
-                      </td>
-                      <td className="py-3 px-4 text-gray-700">
-                        {order.paymentMethod === "BANK_TRANSFER" ? "Chuyển khoản" : order.paymentMethod}
+                        {order.fullName}
                       </td>
                       <td className="py-3 px-4 text-gray-700 font-medium">
                         {order.price.toLocaleString()} VND
@@ -139,11 +170,6 @@ export default function Cashier() {
                       </td>
                       <td className="py-3 px-4 text-gray-700 font-medium text-orange-600">
                         {order.remainingAmount.toLocaleString()} VND
-                      </td>
-                      <td className="py-3 px-4">
-                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusStyle(order)}`}>
-                          {getStatusText(order)}
-                        </span>
                       </td>
                       <td className="py-3 px-4">
                         <button
@@ -174,18 +200,22 @@ export default function Cashier() {
           >
             {/* Modal Header */}
             <div className="flex justify-between items-center p-6 border-b border-gray-200">
-              <h3 className="text-xl font-semibold text-gray-900">Chi tiết đơn hàng</h3>
-              <button
-                className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
-                onClick={() => setSelectedOrder(null)}
-              >
-                ×
-              </button>
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-semibold text-gray-900">
+                  Chi tiết đơn hàng
+                </h3>
+                <button
+                  className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
+                  onClick={() => setSelectedOrder(null)}
+                >
+                  x
+                </button>
+              </div>
             </div>
 
             {/* Modal Body */}
             <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 ">
                 <div className="space-y-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">Mã đơn hàng</label>
@@ -239,22 +269,6 @@ export default function Cashier() {
                     </span>
                   </div>
                 </div>
-              </div>
-
-              {/* Progress Bar */}
-              <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Tiến độ thanh toán</label>
-                <div className="w-full bg-gray-200 rounded-full h-3">
-                  <div 
-                    className="bg-green-500 h-3 rounded-full transition-all duration-300"
-                    style={{ 
-                      width: `${((selectedOrder.price - selectedOrder.remainingAmount) / selectedOrder.price) * 100}%` 
-                    }}
-                  ></div>
-                </div>
-                <p className="text-sm text-gray-600 mt-1">
-                  Đã thanh toán: {(((selectedOrder.price - selectedOrder.remainingAmount) / selectedOrder.price) * 100).toFixed(1)}%
-                </p>
               </div>
             </div>
 

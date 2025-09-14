@@ -20,8 +20,13 @@ import MyReserve from './components/MyReserve';
 import MyDeposit from "./components/MyDeposit"
 import About from "./components/About";
 import Chat from "./components/Chat";
+import Chatbot from "./components/Chatbot";
+import Voucher from "./components/Voucher"
+import News from "./components/News"
+import ScrollToTop from "./components/ScrollToTop"
 
 import '@n8n/chat/style.css';
+import "./styles/Chatbot.css"
 import { createChat } from '@n8n/chat';
 
 
@@ -60,16 +65,13 @@ function App() {
     loadUser();
   }, []);
 
-  useEffect(() => {
-		createChat({
-			webhookUrl: 'https://qui0406.app.n8n.cloud/webhook/5f1c0c82-0ff9-40c7-9e2e-b1a96ffe24cd/chat'
-		});
-	}, []);
+
   return (
     <MyUserContext.Provider value={user}>
       <MyDispatchContext.Provider value={dispatch}>
         <BrowserRouter>
           <Header />
+          <ScrollToTop />
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/profile" element={<Profile />} />
@@ -82,6 +84,8 @@ function App() {
             <Route path="/payment-result" element={<PaymentCompleted />} />
             <Route path="/all-my-reserve" element={<MyReserve/>} />
             <Route path="/all-my-deposit" element= {<MyDeposit/>} />
+            <Route path="/voucher" element={<Voucher/>} />
+            <Route path="/news" element={<News/>} />
             <Route path="/about" element= {<About/>} />
             <Route path="/chat" element= {<Chat/>} />
 
@@ -94,6 +98,8 @@ function App() {
 
           </Routes>
           <Footer />
+          <Chatbot />
+
         </BrowserRouter>
       </MyDispatchContext.Provider>
     </MyUserContext.Provider >

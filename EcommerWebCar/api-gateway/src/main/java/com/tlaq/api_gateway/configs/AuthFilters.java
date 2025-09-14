@@ -40,7 +40,8 @@ public class AuthFilters implements GlobalFilter, Ordered {
         "/ecommer-car-web/profile/register", "/ecommer-car-web/profile/login",
         "/payment/checkout/vnpay_ipn", "/ecommer-car-web/car/.*",
         "/ecommer-car-web/car-model/.*", "/ecommer-car-web/car-branch/.*",
-        "/ecommer-car-web/car-category/.*", "/ecommer-car-web/admin/.*"
+        "/ecommer-car-web/car-category/.*", "/ecommer-car-web/admin/.*",
+            "/ecommer-car-web/inventory/.*"
     };
 
     @Value("${app.api-prefix}")

@@ -1,16 +1,24 @@
 import React, { useEffect } from "react";
+import { useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Card, Button, Row, Col, Container } from "react-bootstrap";
 import "./../styles/FormConfirm.css"
 import axios, { authApis, endpoints } from "./../configs/APIs";
+import { MyUserContext, MyDispatchContext } from "./../configs/MyContexts";
+
 
 export default function FormConfirm() {
   const location = useLocation();
   const navigate = useNavigate();
+  const user = useContext(MyUserContext);
+  const [loading, setLoading]= useState(false)
+
+
+  const isStaff = user?.result?.roles?.includes("STAFF");
 
   const { car, orders } = location.state || {};
 
-  const handlePay = async () => {
+  const handleDeposit = async () => {
     try {
       const response = await authApis().post("http://localhost:8888/api/v1/payment/checkout/url", {
         txnRef: orders.id,
@@ -29,6 +37,24 @@ export default function FormConfirm() {
       console.log("Orders:", orders);
     }
   }, [car, orders]);
+
+
+  const handlePay = async() =>{
+    try{
+      setLoading(true)
+
+      const res = authApis().post(endpoints["create-order-by-staff"], orders.id);
+      if(res.status === 200 || res.status === 201){
+        console.log("Thành công")
+      }
+    }
+    catch{
+      console.error("Thất bại")
+    }
+    finally{
+      setLoading(false)
+    }
+  }
 
   if (!car || !orders) {
     return (
@@ -99,9 +125,16 @@ export default function FormConfirm() {
                 {new Intl.NumberFormat("vi-VN").format(orders.orderDetails.totalAmount)} VNĐ
               </Card.Text>
 
-              <Button variant="success" className="w-100 mt-3" onClick={handlePay}>
-                Thanh toán
+              <Button variant="success" className="w-100 mt-3" onClick={handleDeposit}>
+                Đặt cọc qua VNPay
               </Button>
+              
+              {isStaff === true ? (
+                <Button variant="danger" className="w-100 mt-3" onClick={handlePay}>
+                  Thanh toán
+                </Button>
+              ) : null}
+
             </Card.Body>
           </Card>
         </Col>

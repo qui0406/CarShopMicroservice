@@ -6,6 +6,8 @@ import com.tlaq.main_service.entity.enums.PaymentStatus;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.time.LocalDate;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -14,6 +16,15 @@ import lombok.experimental.FieldDefaults;
 public class OrdersResponse {
     String id;
     PaymentStatus paymentStatus;
-    OrderDetails orderDetails;
-    Profile profile;
+    OrderDetailsResponse orderDetails;
+    ProfileResponse profile;
+
+    @Data
+    @Builder
+    public static class ProfileResponse{
+        String id;
+        String username;
+        String address;
+        String phone;
+    }
 }

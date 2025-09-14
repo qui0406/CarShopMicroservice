@@ -25,10 +25,9 @@ public class CarBranchController {
     CarBranchService carBranchService;
 
     @GetMapping("/car-branch/get-all-car-branch")
-    public ApiResponse<PageResponse<CarBranchResponse>> getAll(@RequestParam(value ="page", required = false, defaultValue = "1") int page,
-                                                               @RequestParam(value = "size", required = false, defaultValue = "5") int size) {
-        return ApiResponse.<PageResponse<CarBranchResponse>>builder()
-                .result(carBranchService.getAll(page, size))
+    public ApiResponse<List<CarBranchResponse>> getAll() {
+        return ApiResponse.<List<CarBranchResponse>>builder()
+                .result(carBranchService.getAll())
                 .build();
     }
 

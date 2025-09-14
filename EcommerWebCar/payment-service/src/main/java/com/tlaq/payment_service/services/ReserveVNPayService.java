@@ -1,19 +1,17 @@
 package com.tlaq.payment_service.services;
 
-import com.tlaq.event.dto.NotificationEvent;
 import com.tlaq.payment_service.dto.event.ResVNPayEvent;
 import com.tlaq.payment_service.dto.request.OnlinePaymentRequest;
 import com.tlaq.payment_service.dto.response.DepositResponse;
 import com.tlaq.payment_service.dto.response.OrdersResponse;
 import com.tlaq.payment_service.dto.response.PaymentResponse;
-import com.tlaq.payment_service.entity.ReservePaymentVNPay;
+import com.tlaq.payment_service.entity.Deposit;
 import com.tlaq.payment_service.entity.enums.PaymentMethod;
 import com.tlaq.payment_service.entity.enums.PaymentStatus;
 import com.tlaq.payment_service.entity.enums.PaymentType;
 import com.tlaq.payment_service.exceptions.AppException;
 import com.tlaq.payment_service.exceptions.ErrorCode;
-import com.tlaq.payment_service.repository.PaymentRepository;
-import com.tlaq.payment_service.repository.ReserveVNPayRepository;
+import com.tlaq.payment_service.repository.DepositRepository;
 import com.tlaq.payment_service.repository.httpClient.MainClient;
 import com.tlaq.payment_service.utils.DateUtils;
 import com.tlaq.payment_service.utils.LocaleUtils;
@@ -40,8 +38,7 @@ import java.util.concurrent.CompletableFuture;
 @RequiredArgsConstructor
 public class ReserveVNPayService {
 
-    private final PaymentRepository paymentRepository;
-    private final ReserveVNPayRepository reserveVNPayRepository;
+    private final DepositRepository depositRepository;
     private final MainClient mainClient;
     private final KafkaTemplate<String, Object> kafkaTemplate;
 
@@ -99,6 +96,8 @@ public class ReserveVNPayService {
                 log.error("Error initiating VNPay payment for order {}: {}", request.getTxnRef(), e.getMessage());
                 throw new AppException(ErrorCode.PAYMENT_INIT_FAILED);
             }
+
+
         });
     }
 
@@ -150,7 +149,7 @@ public class ReserveVNPayService {
     private void savePayment(String orderId, String vnpBankTranNo, String profileId, BigDecimal price,
                              BigDecimal depositAmount, PaymentStatus status, String payDate) {
         LocalDateTime dateTime = LocalDateTime.parse(payDate, DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
-        ReservePaymentVNPay payment = ReservePaymentVNPay.builder()
+        Deposit payment = Deposit.builder()
                 .price(price)
                 .status(status)
                 .createdAt(dateTime)
@@ -158,27 +157,26 @@ public class ReserveVNPayService {
                 .orderId(orderId)
                 .depositAmount(depositAmount)
                 .remainingAmount(price.subtract(depositAmount))
-                .active(true)
                 .profileId(profileId)
                 .type(PaymentType.DEPOSIT)
                 .transactionVNPayId(vnpBankTranNo)
                 .build();
-        paymentRepository.save(payment);
         log.info("Payment record saved for order {}, status {}", orderId, status);
+        depositRepository.save(payment);
     }
 
     public DepositResponse getDeposit(String orderId) {
         OrdersResponse ordersResponse = mainClient.getOrder(orderId).getResult();
-        ReservePaymentVNPay reservePaymentVNPay = reserveVNPayRepository.findByOrderId(orderId)
+        Deposit deposit = depositRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
         return DepositResponse.builder()
-                .orders(ordersResponse)
-                .transactionId(reservePaymentVNPay.getTransactionVNPayId())
-                .depositAmount(reservePaymentVNPay.getDepositAmount())
-                .remainingAmount(reservePaymentVNPay.getRemainingAmount())
-                .price(reservePaymentVNPay.getPrice())
-                .createdAt(reservePaymentVNPay.getCreatedAt())
+                .orderId(deposit.getOrderId())
+                .transactionId(deposit.getTransactionVNPayId())
+                .depositAmount(deposit.getDepositAmount())
+                .remainingAmount(deposit.getRemainingAmount())
+                .price(deposit.getPrice())
+                .createdAt(deposit.getCreatedAt())
                 .build();
     }
 }

@@ -4,7 +4,10 @@ import com.tlaq.payment_service.entity.enums.PaymentMethod;
 import com.tlaq.payment_service.entity.enums.PaymentStatus;
 import com.tlaq.payment_service.entity.enums.PaymentType;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.CreationTimestamp;
@@ -14,13 +17,12 @@ import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @AllArgsConstructor
-@SuperBuilder
 @Entity
+@SuperBuilder
 @Data
-@Table(name = "payment")
-@Inheritance(strategy = InheritanceType.JOINED)
+@Table(name = "deposit")
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class Payment {
+public class Deposit {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
@@ -46,4 +48,13 @@ public class Payment {
 
     @Enumerated(EnumType.STRING)
     PaymentType type;
+
+    @Column(name = "transaction_id")
+    String transactionVNPayId;
+
+    @Column(name = "disposit_amount")
+    BigDecimal depositAmount;
+
+    @Column(name ="remaining_amount")
+    BigDecimal remainingAmount;
 }

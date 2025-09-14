@@ -56,7 +56,7 @@ export default function Home (){
   const itemsPerPage = 4; // số thương hiệu mỗi trang
 
   // Tính toán dữ liệu trang hiện tại
-  const indexOfLast = currentPageBranch * itemsPerPage;
+  const indexOfLast = currentPage * itemsPerPage;
   const indexOfFirst = indexOfLast - itemsPerPage;
   const currentBranches = branches.slice(indexOfFirst, indexOfLast);
 
@@ -64,7 +64,7 @@ export default function Home (){
 
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
-      setCurrentPageBranch(page);
+      setCurrentPage(page);
     }
   };
 
@@ -274,10 +274,9 @@ export default function Home (){
           <div className="hero-overlay"></div>
           <div className="hero-content">
             <div className="hero-text">
-              <span className="hero-subtitle">Tìm xe ô tô mua bán và cho thuê gần bạn</span>
-              <h1 className="hero-title">
+              {/* <h1 className="hero-title">
                 Tìm Chiếc Xe <span className="hero-highlight">Hoàn Hảo</span> Của Bạn
-              </h1>
+              </h1> */}
               <p className="hero-description">
                 Khám phá hàng nghìn xe ô tô chất lượng cao từ các thương hiệu hàng đầu
               </p>
@@ -358,10 +357,10 @@ export default function Home (){
 
             {/* Category Pills */}
             <div className="category-pills">
-              {categories.map((cat) => (
+              {categories.slice(0, 8).map((cat) => (
                 <div
                   key={cat.id}
-                  className={`category-pill ${selectedCategory === cat.name ? "active" : ""}`}
+                  className={`category-pill ${selectedCategory === cat.name ? " active" : ""}`}
                   onClick={() => {
                     setSelectedCategory(cat.name);
                     handleSearch(1); 
@@ -506,7 +505,6 @@ export default function Home (){
                     <div className="car-content">
                       <div className="car-header">
                         <h3 className="car-name">{car.name || "Unknown Car"}</h3>
-                        <span className="car-type">{car.type || "N/A"}</span>
                       </div>
                       <div className="car-info">
                         <div className="car-year">
@@ -549,7 +547,7 @@ export default function Home (){
                     <button
                       key={pageNum}
                       onClick={() => handleCarPageChange(pageNum)}
-                      className={`pagination-number ${carPage === pageNum ? "active" : ""}`}
+                      className={`pagination-number ${carPage === pageNum ? " active" : ""}`}
                     >
                       {pageNum}
                     </button>
@@ -609,7 +607,7 @@ export default function Home (){
           <button
             key={i + 1}
             onClick={() => handlePageChange(i + 1)}
-            className={`pagination-number${currentPage === i + 1 ? "active" : ""}`}
+            className={`pagination-number${currentPage === i + 1 ? " active" : ""}`}
           >
             {i + 1}
           </button>
