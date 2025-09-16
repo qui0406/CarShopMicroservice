@@ -57,7 +57,7 @@ export const endpoints = {
     "payment-cashier": "/payment/staff/payment",
     "get-all-deposit": "/payment/staff/get-all-deposit",
 
-    "create-order-by-staff": "/paymeny/staff/create-order",
+    "payment-not-deposit": "/payment/staff/payment-order-not-deposit",
 
     "search-by-image": "localhost:5000/predict"
 };

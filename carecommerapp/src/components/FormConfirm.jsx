@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useContext } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Card, Button, Row, Col, Container } from "react-bootstrap";
@@ -43,7 +43,7 @@ export default function FormConfirm() {
     try{
       setLoading(true)
 
-      const res = authApis().post(endpoints["create-order-by-staff"], orders.id);
+      const res = authApis().post(endpoints["payment-not-deposit"], orders.id);
       if(res.status === 200 || res.status === 201){
         console.log("Thành công")
       }

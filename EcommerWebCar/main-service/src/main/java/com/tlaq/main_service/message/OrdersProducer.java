@@ -2,7 +2,7 @@
 //
 //import com.tlaq.main_service.configs.RabbitMQConfig;
 //import com.tlaq.main_service.dto.event.OrderEvent;
-//import com.tlaq.main_service.dto.requests.OrdersRequest;
+//import com.tlaq.main_service.dto.requests.orderRequest.OrdersRequest;
 //import com.tlaq.main_service.entity.Orders;
 //import com.tlaq.main_service.entity.enums.PaymentStatus;
 //import lombok.AllArgsConstructor;

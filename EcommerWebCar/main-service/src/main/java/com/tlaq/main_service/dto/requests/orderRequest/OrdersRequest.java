@@ -1,5 +1,6 @@
-package com.tlaq.main_service.dto.requests;
+package com.tlaq.main_service.dto.requests.orderRequest;
 
+import com.tlaq.main_service.entity.enums.RoleCreateOrder;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -15,14 +16,13 @@ import java.math.BigDecimal;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrdersRequest {
     String id;
-
     @NotBlank
     String carId;
+
     BigDecimal unitPrice;
 
     @Min(1)
     @Max(100)
     int quantity;
-
     OrderDetailsRequest orderDetailsRequest;
 }

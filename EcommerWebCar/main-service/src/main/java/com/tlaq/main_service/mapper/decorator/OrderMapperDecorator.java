@@ -1,16 +1,13 @@
 package com.tlaq.main_service.mapper.decorator;
 
-import com.tlaq.main_service.dto.requests.OrdersRequest;
+import com.tlaq.main_service.dto.requests.orderRequest.OrdersRequest;
 import com.tlaq.main_service.dto.responses.OrderDetailsResponse;
 import com.tlaq.main_service.dto.responses.OrdersResponse;
-import com.tlaq.main_service.dto.responses.ProfileResponse;
 import com.tlaq.main_service.entity.OrderDetails;
 import com.tlaq.main_service.entity.Orders;
-import com.tlaq.main_service.entity.Profile;
 import com.tlaq.main_service.entity.enums.PaymentStatus;
 import com.tlaq.main_service.exceptions.AppException;
 import com.tlaq.main_service.exceptions.ErrorCode;
-import com.tlaq.main_service.mapper.NewsMapper;
 import com.tlaq.main_service.mapper.OrdersMapper;
 import com.tlaq.main_service.repositories.CarRepository;
 import com.tlaq.main_service.repositories.OrdersRepository;
@@ -41,6 +38,7 @@ public abstract class OrderMapperDecorator implements OrdersMapper {
         return OrdersResponse.builder()
                 .id(orders.getId())
                 .paymentStatus(PaymentStatus.PENDING)
+                .roleCreateOrder(orders.getRoleCreateOrder())
                 .orderDetails(OrderDetailsResponse.builder()
                         .orderId(orders.getId())
                         .username(orders.getProfile().getUsername())

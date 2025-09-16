@@ -12,11 +12,8 @@ import java.util.Optional;
 
 @Repository
 public interface DepositRepository extends JpaRepository<Deposit, String> {
-    Optional<Deposit> findByOrderId(String s);
+    Optional<Deposit> findByOrderId(String orderId);
 
     List<Deposit> findByProfileId(String profileId);
-
-    @Query("SELECT r FROM ReservePaymentVNPay r WHERE r.type <> :type")
-    List<Deposit> findAllExcludePaymentTypeSuccess(@Param("type") PaymentType type);
 
 }

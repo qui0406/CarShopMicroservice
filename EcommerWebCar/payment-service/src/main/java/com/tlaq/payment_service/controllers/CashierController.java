@@ -27,7 +27,6 @@ public class CashierController {
 
     ReserveVNPayService reserveVNPayService;
 
-    PaymentStatusProducer paymentStatusProducer;
 
     @GetMapping("/staff/get-bill/{id}")
     public ApiResponse<CashPaymentResponse> getBill(@PathVariable String id){
@@ -57,23 +56,12 @@ public class CashierController {
                 .build();
     }
 
-    @PostMapping("/staff/create-order")
-    public ApiResponse<CashPaymentResponse> createOrder(@RequestBody OrderByStaffRequest request) {
-        paymentStatusProducer.sendStatusCodeVNPay(ResVNPayEvent.builder()
-                .code("00")
-                .message("Successful")
-                .orderId(request.getOrderId())
-                .build());
-        return ApiResponse.<CashPaymentResponse>builder()
-                .build();
+    @PostMapping("/staff/payment-order-not-deposit")
+    public ApiResponse<CashierNotDepositResponse> createOrder(@RequestBody OrderByStaffRequest request) {
 
-    }
-
-    @PostMapping("/staff/cashier-not-deposit")
-    public ApiResponse<CashierNotDepositResponse> cashierNotDeposit(@RequestBody OrderByStaffRequest request) {
         return ApiResponse.<CashierNotDepositResponse>builder()
-                .result(cashierService.createOrderByStaff(request.getOrderId()))
+                .result(cashierService.paymentOrderNotDeposit(request.getOrderId()))
                 .build();
-    }
 
+    }
 }

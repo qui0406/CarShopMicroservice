@@ -1,6 +1,7 @@
 package com.tlaq.payment_service.dto.response;
 
 import com.tlaq.payment_service.entity.enums.PaymentStatus;
+import com.tlaq.payment_service.entity.enums.RoleCreateOrder;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import lombok.*;
@@ -18,6 +19,7 @@ public class OrdersResponse {
     Profile profile;
     @Enumerated(EnumType.STRING)
     PaymentStatus paymentStatus;
+    RoleCreateOrder roleCreateOrder;
 
     OrderDetails orderDetails;
 

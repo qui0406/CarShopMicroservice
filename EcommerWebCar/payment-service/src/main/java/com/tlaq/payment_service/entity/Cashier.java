@@ -28,5 +28,6 @@ public class Cashier {
     String staffId;
 
     @OneToOne
+    @JoinColumn(name = "deposit_id")
     Deposit deposit;
 }

@@ -3,6 +3,7 @@ package com.tlaq.main_service.dto.responses;
 import com.tlaq.main_service.entity.OrderDetails;
 import com.tlaq.main_service.entity.Profile;
 import com.tlaq.main_service.entity.enums.PaymentStatus;
+import com.tlaq.main_service.entity.enums.RoleCreateOrder;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -18,6 +19,7 @@ public class OrdersResponse {
     PaymentStatus paymentStatus;
     OrderDetailsResponse orderDetails;
     ProfileResponse profile;
+    RoleCreateOrder roleCreateOrder;
 
     @Data
     @Builder
