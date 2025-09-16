@@ -1,22 +1,18 @@
 package com.tlaq.main_service.controllers;
 
-import com.tlaq.main_service.configs.RabbitMQConfig;
 import com.tlaq.main_service.dto.ApiResponse;
 import com.tlaq.main_service.dto.PageResponse;
-import com.tlaq.main_service.dto.requests.OrdersRequest;
+import com.tlaq.main_service.dto.requests.orderRequest.OrdersRequest;
 import com.tlaq.main_service.dto.responses.OrderDetailsResponse;
 import com.tlaq.main_service.dto.responses.OrderHistoryResponse;
 import com.tlaq.main_service.dto.responses.OrdersResponse;
-import com.tlaq.main_service.entity.Orders;
 //import com.tlaq.main_service.message.OrdersProducer;
-import com.tlaq.main_service.entity.Profile;
 import com.tlaq.main_service.services.InventoryService;
 import com.tlaq.main_service.services.OrdersService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
@@ -75,4 +71,12 @@ public class OrdersController {
                 .result(ordersService.getAll(page, size))
                 .build();
     }
+
+    @GetMapping("/staff/get-staff-order")
+    public ApiResponse<List<OrdersResponse>> getOrderByStaff(){
+        return ApiResponse.<List<OrdersResponse>>builder()
+                .result(ordersService.getOrderByStaff())
+                .build();
+    }
+
 }

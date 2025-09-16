@@ -1,6 +1,5 @@
-package com.tlaq.main_service.dto.requests;
+package com.tlaq.main_service.dto.requests.orderRequest;
 
-import jakarta.persistence.Column;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

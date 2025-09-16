@@ -9,6 +9,7 @@ import com.tlaq.payment_service.entity.Deposit;
 import com.tlaq.payment_service.entity.enums.PaymentMethod;
 import com.tlaq.payment_service.entity.enums.PaymentStatus;
 import com.tlaq.payment_service.entity.enums.PaymentType;
+import com.tlaq.payment_service.entity.enums.RoleCreateOrder;
 import com.tlaq.payment_service.exceptions.AppException;
 import com.tlaq.payment_service.exceptions.ErrorCode;
 import com.tlaq.payment_service.mapper.CashierNotDepositMapper;
@@ -17,6 +18,7 @@ import com.tlaq.payment_service.repository.CashierNotDepositRepository;
 import com.tlaq.payment_service.repository.CashierRepository;
 import com.tlaq.payment_service.repository.DepositRepository;
 import com.tlaq.payment_service.repository.httpClient.MainClient;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Slf4j
 public class CashierService {
     @Autowired
     MainClient mainClient;
@@ -56,16 +59,13 @@ public class CashierService {
         String userKeyCloakId = authentication.getName();
         UserProfileResponse staff = mainClient.getProfile(userKeyCloakId).getResult();
 
-        OrdersResponse ordersResponse = mainClient.getOrder(request.getOrderId()).getResult();
+        Deposit deposit= depositRepository.findByOrderId(request.getOrderId())
+                .orElseThrow(()-> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
+        Cashier cashier= new Cashier();
 
-        Cashier cashier = cashierRepository.findByOrderId(request.getOrderId())
-                .orElseThrow(() -> new RuntimeException("CashierPayment not found for orderId: " + request.getOrderId()));
-
-            cashier.getDeposit().setProfileId(ordersResponse.getProfile().getId());
-            cashier.setStaffId(staff.getId());
-            cashier.getDeposit().setPaymentMethod(PaymentMethod.CASHIER_TRANSFER);
-            cashier.getDeposit().setPrice(ordersResponse.getOrderDetails().getTotalAmount());
+        cashier.setStaffId(staff.getId());
+        cashier.setDeposit(deposit);
 
         if (request.isSuccess()) {
             cashier.getDeposit().setStatus(PaymentStatus.SUCCESS);
@@ -90,7 +90,7 @@ public class CashierService {
 
     public List<DepositResponse> getAllReserver(){
 
-        List<Deposit> getAllReserve= depositRepository.findAllExcludePaymentTypeSuccess(PaymentType.PAID);
+        List<Deposit> getAllReserve= depositRepository.findAll();
 
         List<DepositResponse> listDepositResponse = new ArrayList<>();
         for (Deposit deposit : getAllReserve) {
@@ -149,29 +149,35 @@ public class CashierService {
     }
 
 
-
-    public CashierNotDepositResponse createOrderByStaff(String orderId){
+    public CashierNotDepositResponse paymentOrderNotDeposit(String orderId){
         OrdersResponse ordersResponse = mainClient.getOrder(orderId).getResult();
 
         Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
         String userKeycloakId = authentication.getName();
+
+        if(!ordersResponse.getRoleCreateOrder().equals(RoleCreateOrder.STAFF)){
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
         UserProfileResponse staff = mainClient.getProfile(userKeycloakId).getResult();
 
         CashierNotDeposit cashierNotDeposit = CashierNotDeposit.builder()
                 .orderId(orderId)
-                .type(PaymentType.PENDING)
+                .type(PaymentType.PAID)
                 .price(ordersResponse.getOrderDetails().getTotalAmount())
                 .paymentMethod(PaymentMethod.STAFF)
                 .staffId(staff.getId())
+                .status(PaymentStatus.SUCCESS)
                 .profileId(ordersResponse.getProfile().getId())
                 .build();
 
         cashierNotDepositRepository.save(cashierNotDeposit);
+
+        paymentStatusProducer.sendStatusCodeVNPay(ResVNPayEvent.builder()
+                .code("00")
+                .message("Successful")
+                .orderId(orderId)
+                .build());
         return cashierNotDepositMapper.toCashierNotDepositResponse(cashierNotDeposit);
     }
-
-
-
-
-
 }

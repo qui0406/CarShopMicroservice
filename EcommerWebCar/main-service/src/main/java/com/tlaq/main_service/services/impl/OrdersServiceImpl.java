@@ -1,17 +1,15 @@
 package com.tlaq.main_service.services.impl;
 
 import com.tlaq.main_service.dto.PageResponse;
-import com.tlaq.main_service.dto.requests.OrdersRequest;
+import com.tlaq.main_service.dto.requests.orderRequest.OrdersRequest;
 import com.tlaq.main_service.dto.responses.OrderDetailsResponse;
 import com.tlaq.main_service.dto.responses.OrderHistoryResponse;
 import com.tlaq.main_service.dto.responses.OrderPaymentResponse;
 import com.tlaq.main_service.dto.responses.OrdersResponse;
-import com.tlaq.main_service.dto.responses.carResponse.CarResponse;
-import com.tlaq.main_service.entity.Inventory;
-import com.tlaq.main_service.entity.OrderDetails;
 import com.tlaq.main_service.entity.Orders;
 import com.tlaq.main_service.entity.Profile;
 import com.tlaq.main_service.entity.enums.PaymentStatus;
+import com.tlaq.main_service.entity.enums.RoleCreateOrder;
 import com.tlaq.main_service.exceptions.AppException;
 import com.tlaq.main_service.exceptions.ErrorCode;
 import com.tlaq.main_service.mapper.OrdersMapper;
@@ -27,12 +25,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.util.AbstractMap;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -56,6 +54,7 @@ public class OrdersServiceImpl implements OrdersService {
 
     @Override
     public OrdersResponse createOrder(OrdersRequest request, String userKeyCloakId) {
+
         if (!inventoryRepository.existsByCarId(request.getCarId())) {
             throw new AppException(ErrorCode.INVENTORY_IS_EMPTY);
         }
@@ -69,8 +68,14 @@ public class OrdersServiceImpl implements OrdersService {
 
         Orders orders = ordersMapper.toOrdersEntity(request);
         orders.setProfile(profile);
-        ordersRepository.save(orders);
 
+        if(checkRoleStaff()){
+            orders.setRoleCreateOrder(RoleCreateOrder.STAFF);
+        }else {
+            orders.setRoleCreateOrder(RoleCreateOrder.USER);
+        }
+
+        ordersRepository.save(orders);
         return ordersMapper.toOrdersResponse(orders);
     }
 
@@ -159,4 +164,26 @@ public class OrdersServiceImpl implements OrdersService {
                 .data(pageData.getContent().stream().map(ordersMapper::toOrdersResponse).toList())
                 .build();
     }
+
+    @Override
+    public List<OrdersResponse> getOrderByStaff() {
+        if(!checkRoleStaff()){
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+        List<Orders> orders= ordersRepository.findByRoleCreateOrder(RoleCreateOrder.STAFF);
+        return orders.stream().map(ordersMapper::toOrdersResponse).collect(Collectors.toList());
+    }
+
+    private boolean checkRoleStaff(){
+        Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
+        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        for (GrantedAuthority authority : authorities) {
+            if (authority.getAuthority().equals("ROLE_STAFF")) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+
 }

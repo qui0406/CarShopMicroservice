@@ -1,6 +1,7 @@
 package com.tlaq.main_service.entity;
 
 import com.tlaq.main_service.entity.enums.PaymentStatus;
+import com.tlaq.main_service.entity.enums.RoleCreateOrder;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -39,4 +40,7 @@ public class Orders {
 
     @CreationTimestamp
     LocalDateTime createdAt;
+
+    @Enumerated(EnumType.STRING)
+    RoleCreateOrder roleCreateOrder;
 }
