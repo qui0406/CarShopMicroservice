@@ -20,11 +20,11 @@ import java.util.Collections;
 @RequiredArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequestMapping("/email")
+@RequestMapping("/api/email")
 public class EmailController {
     SendGridMailService sendGridMailService;
 
-    @PostMapping("/send-email")
+    @PostMapping("/api/send-email")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public ApiResponse<EmailResponse> testSendEmail(@RequestBody EmailRequest emailRequest) {
         return ApiResponse.<EmailResponse>builder()

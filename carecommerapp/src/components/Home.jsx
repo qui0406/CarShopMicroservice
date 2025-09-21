@@ -215,24 +215,24 @@ export default function Home (){
       formData.append('image', selectedImage);
 
       // // Replace with your actual image search endpoint
-      // const res = await axios.post(endpoints["search-by-image"], formData, {
-      //   headers: {
-      //     'Content-Type': 'multipart/form-data',
-      //   },
-      // });
+      const resPredict = await axios.post("http://127.0.0.1:5000/predict", formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
 
-      const result = {
-        "predicted_class": "Toyota Innova",
-        "confidence": 0.9876,
-        "class_index": 6,
-        "image_path": "static/uploads/example.jpg"
-      }
+      // const result = {
+      //   "predicted_class": "Toyota Innova",
+      //   "confidence": 0.9876,
+      //   "class_index": 6,
+      //   "image_path": "static/uploads/example.jpg"
+      // }
 
       setShowModal(true);
-      setPredictedCar(result.predicted_class);
-      setNameCarPredict(result);
+      setPredictedCar(resPredict.data.predicted_class);
+      setNameCarPredict(resPredict.data);
 
-      const [carBranch = "", category = ""] = result.predicted_class.split(" ");
+      const [carBranch = "", category = ""] = resPredict.data.predicted_class.split(" ");
 
       const res = await axios.get(endpoints["filter-cars"], { 
         params: { carBranch, category },
@@ -246,7 +246,7 @@ export default function Home (){
 
 
       // setCars(Array.isArray(result) ? result : []);
-      setNameCarPredict(result)
+      setNameCarPredict(resPredict.data)
       setShowImageSearch(false);
       
     } catch (error) {

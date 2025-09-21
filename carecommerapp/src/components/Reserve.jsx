@@ -4,6 +4,7 @@ import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
 import "./../styles/Reserve.css";
 import { useNavigate } from "react-router-dom";
 import  axios ,{ authApis, endpoints } from "./../configs/APIs";
+import { CarTaxiFront } from "lucide-react";
 
 export default function Reserve() {
   const location = useLocation();
@@ -67,6 +68,7 @@ export default function Reserve() {
   };
 
   if (!car) {
+
     return (
       <Container className="my-5 text-center">
         <h2>Không có thông tin xe</h2>
@@ -94,7 +96,7 @@ export default function Reserve() {
                 <strong>Tên:</strong> {car.name || "N/A"}
               </Card.Text>
               <Card.Text>
-                <strong>Năm sản xuất:</strong> {car.year.split("-")[0] || "N/A"}
+                <strong>Năm sản xuất:</strong> {car.year[0] || "N/A"}
               </Card.Text>
             </Card.Body>
           </Card>

@@ -21,12 +21,12 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
+@RequestMapping("/api")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CashierController {
     CashierService cashierService;
 
     ReserveVNPayService reserveVNPayService;
-
 
     @GetMapping("/staff/get-bill/{id}")
     public ApiResponse<CashPaymentResponse> getBill(@PathVariable String id){
@@ -49,6 +49,8 @@ public class CashierController {
                 .build();
     }
 
+
+
     @PostMapping("/staff/payment")
     public ApiResponse<CashPaymentResponse> payment(@RequestBody CashPaymentRequest request) {
         return ApiResponse.<CashPaymentResponse>builder()
@@ -57,8 +59,7 @@ public class CashierController {
     }
 
     @PostMapping("/staff/payment-order-not-deposit")
-    public ApiResponse<CashierNotDepositResponse> createOrder(@RequestBody OrderByStaffRequest request) {
-
+    public ApiResponse<CashierNotDepositResponse> createPayment(@RequestBody OrderByStaffRequest request) {
         return ApiResponse.<CashierNotDepositResponse>builder()
                 .result(cashierService.paymentOrderNotDeposit(request.getOrderId()))
                 .build();

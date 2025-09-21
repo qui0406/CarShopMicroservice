@@ -46,7 +46,7 @@ payment:
   vnpay:
     tmn-code: BSYVAKDJ
     init-payment-url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
-    return-url: http://localhost:8888/api/v1/payment/checkout/vnpay_ipn
+    return-url: http://localhost:8888/api/v1/payment/api/checkout/vnpay_ipn
     secret-key: LDELTSZERUCS745OLFK8OJI1X1JGFI5L
     time-out: 10
     username: anhqui04062004@gmail.com
@@ -71,8 +71,6 @@ resilience4j:
     instances:
       vnpayTimeLimiter:
         timeoutDuration: 5s
-
-
 
 idp:
   url: http://localhost:8180/realms/anhqui/protocol/openid-connect/token

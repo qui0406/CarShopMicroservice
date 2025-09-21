@@ -20,6 +20,7 @@ public class OrdersResponse {
     @Enumerated(EnumType.STRING)
     PaymentStatus paymentStatus;
     RoleCreateOrder roleCreateOrder;
+    int quantity;
 
     OrderDetails orderDetails;
 
