@@ -23,7 +23,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@RequestMapping("/orders")
+@RequestMapping("/api/orders")
 public class OrdersController {
     OrdersService ordersService;
     InventoryService inventoryService;

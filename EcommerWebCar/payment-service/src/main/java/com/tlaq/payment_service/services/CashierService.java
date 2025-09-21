@@ -152,8 +152,10 @@ public class CashierService {
     public CashierNotDepositResponse paymentOrderNotDeposit(String orderId){
         OrdersResponse ordersResponse = mainClient.getOrder(orderId).getResult();
 
+
         Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
         String userKeycloakId = authentication.getName();
+
 
         if(!ordersResponse.getRoleCreateOrder().equals(RoleCreateOrder.STAFF)){
             throw new AppException(ErrorCode.UNAUTHORIZED);

@@ -21,6 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 @Builder
+@RequestMapping("/api")
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class VoucherController {
     VoucherService voucherService;

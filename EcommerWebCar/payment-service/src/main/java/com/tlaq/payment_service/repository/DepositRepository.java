@@ -16,4 +16,5 @@ public interface DepositRepository extends JpaRepository<Deposit, String> {
 
     List<Deposit> findByProfileId(String profileId);
 
+
 }

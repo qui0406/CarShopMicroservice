@@ -38,6 +38,6 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         cookie.setPath("/");
         cookie.setMaxAge(24 * 60 * 60);
         response.addCookie(cookie);
-        response.sendRedirect("/ScoreManagement/admin/dashboard");
+        response.sendRedirect("/ecommer-car-web/admin/dashboard");
     }
 }

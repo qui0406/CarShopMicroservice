@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div>
+    <form method="get" th:action="@{/admin/stats}">
+        <div class="row">
+            <div class="col-md-3">
+                <label>Năm:</label>
+                <input type="number" name="year" class="form-control" th:value="${#dates.year(#dates.createNow())}">
+            </div>
+            <div class="col-md-3">
+                <label>Tháng:</label>
+                <input type="number" name="month" class="form-control" min="1" max="12" th:value="${#dates.month(#dates.createNow())}">
+            </div>
+            <div class="col-md-3 align-self-end">
+                <button type="submit" class="btn btn-primary">Xem báo cáo</button>
+            </div>
+        </div>
+    </form>
+
+</div>
+
+</body>
+</html>

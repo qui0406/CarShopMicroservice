@@ -21,7 +21,7 @@ import java.util.List;
 public class PaymentController {
     PartialPaymentService partialPaymentService;
 
-    @GetMapping("/get-my-payment")
+    @GetMapping("/api/get-my-payment")
     public ApiResponse<List<OrderHistoryResponse>> getOrderHistory(){
         return ApiResponse.<List<OrderHistoryResponse>>builder()
                 .result(partialPaymentService.getOrderHistory())

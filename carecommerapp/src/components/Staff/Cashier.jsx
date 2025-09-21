@@ -200,17 +200,21 @@ export default function Cashier() {
           >
             {/* Modal Header */}
             <div className="flex justify-between items-center p-6 border-b border-gray-200">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-semibold text-gray-900">
-                  Chi tiết đơn hàng
-                </h3>
-                <button
-                  className="text-gray-400 hover:text-gray-600 text-2xl leading-none"
-                  onClick={() => setSelectedOrder(null)}
-                >
-                  x
-                </button>
-              </div>
+              <div className="flex w-full items-center justify-between px-2">
+  <h3 className="text-2xl font-bold text-gray-800">
+    Chi tiết đơn hàng
+  </h3>
+  <button
+    onClick={() => setSelectedOrder(null)}
+    className="p-2 rounded-full hover:bg-gray-100 transition-colors duration-200"
+    aria-label="Đóng"
+  >
+    <span className="text-gray-500 hover:text-gray-700 text-xl font-bold">
+      ✕
+    </span>
+  </button>
+</div>
+
             </div>
 
             {/* Modal Body */}

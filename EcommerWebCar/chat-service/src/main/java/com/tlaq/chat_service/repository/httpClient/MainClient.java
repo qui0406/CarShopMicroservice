@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 @FeignClient(name = "main", url = "${app.services.main.url}",
         configuration = { AuthenticationRequestInterceptor.class })
 public interface MainClient {
-    @GetMapping("/profile/get-profile/{userKeyCloakId}")
+    @GetMapping("/api/profile/get-profile/{userKeyCloakId}")
     ApiResponse<UserProfileResponse> getProfile(@PathVariable String userKeyCloakId);
 
-    @GetMapping("/profile/get-profile-by-id/{id}")
+    @GetMapping("/api/profile/get-profile-by-id/{id}")
     ApiResponse<UserProfileResponse> getProfileById(@PathVariable String id);
 }
