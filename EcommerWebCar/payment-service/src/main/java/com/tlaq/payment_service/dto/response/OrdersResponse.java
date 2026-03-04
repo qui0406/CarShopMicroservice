@@ -1,33 +1,23 @@
 package com.tlaq.payment_service.dto.response;
 
-import com.tlaq.payment_service.entity.enums.PaymentStatus;
-import com.tlaq.payment_service.entity.enums.RoleCreateOrder;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrdersResponse {
     String id;
-    Profile profile;
-    @Enumerated(EnumType.STRING)
-    PaymentStatus paymentStatus;
-    RoleCreateOrder roleCreateOrder;
-    int quantity;
-
-    OrderDetails orderDetails;
-
-    @Data
-    @RequiredArgsConstructor
-    public static class OrderDetails {
-        private BigDecimal totalAmount;
-        private int quantity;
-    }
+    String userId;
+    BigDecimal totalAmount;
+    String note;
+    List<OrdersDetailsResponse> orderItems;
+    LocalDateTime createdAt;
+    LocalDateTime updatedAt;
 }

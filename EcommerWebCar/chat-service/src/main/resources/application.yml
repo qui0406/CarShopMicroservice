@@ -1,5 +1,5 @@
 server:
-  port: 8082
+  port: 8085
   servlet:
     context-path: /chat
 
@@ -32,24 +32,5 @@ eureka:
 
 idp:
   url: http://localhost:8180/realms/anhqui/protocol/openid-connect/token
-  client-id: ecommer_app
-  client-secret: WKnFf5PHkolShqwY8CnVrYP7bHhYph4H
-
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health, info, metrics, prometheus
-  metrics:
-    distribution:
-      percentiles-histogram:
-        http:
-          server:
-            requests: true
-  observations:
-    key-values:
-      application: loan-service
-  tracing:
-    sampling:
-      probability: 1.0
+  client-id: ecommer-app
+  client-secret: 2anScggPiIAmbA5mW5SI5JnGZAcCVveo
