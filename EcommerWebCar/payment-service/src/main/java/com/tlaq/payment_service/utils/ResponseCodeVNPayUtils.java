@@ -1,7 +1,5 @@
 package com.tlaq.payment_service.utils;
 
-import com.tlaq.payment_service.dto.response.StatusCodeVNPayResponse;
-
 public class ResponseCodeVNPayUtils {
     public static final StatusCodeVNPayResponse SUCCESS = new StatusCodeVNPayResponse("00", "Successful");
     public static final StatusCodeVNPayResponse SIGNATURE_FAILED = new StatusCodeVNPayResponse("97", "Signature failed");

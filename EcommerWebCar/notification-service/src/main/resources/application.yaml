@@ -1,5 +1,5 @@
 server:
-    port: 8081
+    port: 8087
     servlet:
         context-path: /notification
 spring:
@@ -38,26 +38,7 @@ eureka:
     prefer-ip-address: true
     hostname: localhost
 
-management:
-    endpoints:
-        web:
-            exposure:
-                include: health, info, metrics, prometheus
-    metrics:
-        distribution:
-            percentiles-histogram:
-                http:
-                    server:
-                        requests: true
-    observations:
-        key-values:
-            application: notification_service
-    tracing:
-        sampling:
-            probability: 1.0
 
 logging:
     level:
         org.springframework.security.web: DEBUG
-#    pattern:
-#        correlation: "[${spring.application.name:},%X{traceId:-},%X{spanId:-}]"

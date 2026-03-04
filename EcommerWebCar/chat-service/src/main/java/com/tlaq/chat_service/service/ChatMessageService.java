@@ -101,11 +101,6 @@ public class ChatMessageService {
     }
 
 
-
-
-
-
-
     private void autoAssignStaffToConversation(Conversation conversation, String staffId) {
         try {
             if (!conversation.getStaffIds().contains(staffId)) {

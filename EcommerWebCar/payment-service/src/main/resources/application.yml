@@ -1,5 +1,5 @@
 server:
-  port: 8083
+  port: 8084
   servlet:
     context-path: /payment
 
@@ -7,7 +7,7 @@ spring:
   application:
     name: payment-service
   datasource:
-    url: "jdbc:mysql://localhost:3306/payment_ecommer"
+    url: "jdbc:mysql://localhost:3306/payment_ecommer_car"
     driverClassName: "com.mysql.cj.jdbc.Driver"
     username: root
     password: 12345678
@@ -74,5 +74,5 @@ resilience4j:
 
 idp:
   url: http://localhost:8180/realms/anhqui/protocol/openid-connect/token
-  client-id: ecommer_app
-  client-secret: WKnFf5PHkolShqwY8CnVrYP7bHhYph4H
+  client-id: ecommer-app
+  client-secret: 2anScggPiIAmbA5mW5SI5JnGZAcCVveo
