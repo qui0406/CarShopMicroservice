@@ -8,6 +8,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -34,6 +35,7 @@ public class CarCategoryController {
                 .build();
     }
 
+    @PreAuthorize("hasRole('STAFF')")
     @PostMapping("/staff/car-category/create-category")
     public ApiResponse<CarCategoryResponse> createCarCategory(@RequestBody CarCategoryRequest carCategoryRequest) {
         return ApiResponse.<CarCategoryResponse>builder()

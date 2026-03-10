@@ -1,6 +1,5 @@
 package com.tlaq.catalog_service.controller;
 
-import com.cloudinary.Api;
 import com.tlaq.catalog_service.dto.ApiResponse;
 import com.tlaq.catalog_service.dto.request.CarBranchRequest;
 import com.tlaq.catalog_service.dto.response.CarBranchResponse;
@@ -10,10 +9,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.awt.*;
 import java.util.List;
 
 @RestController
@@ -38,6 +37,7 @@ public class CarBranchController {
                 .build();
     }
 
+    @PreAuthorize("hasRole('STAFF')")
     @PostMapping(value = "/staff/car-branch/create-branch", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<CarBranchResponse> create(@ModelAttribute CarBranchRequest request,
                                                  MultipartFile imageBranch) {
@@ -46,6 +46,7 @@ public class CarBranchController {
                 .build();
     }
 
+    @PreAuthorize("hasRole('STAFF')")
     @DeleteMapping("/staff/delete-branch/{branchId}")
     public ApiResponse<CarBranchResponse> delete(@PathVariable Long branchId){
         carBranchService.deleteById(branchId);

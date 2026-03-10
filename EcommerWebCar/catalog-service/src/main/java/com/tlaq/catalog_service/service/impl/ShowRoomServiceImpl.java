@@ -38,36 +38,27 @@ public class ShowRoomServiceImpl implements ShowRoomService {
 
     @Override
     public ShowRoomResponse getShowRoom() {
-        // 1. Lấy Keycloak ID từ Token hiện tại
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String userKeyCloakId = authentication.getName();
-
-        // 2. Gọi sang Identity Service để lấy Profile ID tương ứng
-        var profileResponse = identityClient.getProfile(userKeyCloakId);
-        if (profileResponse.getResult() == null) {
-            throw new AppException(ErrorCode.USER_NOT_EXISTED);
-        }
-        String profileId = profileResponse.getResult().getId();
-
-        // 3. Tìm Showroom dựa trên profileId (ownerId)
-        return showRoomMapper.toShowRoomResponse(showRoomRepository.findByOwnerId(profileId));
+        ShowRoom showRoom = showRoomRepository.findMainShowRoom()
+                .orElseThrow(() -> new AppException(ErrorCode.SHOWROOM_NOT_FOUND));
+        return showRoomMapper.toShowRoomResponse(showRoom);
     }
 
     @Override
     public ShowRoomResponse createShowRoom(ShowRoomRequest request, List<MultipartFile> images) {
+        if (showRoomRepository.count() > 0) {
+            throw new AppException(ErrorCode.SHOWROOM_ALREADY_EXISTS);
+        }
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userKeyCloakId = authentication.getName();
 
-        var profileResponse = identityClient.getProfile(userKeyCloakId);
+        var profileResponse = identityClient.getProfileByUserKeycloakId(userKeyCloakId);
         String profileId = profileResponse.getResult().getId();
 
-        // 3. Map dữ liệu và set ownerId [cite: 2026-02-25]
         ShowRoom showRoom = showRoomMapper.toShowRoom(request);
-        showRoom.setOwnerId(profileId); // Chỉ lưu String ID [cite: 2026-02-25]
+        showRoom.setOwnerId(profileId);
 
-        // 4. Xử lý Upload ảnh lên Cloudinary
         uploadImages(images, showRoom);
-
         return showRoomMapper.toShowRoomResponse(showRoomRepository.save(showRoom));
     }
 

@@ -32,7 +32,6 @@ public class KeyCloakTokenService {
 
     public synchronized String getAccessToken() {
         if (cachedToken != null && System.currentTimeMillis() < tokenExpiryTime) {
-            log.info("Using cached Keycloak token");
             return cachedToken;
         }
 
@@ -51,7 +50,6 @@ public class KeyCloakTokenService {
                 cachedToken = "Bearer " + response.getBody().get("access_token");
                 long expiresIn = Long.parseLong(response.getBody().get("expires_in").toString()) * 1000 - 60000;
                 tokenExpiryTime = System.currentTimeMillis() + expiresIn;
-                log.info("Fetched new Keycloak token, expires in {} ms", expiresIn);
                 return cachedToken;
             } else {
                 throw new RuntimeException("Failed to fetch Keycloak token, status: " + response.getStatusCode() + ", body: " + response.getBody());
