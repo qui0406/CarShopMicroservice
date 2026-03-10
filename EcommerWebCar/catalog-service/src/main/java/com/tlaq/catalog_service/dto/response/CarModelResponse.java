@@ -22,8 +22,6 @@ public class CarModelResponse {
     FuelType fuelType;
     String description;
 
-    // CarCategoryResponse.java
-
     @Data
     @Builder
     public static class CarCategoryResponse {

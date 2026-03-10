@@ -24,7 +24,6 @@ public class Car {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
     String name;
-    LocalDate year;
     BigDecimal price;
 
     @CreationTimestamp
@@ -44,13 +43,13 @@ public class Car {
 
     String model3dUrl;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "car_specification_id")
-    CarSpecification carSpecification; // Gộp các bảng Feature lại
+    Equipment equipment;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "car_service_id", referencedColumnName = "id")
-    CarService carService;
+    TechnicalSpec technicalSpec;
 
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL, orphanRemoval = true)
     List<CarImage> carImages;

@@ -67,7 +67,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiResponse> handlingRuntimeException() {
-        ErrorCode errorCode = ErrorCode.IMAGE_IS_EMPTY; // Sử dụng ErrorCode phù hợp
+        ErrorCode errorCode = ErrorCode.UNAUTHENTICATED; // Sử dụng ErrorCode phù hợp
         ApiResponse apiResponse = new ApiResponse();
 
         apiResponse.setCode(errorCode.getCode());

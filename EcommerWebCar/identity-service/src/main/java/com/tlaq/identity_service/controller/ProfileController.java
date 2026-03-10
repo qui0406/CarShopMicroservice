@@ -1,21 +1,15 @@
 package com.tlaq.identity_service.controller;
 
 import com.tlaq.identity_service.dto.ApiResponse;
-import com.tlaq.identity_service.dto.request.IntrospectRequest;
-import com.tlaq.identity_service.dto.request.LoginRequest;
-import com.tlaq.identity_service.dto.request.RegistrationRequest;
-import com.tlaq.identity_service.dto.response.IntrospectResponse;
+import com.tlaq.identity_service.dto.request.*;
 import com.tlaq.identity_service.dto.response.ProfileResponse;
-import com.tlaq.identity_service.dto.response.TokenResponse;
 import com.tlaq.identity_service.service.ProfileService;
-import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -26,28 +20,6 @@ import java.util.List;
 @RequestMapping("/api/profile")
 public class ProfileController {
     ProfileService profileService;
-
-    @PostMapping("/register")
-    public ApiResponse<ProfileResponse> register(@ModelAttribute @Valid RegistrationRequest request,
-                                                 MultipartFile avatar) {
-        return ApiResponse.<ProfileResponse>builder()
-                .result(profileService.register(request, avatar))
-                .build();
-    }
-
-    @PostMapping("/login")
-    public ApiResponse<TokenResponse> login(@RequestBody LoginRequest request) {
-        return ApiResponse.<TokenResponse>builder()
-                .result(profileService.login(request))
-                .build();
-    }
-
-    @PostMapping("/introspect")
-    public ApiResponse<IntrospectResponse> introspect(@RequestBody IntrospectRequest request) {
-        return ApiResponse.<IntrospectResponse>builder()
-                .result(profileService.introspect(request))
-                .build();
-    }
 
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/profiles")
@@ -64,8 +36,8 @@ public class ProfileController {
                 .build();
     }
 
-    @GetMapping("/get-profile/{userKeyCloakId}")
-    public ApiResponse<ProfileResponse> getProfile(@PathVariable String userKeyCloakId) {
+    @GetMapping("/get-profile-by-keycloak-id/{userKeyCloakId}")
+    public ApiResponse<ProfileResponse> getProfileByUserKeyCloakId(@PathVariable String userKeyCloakId) {
         return ApiResponse.<ProfileResponse>builder()
                 .result(profileService.getProfileByKeyCloakId(userKeyCloakId))
                 .build();

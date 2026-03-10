@@ -34,5 +34,4 @@ public class RegistrationRequest {
 
     @DobConstraint(min = 10, message = "INVALID_DOB")
     LocalDate dob;
-
 }

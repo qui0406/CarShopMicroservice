@@ -30,6 +30,5 @@ public class ShowRoomRequest {
     String about;
     String description;
 
-    // ID của người chủ (Lấy từ Identity Service)
     String ownerId;
 }

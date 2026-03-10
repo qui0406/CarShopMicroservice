@@ -9,6 +9,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -33,6 +34,7 @@ public class InventoryController {
                 .build();
     }
 
+    @PreAuthorize("hasRole('STAFF')")
     @PostMapping("/staff/inventory/create-inventory")
     public ApiResponse<InventoryResponse> createInventory(@RequestBody InventoryRequest inventoryRequest) {
         return ApiResponse.<InventoryResponse>builder()
@@ -40,6 +42,7 @@ public class InventoryController {
                 .build();
     }
 
+    @PreAuthorize("hasRole('STAFF')")
     @PutMapping("/staff/inventory/update-inventory/{inventoryId}")
     public ApiResponse<InventoryResponse> updateInventory(@PathVariable String inventoryId,
                                                           @RequestBody InventoryUpdateRequest request) {
@@ -48,6 +51,7 @@ public class InventoryController {
                 .build();
     }
 
+    @PreAuthorize("hasRole('STAFF')")
     @DeleteMapping("/staff/inventory/delete-inventory/{inventoryId}")
     public ApiResponse<InventoryResponse> deleteInventory(@PathVariable String inventoryId) {
         inventoryService.delete(inventoryId);

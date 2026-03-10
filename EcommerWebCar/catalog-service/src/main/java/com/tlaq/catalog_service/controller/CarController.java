@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -51,24 +52,18 @@ public class CarController {
                 .build();
     }
 
+    @PreAuthorize("hasRole('STAFF')")
     @PostMapping(value = "/staff/car/create-product", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiResponse<CarResponse> createCar(@ModelAttribute CarRequest carRequest,
-                                              @RequestParam("images") @Valid
-                                              @ImageConstraint(min = 1, max = 5, message = "Chọn từ 1 tới 5 ảnh")
-                                              List<MultipartFile> images) {
-        try{
-             carDetailsService.createCarDetail(carRequest, images);
-            return ApiResponse.<CarResponse>builder()
-                    .message("Car created successfully")
-                    .build();
-        }
-        catch(AppException e){
-            return ApiResponse.<CarResponse>builder()
-                    .message(e.getMessage())
-                    .build();
-        }
+    public ApiResponse<CarResponse> createCar(
+            @RequestPart("request") @Valid CarRequest request,
+            @RequestPart("images") List<MultipartFile> images
+    ) {
+        return ApiResponse.<CarResponse>builder()
+                .result(carDetailsService.createCarDetail(request, images))
+                .build();
     }
 
+    @PreAuthorize("hasRole('STAFF')")
     @DeleteMapping("/staff/car/delete-product/{carId}")
     public ApiResponse<Void> deleteCar(@PathVariable("carId") String carId){
         carDetailsService.delete(carId);

@@ -32,6 +32,13 @@ public enum ErrorCode {
     APPRAISAL_NOT_FOUND(1020, "Appraisal not found", HttpStatus.NOT_FOUND),
     INVALID_STATUS_FOR_INVENTORY(1021, "Invalid status for inventory", HttpStatus.BAD_REQUEST),
 
+    SHOWROOM_NOT_FOUND(1022, "Showroom not found", HttpStatus.NOT_FOUND),
+    SHOWROOM_ALREADY_EXISTS(1023, "Showroom already exists", HttpStatus.CONFLICT),
+    MODEL_NOT_FOUND(1024, "Model not found", HttpStatus.NOT_FOUND),
+    CAR_BRANCH_NOT_FOUND(1025, "Car branch not found", HttpStatus.NOT_FOUND),
+    INVENTORY_NOT_FOUND(1026, "Inventory not found", HttpStatus.NOT_FOUND),
+    INVALID_QUANTITY(1027, "Invalid quantity", HttpStatus.BAD_REQUEST),
+
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

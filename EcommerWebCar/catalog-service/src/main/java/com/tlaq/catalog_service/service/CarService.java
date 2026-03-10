@@ -11,7 +11,7 @@ import java.util.Map;
 public interface CarService {
     PageResponse<CarResponse> getCar(int page, int size);
     CarResponse getCarDetails(String carId);
-    void createCarDetail(CarRequest carRequest, List<MultipartFile> images);
+    CarResponse createCarDetail(CarRequest carRequest, List<MultipartFile> images);
     void delete(String carId);
     PageResponse<CarResponse> filterCar(Map<String, String> filter);
 }

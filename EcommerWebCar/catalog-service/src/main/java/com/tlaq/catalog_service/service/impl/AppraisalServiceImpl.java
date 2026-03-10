@@ -2,9 +2,11 @@ package com.tlaq.catalog_service.service.impl;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.tlaq.catalog_service.dto.ApiResponse;
 import com.tlaq.catalog_service.dto.PageResponse;
 import com.tlaq.catalog_service.dto.request.AppraisalRequestDto;
 import com.tlaq.catalog_service.dto.response.AppraisalResponse;
+import com.tlaq.catalog_service.dto.response.UserProfileResponse;
 import com.tlaq.catalog_service.entity.AppraisalImage;
 import com.tlaq.catalog_service.entity.AppraisalRequest;
 import com.tlaq.catalog_service.entity.enums.AppraisalStatus;
@@ -48,7 +50,8 @@ public class AppraisalServiceImpl implements AppraisalService {
 
     @Override
     public List<AppraisalResponse> getMyAppraisals(String userKeyCloakId) {
-        var profileRes = identityClient.getProfile(userKeyCloakId);
+        ApiResponse<UserProfileResponse> profileRes = identityClient.getProfileByUserKeycloakId(userKeyCloakId);
+
         if (profileRes.getResult() == null) {
             throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }
@@ -89,7 +92,7 @@ public class AppraisalServiceImpl implements AppraisalService {
 
     @Override
     public AppraisalResponse createAppraisal(AppraisalRequestDto dto, List<MultipartFile> images, String userKeyCloakId) {
-        var profileRes = identityClient.getProfile(userKeyCloakId);
+        var profileRes = identityClient.getProfileByUserKeycloakId(userKeyCloakId);
         if (profileRes.getResult() == null) throw new AppException(ErrorCode.USER_NOT_EXISTED);
         String profileId = profileRes.getResult().getId();
 

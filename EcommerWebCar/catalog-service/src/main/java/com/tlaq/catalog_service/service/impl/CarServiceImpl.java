@@ -7,14 +7,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tlaq.catalog_service.dto.PageResponse;
 import com.tlaq.catalog_service.dto.request.CarRequest;
 import com.tlaq.catalog_service.dto.response.CarResponse;
-import com.tlaq.catalog_service.entity.Car;
-import com.tlaq.catalog_service.entity.CarImage;
+import com.tlaq.catalog_service.entity.*;
 import com.tlaq.catalog_service.exceptions.AppException;
 import com.tlaq.catalog_service.exceptions.ErrorCode;
 import com.tlaq.catalog_service.mapper.CarMapper;
+import com.tlaq.catalog_service.repo.CarModelRepository;
 import com.tlaq.catalog_service.repo.CarRepository;
 import com.tlaq.catalog_service.service.CarService;
 import com.tlaq.catalog_service.specifications.CarSpecification;
+import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -40,6 +41,7 @@ import java.util.Map;
 public class CarServiceImpl implements CarService {
     CarMapper carMapper;
     CarRepository carRepository;
+    CarModelRepository carModelRepository;
     Cloudinary cloudinary;
     ObjectMapper objectMapper;
 
@@ -63,34 +65,56 @@ public class CarServiceImpl implements CarService {
         CarResponse carDetailsResponse= carMapper.toCarResponse(car);
         carDetailsResponse.setName(car.getCarModel().getCarBranch().getName() + " " +
                 car.getCarModel().getCategory().getName()+ " " +
-                car.getCarModel().getName() + " " + car.getYear().toString().split("-")[0]);
+                car.getCarModel().getName() + " " + car.getManufacturingYear());
         return carDetailsResponse;
     }
 
     @Override
-    public void createCarDetail(CarRequest request, List<MultipartFile> images) {
-        Car car= carMapper.toCar(request);
-        List<CarImage> carImageList = new ArrayList<>();
+    @Transactional
+    public CarResponse createCarDetail(CarRequest request, List<MultipartFile> images) {
+        // 1. Map thông tin cơ bản
+        Car car = carMapper.toCar(request);
 
+        // 2. PHẢI GÁN TechSpec và Equipment vào Car [cite: 2026-03-09]
+        if (request.getTechnicalSpec() != null) {
+            TechnicalSpec tech = carMapper.toTechnicalSpec(request.getTechnicalSpec());
+            car.setTechnicalSpec(tech);
+        }
+        if (request.getEquipment() != null) {
+            Equipment equip = carMapper.toEquipment(request.getEquipment());
+            car.setEquipment(equip);
+        }
+
+        // 3. XỬ LÝ car_model_id (Đang bị NULL trong hình 4) [cite: 2026-03-09]
+        CarModel model = carModelRepository.findById(request.getCarModelId())
+                .orElseThrow(() -> new AppException(ErrorCode.MODEL_NOT_FOUND));
+        car.setCarModel(model);
+
+        // 4. Xử lý ảnh (Nhớ gắn car vào từng CarImage) [cite: 2026-03-06]
+        // ... (Giữ nguyên đoạn code upload ảnh của bạn nhưng thêm carImage.setCar(car)) [cite: 2026-03-05]
         if (images != null && !images.isEmpty()) {
+            List<CarImage> carImageList = new ArrayList<>();
             for (MultipartFile img : images) {
                 try {
                     Map res = cloudinary.uploader().upload(img.getBytes(),
                             ObjectUtils.asMap("resource_type", "auto"));
                     String imageUrl = res.get("secure_url").toString();
-                    CarImage carImage = CarImage.builder()
+
+                    // Gán car vào carImage để tránh null car_id trong DB [cite: 2026-03-05, 2026-03-06]
+                    carImageList.add(CarImage.builder()
                             .image(imageUrl)
-                            .build();
-                    carImageList.add(carImage);
+                            .car(car)
+                            .build());
                 } catch (IOException ex) {
                     throw new AppException(ErrorCode.UPLOAD_IMAGE_ERROR);
                 }
             }
-        }else{
+            car.setCarImages(carImageList);
+        } else {
             throw new AppException(ErrorCode.IMAGE_IS_EMPTY);
         }
-        car.setCarImages(carImageList);
-        carRepository.save(car);
+
+        return carMapper.toCarResponse(carRepository.save(car));
     }
 
     @Override

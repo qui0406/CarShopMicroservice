@@ -26,7 +26,7 @@ public class Inventory {
     @Column(name = "created_at")
     LocalDateTime createdAt;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     Car car;
 
     @ManyToOne(fetch = FetchType.LAZY)

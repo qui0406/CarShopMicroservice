@@ -16,20 +16,22 @@ public class CarResponse {
     String id;
     String name;
     BigDecimal price;
+    int manufacturingYear;
 
-    // Thông tin từ các quan hệ (Nên dùng DTO con để tránh lộ thông tin thừa)
-    CarModelResponse carModel;
-    CarSpecificationResponse specification;
-    CarServiceResponse carService;
-    List<String> images; // Chỉ cần danh sách URL ảnh
-
-    // Thông tin định danh xe
+    // Tình trạng thực tế
     boolean isUsed;
     int mileage;
-    int manufacturingYear;
     String vinNumber;
+    String color;
     String inspectionReportUrl;
     String model3dUrl;
+
+    // Các thông tin chi tiết lồng nhau
+    TechSpecResponse technicalSpec;
+    EquipmentResponse equipment;
+
+    // Danh sách ảnh xe
+    List<String> images;
 
     LocalDateTime createdAt;
     LocalDateTime updatedAt;

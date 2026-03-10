@@ -37,11 +37,11 @@ public class AuthFilters implements GlobalFilter, Ordered {
 
     @NonFinal
     private static final String[] PUBLIC_ENDPOINTS = {
-        "/auth/api/profile/register", "/auth/api/profile/login",
-        "/payment/api/checkout/vnpay_ipn", "/ecommer-car-web/api/car/.*",
-        "/ecommer-car-web/api/car-model/.*", "/ecommer-car-web/api/car-branch/.*",
-        "/ecommer-car-web/api/car-category/.*", "/ecommer-car-web/admin/.*",
-            "/ecommer-car-web/api/inventory/.*", "/payment/api/stats/.*"
+            "/auth/api/register",
+            "/auth/api/login",
+            "/auth/api/introspect",
+            "/auth/api/refresh",
+            "/auth/api/logout"
     };
 
     @Value("${app.api-prefix}")

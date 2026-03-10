@@ -4,6 +4,10 @@ server:
     context-path: /catalog
 
 spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB
   application:
     name: catalog-service
   datasource:
@@ -27,10 +31,22 @@ cloudinary:
   api-key: 947875495844325
   api-secret: evQEPk5TbxIMpCWbbXl8sLMbo6A
 
+aws:
+  s3:
+    bucket-name: qui-showroom-assets
+    region: ap-southeast-1
+    access-key: ${AWS_ACCESS_KEY}
+    secret-key: ${AWS_SECRET_KEY}
+
 idp:
   url: http://localhost:8180
   client-id: ecommer-app
   client-secret: 2anScggPiIAmbA5mW5SI5JnGZAcCVveo
+
+app:
+  services:
+    main:
+      url: http://localhost:8081
 
 eureka:
   client:

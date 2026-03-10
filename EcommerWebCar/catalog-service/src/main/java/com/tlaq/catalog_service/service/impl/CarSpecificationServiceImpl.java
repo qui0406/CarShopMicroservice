@@ -1,9 +1,9 @@
 package com.tlaq.catalog_service.service.impl;
 
-import com.tlaq.catalog_service.dto.request.CarSpecificationRequest;
-import com.tlaq.catalog_service.dto.response.CarSpecificationResponse;
-import com.tlaq.catalog_service.entity.CarSpecification;
-import com.tlaq.catalog_service.mapper.CarSpecificationMapper;
+import com.tlaq.catalog_service.dto.request.EquipmentRequest;
+import com.tlaq.catalog_service.dto.response.EquipmentResponse;
+import com.tlaq.catalog_service.entity.Equipment;
+import com.tlaq.catalog_service.mapper.EquipmentMapper;
 import com.tlaq.catalog_service.repo.CarSpecificationRepository;
 import com.tlaq.catalog_service.service.CarSpecificationService;
 import lombok.AccessLevel;
@@ -18,36 +18,36 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class CarSpecificationServiceImpl implements CarSpecificationService {
     CarSpecificationRepository carSpecificationRepository;
-    CarSpecificationMapper carSpecificationMapper;
+    EquipmentMapper equipmentMapper;
 
     @Override
-    public CarSpecificationResponse create(CarSpecificationRequest request) {
-        CarSpecification specification = carSpecificationMapper.toEntity(request);
+    public EquipmentResponse create(EquipmentRequest request) {
+        Equipment specification = equipmentMapper.toEntity(request);
         specification = carSpecificationRepository.save(specification);
-        return carSpecificationMapper.toResponse(specification);
+        return equipmentMapper.toResponse(specification);
     }
 
     @Override
-    public List<CarSpecificationResponse> findAll() {
+    public List<EquipmentResponse> findAll() {
         return carSpecificationRepository.findAll().stream()
-                .map(carSpecificationMapper::toResponse)
+                .map(equipmentMapper::toResponse)
                 .toList();
     }
 
     @Override
-    public CarSpecificationResponse getByCarId(Long carId) {
+    public EquipmentResponse getByCarId(Long carId) {
         return carSpecificationRepository.findById(carId)
-                .map(carSpecificationMapper::toResponse)
+                .map(equipmentMapper::toResponse)
                 .orElseThrow(() -> new RuntimeException("Car Specification not found with id: " + carId));
     }
 
     @Override
-    public CarSpecificationResponse update(Long carId, CarSpecificationRequest request) {
-        CarSpecification specification = carSpecificationRepository.findById(carId)
+    public EquipmentResponse update(Long carId, EquipmentRequest request) {
+        Equipment specification = carSpecificationRepository.findById(carId)
                 .orElseThrow(() -> new RuntimeException("Car Specification not found"));
 
-        carSpecificationMapper.updateEntity(specification, request);
-        return carSpecificationMapper.toResponse(carSpecificationRepository.save(specification));
+        equipmentMapper.updateEntity(specification, request);
+        return equipmentMapper.toResponse(carSpecificationRepository.save(specification));
     }
 
     @Override
