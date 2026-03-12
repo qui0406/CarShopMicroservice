@@ -13,7 +13,6 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -28,31 +27,23 @@ import java.util.List;
 public class AppraisalController {
     AppraisalService appraisalService;
 
-    // 1. Khách hàng gửi yêu cầu định giá xe cũ (Kèm nhiều ảnh thực tế)
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<AppraisalResponse> createAppraisal(
             @RequestPart("dto") @Valid AppraisalRequestDto dto,
             @RequestPart("images") List<MultipartFile> images) {
-
-        // Trích xuất ID từ Token để xác định chủ nhân xe
-        String userKeyCloakId = SecurityContextHolder.getContext().getAuthentication().getName();
-
         return ApiResponse.<AppraisalResponse>builder()
-                .result(appraisalService.createAppraisal(dto, images, userKeyCloakId))
+                .result(appraisalService.createAppraisal(dto, images))
                 .build();
     }
 
-    // 2. Khách hàng xem danh sách xe mình đã gửi định giá
     @GetMapping("/my-requests")
     public ApiResponse<List<AppraisalResponse>> getMyAppraisals() {
-        String userKeyCloakId = SecurityContextHolder.getContext().getAuthentication().getName();
         return ApiResponse.<List<AppraisalResponse>>builder()
-                .result(appraisalService.getMyAppraisals(userKeyCloakId))
+                .result(appraisalService.getMyAppraisals())
                 .build();
     }
 
-    // 3. STAFF/ADMIN xem toàn bộ yêu cầu định giá (Có phân trang và lọc theo trạng thái)
-    @GetMapping
+    @GetMapping("/get-all-appraisals")
     @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
     public ApiResponse<PageResponse<AppraisalResponse>> getAllAppraisals(
             @RequestParam(value = "page", defaultValue = "1") int page,
@@ -64,7 +55,6 @@ public class AppraisalController {
                 .build();
     }
 
-    // 4. STAFF đưa ra mức giá đề nghị mua lại chiếc xe
     @PatchMapping("/{id}/offer-price")
     @PreAuthorize("hasRole('STAFF')")
     public ApiResponse<AppraisalResponse> updateOfferedPrice(
@@ -77,7 +67,6 @@ public class AppraisalController {
                 .build();
     }
 
-    // 5. Cập nhật trạng thái (Duyệt, Từ chối, Đã mua...)
     @PutMapping("/{id}/status")
     @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
     public ApiResponse<AppraisalResponse> updateStatus(

@@ -55,7 +55,6 @@ public class CarSpecificationController {
                 .build();
     }
 
-    // 5. Xóa bộ thông số (Lưu ý: Chỉ xóa được khi chưa có xe nào sử dụng spec này)
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ApiResponse<String> delete(@PathVariable Long id) {

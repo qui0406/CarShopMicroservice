@@ -30,8 +30,13 @@ spring:
 
 app:
   services:
-    main:
-      url: http://localhost:8080/ecommer-car-web
+    identity:
+      url: http://localhost:8081
+    catalog:
+      url: http://localhost:8082
+    ordering:
+      url: http://localhost:8083
+
 
 eureka:
   client:

@@ -25,21 +25,18 @@ public class OrdersHistory {
     @JoinColumn(name = "order_id", nullable = false)
     Orders order;
 
-    // Trạng thái của đơn hàng tại thời điểm ghi log
     @Enumerated(EnumType.STRING)
-    @Column(name = "order_status")
     OrdersStatus status;
 
-    // Ghi chú chi tiết về lý do thay đổi (VD: "Đã xác nhận đặt cọc qua VNPAY")
-    @Column(columnDefinition = "TEXT")
     String note;
 
-    // ID của người thực hiện thay đổi (Lấy từ Identity Service)
-    // Có thể là User ID (khách hàng) hoặc Staff ID (nhân viên showroom)
-    @Column(name = "updated_by")
+    @Column(name = "updated_by") // Giữ cái này [cite: 2026-03-10]
     String updatedBy;
 
+    // Đổi tên cột hoặc dùng chung updatedBy [cite: 2026-03-10]
+    // @Column(name = "created_by")
+    // String createdBy;
+
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
     LocalDateTime createdAt;
 }

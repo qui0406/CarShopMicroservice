@@ -18,6 +18,5 @@ public class OrdersDetailsRequest {
     String cccd;
     LocalDate dob;
 
-    // Thường quantity mặc định là 1 cho xe cũ, hoặc có thể truyền từ frontend
     int quantity;
 }

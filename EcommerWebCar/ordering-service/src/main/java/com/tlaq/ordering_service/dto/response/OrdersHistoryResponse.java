@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrdersHistoryResponse {
-    Long id;
+    String orderId;
     OrdersStatus status;
     String note;
     String updatedBy;

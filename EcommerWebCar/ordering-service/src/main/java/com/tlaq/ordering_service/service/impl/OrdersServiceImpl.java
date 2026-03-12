@@ -1,8 +1,12 @@
 package com.tlaq.ordering_service.service.impl;
 
+import com.tlaq.ordering_service.config.RabbitMQConfig;
 import com.tlaq.ordering_service.dto.PageResponse;
+import com.tlaq.ordering_service.dto.message.InventoryUpdateMessage;
 import com.tlaq.ordering_service.dto.request.OrdersDetailsRequest;
 import com.tlaq.ordering_service.dto.request.OrdersRequest;
+import com.tlaq.ordering_service.dto.response.CarResponse;
+import com.tlaq.ordering_service.dto.response.InventoryResponse;
 import com.tlaq.ordering_service.dto.response.OrdersHistoryResponse;
 import com.tlaq.ordering_service.dto.response.OrdersResponse;
 import com.tlaq.ordering_service.entity.Orders;
@@ -22,6 +26,7 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -30,8 +35,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 @Service
 @Slf4j
@@ -43,6 +50,7 @@ public class OrdersServiceImpl implements OrdersService {
     OrdersMapper ordersMapper;
     CatalogClient catalogClient;
     IdentityClient identityClient;
+    RabbitTemplate rabbitTemplate;
 
     @Override
     public OrdersResponse getOrderById(String id) {
@@ -51,36 +59,60 @@ public class OrdersServiceImpl implements OrdersService {
         return ordersMapper.toOrdersResponse(order);
     }
 
+
     @Override
     @Transactional
-    public OrdersResponse createOrder(OrdersRequest request, String userKeyCloakId) {
+    public OrdersResponse createOrder(OrdersRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userKeyCloakId = authentication.getName();
+
         if (request.getOrderItems() == null || request.getOrderItems().isEmpty()) {
             throw new AppException(ErrorCode.ORDER_IS_EMPTY);
         }
 
-        // 1. Kiểm tra tồn kho (Lấy xe đầu tiên)
-        OrdersDetailsRequest firstItem = request.getOrderItems().get(0);
-        Boolean isAvailable = catalogClient.checkInventory(firstItem.getCarId(), firstItem.getQuantity()).getResult();
-        if (Boolean.FALSE.equals(isAvailable)) {
-            throw new AppException(ErrorCode.QUANTITY_NOT_ENOUGH);
-        }
+        // 1. Lấy Profile ID từ Identity Service
+        var profileRes = identityClient.getProfileByUserKeycloakId(userKeyCloakId).getResult();
+        if (profileRes == null) throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        String profileId = profileRes.getId();
 
-        // 2. Lấy Profile ID từ Identity Service
-        var profileRes = identityClient.getProfile(userKeyCloakId);
-        if (profileRes.getResult() == null) throw new AppException(ErrorCode.USER_NOT_EXISTED);
-        String profileId = profileRes.getResult().getId();
-
-        // 3. Khởi tạo đơn hàng
+        // 2. Khởi tạo đơn hàng
         Orders order = ordersMapper.toOrdersEntity(request);
         order.setUserId(profileId);
         order.setStatus(OrdersStatus.PENDING);
 
         List<OrdersDetails> detailsEntities = new ArrayList<>();
+
+        // Khởi tạo các biến tích lũy để tránh null [cite: 2026-03-11]
+        BigDecimal totalBaseAmount = BigDecimal.ZERO;
+        BigDecimal totalTaxAmount = BigDecimal.ZERO;
+        BigDecimal totalPlateFeeAmount = BigDecimal.ZERO;
+        BigDecimal totalInsuranceAmount = BigDecimal.ZERO;
         BigDecimal totalOrderAmount = BigDecimal.ZERO;
 
-        // 4. Xử lý từng Item và lấy giá từ Catalog Service
         for (OrdersDetailsRequest itemDto : request.getOrderItems()) {
-            BigDecimal currentPrice = catalogClient.getCarPrice(itemDto.getCarId()).getResult();
+            CarResponse carDetail = catalogClient.getProductById(itemDto.getCarId()).getResult();
+            if (carDetail == null) throw new AppException(ErrorCode.CAR_NOT_FOUND);
+
+            var inventoryRes = catalogClient.checkInventory(itemDto.getCarId(), itemDto.getQuantity());
+            if (inventoryRes == null || !Boolean.TRUE.equals(inventoryRes.getResult())) {
+                throw new AppException(ErrorCode.QUANTITY_NOT_ENOUGH);
+            }
+
+            BigDecimal basePrice = carDetail.getPrice();
+            BigDecimal qty = BigDecimal.valueOf(itemDto.getQuantity());
+
+            BigDecimal registrationTax = calculateRegistrationTax(basePrice, itemDto.getAddress(), carDetail.getTechnicalSpec().getFuelType());
+            BigDecimal plateFee = calculatePlateFee(itemDto.getAddress());
+            BigDecimal fixedFees = new BigDecimal("2500000"); // Đăng kiểm...
+
+            totalBaseAmount = totalBaseAmount.add(basePrice.multiply(qty));
+            totalTaxAmount = totalTaxAmount.add(registrationTax.multiply(qty));
+            totalPlateFeeAmount = totalPlateFeeAmount.add(plateFee.multiply(qty));
+            totalInsuranceAmount = totalInsuranceAmount.add(fixedFees.multiply(qty));
+
+            BigDecimal unitRollingPrice = basePrice.add(registrationTax).add(plateFee).add(fixedFees);
+            BigDecimal itemTotalAmount = unitRollingPrice.multiply(qty);
+            totalOrderAmount = totalOrderAmount.add(itemTotalAmount);
 
             OrdersDetails detail = OrdersDetails.builder()
                     .carId(itemDto.getCarId())
@@ -90,130 +122,114 @@ public class OrdersServiceImpl implements OrdersService {
                     .cccd(itemDto.getCccd())
                     .dob(itemDto.getDob())
                     .quantity(itemDto.getQuantity())
-                    .unitPrice(currentPrice)
-                    .totalAmount(currentPrice.multiply(BigDecimal.valueOf(itemDto.getQuantity())))
+                    .unitPrice(unitRollingPrice)
+                    .totalAmount(itemTotalAmount)
                     .order(order)
                     .build();
 
             detailsEntities.add(detail);
-            totalOrderAmount = totalOrderAmount.add(detail.getTotalAmount());
         }
 
         order.setOrderItems(detailsEntities);
+        order.setBaseAmount(totalBaseAmount);
+        order.setTaxAmount(totalTaxAmount);
+        order.setPlateFeeAmount(totalPlateFeeAmount);
+        order.setInsuranceAmount(totalInsuranceAmount);
         order.setTotalAmount(totalOrderAmount);
 
-        // 5. Lưu và ghi log lịch sử
+        // 4. Lưu và ghi log lịch sử
         Orders savedOrder = ordersRepository.save(order);
-        saveHistory(savedOrder, OrdersStatus.PENDING, "Đơn hàng đã được khởi tạo bởi khách hàng.", profileId);
+
+        // Bắn tin nhắn trừ kho cho từng chiếc xe trong đơn hàng [cite: 2026-03-11]
+        savedOrder.getOrderItems().forEach(item -> {
+            InventoryUpdateMessage message = InventoryUpdateMessage.builder()
+                    .carId(item.getCarId())
+                    .quantity(item.getQuantity())
+                    .build();
+
+            rabbitTemplate.convertAndSend(
+                    RabbitMQConfig.EXCHANGE,
+                    RabbitMQConfig.INVENTORY_ROUTING_KEY,
+                    message
+            );
+        });
+
+        saveHistory(savedOrder, OrdersStatus.PENDING, "Đơn hàng đã được khởi tạo.", profileId);
 
         return ordersMapper.toOrdersResponse(savedOrder);
     }
 
-    @Override
-    @Transactional
-    public void markSuccess(String id) {
-        Orders order = ordersRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.ORDER_IS_EMPTY));
-
-        order.setStatus(OrdersStatus.PAID);
-        ordersRepository.save(order);
-
-        saveHistory(order, OrdersStatus.PAID, "Hệ thống: Thanh toán thành công.", "SYSTEM_PAYMENT");
-    }
-
-    @Override
-    @Transactional
-    public void markFail(String id) {
-        Orders order = ordersRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.ORDER_IS_EMPTY));
-
-        order.setStatus(OrdersStatus.CANCELLED);
-        ordersRepository.save(order);
-
-        saveHistory(order, OrdersStatus.CANCELLED, "Hệ thống: Giao dịch thất bại hoặc bị hủy.", "SYSTEM_PAYMENT");
-    }
 
     @Override
     public List<OrdersResponse> getMyOrders(String userKeyCloakId) {
-        String profileId = identityClient.getProfile(userKeyCloakId).getResult().getId();
+        String profileId = identityClient.getProfileByUserKeycloakId(userKeyCloakId).getResult().getId();
         return ordersRepository.findByUserIdOrderByCreatedAtDesc(profileId).stream()
                 .map(ordersMapper::toOrdersResponse)
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public PageResponse<OrdersResponse> getAllOrders(int page, int size, String status) {
-        Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
-        Pageable pageable = PageRequest.of(page - 1, size, sort);
-
-        // Nếu có status thì lọc theo status, không thì lấy hết
-        var pageData = (status != null)
-                ? ordersRepository.findByStatus(OrdersStatus.valueOf(status), pageable)
-                : ordersRepository.findAll(pageable);
-
-        return PageResponse.<OrdersResponse>builder()
-                .currentPage(page)
-                .totalPages(pageData.getTotalPages())
-                .totalElements(pageData.getTotalElements())
-                .data(pageData.getContent().stream().map(ordersMapper::toOrdersResponse).toList())
-                .build();
-    }
-
-    @Override
-    @Transactional
-    public OrdersResponse updateStatus(String orderId, OrdersStatus newStatus, String note) {
-        if (!checkRoleStaff()) throw new AppException(ErrorCode.UNAUTHORIZED);
-
-        Orders order = ordersRepository.findById(orderId)
-                .orElseThrow(() -> new AppException(ErrorCode.ORDER_IS_EMPTY));
-
-        order.setStatus(newStatus);
-        Orders savedOrder = ordersRepository.save(order);
-
-        // Lấy tên staff thực hiện
-        String staffName = SecurityContextHolder.getContext().getAuthentication().getName();
-        saveHistory(savedOrder, newStatus, "Nhân viên showroom: " + note, staffName);
-
-        return ordersMapper.toOrdersResponse(savedOrder);
-    }
-
-    @Override
-    public List<OrdersHistoryResponse> getOrderTimeline(String orderId) {
-        return ordersHistoryRepository.findByOrderIdOrderByCreatedAtAsc(orderId).stream()
-                .map(ordersMapper::toOrdersHistoryResponse)
-                .collect(Collectors.toList());
-    }
 
     @Override
     public void confirmDelivery(String orderId) {
-        // 1. Tìm đơn hàng
         Orders order = ordersRepository.findById(orderId)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
-        // 2. Kiểm tra: Chỉ cho phép giao xe khi đã thanh toán (PAID) [cite: 2026-03-03]
         if (!order.getStatus().equals(OrdersStatus.PAID)) {
             throw new AppException(ErrorCode.ORDER_NOT_PAID_YET);
         }
 
-        // 3. Cập nhật trạng thái sang DELIVERED (Đã giao)
         order.setStatus(OrdersStatus.COMPLETED);
         ordersRepository.save(order);
-
-        // 4. Lưu lịch sử Timeline cho khách theo dõi [cite: 2026-03-03]
-        // Trong hàm markSuccess
         saveHistory(order, OrdersStatus.PAID, "Hệ thống đã xác nhận thanh toán cọc qua VNPAY.", "SYSTEM");
 
         log.info("Order {} has been delivered successfully.", orderId);
     }
 
-    // --- Helper Methods ---
+    @Override
+    @Transactional
+    public void cancelOrder(String orderId, String reason) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userKeyCloakId = authentication.getName();
 
-    private void saveHistory(Orders order, OrdersStatus status, String note, String updatedBy) {
+        // 2. Tìm đơn hàng
+        Orders order = ordersRepository.findById(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
+
+        var profile = identityClient.getProfileByUserKeycloakId(userKeyCloakId).getResult();
+        if (!order.getUserId().equals(profile.getId())) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        // 4. Kiểm tra trạng thái (Chỉ được hủy khi còn PENDING)
+        if (!order.getStatus().equals(OrdersStatus.PENDING)) {
+            throw new AppException(ErrorCode.CANNOT_CANCEL_ORDER);
+        }
+
+        // 5. Cập nhật trạng thái và lưu lịch sử
+        order.setStatus(OrdersStatus.CANCELLED);
+        order.setNote("Khách hàng hủy: " + reason);
+        ordersRepository.save(order);
+
+        saveHistory(order, OrdersStatus.CANCELLED, "Khách hàng chủ động hủy đơn. Lý do: " + reason, profile.getId());
+    }
+
+    private BigDecimal calculateRegistrationTax(BigDecimal price, String address, String fuelType) {
+        if ("ELECTRIC".equalsIgnoreCase(fuelType)) return BigDecimal.ZERO;
+        double rate = (address.contains("Hà Nội") || address.contains("Hồ Chí Minh")) ? 0.12 : 0.10;
+        return price.multiply(BigDecimal.valueOf(rate));
+    }
+
+    private BigDecimal calculatePlateFee(String address) {
+        return (address.contains("Hà Nội") || address.contains("Hồ Chí Minh"))
+                ? new BigDecimal("20000000") : new BigDecimal("1000000");
+    }
+
+    private void saveHistory(Orders order, OrdersStatus status, String note, String actorId) {
         OrdersHistory history = OrdersHistory.builder()
                 .order(order)
                 .status(status)
                 .note(note)
-                .updatedBy(updatedBy)
+                .updatedBy(actorId)
                 .build();
         ordersHistoryRepository.save(history);
     }

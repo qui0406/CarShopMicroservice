@@ -17,6 +17,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -37,6 +38,15 @@ public class CarController {
                 .result(carDetailsService.getCar(page, size))
                 .build();
     }
+
+
+    @GetMapping("/get-price/{carId}")
+    public ApiResponse<BigDecimal> getCarPrice(@PathVariable String carId) {
+        return ApiResponse.<BigDecimal>builder()
+                .result(carDetailsService.getPrice(carId))
+                .build();
+    }
+
 
     @GetMapping(value ="/car/get-product-by-id/{carId}")
     public ApiResponse<CarResponse> getCarById(@PathVariable String carId){

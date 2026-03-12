@@ -12,14 +12,11 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrdersDetailsResponse {
-    Long id;
     String carId;
     String fullName;
     String phoneNumber;
     String address;
-    String cccd;
-    LocalDate dob;
-    BigDecimal unitPrice;
     int quantity;
-    BigDecimal totalAmount;
+    BigDecimal unitPrice;   // Giá lăn bánh của 1 chiếc
+    BigDecimal totalAmount; // unitPrice * quantity
 }

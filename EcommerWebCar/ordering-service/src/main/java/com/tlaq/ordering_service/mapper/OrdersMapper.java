@@ -12,6 +12,8 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface OrdersMapper {
     OrdersResponse toOrdersResponse(Orders orders);
+
+    @Mapping(target = "orderItems", ignore = true) // Vì item sẽ được set thủ công trong Service [cite: 2026-03-10]
     Orders toOrdersEntity(OrdersRequest ordersRequest);
 
     @Mapping(target = "orderId", source = "order.id")

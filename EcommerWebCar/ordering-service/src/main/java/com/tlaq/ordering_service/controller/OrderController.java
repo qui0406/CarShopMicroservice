@@ -11,40 +11,61 @@ import lombok.experimental.FieldDefaults;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/orders")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class OrderController {
-    OrdersService orderService;
-    OrderExportService orderExportService;
+    OrdersService ordersService;
 
     @PostMapping("/create")
     public ApiResponse<OrdersResponse> createOrder(@RequestBody OrdersRequest request) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String userKeyCloak= authentication.getName();
-        var result = orderService.createOrder(request, userKeyCloak);
-        return ApiResponse.<OrdersResponse>builder().result(result).build();
+        return ApiResponse.<OrdersResponse>builder()
+                .result(ordersService.createOrder(request))
+                .build();
     }
 
-    @GetMapping("/{id}")
-    public ApiResponse<OrdersResponse> getOrder(@PathVariable String id) {
-        var result = orderService.getOrderById(id);
-        return ApiResponse.<OrdersResponse>builder().result(result).build();
+    @GetMapping("/my-orders")
+    public ApiResponse<List<OrdersResponse>> getMyOrders() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String userId = auth.getName();
+
+        return ApiResponse.<List<OrdersResponse>>builder()
+                .result(ordersService.getMyOrders(userId))
+                .build();
     }
 
-    // 3. Xuất hóa đơn/Hợp đồng PDF (Điểm cộng khóa luận) [cite: 2026-03-03]
-    @GetMapping("/{id}/export")
-    public ResponseEntity<byte[]> exportInvoice(@PathVariable String id) {
-        byte[] pdfContent = orderExportService.exportOrderPdf(id);
+    @PreAuthorize("hasRole('STAFF')")
+    @GetMapping("/staff/get-order-by-id/{id}")
+    public ApiResponse<OrdersResponse> getOrderById(@PathVariable String id) {
+        return ApiResponse.<OrdersResponse>builder()
+                .result(ordersService.getOrderById(id))
+                .build();
+    }
 
-        return ResponseEntity.ok()
-                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=invoice_" + id + ".pdf")
-                .contentType(MediaType.APPLICATION_PDF)
-                .body(pdfContent);
+    @PostMapping("/cancel-order-id/{id}")
+    public ApiResponse<String> cancelOrder(
+            @PathVariable String id,
+            @RequestParam String reason) {
+        ordersService.cancelOrder(id, reason);
+        return ApiResponse.<String>builder()
+                .result("Hủy đơn hàng thành công.")
+                .build();
+    }
+
+    @PreAuthorize("hasRole('STAFF')")
+    @PostMapping("/confirm-delivery/{id}")
+    public ApiResponse<String> confirmDelivery(@PathVariable String id) {
+        ordersService.confirmDelivery(id);
+        return ApiResponse.<String>builder()
+                .result("Xác nhận đã nhận xe thành công. Chúc mừng quý khách!")
+                .build();
     }
 }

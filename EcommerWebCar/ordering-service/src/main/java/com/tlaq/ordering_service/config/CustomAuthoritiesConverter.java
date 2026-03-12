@@ -18,36 +18,24 @@ public class CustomAuthoritiesConverter implements Converter<Jwt, Collection<Gra
 
     @Override
     public Collection<GrantedAuthority> convert(Jwt source) {
-        log.info("=== JWT TOKEN DEBUG ===");
-        log.info("JWT Subject: {}", source.getSubject());
-        log.info("JWT Claims: {}", source.getClaims());
-
         Map<String, Object> realmAccess = source.getClaimAsMap(REALM_ACCESS);
-        log.info("Realm Access: {}", realmAccess);
 
         if (realmAccess == null) {
-            log.warn("No realm_access found in JWT token");
             return List.of();
         }
 
         Object roles = realmAccess.get("roles");
-        log.info("Raw roles object: {}", roles);
 
         if (roles instanceof List stringRoles) {
             List<GrantedAuthority> authorities = ((List<String>) stringRoles)
                     .stream()
                     .map(s -> {
                         String authority = String.format("%s%s", PREFIX_ROLE, s);
-                        log.info("Converting role '{}' to authority '{}'", s, authority);
                         return new SimpleGrantedAuthority(authority);
                     })
                     .collect(Collectors.toList());
-
-            log.info("Final authorities: {}", authorities);
             return authorities;
         }
-
-        log.warn("Roles is not a List instance: {}", roles != null ? roles.getClass() : "null");
         return List.of();
 
     }

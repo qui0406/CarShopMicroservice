@@ -38,6 +38,7 @@ public enum ErrorCode {
     CAR_BRANCH_NOT_FOUND(1025, "Car branch not found", HttpStatus.NOT_FOUND),
     INVENTORY_NOT_FOUND(1026, "Inventory not found", HttpStatus.NOT_FOUND),
     INVALID_QUANTITY(1027, "Invalid quantity", HttpStatus.BAD_REQUEST),
+    QUANTITY_NOT_ENOUGH(1028, "Quantity car not enough", HttpStatus.BAD_REQUEST),
 
     ;
 
