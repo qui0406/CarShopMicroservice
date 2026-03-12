@@ -34,6 +34,15 @@ public class InventoryController {
                 .build();
     }
 
+    @GetMapping("/cars/check-inventory/{carId}/{quantity}")
+    public ApiResponse<Boolean> checkStock(
+            @PathVariable String carId,
+            @PathVariable Integer quantity) { // Dùng @PathVariable [cite: 2026-03-10]
+        return ApiResponse.<Boolean>builder()
+                .result(inventoryService.checkStock(carId, quantity)) // Gọi xuống service xử lý [cite: 2026-03-10]
+                .build();
+    }
+
     @PreAuthorize("hasRole('STAFF')")
     @PostMapping("/staff/inventory/create-inventory")
     public ApiResponse<InventoryResponse> createInventory(@RequestBody InventoryRequest inventoryRequest) {

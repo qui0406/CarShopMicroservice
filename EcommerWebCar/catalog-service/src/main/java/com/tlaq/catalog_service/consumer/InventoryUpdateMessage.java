@@ -1,0 +1,14 @@
+package com.tlaq.catalog_service.consumer;
+
+import lombok.*;
+import lombok.experimental.FieldDefaults;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE)
+public class InventoryUpdateMessage {
+    String carId;
+    int quantity;
+}

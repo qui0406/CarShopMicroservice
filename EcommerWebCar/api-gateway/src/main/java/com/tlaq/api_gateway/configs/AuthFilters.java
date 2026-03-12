@@ -41,7 +41,20 @@ public class AuthFilters implements GlobalFilter, Ordered {
             "/auth/api/login",
             "/auth/api/introspect",
             "/auth/api/refresh",
-            "/auth/api/logout"
+            "/auth/api/logout",
+
+            "/catalog/api/car-branch/get-all-car-branch",
+            "/catalog/api/car-branch/get-branch-by-id/.*",
+            "/catalog/api/car-model/get-all-car-model",
+            "/catalog/api/car-model/get-car-model-by-id/.*",
+            "/catalog/api/car-category/get-car-category-by-id/.*",
+            "/catalog/api/car-category/get-all-car-category",
+            "/catalog/api/car/get-products",
+            "/catalog/api/car/get-product-by-id/.*",
+            "/catalog/api/car/filter-car",
+            "/catalog/api/catalog/api/inventory/get-inventory/.*",
+            "/catalog/api/inventory/get-inventory-by-carId/.*",
+            "/catalog/api/showroom/get-info-showroom",
     };
 
     @Value("${app.api-prefix}")

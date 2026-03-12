@@ -70,6 +70,13 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
+    public BigDecimal getPrice(String carId) {
+        Car car = carRepository.findById(carId)
+                .orElseThrow(() -> new AppException(ErrorCode.CAR_NOT_FOUND));
+        return car.getPrice();
+    }
+
+    @Override
     @Transactional
     public CarResponse createCarDetail(CarRequest request, List<MultipartFile> images) {
         // 1. Map thông tin cơ bản

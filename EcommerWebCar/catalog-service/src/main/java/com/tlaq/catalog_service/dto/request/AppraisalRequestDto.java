@@ -24,10 +24,10 @@ public class AppraisalRequestDto {
     Integer manufacturingYear;
 
     @Min(value = 0)
-    Integer mileage; // Số KM thực tế
+    Integer mileage;
 
-    String conditionNote; // Mô tả tình trạng (trầy xước, máy móc...)
+    String conditionNote;
 
     @Positive
-    BigDecimal expectedPrice; // Giá khách mong muốn
+    BigDecimal expectedPrice;
 }

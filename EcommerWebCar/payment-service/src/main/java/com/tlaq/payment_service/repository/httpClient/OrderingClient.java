@@ -7,7 +7,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "ordering-service", url = "${app.services.main.url}",
+@FeignClient(name = "ordering-service", url = "${app.services.ordering.url}",
         configuration = { AuthenticationRequestInterceptor.class })
 public interface OrderingClient {
     @GetMapping("/api/orders/orders-car/{orderId}")

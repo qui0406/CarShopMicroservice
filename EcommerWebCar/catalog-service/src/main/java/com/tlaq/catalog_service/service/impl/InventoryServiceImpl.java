@@ -68,7 +68,14 @@ public class InventoryServiceImpl implements InventoryService {
     }
 
     @Override
-    @Transactional // Luôn dùng Transactional cho các thao tác thay đổi DB
+    public Boolean checkStock(String carId, Integer quantity) {
+        Inventory inventory = inventoryRepository.findInventoryByCarId(carId)
+                .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_NOT_FOUND));
+        return inventory.getQuantity() >= quantity;
+    }
+
+    @Override
+    @Transactional
     public InventoryResponse update(InventoryUpdateRequest request, String inventoryId) {
         // 1. Tìm bản ghi kho theo ID
         Inventory inventory = inventoryRepository.findById(inventoryId)

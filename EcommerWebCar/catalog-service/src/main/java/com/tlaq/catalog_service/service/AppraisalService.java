@@ -11,8 +11,8 @@ import java.util.List;
 
 public interface AppraisalService {
     // Cho Khách hàng
-    AppraisalResponse createAppraisal(AppraisalRequestDto dto, List<MultipartFile> images, String userKeyCloakId);
-    List<AppraisalResponse> getMyAppraisals(String userKeyCloakId);
+    AppraisalResponse createAppraisal(AppraisalRequestDto dto, List<MultipartFile> images);
+    List<AppraisalResponse> getMyAppraisals();
 
     // Cho Nhân viên Showroom (Admin)
     PageResponse<AppraisalResponse> getAllAppraisals(int page, int size, String status);

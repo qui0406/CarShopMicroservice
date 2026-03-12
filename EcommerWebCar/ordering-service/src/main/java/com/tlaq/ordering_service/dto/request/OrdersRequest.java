@@ -12,7 +12,7 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrdersRequest {
-    OrdersType type; // PURCHASE hoặc DEPOSIT
+    OrdersType type;
     String note;
     List<OrdersDetailsRequest> orderItems;
 }

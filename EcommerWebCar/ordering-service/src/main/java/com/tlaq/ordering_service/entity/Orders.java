@@ -26,26 +26,29 @@ public class Orders {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
-    @Column(name = "user_id", nullable = false)
-    String userId; // ID khách hàng từ Identity Service
+    String userId;
 
     @Enumerated(EnumType.STRING)
-    OrdersStatus status; // PENDING, DEPOSITED, PAID, CANCELLED, COMPLETED
+    OrdersStatus status;
 
     @Enumerated(EnumType.STRING)
-    OrdersType type; // PURCHASE (Mua đứt), DEPOSIT (Đặt cọc)
+    OrdersType type;
 
-    BigDecimal totalAmount; // Tổng giá trị đơn hàng
+    // --- Bổ sung các trường này để lưu vết thuế phí [cite: 2026-03-10] ---
+    BigDecimal baseAmount;      // Tổng giá xe gốc
+    BigDecimal taxAmount;       // Tổng thuế trước bạ
+    BigDecimal plateFeeAmount;  // Tổng phí biển số
+    BigDecimal insuranceAmount; // Phí bảo trì/BH cố định
+    BigDecimal totalAmount;     // Tổng cuối cùng
 
     @Column(columnDefinition = "TEXT")
     String note;
 
     @CreationTimestamp
-    @Column(name = "created_at", updatable = false)
+    @Column(updatable = false)
     LocalDateTime createdAt;
 
     @UpdateTimestamp
-    @Column(name = "updated_at")
     LocalDateTime updatedAt;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)

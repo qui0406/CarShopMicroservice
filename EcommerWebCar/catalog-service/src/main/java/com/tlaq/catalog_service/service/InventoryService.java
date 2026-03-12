@@ -12,4 +12,5 @@ public interface InventoryService {
     void updateInventoryAfterPay(String orderId);
     void restoreInventory(String orderId);
     InventoryResponse getInventoryByCarId(String carId);
+    Boolean checkStock(String carId, Integer quantity);
 }

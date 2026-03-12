@@ -8,24 +8,15 @@ import com.tlaq.ordering_service.dto.response.OrdersHistoryResponse;
 import com.tlaq.ordering_service.dto.response.OrdersResponse;
 import com.tlaq.ordering_service.entity.enums.OrdersStatus;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 public interface OrdersService {
-    // 1. Quản lý Đơn hàng cho Khách hàng
-    OrdersResponse createOrder(OrdersRequest request, String userKeyCloakId);
-    OrdersResponse getOrderById(String id);
-    List<OrdersResponse> getMyOrders(String userKeyCloakId); // Thay cho getHistoryResponseByProfileId
-
-    // 2. Quản lý cho Nhân viên Showroom (Admin)
-    PageResponse<OrdersResponse> getAllOrders(int page, int size, String status); // Thêm filter status
-    OrdersResponse updateStatus(String orderId, OrdersStatus newStatus, String note); // Hàm quan trọng nhất cho Staff
-
-    // 3. Xử lý logic từ Payment Service (Webhook/Callback)
-    void markSuccess(String id); // Chuyển sang PAID
-    void markFail(String id);    // Chuyển sang CANCELLED
-
-    // 4. Truy vấn Lịch sử (Timeline)
-    List<OrdersHistoryResponse> getOrderTimeline(String orderId);
-
-    void confirmDelivery(String orderId);
+    OrdersResponse createOrder(OrdersRequest request); // Tạo đơn & tính thuế lăn bánh
+    OrdersResponse getOrderById(String id);           // Xem chi tiết đơn
+    List<OrdersResponse> getMyOrders(String userId);  // Danh sách đơn của tôi
+    void cancelOrder(String orderId, String reason);  // Khách tự hủy khi chưa duyệt
+    void confirmDelivery(String orderId);             // Khách xác nhận đã nhận xe
 }

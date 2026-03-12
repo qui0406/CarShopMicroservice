@@ -43,6 +43,7 @@ public class CarModelController {
                 .build();
     }
 
+    @PreAuthorize("hasRole('STAFF')")
     @DeleteMapping("/staff/car-model/delete-car-model/{carModelId}")
     public ApiResponse<CarModelResponse> deleteCarModel(@PathVariable("carModelId") Long carModelId){
         carModelService.deleteById(carModelId);

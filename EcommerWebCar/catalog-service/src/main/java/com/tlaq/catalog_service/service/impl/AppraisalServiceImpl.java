@@ -49,7 +49,9 @@ public class AppraisalServiceImpl implements AppraisalService {
     IdentityClient identityClient;
 
     @Override
-    public List<AppraisalResponse> getMyAppraisals(String userKeyCloakId) {
+    public List<AppraisalResponse> getMyAppraisals() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userKeyCloakId= authentication.getName();
         ApiResponse<UserProfileResponse> profileRes = identityClient.getProfileByUserKeycloakId(userKeyCloakId);
 
         if (profileRes.getResult() == null) {
@@ -68,30 +70,24 @@ public class AppraisalServiceImpl implements AppraisalService {
 
     @Override
     public AppraisalResponse updateStatus(String id, AppraisalStatus status) {
-        // 1. Kiểm tra quyền hạn (Chỉ Staff mới được duyệt/đổi trạng thái)
-        if (!checkRoleStaff()) {
-            throw new AppException(ErrorCode.UNAUTHORIZED);
-        }
-
-        // 2. Tìm yêu cầu định giá theo ID
         AppraisalRequest request = appraisalRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.APPRAISAL_NOT_FOUND));
 
-        // 3. Cập nhật trạng thái mới
         request.setStatus(status);
 
-        // Ghi chú tự động nếu trạng thái là BOUGHT (Đã mua)
         if (status == AppraisalStatus.BOUGHT) {
             request.setConditionNote(request.getConditionNote() + "\n[Hệ thống]: Showroom đã hoàn tất thu mua chiếc xe này.");
         }
 
-        // 4. Lưu và trả về kết quả
         AppraisalRequest updatedRequest = appraisalRepository.save(request);
         return appraisalMapper.toResponse(updatedRequest);
     }
 
     @Override
-    public AppraisalResponse createAppraisal(AppraisalRequestDto dto, List<MultipartFile> images, String userKeyCloakId) {
+    public AppraisalResponse createAppraisal(AppraisalRequestDto dto, List<MultipartFile> images) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userKeyCloakId= authentication.getName();
+
         var profileRes = identityClient.getProfileByUserKeycloakId(userKeyCloakId);
         if (profileRes.getResult() == null) throw new AppException(ErrorCode.USER_NOT_EXISTED);
         String profileId = profileRes.getResult().getId();
@@ -106,7 +102,6 @@ public class AppraisalServiceImpl implements AppraisalService {
 
         // 4. Lưu vào Database (Lưu cả Request và Images nhờ Cascade)
         AppraisalRequest savedRequest = appraisalRepository.save(request);
-
         return appraisalMapper.toResponse(savedRequest);
     }
 

@@ -34,7 +34,7 @@ public enum ErrorCode {
 
     ORDER_NOT_FOUND(1022, "Order not found", HttpStatus.NOT_FOUND),
     ORDER_NOT_PAID_YET(1023, "Order not paid yet", HttpStatus.BAD_REQUEST),
-
+    CANNOT_CANCEL_ORDER(1024, "Order cancel not found", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
