@@ -13,6 +13,7 @@ import com.tlaq.ordering_service.entity.Orders;
 import com.tlaq.ordering_service.entity.OrdersDetails;
 import com.tlaq.ordering_service.entity.OrdersHistory;
 import com.tlaq.ordering_service.entity.enums.OrdersStatus;
+import com.tlaq.ordering_service.entity.enums.OrdersType;
 import com.tlaq.ordering_service.exceptions.AppException;
 import com.tlaq.ordering_service.exceptions.ErrorCode;
 import com.tlaq.ordering_service.mapper.OrdersMapper;
@@ -53,9 +54,34 @@ public class OrdersServiceImpl implements OrdersService {
     RabbitTemplate rabbitTemplate;
 
     @Override
+    public Boolean checkOrderId(String orderId) {
+        boolean exists = ordersRepository.existsById(orderId);
+
+        if (exists) {
+            log.info("Order ID hợp lệ: {}", orderId);
+        } else {
+            log.warn("Order ID không tồn tại trong hệ thống thanh toán: {}", orderId);
+        }
+
+        return exists;
+    }
+
+    @Override
     public OrdersResponse getOrderById(String id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userKeycloak= authentication.getName();
+
+        String userId = identityClient.getProfileByUserKeycloakId(userKeycloak).getResult().getId();
+
         Orders order = ordersRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_IS_EMPTY));
+
+        if (!order.getUserId().equals(userId)) {
+            log.warn("Cảnh báo: Người dùng {} cố tình truy cập đơn hàng {} của người dùng {}",
+                    userKeycloak, id, order.getUserId());
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
         return ordersMapper.toOrdersResponse(order);
     }
 
@@ -80,9 +106,14 @@ public class OrdersServiceImpl implements OrdersService {
         order.setUserId(profileId);
         order.setStatus(OrdersStatus.PENDING);
 
+        if(checkRoleStaff()){
+            order.setType(OrdersType.PURCHASE);
+        }else{
+            order.setType(OrdersType.DEPOSIT);
+        }
+
         List<OrdersDetails> detailsEntities = new ArrayList<>();
 
-        // Khởi tạo các biến tích lũy để tránh null [cite: 2026-03-11]
         BigDecimal totalBaseAmount = BigDecimal.ZERO;
         BigDecimal totalTaxAmount = BigDecimal.ZERO;
         BigDecimal totalPlateFeeAmount = BigDecimal.ZERO;
@@ -141,18 +172,18 @@ public class OrdersServiceImpl implements OrdersService {
         Orders savedOrder = ordersRepository.save(order);
 
         // Bắn tin nhắn trừ kho cho từng chiếc xe trong đơn hàng [cite: 2026-03-11]
-        savedOrder.getOrderItems().forEach(item -> {
-            InventoryUpdateMessage message = InventoryUpdateMessage.builder()
-                    .carId(item.getCarId())
-                    .quantity(item.getQuantity())
-                    .build();
-
-            rabbitTemplate.convertAndSend(
-                    RabbitMQConfig.EXCHANGE,
-                    RabbitMQConfig.INVENTORY_ROUTING_KEY,
-                    message
-            );
-        });
+//        savedOrder.getOrderItems().forEach(item -> {
+//            InventoryUpdateMessage message = InventoryUpdateMessage.builder()
+//                    .carId(item.getCarId())
+//                    .quantity(item.getQuantity())
+//                    .build();
+//
+//            rabbitTemplate.convertAndSend(
+//                    RabbitMQConfig.EXCHANGE,
+//                    RabbitMQConfig.INVENTORY_ROUTING_KEY,
+//                    message
+//            );
+//        });
 
         saveHistory(savedOrder, OrdersStatus.PENDING, "Đơn hàng đã được khởi tạo.", profileId);
 
@@ -178,11 +209,8 @@ public class OrdersServiceImpl implements OrdersService {
             throw new AppException(ErrorCode.ORDER_NOT_PAID_YET);
         }
 
-        order.setStatus(OrdersStatus.COMPLETED);
+        order.setStatus(OrdersStatus.WAITING_FOR_PAY);
         ordersRepository.save(order);
-        saveHistory(order, OrdersStatus.PAID, "Hệ thống đã xác nhận thanh toán cọc qua VNPAY.", "SYSTEM");
-
-        log.info("Order {} has been delivered successfully.", orderId);
     }
 
     @Override

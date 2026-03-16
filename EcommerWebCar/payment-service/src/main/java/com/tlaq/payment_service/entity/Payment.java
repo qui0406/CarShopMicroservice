@@ -25,10 +25,10 @@ public class Payment {
     String id;
 
     @Column(name = "order_id", unique = true, nullable = false)
-    String orderId; // Link tới đơn hàng bên Ordering Service
+    String orderId;
 
     @Column(precision = 19, scale = 2)
-    BigDecimal totalAmount; // Tổng giá trị chiếc xe
+    BigDecimal totalAmount;
 
     @Column(precision = 19, scale = 2)
     BigDecimal paidAmount;  // Số tiền khách đã trả (cộng dồn các Transaction)
@@ -40,7 +40,7 @@ public class Payment {
     PaymentStatus status; // PENDING, PARTIALLY_PAID (đã cọc), COMPLETED (mua đứt), CANCELLED
 
     @OneToMany(mappedBy = "payment", cascade = CascadeType.ALL)
-    List<PaymentTransaction> transactions; // Lịch sử các lần nộp tiền
+    List<PaymentTransaction> transactions;
 
     @CreationTimestamp
     LocalDateTime createdAt;

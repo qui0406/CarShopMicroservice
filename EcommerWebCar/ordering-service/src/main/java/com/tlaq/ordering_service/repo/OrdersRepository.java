@@ -48,4 +48,6 @@ public interface OrdersRepository extends JpaRepository<Orders, String>, JpaSpec
     List<MonthlyRevenueResponse> getMonthlyRevenue(@Param("year") int year, @Param("status") OrdersStatus status);
 
     long countByUserIdAndStatus(String userId, OrdersStatus status);
+
+    boolean existsById(String id);
 }

@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 @FeignClient(name = "ordering-service", url = "${app.services.ordering.url}",
         configuration = { AuthenticationRequestInterceptor.class })
 public interface OrderingClient {
-    @GetMapping("/api/orders/orders-car/{orderId}")
+    @GetMapping("/ordering/orders/get-order-by-id/{orderId}")
     ApiResponse<OrdersResponse> getOrder(@PathVariable String orderId);
+
+    @GetMapping("/ordering/orders/check-order-by-id/{orderId}")
+    ApiResponse<Boolean> checkOrderId(@PathVariable String orderId);
 }

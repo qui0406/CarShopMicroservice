@@ -25,6 +25,13 @@ import java.util.List;
 public class OrderController {
     OrdersService ordersService;
 
+    @GetMapping("/check-order-by-id/{orderId}")
+    public ApiResponse<Boolean> checkOrderById(@PathVariable String orderId) {
+        return ApiResponse.<Boolean>builder()
+                .result(ordersService.checkOrderId(orderId))
+                .build();
+    }
+
     @PostMapping("/create")
     public ApiResponse<OrdersResponse> createOrder(@RequestBody OrdersRequest request) {
         return ApiResponse.<OrdersResponse>builder()
@@ -42,8 +49,7 @@ public class OrderController {
                 .build();
     }
 
-    @PreAuthorize("hasRole('STAFF')")
-    @GetMapping("/staff/get-order-by-id/{id}")
+    @GetMapping("/get-order-by-id/{id}")
     public ApiResponse<OrdersResponse> getOrderById(@PathVariable String id) {
         return ApiResponse.<OrdersResponse>builder()
                 .result(ordersService.getOrderById(id))
@@ -65,7 +71,7 @@ public class OrderController {
     public ApiResponse<String> confirmDelivery(@PathVariable String id) {
         ordersService.confirmDelivery(id);
         return ApiResponse.<String>builder()
-                .result("Xác nhận đã nhận xe thành công. Chúc mừng quý khách!")
+                .result("Xác nhận đơn hàng thành công!")
                 .build();
     }
 }

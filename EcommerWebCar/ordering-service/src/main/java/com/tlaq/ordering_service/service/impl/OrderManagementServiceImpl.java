@@ -75,7 +75,7 @@ public class OrderManagementServiceImpl implements OrderManagementService {
         BigDecimal total = ordersRepository.calculateTotalRevenue(
                 start,
                 end,
-                OrdersStatus.COMPLETED
+                OrdersStatus.WAITING_FOR_PAY
         );
 
         // 2. Tránh trả về null, trả về 0 nếu không có doanh thu [cite: 2026-03-12]
@@ -89,6 +89,6 @@ public class OrderManagementServiceImpl implements OrderManagementService {
 
     @Override
     public List<MonthlyRevenueResponse> getYearlyRevenue(int year) {
-        return ordersRepository.getMonthlyRevenue(year, OrdersStatus.COMPLETED);
+        return ordersRepository.getMonthlyRevenue(year, OrdersStatus.WAITING_FOR_PAY);
     }
 }

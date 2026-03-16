@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface OrdersService {
+    Boolean checkOrderId(String orderId);
     OrdersResponse createOrder(OrdersRequest request); // Tạo đơn & tính thuế lăn bánh
     OrdersResponse getOrderById(String id);           // Xem chi tiết đơn
     List<OrdersResponse> getMyOrders(String userId);  // Danh sách đơn của tôi

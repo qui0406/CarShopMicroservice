@@ -3,6 +3,7 @@ package com.tlaq.payment_service.exceptions;
 
 import com.tlaq.payment_service.dto.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -18,16 +19,6 @@ public class GlobalExceptionHandler {
 
     private static final String MIN_ATTRIBUTE = "min";
 
-    @ExceptionHandler(value = Exception.class)
-    ResponseEntity<ApiResponse> handlingRuntimeException(RuntimeException exception) {
-        log.error("Exception: ", exception);
-        ApiResponse apiResponse = new ApiResponse();
-
-        apiResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
-        apiResponse.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
-
-        return ResponseEntity.badRequest().body(apiResponse);
-    }
 
     @ExceptionHandler(MultipartException.class)
     public ResponseEntity<ApiResponse> handleMultipartException(MultipartException ex) {
@@ -59,17 +50,18 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ApiResponse> handlingRuntimeException() {
-        ErrorCode errorCode = ErrorCode.IMAGE_IS_EMPTY; // Sử dụng ErrorCode phù hợp
+
+    @ExceptionHandler(value = RuntimeException.class)
+    public ResponseEntity<ApiResponse> handlingRuntimeException(RuntimeException exception) {
+        // Log lỗi thực tế ra Console để Quí biết tại sao bị lỗi khi Test Postman
+        log.error("Hệ thống gặp lỗi: ", exception);
+
         ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
+        apiResponse.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
 
-        apiResponse.setCode(errorCode.getCode());
-        apiResponse.setMessage(errorCode.getMessage());
-
-        return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(apiResponse);
     }
-
 
 
     @ExceptionHandler(value = AppException.class)

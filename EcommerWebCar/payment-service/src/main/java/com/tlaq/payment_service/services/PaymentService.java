@@ -4,6 +4,7 @@ import com.tlaq.payment_service.dto.request.OfflinePaymentRequest;
 import com.tlaq.payment_service.dto.request.PaymentRequest;
 import com.tlaq.payment_service.dto.response.PaymentResponse;
 import com.tlaq.payment_service.entity.Payment;
+import com.tlaq.payment_service.entity.enums.PaymentMethod;
 import com.tlaq.payment_service.entity.enums.TransactionType;
 
 import java.math.BigDecimal;
@@ -20,4 +21,9 @@ public interface PaymentService {
 
     // 4. Lấy thông tin để hiển thị Progress Bar và 3D Model
     PaymentResponse getPaymentStatusByOrder(String orderId);
+
+    PaymentResponse processDeposit(String orderId, BigDecimal depositAmount, PaymentMethod method);
+
+    // Kiểm tra xem đơn hàng này đã nộp đủ tiền cọc tối thiểu chưa
+    boolean isDepositReached(String orderId);
 }
