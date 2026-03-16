@@ -41,6 +41,7 @@ public enum ErrorCode {
     PAYMENT_PROCESSING_FAILED(1030, "Payment processing failed", HttpStatus.INTERNAL_SERVER_ERROR),
     PAYMENT_NOT_FOUND(1031, "Payment not found", HttpStatus.NOT_FOUND),
     TRANSACTION_NOT_FOUND(1032, "Transaction not found", HttpStatus.NOT_FOUND),
+    INVALID_CHECKSUM(1033, "Invalid checksum", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

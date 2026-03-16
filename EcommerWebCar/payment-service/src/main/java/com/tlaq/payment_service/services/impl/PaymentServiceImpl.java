@@ -6,7 +6,9 @@ import com.tlaq.payment_service.dto.request.PaymentRequest;
 import com.tlaq.payment_service.dto.response.PaymentResponse;
 import com.tlaq.payment_service.entity.Payment;
 import com.tlaq.payment_service.entity.PaymentTransaction;
+import com.tlaq.payment_service.entity.enums.PaymentMethod;
 import com.tlaq.payment_service.entity.enums.PaymentStatus;
+import com.tlaq.payment_service.entity.enums.TransactionStatus;
 import com.tlaq.payment_service.entity.enums.TransactionType;
 import com.tlaq.payment_service.exceptions.AppException;
 import com.tlaq.payment_service.exceptions.ErrorCode;
@@ -45,26 +47,24 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public PaymentResponse updatePaymentProgress(Payment payment, BigDecimal newAmount) {
-        // Cộng dồn tiền đã trả
         BigDecimal totalPaid = payment.getPaidAmount().add(newAmount);
         payment.setPaidAmount(totalPaid);
         payment.setRemainAmount(payment.getTotalAmount().subtract(totalPaid));
 
-        // Cập nhật trạng thái tổng quát
         if (payment.getRemainAmount().compareTo(BigDecimal.ZERO) <= 0) {
             payment.setStatus(PaymentStatus.COMPLETED);
-            // Gửi tin nhắn báo cho Ordering Service đơn hàng đã thanh toán xong [cite: 2026-03-03]
             rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE,
                     RabbitMQConfig.RK_PAYMENT_COMPLETED,
                     payment.getOrderId());
         } else {
             payment.setStatus(PaymentStatus.PARTIALLY_PAID);
-            // Nếu là cọc lần đầu, có thể gửi thông báo bắt đầu chuẩn bị xe
         }
 
         return paymentMapper.toPaymentResponse(paymentRepository.save(payment));
     }
 
+
+    // Xu ly so tien con lai khi da thanh toan coc
     @Override
     @Transactional
     public PaymentResponse confirmOfflinePayment(OfflinePaymentRequest request) {
@@ -84,6 +84,47 @@ public class PaymentServiceImpl implements PaymentService {
 
     @Override
     public PaymentResponse getPaymentStatusByOrder(String orderId) {
-        return null;
+        Payment payment = paymentRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND));
+        return paymentMapper.toPaymentResponse(payment);
+    }
+
+
+    //Tra truc tiep tai cua hang khong can coc
+    @Override
+    @Transactional
+    public PaymentResponse processDeposit(String orderId, BigDecimal depositAmount, PaymentMethod method) {
+        Payment payment = paymentRepository.findByOrderId(orderId).orElseThrow();
+
+        // 1. Tạo Transaction Đặt cọc
+        PaymentTransaction depositTxn = PaymentTransaction.builder()
+                .payment(payment)
+                .amount(depositAmount)
+                .type(TransactionType.DEPOSIT)
+                .method(method)
+                .status(TransactionStatus.SUCCESS)
+                .build();
+        transactionRepository.save(depositTxn);
+
+        // 2. Cập nhật trạng thái Payment sang PARTIALLY_PAID (Đã cọc)
+        payment.setPaidAmount(payment.getPaidAmount().add(depositAmount));
+        payment.setRemainAmount(payment.getTotalAmount().subtract(payment.getPaidAmount()));
+        payment.setStatus(PaymentStatus.PARTIALLY_PAID);
+        paymentRepository.save(payment);
+
+        rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE,
+                "payment.deposit.success",
+                payment.getOrderId());
+
+        return paymentMapper.toPaymentResponse(payment);
+    }
+
+    @Override
+    public boolean isDepositReached(String orderId) {
+        Payment payment = paymentRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND));
+
+        BigDecimal minDeposit = new BigDecimal("20000000");
+        return payment.getPaidAmount().compareTo(minDeposit) >= 0;
     }
 }

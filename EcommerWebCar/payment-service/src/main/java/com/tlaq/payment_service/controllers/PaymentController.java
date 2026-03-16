@@ -5,14 +5,18 @@ import com.tlaq.payment_service.dto.request.DepositRequest;
 import com.tlaq.payment_service.dto.request.OfflinePaymentRequest;
 import com.tlaq.payment_service.dto.response.PaymentResponse;
 import com.tlaq.payment_service.dto.response.VNPayResponse;
+import com.tlaq.payment_service.entity.enums.TransactionType;
 import com.tlaq.payment_service.services.PaymentService;
 import com.tlaq.payment_service.services.VNPayService;
+import com.tlaq.payment_service.utils.VNPayUtils;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
 
 @RestController
 @RequestMapping("/payments")
@@ -22,11 +26,17 @@ public class PaymentController {
     PaymentService paymentService;
     VNPayService vnPayService;
 
-    @PostMapping("/vnpay-url")
-    public ApiResponse<VNPayResponse> createDepositUrl(@RequestBody DepositRequest request, HttpServletRequest servletRequest) {
-        String ipAddress = servletRequest.getRemoteAddr();
-        var result = vnPayService.createDepositUrl(request.getPaymentId(), request.getAmount(), ipAddress);
-        return ApiResponse.<VNPayResponse>builder().result(result).build();
+    @PostMapping("/create-vnpay-url")
+    public ApiResponse<VNPayResponse> createUrl(
+            @RequestParam String orderId,
+            @RequestParam BigDecimal amount,
+            @RequestParam TransactionType type,
+            HttpServletRequest request) {
+
+        String ipAddress = VNPayUtils.getIpAddress(request);
+        return ApiResponse.<VNPayResponse>builder()
+                .result(vnPayService.createPaymentUrl(orderId, amount, ipAddress, type))
+                .build();
     }
 
     @PostMapping("/confirm-offline")
@@ -41,8 +51,4 @@ public class PaymentController {
         var result = paymentService.getPaymentStatusByOrder(orderId);
         return ApiResponse.<PaymentResponse>builder().result(result).build();
     }
-
-
-
-
 }

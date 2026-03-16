@@ -1,29 +1,37 @@
 package com.tlaq.payment_service.utils;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
+import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.codec.digest.HmacAlgorithms;
+import org.apache.commons.codec.digest.HmacUtils;
+
 import java.util.Random;
 
 public class VNPayUtils {
-    // Thuật toán HmacSHA512 bắt buộc của VNPAY [cite: 2026-03-03]
     public static String hmacSHA512(final String key, final String data) {
         try {
-            if (key == null || data == null) throw new NullPointerException();
-            final Mac hmac512 = Mac.getInstance("HmacSHA512");
-            byte[] hmacKeyBytes = key.getBytes();
-            final SecretKeySpec secretKey = new SecretKeySpec(hmacKeyBytes, "HmacSHA512");
-            hmac512.init(secretKey);
-            byte[] dataBytes = data.getBytes(StandardCharsets.UTF_8);
-            byte[] result = hmac512.doFinal(dataBytes);
-            StringBuilder sb = new StringBuilder(2 * result.length);
-            for (byte b : result) {
-                sb.append(String.format("%02x", b & 0xff));
-            }
-            return sb.toString();
+            String result = new HmacUtils(HmacAlgorithms.HMAC_SHA_512, key).hmacHex(data);
+            System.out.println("Hash length: " + result.length()); // phải = 128
+            return result;
         } catch (Exception ex) {
+            ex.printStackTrace();
             return "";
         }
+    }
+
+    public static String getIpAddress(HttpServletRequest request) {
+        String ipAddress;
+        try {
+            ipAddress = request.getHeader("X-FORWARDED-FOR");
+            if (ipAddress == null || ipAddress.isEmpty()) {
+                ipAddress = request.getRemoteAddr();
+            }
+            if ("0:0:0:0:0:0:0:1".equals(ipAddress) || "::1".equals(ipAddress)) {
+                ipAddress = "127.0.0.1";
+            }
+        } catch (Exception e) {
+            ipAddress = "127.0.0.1";
+        }
+        return ipAddress;
     }
 
     public static String getRandomNumber(int len) {
@@ -31,7 +39,6 @@ public class VNPayUtils {
         String chars = "0123456789";
         StringBuilder sb = new StringBuilder(len);
         for (int i = 0; i < len; i++) {
-            // SỬA: Thay .add() bằng .append() [cite: 2026-03-03]
             sb.append(chars.charAt(rnd.nextInt(chars.length())));
         }
         return sb.toString();
