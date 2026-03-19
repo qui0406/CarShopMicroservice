@@ -20,7 +20,6 @@ public class OrdersResponse {
     OrdersStatus status;
     OrdersType type;
 
-    // --- Các thông số về giá và lệ phí [cite: 2026-03-10] ---
     BigDecimal baseAmount;      // Tổng giá gốc của các xe (chưa thuế phí lăn bánh)
     BigDecimal taxAmount;       // Tổng lệ phí trước bạ (10% - 12%)
     BigDecimal plateFeeAmount;  // Tổng phí cấp biển số (1tr hoặc 20tr)

@@ -8,7 +8,6 @@ import org.mapstruct.Mapping;
 
 @Mapper(componentModel = "spring")
 public interface InventoryMapper {
-    @Mapping(target = "car", ignore = true)
     @Mapping(target = "showRoom", ignore = true)
     Inventory toInventory(InventoryRequest request);
 

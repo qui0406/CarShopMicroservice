@@ -2,7 +2,7 @@ package com.tlaq.notification_service.configs;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tlaq.notification_service.exceptions.ErrorCode;
-import com.tlaq.notification_service.response.ApiResponse;
+import com.tlaq.notification_service.dto.ApiResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;

@@ -1,5 +1,6 @@
 package com.tlaq.payment_service.services;
 
+import com.tlaq.payment_service.dto.request.ConfirmPaymentRequest;
 import com.tlaq.payment_service.dto.request.OfflinePaymentRequest;
 import com.tlaq.payment_service.dto.request.PaymentRequest;
 import com.tlaq.payment_service.dto.response.PaymentResponse;
@@ -17,12 +18,12 @@ public interface PaymentService {
     PaymentResponse updatePaymentProgress(Payment payment, BigDecimal newAmount);
 
     // 3. Nhân viên xác nhận thu tiền mặt/chuyển khoản tại showroom
-    PaymentResponse confirmOfflinePayment(OfflinePaymentRequest request);
+    PaymentResponse confirmOfflinePayment(ConfirmPaymentRequest request);
 
     // 4. Lấy thông tin để hiển thị Progress Bar và 3D Model
     PaymentResponse getPaymentStatusByOrder(String orderId);
 
-    PaymentResponse processDeposit(String orderId, BigDecimal depositAmount, PaymentMethod method);
+    PaymentResponse fullPayment(OfflinePaymentRequest request);
 
     // Kiểm tra xem đơn hàng này đã nộp đủ tiền cọc tối thiểu chưa
     boolean isDepositReached(String orderId);

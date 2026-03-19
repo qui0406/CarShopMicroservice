@@ -12,7 +12,7 @@ import java.util.Map;
 
 public interface OrderManagementService {
     PageResponse<OrdersResponse> getAllOrders(int page, int size, String status); // Filter đơn
-    OrdersResponse updateStatus(String orderId, OrdersStatus newStatus, String note); // Duyệt đơn
+    OrdersResponse updateStatus(String orderId, String note); // Duyệt đơn
 
     BigDecimal calculateRevenue(LocalDateTime start, LocalDateTime end);
     Map<OrdersStatus, Long> countOrdersByStatus();

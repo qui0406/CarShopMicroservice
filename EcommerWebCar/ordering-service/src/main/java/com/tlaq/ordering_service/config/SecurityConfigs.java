@@ -27,7 +27,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @Slf4j
 public class SecurityConfigs {
     private static final String[] PUBLIC_ENDPOINTS = {
-
+        "/payments/vnpay-callback/**"
     };
 
     private static final String[] STAFF_ENDPOINTS = {

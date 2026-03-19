@@ -1,5 +1,6 @@
 package com.tlaq.payment_service.mapper;
 
+import com.tlaq.payment_service.dto.request.ConfirmPaymentRequest;
 import com.tlaq.payment_service.dto.request.OfflinePaymentRequest;
 import com.tlaq.payment_service.dto.response.PaymentTransactionResponse;
 import com.tlaq.payment_service.entity.PaymentTransaction;
@@ -19,4 +20,6 @@ public interface PaymentTransactionMapper {
     @Mapping(target = "status", expression = "java(com.tlaq.payment_service.entity.enums.TransactionStatus.SUCCESS)")
     @Mapping(target = "createdAt", ignore = true)
     PaymentTransaction toEntity(OfflinePaymentRequest request);
+
+    PaymentTransaction toConfirmPayment(ConfirmPaymentRequest request);
 }

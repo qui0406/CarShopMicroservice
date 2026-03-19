@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface OrdersHistoryRepository extends JpaRepository<OrdersHistory, Long> {
+public interface OrdersHistoryRepository extends JpaRepository<OrdersHistory, String> {
     List<OrdersHistory> findByOrderIdOrderByCreatedAtAsc(String orderId);
 }

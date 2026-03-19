@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface OrdersDetailsRepository extends JpaRepository<OrdersDetails, Long> {
+public interface OrdersDetailsRepository extends JpaRepository<OrdersDetails, String> {
 
     // Tìm chi tiết đơn hàng theo ID xe (Hữu ích khi muốn kiểm tra xe này đã được bán chưa) [cite: 2026-02-25]
     Optional<OrdersDetails> findByCarId(String carId);

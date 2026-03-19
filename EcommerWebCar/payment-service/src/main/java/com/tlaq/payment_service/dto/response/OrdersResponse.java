@@ -1,5 +1,7 @@
 package com.tlaq.payment_service.dto.response;
 
+import com.tlaq.payment_service.entity.enums.OrdersStatus;
+import com.tlaq.payment_service.entity.enums.OrdersType;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -15,7 +17,15 @@ import java.util.List;
 public class OrdersResponse {
     String id;
     String userId;
-    BigDecimal totalAmount;
+    OrdersStatus status;
+    OrdersType type;
+
+    BigDecimal baseAmount;      // Giá gốc
+    BigDecimal taxAmount;       // Thuế
+    BigDecimal plateFeeAmount;  // Phí biển số
+    BigDecimal insuranceAmount; // Bảo hiểm
+    BigDecimal totalAmount;     // Tổng cộng
+
     String note;
     List<OrdersDetailsResponse> orderItems;
     LocalDateTime createdAt;

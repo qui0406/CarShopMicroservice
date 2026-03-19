@@ -24,7 +24,6 @@ import java.util.Map;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @PreAuthorize("hasRole('STAFF') or hasRole('ADMIN')")
 public class OrderManagementController {
-
     OrderManagementService orderManagementService;
 
     @GetMapping(value="/all-orders")
@@ -37,13 +36,12 @@ public class OrderManagementController {
                 .build();
     }
 
-    @PatchMapping("/update-status/{orderId}")
+    @PatchMapping("/cancel-order/{orderId}")
     public ApiResponse<OrdersResponse> updateStatus(
             @PathVariable String orderId,
-            @RequestParam OrdersStatus newStatus,
             @RequestParam(required = false) String note) {
         return ApiResponse.<OrdersResponse>builder()
-                .result(orderManagementService.updateStatus(orderId, newStatus, note))
+                .result(orderManagementService.updateStatus(orderId, note))
                 .build();
     }
 
