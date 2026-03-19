@@ -13,7 +13,6 @@ import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
@@ -29,7 +28,6 @@ public class NotificationController {
 
     SendGridMailService sendGridMailService;
 
-    @KafkaListener(topics = "notification-delivery")
     public void listenNotificationDelivery(NotificationEvent message) {
         EmailRequest emailRequest = EmailRequest.builder()
                 .sender(Sender.builder()

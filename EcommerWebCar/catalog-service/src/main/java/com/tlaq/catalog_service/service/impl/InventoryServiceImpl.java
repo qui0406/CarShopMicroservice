@@ -20,6 +20,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -60,7 +62,7 @@ public class InventoryServiceImpl implements InventoryService {
             inventory.setQuantity(inventory.getQuantity() + request.getQuantity());
         } else {
             inventory = inventoryMapper.toInventory(request);
-            inventory.setCar(car);       // Gán object Car thực tế
+            inventory.setCarId(car.getId());       // Gán object Car thực tế
             inventory.setShowRoom(showRoom); // Gán object ShowRoom thực tế
         }
 
@@ -69,9 +71,9 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     public Boolean checkStock(String carId, Integer quantity) {
-        Inventory inventory = inventoryRepository.findInventoryByCarId(carId)
-                .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_NOT_FOUND));
-        return inventory.getQuantity() >= quantity;
+        return inventoryRepository.findInventoryByCarId(carId)
+                .map(inventory -> inventory.getQuantity() >= quantity)
+                .orElse(false);
     }
 
     @Override
@@ -118,5 +120,43 @@ public class InventoryServiceImpl implements InventoryService {
         Inventory inventory= inventoryRepository.findInventoryByCarId(carId)
                 .orElseThrow(()-> new AppException(ErrorCode.INVENTORY_IS_EMPTY));
         return inventoryMapper.toInventoryResponse(inventoryRepository.save(inventory));
+    }
+
+    @Override
+    @Transactional
+    public void deduceStock(List<Map<String, Object>> items) {
+        for (Map<String, Object> item : items) {
+            String carId = (String) item.get("carId");
+            Integer quantity = (Integer) item.get("quantity");
+
+            log.info("Đang trừ kho cho CarId: {} với số lượng: {}", carId, quantity);
+
+            // 1. Kiểm tra tồn kho hiện tại trước khi trừ (Optional nhưng nên có)
+            int currentStock = inventoryRepository.findQuantityByCarId(carId)
+                    .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_IS_EMPTY));
+
+            if (currentStock < quantity) {
+                throw new AppException(ErrorCode.QUANTITY_NOT_ENOUGH);
+            }
+
+            // 2. Gọi phương thức reduceStock đã có trong Repository
+            inventoryRepository.reduceStock(carId, quantity);
+        }
+    }
+
+    @Override
+    public void restoreInventory(List<Map<String, Object>> items) {
+        for (Map<String, Object> item : items) {
+            String carId = String.valueOf(item.get("carId"));
+            Integer quantity = Integer.valueOf(item.get("quantity").toString());
+
+            log.info("Khôi phục kho cho CarId: {} số lượng: {}", carId, quantity);
+
+            Inventory inventory = inventoryRepository.findByCarId(carId)
+                    .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_NOT_FOUND));
+
+            inventory.setQuantity(inventory.getQuantity() + quantity);
+            inventoryRepository.save(inventory);
+        }
     }
 }

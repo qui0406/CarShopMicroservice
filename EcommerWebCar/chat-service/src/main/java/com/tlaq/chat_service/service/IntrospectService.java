@@ -1,9 +1,7 @@
 package com.tlaq.chat_service.service;
 
-import com.tlaq.chat_service.dto.request.IntrospectRequest;
 import com.tlaq.chat_service.dto.response.IntrospectResponse;
 import com.tlaq.chat_service.repository.httpClient.KeyCloakClient;
-import com.tlaq.chat_service.repository.httpClient.MainClient;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

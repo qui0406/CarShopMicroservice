@@ -1,10 +1,12 @@
 package com.tlaq.payment_service.controllers;
 
 import com.tlaq.payment_service.dto.ApiResponse;
+import com.tlaq.payment_service.dto.request.ConfirmPaymentRequest;
 import com.tlaq.payment_service.dto.request.DepositRequest;
 import com.tlaq.payment_service.dto.request.OfflinePaymentRequest;
 import com.tlaq.payment_service.dto.response.PaymentResponse;
 import com.tlaq.payment_service.dto.response.VNPayResponse;
+import com.tlaq.payment_service.entity.enums.PaymentMethod;
 import com.tlaq.payment_service.entity.enums.TransactionType;
 import com.tlaq.payment_service.services.PaymentService;
 import com.tlaq.payment_service.services.VNPayService;
@@ -39,11 +41,19 @@ public class PaymentController {
                 .build();
     }
 
-    @PostMapping("/confirm-offline")
+    @PostMapping("/staff/confirm-offline")
     @PreAuthorize("hasRole('STAFF')")
-    public ApiResponse<PaymentResponse> confirmOffline(@RequestBody OfflinePaymentRequest request) {
+    public ApiResponse<PaymentResponse> confirmOffline(@RequestBody ConfirmPaymentRequest request) {
         var result = paymentService.confirmOfflinePayment(request);
         return ApiResponse.<PaymentResponse>builder().result(result).build();
+    }
+
+    @PreAuthorize("hasRole('STAFF')")
+    @PostMapping("/staff/create-payment")
+    public ApiResponse<PaymentResponse> createPayment(@RequestBody OfflinePaymentRequest request) {
+        return ApiResponse.<PaymentResponse>builder()
+                .result(paymentService.fullPayment(request))
+                .build();
     }
 
     @GetMapping("/status/{orderId}")

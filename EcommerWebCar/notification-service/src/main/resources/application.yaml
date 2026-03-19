@@ -1,34 +1,32 @@
 server:
-    port: 8087
-    servlet:
-        context-path: /notification
+  port: 8086
+  servlet:
+    context-path: /notification
+
 spring:
-    application:
-        name: notification-service
+  application:
+      name: notification-service
+  data:
+    mongodb:
+      uri: mongodb://root:123456@localhost:27017/notification-service?authSource=admin
+      auto-index-creation: false
 
-    kafka:
-        bootstrap-servers: localhost:9094
-        consumer:
-            group-id: notification-group
-            auto-offset-reset: earliest
-            key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-            value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-            properties:
-                spring.deserializer.value.delegate.class: org.springframework.kafka.support.serializer.JsonDeserializer
-                spring.json.trusted.packages: com.tlaq.event.dto
-                spring.json.value.default.type: com.tlaq.event.dto.NotificationEvent
+  send-grid:
+    api-key: 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
+    from-email: anhqui04062004@gmail.com
+    from-name: ecommer_car
 
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: root
+    password: 123456
 
-    send-grid:
-        api-key: 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
-        from-email: anhqui04062004@gmail.com
-        from-name: ecommer_car
-
-    security:
-        oauth2:
-            resourceserver:
-                jwt:
-                    issuer-uri: http://localhost:8180/realms/anhqui
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/anhqui
 
 eureka:
   client:
@@ -40,5 +38,5 @@ eureka:
 
 
 logging:
-    level:
-        org.springframework.security.web: DEBUG
+  level:
+    org.springframework.security.web: DEBUG

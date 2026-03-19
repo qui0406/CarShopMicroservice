@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrdersDetailsResponse {
-    Long id;
+    String id;
     String carId;
     String fullName;
     String phoneNumber;

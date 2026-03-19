@@ -9,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,7 +28,15 @@ public class ConversationController {
             .build();
     }
 
+    @PreAuthorize("hasRole('STAFF')")
+    @PutMapping("/join/{conversationId}")
+    public ApiResponse<ConversationResponse> staffJoin(@PathVariable String conversationId) {
+        return ApiResponse.<ConversationResponse>builder()
+                .result(conversationService.staffJoinConversation(conversationId))
+                .build();
+    }
 
+    @PreAuthorize("hasRole('STAFF')")
     @GetMapping("/get-all-conversation")
     public ApiResponse<PageResponse<ConversationResponse>> getAllConversation(
             @RequestParam(value ="page", required = false, defaultValue = "1") int page,

@@ -1,5 +1,6 @@
 package com.tlaq.ordering_service.service.impl;
 
+import com.tlaq.ordering_service.config.RabbitMQConfig;
 import com.tlaq.ordering_service.dto.PageResponse;
 import com.tlaq.ordering_service.dto.response.MonthlyRevenueResponse;
 import com.tlaq.ordering_service.dto.response.OrdersResponse;
@@ -15,6 +16,8 @@ import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,25 +27,46 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class OrderManagementServiceImpl implements OrderManagementService {
     OrdersRepository ordersRepository;
     OrdersMapper ordersMapper;
     OrderHistoryService orderHistoryService;
+    RabbitTemplate rabbitTemplate;
 
     @Override
     @Transactional
-    public OrdersResponse updateStatus(String orderId, OrdersStatus newStatus, String note) {
-        Orders order = ordersRepository.findById(orderId).orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
-        order.setStatus(newStatus);
+    public OrdersResponse updateStatus(String orderId, String note) {
+        Orders order = ordersRepository.findById(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
+
+        order.getOrderItems().forEach(item -> {
+            Map<String, Object> rollbackMsg = new HashMap<>();
+            rollbackMsg.put("carId", item.getCarId());
+            rollbackMsg.put("quantity", item.getQuantity());
+            rollbackMsg.put("action", "INCREASE");
+
+            rabbitTemplate.convertAndSend(
+                    RabbitMQConfig.EXCHANGE,
+                    RabbitMQConfig.INVENTORY_ROUTING_KEY,
+                    rollbackMsg
+            );
+            log.info("♻️ [RabbitMQ] Đã gửi yêu cầu hoàn kho cho xe: {}, SL: {}",
+                    item.getCarId(), item.getQuantity());
+        });
+
+
+        order.setStatus(OrdersStatus.CANCELLED);
         String staffName = SecurityContextHolder.getContext().getAuthentication().getName();
-        orderHistoryService.saveHistory(order, newStatus, "Nhân viên: " + note, staffName);
+        orderHistoryService.saveHistory(order, OrdersStatus.CANCELLED, "Nhân viên xử lý: " + note, staffName);
 
         return ordersMapper.toOrdersResponse(ordersRepository.save(order));
     }

@@ -24,11 +24,12 @@ public interface InventoryRepository extends JpaRepository<Inventory, String> {
 
     Optional<Inventory> findByCarIdAndShowRoomId(String carId, String showRoomId);
 
-    @Query("SELECT i.quantity FROM Inventory i WHERE i.car.id = :carId")
+    @Query("SELECT i.quantity FROM Inventory i WHERE i.carId = :carId")
     Optional<Integer> findQuantityByCarId(String carId);
 
     @Modifying(clearAutomatically = true)
     @Transactional
-    @Query("UPDATE Inventory i SET i.quantity = i.quantity - :qty WHERE i.car.id = :carId")
+    // Sửa i.car.id thành i.carId
+    @Query("UPDATE Inventory i SET i.quantity = i.quantity - :qty WHERE i.carId = :carId")
     void reduceStock(String carId, int qty);
 }

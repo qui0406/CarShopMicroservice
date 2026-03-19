@@ -22,7 +22,7 @@ public interface PaymentMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "transactions", ignore = true)
     @Mapping(target = "status", constant = "PENDING")
-    @Mapping(target = "paidAmount", constant = "0")
-    @Mapping(target = "remainAmount", source = "totalAmount")
+    @Mapping(target = "paidAmount", expression = "java(java.math.BigDecimal.ZERO)")
+// Lưu ý: dùng expression cho BigDecimal.ZERO để chuẩn kiểu dữ liệu
     Payment toEntity(PaymentRequest request);
 }

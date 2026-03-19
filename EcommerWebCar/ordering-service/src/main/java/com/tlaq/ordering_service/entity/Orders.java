@@ -34,12 +34,11 @@ public class Orders {
     @Enumerated(EnumType.STRING)
     OrdersType type;
 
-    // --- Bổ sung các trường này để lưu vết thuế phí [cite: 2026-03-10] ---
-    BigDecimal baseAmount;      // Tổng giá xe gốc
-    BigDecimal taxAmount;       // Tổng thuế trước bạ
-    BigDecimal plateFeeAmount;  // Tổng phí biển số
-    BigDecimal insuranceAmount; // Phí bảo trì/BH cố định
-    BigDecimal totalAmount;     // Tổng cuối cùng
+    BigDecimal baseAmount;
+    BigDecimal taxAmount;
+    BigDecimal plateFeeAmount;
+    BigDecimal insuranceAmount;
+    BigDecimal totalAmount; // = base + tax + plate + insurance, tính khi tạo order
 
     @Column(columnDefinition = "TEXT")
     String note;
@@ -51,6 +50,6 @@ public class Orders {
     @UpdateTimestamp
     LocalDateTime updatedAt;
 
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     List<OrdersDetails> orderItems;
 }

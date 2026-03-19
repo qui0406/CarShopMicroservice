@@ -18,36 +18,37 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "payment_transactions")
+@Table(name = "payment_transactions",
+        indexes = @Index(name = "idx_txn_ref", columnList = "txn_ref")) // ← THÊM index
 public class PaymentTransaction {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "payment_id")
+    @JoinColumn(name = "payment_id", nullable = false)
     Payment payment;
 
     @Enumerated(EnumType.STRING)
-    TransactionType type; // DEPOSIT (Cọc), BALANCE (Trả nốt), FULL_PAYMENT (Mua đứt)
+    TransactionType type;
 
     @Enumerated(EnumType.STRING)
-    PaymentMethod method; // VNPAY, CASH (Tiền mặt), BANK_TRANSFER (Chuyển khoản showroom)
+    PaymentMethod method;
 
-    @Column(precision = 19, scale = 2)
-    BigDecimal amount; // Số tiền của riêng lần giao dịch này
+    @Column(precision = 19, scale = 2, nullable = false)
+    BigDecimal amount;
 
-    String txnRef; // Mã tham chiếu (Mã đơn hàng VNPAY hoặc mã số biên lai viết tay)
+    @Column(name = "txn_ref") // ← đổi tên nhất quán
+    String txnRef;
 
     @Column(name = "vnp_transaction_no")
-    String vnpTransactionNo; // Mã giao dịch trả về từ hệ thống VNPAY
+    String vnpTransactionNo;
 
     @Enumerated(EnumType.STRING)
-    TransactionStatus status; // SUCCESS, FAILED, PROCESSING
+    TransactionStatus status;
 
-    String staffId; // ID nhân viên xác nhận (nếu thanh toán Offline tại showroom)
-
-    String note; // Ghi chú (Vd: "Khách nộp tiền mặt tại showroom Quận 7")
+    String staffId;
+    String note;
 
     @CreationTimestamp
     LocalDateTime createdAt;

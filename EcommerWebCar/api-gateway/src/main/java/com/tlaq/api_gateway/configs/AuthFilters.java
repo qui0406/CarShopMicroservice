@@ -56,7 +56,7 @@ public class AuthFilters implements GlobalFilter, Ordered {
             "/catalog/api/inventory/get-inventory-by-carId/.*",
             "/catalog/api/showroom/get-info-showroom",
 
-            "/payment/payments/vnpay-callback"
+            "/payment/payments/vnpay-callback/.*"
     };
 
     @Value("${app.api-prefix}")

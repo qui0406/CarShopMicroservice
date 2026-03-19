@@ -12,7 +12,6 @@ import java.util.List;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrdersRequest {
-    OrdersType type;
     String note;
     List<OrdersDetailsRequest> orderItems;
 }

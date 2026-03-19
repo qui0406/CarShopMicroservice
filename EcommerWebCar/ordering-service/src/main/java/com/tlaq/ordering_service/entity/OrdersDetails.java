@@ -13,12 +13,13 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
+// OrdersDetails.java — bỏ totalAmount (computed), bỏ orders object (chỉ giữ FK qua @ManyToOne)
 @Entity
-@Table(name="order_details")
+@Table(name = "order_details")
 public class OrdersDetails {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    String id;
 
     String address;
     String fullName;
@@ -26,18 +27,16 @@ public class OrdersDetails {
     String cccd;
     String phoneNumber;
 
-    @Column(name = "unit_price")
+    @Column(name = "unit_price", nullable = false)
     BigDecimal unitPrice;
 
+    @Column(nullable = false)
     int quantity;
-
-    @Column(name ="total_amount")
-    BigDecimal totalAmount;
 
     @Column(name = "car_id", nullable = false)
     String carId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id")
+    @JoinColumn(name = "order_id", nullable = false)
     Orders order;
 }

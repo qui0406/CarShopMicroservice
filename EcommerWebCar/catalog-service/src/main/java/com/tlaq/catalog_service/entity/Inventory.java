@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
@@ -14,22 +15,27 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name="inventory")
+@Table(name = "inventory")
 public class Inventory {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
+    @Column(name = "car_id", nullable = false, unique = true)
+    String carId;
+
+    @Column(nullable = false)
     int quantity;
-
-    @CreationTimestamp
-    @Column(name = "created_at")
-    LocalDateTime createdAt;
-
-    @OneToOne
-    Car car;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "show_room_id")
     ShowRoom showRoom;
+
+    @CreationTimestamp
+    @Column(name = "created_at", updatable = false)
+    LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    LocalDateTime updatedAt;
 }

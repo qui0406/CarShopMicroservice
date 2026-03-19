@@ -1,4 +1,4 @@
-package com.tlaq.notification_service.response;
+package com.tlaq.notification_service.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
