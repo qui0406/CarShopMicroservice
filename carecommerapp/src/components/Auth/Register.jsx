@@ -26,7 +26,7 @@ const Register = () => {
         label: "Họ",
         type: "text",
         field: "lastName"
-    }, 
+    },
     {
         label: "Email address",
         type: "email",
@@ -87,7 +87,7 @@ const Register = () => {
                     }
                 });
 
-                
+
                 if (res.status === 200) {
                     setMsg("Đăng ký thành công");
                     nav("/login");
@@ -107,51 +107,145 @@ const Register = () => {
     return (
         <div
             className="d-flex justify-content-center align-items-center"
-            style={{ minHeight: "150vh", background: "#f6f8fa", paddingTop: "70px" }}
-        >
-        <div
             style={{
-                width: 650,
-                padding: "32px 28px",
-                background: "#fff",
-                borderRadius: 18,
-                boxShadow: "0 4px 24px 0 rgba(0,0,0,.08)",
+                minHeight: "100vh",
+                background: "#f8f9fa",
+                padding: "100px 20px 80px",
+                fontFamily: "'Montserrat', 'Roboto', sans-serif"
             }}
         >
-            <h2 className="mb-2 mt-2 text-center">Đăng ký tài khoản</h2>
-            {msg && <Alert variant="danger">{msg}</Alert>}
-            <Form onSubmit={register}>
-                    {info.map(f => {
-                        if (f.type === "file") return null;
-                        if (f.type === "select") {
+            <div
+                style={{
+                    width: 700,
+                    padding: "48px 40px",
+                    background: "#ffffff",
+                    borderRadius: 8,
+                    border: "1px solid #e7e8e9",
+                    boxShadow: "none"
+                }}
+            >
+                <div className="text-center mb-4">
+                    <h2 style={{
+                        color: "#1a73e8",
+                        fontWeight: 700,
+                        letterSpacing: "-0.5px",
+                        margin: 0
+                    }}>Đăng ký tài khoản</h2>
+
+                </div>
+
+                {msg && <Alert variant="danger" style={{ borderRadius: 4, border: "none" }}>{msg}</Alert>}
+
+                <Form onSubmit={register}>
+                    <div className="row">
+                        {info.map(f => {
+                            if (f.type === "file") return null;
+
+                            // Make some fields 50% width to save vertical space
+                            const isHalfWidth = ["password", "confirmPassword", "firstName", "lastName", "email", "phone", "gender", "dob"].includes(f.field);
+
+                            const commonInputStyle = {
+                                background: "#f8f9fa",
+                                border: "1px solid #c1c6d6",
+                                borderRadius: 4,
+                                padding: "12px 16px",
+                                fontSize: "0.95rem",
+                                boxShadow: "none",
+                                color: "#191c1d"
+                            };
+
+                            const labelStyle = {
+                                fontSize: "0.85rem",
+                                fontWeight: 600,
+                                color: "#191c1d",
+                                marginBottom: "8px"
+                            };
+
+                            if (f.type === "select") {
+                                return (
+                                    <Form.Group key={f.field} className={`mb-3 ${isHalfWidth ? 'col-md-6' : 'col-12'}`} controlId={`input-${f.field}`}>
+                                        <Form.Label style={labelStyle}>{f.label}</Form.Label>
+                                        <Form.Select
+                                            required
+                                            value={user[f.field] || ""}
+                                            onChange={e => setState(e.target.value, f.field)}
+                                            style={commonInputStyle}
+                                        >
+                                            <option value="">Chọn {f.label.toLowerCase()}</option>
+                                            {f.options.map(opt =>
+                                                <option key={opt.value} value={opt.value}>{opt.label}</option>
+                                            )}
+                                        </Form.Select>
+                                    </Form.Group>
+                                );
+                            }
                             return (
-                                <FloatingLabel key={f.field} controlId={`floating-${f.field}`} label={f.label} className="mb-3">
-                                    <Form.Select
+                                <Form.Group key={f.field} className={`mb-3 ${isHalfWidth ? 'col-md-6' : 'col-12'}`} controlId={`input-${f.field}`}>
+                                    <Form.Label style={labelStyle}>{f.label}</Form.Label>
+                                    <Form.Control
+                                        type={f.type}
+                                        placeholder={`Nhập ${f.label.toLowerCase()}`}
                                         required
                                         value={user[f.field] || ""}
                                         onChange={e => setState(e.target.value, f.field)}
-                                        style={{ background: "#f7f7f9" }}
-                                    >
-                                        <option value="">Chọn</option>
-                                        {f.options.map(opt =>
-                                            <option key={opt.value} value={opt.value}>{opt.label}</option>
-                                        )}
-                                    </Form.Select>
-                                </FloatingLabel>
+                                        style={commonInputStyle}
+                                    />
+                                </Form.Group>
                             );
-                        }
-                        return (
-                            <FloatingLabel key={f.field} controlId="floatingInput" label={f.label} className="mb-3">
-                                <Form.Control type={f.type} placeholder={f.label} required value={user[f.field]} onChange={e => setState(e.target.value, f.field)} style={{ background: "#f7f7f9" }}
-                                />
-                            </FloatingLabel>
-                        );
-                    })}
-                    <FloatingLabel controlId="floatingInput" label="Ảnh đại diện" className="mb-3">
-                        <Form.Control style={{ background: "#f7f7f9" }} type="file" placeholder="Ảnh đại diện" ref={avatar} onChange={(e) => setState(e.target.files[0], "avatar")} />
-                    </FloatingLabel>
-                    {loading ? <MySpinner /> : <Button type="submit" variant="success" className="mt-2 w-100 py-2" style={{ fontWeight: 600, fontSize: 17, letterSpacing: 1 }}>
-                        Đăng ký</Button>}
+                        })}
+
+                        <Form.Group className="mb-4 col-12" controlId="input-avatar">
+                            <Form.Label style={{ fontSize: "0.85rem", fontWeight: 600, color: "#191c1d", marginBottom: "8px" }}>Ảnh đại diện</Form.Label>
+                            <Form.Control
+                                type="file"
+                                required
+                                ref={avatar}
+                                onChange={(e) => setState(e.target.files[0], "avatar")}
+                                style={{
+                                    background: "#f8f9fa",
+                                    border: "1px solid #c1c6d6",
+                                    borderRadius: 4,
+                                    padding: "10px 16px",
+                                    fontSize: "0.95rem",
+                                    boxShadow: "none",
+                                    color: "#191c1d"
+                                }}
+                            />
+                        </Form.Group>
+                    </div>
+
+                    {loading ? (
+                        <div className="text-center mt-3"><MySpinner /></div>
+                    ) : (
+                        <Button
+                            type="submit"
+                            className="mt-3 w-100 py-2"
+                            style={{
+                                background: "#1a73e8",
+                                color: "#ffffff",
+                                border: "none",
+                                borderRadius: 4,
+                                padding: "14px",
+                                fontWeight: 600,
+                                fontSize: "1rem",
+                                boxShadow: "none"
+                            }}
+                        >
+                            Đăng ký
+                        </Button>
+                    )}
+
+                    <div className="mt-4 text-center">
+                        <span style={{ color: "#5d6571", fontSize: "0.9rem" }}>Đã có tài khoản? </span>
+                        <a href="/login" style={{
+                            color: "#1a73e8",
+                            fontWeight: 600,
+                            textDecoration: "none",
+                            fontSize: "0.9rem"
+                        }}>
+                            Đăng nhập ngay
+                        </a>
+                    </div>
                 </Form>
             </div>
         </div>
