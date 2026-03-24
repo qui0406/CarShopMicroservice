@@ -1,8 +1,6 @@
 package com.tlaq.chat_service.service;
 
-import com.sun.tools.javac.Main;
 import com.tlaq.chat_service.dto.PageResponse;
-import com.tlaq.chat_service.dto.request.ConversationRequest;
 import com.tlaq.chat_service.dto.response.ConversationResponse;
 import com.tlaq.chat_service.entity.Conversation;
 import com.tlaq.chat_service.entity.ParticipantInfo;
@@ -11,7 +9,7 @@ import com.tlaq.chat_service.exceptions.AppException;
 import com.tlaq.chat_service.exceptions.ErrorCode;
 import com.tlaq.chat_service.mapper.ConversationMapper;
 import com.tlaq.chat_service.repository.ConversationRepository;
-import com.tlaq.chat_service.repository.httpClient.MainClient;
+import com.tlaq.chat_service.repository.httpClient.IdentityClient;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -23,6 +21,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.util.*;
@@ -33,7 +32,7 @@ import java.util.*;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ConversationService {
     ConversationRepository conversationRepository;
-    MainClient mainClient;
+    IdentityClient identityClient;
     ConversationMapper conversationMapper;
 
 
@@ -41,9 +40,6 @@ public class ConversationService {
         Sort sort= Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable pageable= PageRequest.of(page- 1, size, sort);
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        checkValidStaff(authentication);
 
         var pageData = conversationRepository.findAll(pageable);
         return PageResponse.<ConversationResponse>builder()
@@ -56,10 +52,29 @@ public class ConversationService {
                 .build();
     }
 
+    @Transactional
+    public ConversationResponse staffJoinConversation(String conversationId) {
+        String staffKeycloakId = SecurityContextHolder.getContext().getAuthentication().getName();
+        var staffProfile = identityClient.getProfileByUserKeycloakId(staffKeycloakId).getResult();
+
+        Conversation conversation = conversationRepository.findById(conversationId)
+                .orElseThrow(() -> new AppException(ErrorCode.CONVERSATION_NOT_FOUND));
+
+        // 2. Thêm staffId vào danh sách quản lý (nếu chưa có)
+        if (!conversation.getStaffIds().contains(staffProfile.getId())) {
+            conversation.getStaffIds().add(staffProfile.getId());
+        }
+
+        // 3. Chuyển trạng thái sang ACTIVE
+        conversation.setStatus(ConversationStatus.ACTIVE);
+
+        return conversationMapper.toConversationResponse(conversationRepository.save(conversation));
+    }
+
 
     public ConversationResponse getCustomerConversation() {
         String userKeyCloakId = SecurityContextHolder.getContext().getAuthentication().getName();
-        var userInfoResponse = mainClient.getProfile(userKeyCloakId);
+        var userInfoResponse = identityClient.getProfileByUserKeycloakId(userKeyCloakId);
 
         if (Objects.isNull(userInfoResponse)) {
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
@@ -77,7 +92,7 @@ public class ConversationService {
 
         String userKeyCloakId = authentication.getName();
 
-        var userInfoResponse = mainClient.getProfile(userKeyCloakId);
+        var userInfoResponse = identityClient.getProfileByUserKeycloakId(userKeyCloakId);
 
         if (Objects.isNull(userInfoResponse)) {
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
@@ -103,7 +118,7 @@ public class ConversationService {
     public ConversationResponse createOrGetConversation() {
         String userKeyCloakId = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        var userInfoResponse = mainClient.getProfile(userKeyCloakId);
+        var userInfoResponse = identityClient.getProfileByUserKeycloakId(userKeyCloakId);
 
         if (Objects.isNull(userInfoResponse)) {
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
@@ -112,6 +127,7 @@ public class ConversationService {
         var userInfo = userInfoResponse.getResult();
 
         var existingConversation = conversationRepository.findByCustomerId(userInfo.getId());
+
         if (existingConversation.isPresent()) {
             var conversation = existingConversation.get();
             return toCustomerConversationResponse(conversation);
@@ -146,20 +162,5 @@ public class ConversationService {
                 conversation.getId(), conversation.getCustomerInfo().getUsername());
     }
 
-    private void checkValidStaff(Authentication authentication){
-        authentication = SecurityContextHolder.getContext().getAuthentication();
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
 
-        boolean hasStaffRole = false;
-        for (GrantedAuthority authority : authorities) {
-            if (authority.getAuthority().equals("ROLE_STAFF")) {
-                hasStaffRole = true;
-                break;
-            }
-        }
-
-        if (!hasStaffRole) {
-            throw new AppException(ErrorCode.UNAUTHORIZED);
-        }
-    }
 }

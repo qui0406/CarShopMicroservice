@@ -1,5 +1,5 @@
 server:
-  port: 8083
+  port: 8084
   servlet:
     context-path: /payment
 
@@ -7,7 +7,7 @@ spring:
   application:
     name: payment-service
   datasource:
-    url: "jdbc:mysql://localhost:3306/payment_ecommer"
+    url: "jdbc:mysql://localhost:3306/payment-ecommer-car"
     driverClassName: "com.mysql.cj.jdbc.Driver"
     username: root
     password: 12345678
@@ -30,49 +30,55 @@ spring:
 
 app:
   services:
-    main:
-      url: http://localhost:8080/ecommer-car-web
+    identity:
+      url: http://localhost:8081
+    catalog:
+      url: http://localhost:8082
+    ordering:
+      url: http://localhost:8083
+
 
 eureka:
   client:
-    serviceUrl:
+    service-url:
       defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
   instance:
+    instance-id: ${spring.application.name}:${server.port}:${random.value}
     prefer-ip-address: true
-    hostname: localhost
 
 
 payment:
   vnpay:
-    tmn-code: BSYVAKDJ
+    tmn-code: E4Q8NLOC
     init-payment-url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
-    return-url: http://localhost:8888/api/v1/payment/api/checkout/vnpay_ipn
-    secret-key: LDELTSZERUCS745OLFK8OJI1X1JGFI5L
-    time-out: 10
-    username: anhqui04062004@gmail.com
-    password: NU#f.8HjkmSL3c5
+    return-url: http://localhost:8084/payment/payments/vnpay-callback
+    hash-secret: T4BD1GPII9JPUHVDNPJ85XODWYW8Q97L
+    url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
 
-resilience4j:
-  circuitbreaker:
-    instances:
-      vnpayCircuitBreaker:
-        registerHealthIndicator: true
-        slidingWindowType: COUNT_BASED
-        slidingWindowSize: 5
-        minimumNumberOfCalls: 3
-        failureRateThreshold: 50
-        waitDurationInOpenState: 30s
-  retry:
-    instances:
-      vnpayRetry:
-        maxAttempts: 3
-        waitDuration: 2s
-  timelimiter:
-    instances:
-      vnpayTimeLimiter:
-        timeoutDuration: 5s
+
+#resilience4j:
+#  circuitbreaker:
+#    instances:
+#      vnpayCircuitBreaker:
+#        registerHealthIndicator: true
+#        slidingWindowType: COUNT_BASED
+#        slidingWindowSize: 5
+#        minimumNumberOfCalls: 3
+#        failureRateThreshold: 50
+#        waitDurationInOpenState: 30s
+#  retry:
+#    instances:
+#      vnpayRetry:
+#        maxAttempts: 3
+#        waitDuration: 2s
+#  timelimiter:
+#    instances:
+#      vnpayTimeLimiter:
+#        timeoutDuration: 5s
 
 idp:
   url: http://localhost:8180/realms/anhqui/protocol/openid-connect/token
-  client-id: ecommer_app
-  client-secret: WKnFf5PHkolShqwY8CnVrYP7bHhYph4H
+  client-id: ecommer-app
+  client-secret: 2anScggPiIAmbA5mW5SI5JnGZAcCVveo

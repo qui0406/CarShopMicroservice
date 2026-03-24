@@ -1,5 +1,5 @@
 server:
-  port: 8082
+  port: 8085
   servlet:
     context-path: /chat
 
@@ -8,8 +8,8 @@ spring:
     name: chat-service
   data:
     mongodb:
-      uri: mongodb://localhost:27017/chat-service
-      auto-index-creation: true
+      uri: mongodb://root:123456@localhost:27017/chat-service?authSource=admin
+      auto-index-creation: false
 
   security:
     oauth2:
@@ -19,8 +19,12 @@ spring:
 
 app:
   services:
-    main:
-      url: http://localhost:8080/ecommer-car-web
+    identity:
+      url: http://localhost:8081
+    catalog:
+      url: http://localhost:8082
+    ordering:
+      url: http://localhost:8083
 
 eureka:
   client:
@@ -32,24 +36,5 @@ eureka:
 
 idp:
   url: http://localhost:8180/realms/anhqui/protocol/openid-connect/token
-  client-id: ecommer_app
-  client-secret: WKnFf5PHkolShqwY8CnVrYP7bHhYph4H
-
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health, info, metrics, prometheus
-  metrics:
-    distribution:
-      percentiles-histogram:
-        http:
-          server:
-            requests: true
-  observations:
-    key-values:
-      application: loan-service
-  tracing:
-    sampling:
-      probability: 1.0
+  client-id: ecommer-app
+  client-secret: 2anScggPiIAmbA5mW5SI5JnGZAcCVveo

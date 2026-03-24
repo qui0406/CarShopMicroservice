@@ -1,136 +1,46 @@
 package com.tlaq.payment_service.utils;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
+import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.codec.digest.HmacAlgorithms;
+import org.apache.commons.codec.digest.HmacUtils;
 
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Map;
+import java.util.Random;
 
-@Component
 public class VNPayUtils {
-
-    @Value(value = "${payment.vnpay.secret-key}")
-    public static String secretKey;
-
-    @Value(value = "${payment.vnpay.init-payment-url}")
-    public static String initPaymentPrefixUrl;
-
-    @Value(value = "${payment.vnpay.return-url}")
-    public static String returnUrlFormat;
-
-    public static Boolean verifyIpn(Map<String, String> params) {
-        var reqSecureHash = params.get(VNPayParams.SECURE_HASH);
-        params.remove(VNPayParams.SECURE_HASH);
-        params.remove(VNPayParams.SECURE_HASH_TYPE);
-        var hashPayload = new StringBuilder();
-        var fieldNames = new ArrayList<>(params.keySet());
-        Collections.sort(fieldNames);
-
-        var itr = fieldNames.iterator();
-        while (itr.hasNext()) {
-            var fieldName = itr.next();
-            var fieldValue = params.get(fieldName);
-            if ((fieldValue != null) && (!fieldValue.isEmpty())) {
-                //Build hash data
-                hashPayload.append(fieldName);
-                hashPayload.append("=");
-                hashPayload.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
-
-                if (itr.hasNext()) {
-                    hashPayload.append("&");
-                }
-            }
-        }
-
-        var secureHash = hmacSHA512(secretKey ,hashPayload.toString());
-        return secureHash.equals(reqSecureHash);
-    }
-
-    public static String buildInitPaymentUrl(Map<String, String> params) {
-        var hashPayload = new StringBuilder();
-        var query = new StringBuilder();
-        var fieldNames = new ArrayList<>(params.keySet());
-        Collections.sort(fieldNames);   // 1. Sort field names
-
-        var itr = fieldNames.iterator();
-        while (itr.hasNext()) {
-            var fieldName = itr.next();
-            var fieldValue = params.get(fieldName);
-            if ((fieldValue != null) && (!fieldValue.isEmpty())) {
-                // 2.1. Build hash data
-                hashPayload.append(fieldName);
-                hashPayload.append("=");
-                hashPayload.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
-
-                // 2.2. Build query
-                query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII));
-                query.append("=");
-                query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII));
-
-                if (itr.hasNext()) {
-                    query.append("&");
-                    hashPayload.append("&");
-                }
-            }
-        }
-
-        // 3. Build secureHash
-        var secureHash = hmacSHA512(secretKey , String.valueOf(hashPayload));
-
-        // 4. Finalize query
-        query.append("&vnp_SecureHash=");
-        query.append(secureHash);
-
-        return initPaymentPrefixUrl + "?" + query;
-    }
-
-    public static String buildReturnUrl(String txnRef) {
-        return String.format(returnUrlFormat);
-    }
-
-    public static String buildPaymentDetail(String orderId) {
-        return String.format("Payment for order(s): %s", "x");
-    }
-
     public static String hmacSHA512(final String key, final String data) {
         try {
-
-            if (key == null || data == null) {
-                throw new NullPointerException();
-            }
-            final Mac hmac512 = Mac.getInstance("HmacSHA512");
-            byte[] hmacKeyBytes = key.getBytes();
-            final SecretKeySpec secretKey = new SecretKeySpec(hmacKeyBytes, "HmacSHA512");
-            hmac512.init(secretKey);
-            byte[] dataBytes = data.getBytes(StandardCharsets.UTF_8);
-            byte[] result = hmac512.doFinal(dataBytes);
-            StringBuilder sb = new StringBuilder(2 * result.length);
-            for (byte b : result) {
-                sb.append(String.format("%02x", b & 0xff));
-            }
-            return sb.toString();
-
+            String result = new HmacUtils(HmacAlgorithms.HMAC_SHA_512, key).hmacHex(data);
+            System.out.println("Hash length: " + result.length()); // phải = 128
+            return result;
         } catch (Exception ex) {
+            ex.printStackTrace();
             return "";
         }
     }
-    @Value("${payment.vnpay.secret-key}")
-    public void setSecretKey(String secretKey) {
-        VNPayUtils.secretKey = secretKey;
+
+    public static String getIpAddress(HttpServletRequest request) {
+        String ipAddress;
+        try {
+            ipAddress = request.getHeader("X-FORWARDED-FOR");
+            if (ipAddress == null || ipAddress.isEmpty()) {
+                ipAddress = request.getRemoteAddr();
+            }
+            if ("0:0:0:0:0:0:0:1".equals(ipAddress) || "::1".equals(ipAddress)) {
+                ipAddress = "127.0.0.1";
+            }
+        } catch (Exception e) {
+            ipAddress = "127.0.0.1";
+        }
+        return ipAddress;
     }
 
-    @Value("${payment.vnpay.init-payment-url}")
-    public void setInitPaymentPrefixUrl(String initPaymentPrefixUrl) {
-        VNPayUtils.initPaymentPrefixUrl = initPaymentPrefixUrl;
-    }
-
-    @Value("${payment.vnpay.return-url}")
-    public void setReturnUrlFormat(String returnUrlFormat) {
-        VNPayUtils.returnUrlFormat = returnUrlFormat;
+    public static String getRandomNumber(int len) {
+        Random rnd = new Random();
+        String chars = "0123456789";
+        StringBuilder sb = new StringBuilder(len);
+        for (int i = 0; i < len; i++) {
+            sb.append(chars.charAt(rnd.nextInt(chars.length())));
+        }
+        return sb.toString();
     }
 }

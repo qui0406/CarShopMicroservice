@@ -2,8 +2,6 @@ server:
   port: 8888
 
 app:
-  application:
-    name: api-gateway
   api-prefix: /api/v1
 
 eureka:
@@ -15,6 +13,8 @@ eureka:
     hostname: localhost
 
 spring:
+  application:
+    name: api-gateway
   cloud:
     gateway:
       discovery:
@@ -22,10 +22,10 @@ spring:
           enabled: true
           lower-case-service-id: true
       routes:
-        - id: main-service
-          uri: lb://main-service
+        - id: identity-service
+          uri: lb://identity-service
           predicates:
-            - Path=${app.api-prefix}/ecommer-car-web/**
+            - Path=${app.api-prefix}/auth/**
           filters:
             - StripPrefix=2
 
@@ -50,13 +50,33 @@ spring:
           filters:
             - StripPrefix=2
 
+        - id: ordering-service
+          uri: lb://ordering-service
+          predicates:
+            - Path=${app.api-prefix}/ordering/**
+          filters:
+            - StripPrefix=2
+
+        - id: catalog-service
+          uri: lb://catalog-service
+          predicates:
+            - Path=${app.api-prefix}/catalog/**
+          filters:
+            - StripPrefix=2
+
+        - id: cms-service
+          uri: lb://cms-service
+          predicates:
+            - Path=${app.api-prefix}/cms/**
+          filters:
+            - StripPrefix=2
+
 
 
 idp:
   url: http://localhost:8180
-  client-id: ecommer_app
-  client-secret: WKnFf5PHkolShqwY8CnVrYP7bHhYph4H
-
+  client-id: ecommer-app
+  client-secret: 2anScggPiIAmbA5mW5SI5JnGZAcCVveo
 
 #management:
 #  endpoints:

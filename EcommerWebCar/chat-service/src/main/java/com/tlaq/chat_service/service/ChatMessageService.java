@@ -2,7 +2,6 @@ package com.tlaq.chat_service.service;
 
 import com.corundumstudio.socketio.SocketIOServer;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tlaq.chat_service.dto.request.ChatMessageRequest;
 import com.tlaq.chat_service.dto.response.ChatMessageResponse;
 import com.tlaq.chat_service.dto.response.UserProfileResponse;
@@ -10,14 +9,13 @@ import com.tlaq.chat_service.entity.ChatMessage;
 import com.tlaq.chat_service.entity.Conversation;
 import com.tlaq.chat_service.entity.ParticipantInfo;
 import com.tlaq.chat_service.entity.WebSocketSession;
-import com.tlaq.chat_service.entity.enums.ConversationStatus;
 import com.tlaq.chat_service.exceptions.AppException;
 import com.tlaq.chat_service.exceptions.ErrorCode;
 import com.tlaq.chat_service.mapper.ChatMessageMapper;
 import com.tlaq.chat_service.repository.ChatMessageRepository;
 import com.tlaq.chat_service.repository.ConversationRepository;
 import com.tlaq.chat_service.repository.WebSocketSessionRepository;
-import com.tlaq.chat_service.repository.httpClient.MainClient;
+import com.tlaq.chat_service.repository.httpClient.IdentityClient;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -41,12 +39,12 @@ public class ChatMessageService {
     ChatMessageRepository chatMessageRepository;
     ConversationRepository conversationRepository;
     WebSocketSessionRepository webSocketSessionRepository;
-    MainClient mainClient;
+    IdentityClient identityClient;
     ChatMessageMapper chatMessageMapper;
 
     public List<ChatMessageResponse> getMessages(String conversationId) {
         String userKeyCloakId = SecurityContextHolder.getContext().getAuthentication().getName();
-        var userInfoResponse = mainClient.getProfile(userKeyCloakId);
+        var userInfoResponse = identityClient.getProfileByUserKeycloakId(userKeyCloakId);
 
         if (Objects.isNull(userInfoResponse)) {
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
@@ -71,7 +69,7 @@ public class ChatMessageService {
 
     public ChatMessageResponse create(ChatMessageRequest request) throws JsonProcessingException {
         String userKeyCloakId = SecurityContextHolder.getContext().getAuthentication().getName();
-        var userInfoResponse = mainClient.getProfile(userKeyCloakId);
+        var userInfoResponse = identityClient.getProfileByUserKeycloakId(userKeyCloakId);
 
         if (Objects.isNull(userInfoResponse)) {
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
@@ -99,11 +97,6 @@ public class ChatMessageService {
 
         return toChatMessageResponse(chatMessage, userInfo.getId());
     }
-
-
-
-
-
 
 
     private void autoAssignStaffToConversation(Conversation conversation, String staffId) {

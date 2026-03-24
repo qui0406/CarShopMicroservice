@@ -1,631 +1,447 @@
-import React, { useState, useRef, useEffect } from "react";
-import  axios ,{ authApis, endpoints } from "./../../configs/APIs";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
-export default function CarForm() {
-  const [car, setCar] = useState({
-    name: "",
-    price: "",
-    year: "",
-    carBranch: "",
-    carModel: "",
-    carFeature: {
-      carComfortResponse: {
-        mayDieuHoa: false,
-        manHinh: "",
-        ghe: "",
-        sacKhongDay: false,
-        copDien: false,
-        cuaSo: "",
-        bluetooth: false,
-        loa: "",
-        gps: false,
-      },
-      carExteriorResponse: {
-        den: "",
-        gatMua: "",
-        smartKey: false,
-        guongDien: false,
-      },
-      featureSafetyResponse: {
-        tuiKhi: false,
-        phanh: "",
-        canBangDienTu: false,
-        hoTroGiuLan: false,
-        camera: false,
-        camBienDoXe: false,
-      },
-    },
-    carService: {
-      dongCo: "",
-      hopSo: "",
-      congSuat: "",
-      momenXoan: "",
-      dungTichXiLanh: "",
-      dungTichXang: "",
-      chieuDai: "",
-      mauSac: "",
-      tocDoToiDa: "",
-      loaiNhienLieu: "",
-    },
+/* ─── Mock data ────────────────────────────────────────── */
+const revenueData = [
+  { month: "JAN", value: 55 },
+  { month: "FEB", value: 72 },
+  { month: "MAR", value: 60 },
+  { month: "APR", value: 80 },
+  { month: "MAY", value: 92 },
+  { month: "JUN", value: 100 },
+];
+
+const brandData = [
+  { name: "Porsche",       pct: 45, color: "#1d4ed8" },
+  { name: "BMW",           pct: 25, color: "#bfdbfe" },
+  { name: "Mercedes-Benz", pct: 30, color: "#6b7280" },
+];
+
+const activities = [
+  {
+    id: 1,
+    icon: "💳",
+    iconBg: "#dcfce7",
+    type: "Deposit Received",
+    detail: "Porsche 911 GT3 (Ref: #8921)",
+    staff: "Alex Reed",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&q=80&fit=crop&crop=face",
+    time: "14:22 PM",
+    status: "COMPLETED",
+    statusColor: "#16a34a",
+    statusBg: "#dcfce7",
+  },
+  {
+    id: 2,
+    icon: "🚗",
+    iconBg: "#dbeafe",
+    type: "Car Addition",
+    detail: "BMW M4 Competition (2024 Model)",
+    staff: "Sarah Chen",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&q=80&fit=crop&crop=face",
+    time: "12:05 PM",
+    status: "PUBLISHED",
+    statusColor: "#1d4ed8",
+    statusBg: "#dbeafe",
+  },
+  {
+    id: 3,
+    icon: "🔑",
+    iconBg: "#f3f4f6",
+    type: "Staff Login",
+    detail: "Terminal Access granted via Auth0",
+    staff: "Jordan Smith",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&q=80&fit=crop&crop=face",
+    time: "09:12 AM",
+    status: "AUTHONLY",
+    statusColor: "#374151",
+    statusBg: "#f3f4f6",
+  },
+];
+
+/* ─── Donut SVG helper ──────────────────────────────────── */
+function DonutChart({ data, total }) {
+  const R = 70;
+  const CX = 90;
+  const CY = 90;
+  const circumference = 2 * Math.PI * R;
+
+  let cumulative = 0;
+  const slices = data.map((d) => {
+    const dash = (d.pct / 100) * circumference;
+    const offset = -((cumulative / 100) * circumference) + circumference * 0.25;
+    cumulative += d.pct;
+    return { ...d, dash, offset };
   });
 
-  const [images, setImages] = useState([]);
-  const [previewImages, setPreviewImages] = useState([]);
-  const [loading, setLoading]= useState(false)
+  return (
+    <svg width="180" height="180" viewBox="0 0 180 180">
+      {/* Background ring */}
+      <circle cx={CX} cy={CY} r={R} fill="none" stroke="#f3f4f6" strokeWidth="22" />
+      {slices.map((s, i) => (
+        <circle
+          key={i}
+          cx={CX}
+          cy={CY}
+          r={R}
+          fill="none"
+          stroke={s.color}
+          strokeWidth="22"
+          strokeDasharray={`${s.dash} ${circumference - s.dash}`}
+          strokeDashoffset={s.offset}
+          style={{ transition: "stroke-dasharray 0.6s ease" }}
+        />
+      ))}
+      <text x={CX} y={CY - 6} textAnchor="middle" fontSize="22" fontWeight="800" fill="#111827">{total}</text>
+      <text x={CX} y={CY + 14} textAnchor="middle" fontSize="11" fill="#6b7280" fontWeight="600">TOTAL</text>
+    </svg>
+  );
+}
 
-  const [carModel, setCarModel] = useState([]);
+/* ─── Sidebar nav item ──────────────────────────────────── */
+function NavItem({ icon, label, active, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-bold tracking-wide transition-colors rounded-none ${
+        active
+          ? "text-blue-600 border-l-4 border-blue-600 bg-blue-50 pl-3"
+          : "text-gray-500 border-l-4 border-transparent hover:bg-gray-50 hover:text-gray-800"
+      }`}
+    >
+      <span className="text-lg">{icon}</span>
+      {label}
+    </button>
+  );
+}
 
-  const fileInputRef = useRef(null);
+/* ─── Main Component ────────────────────────────────────── */
+export default function HomeStaff() {
+  const navigate = useNavigate();
+  const [activeNav, setActiveNav] = useState("DASHBOARD");
+  const [searchVal, setSearchVal] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const handleChange = (e, path) => {
-    const value = e.target.type === "checkbox" ? e.target.checked : e.target.value;
+  // ── All dashboard data lives in state, simulating an API response
+  const [dashData, setDashData] = useState(null);
 
+  useEffect(() => {
+    // Simulate API fetch delay (replace setTimeout with real axios calls later)
+    const timer = setTimeout(() => {
+      setDashData({
+        stats: [
+          { label: "TOTAL REVENUE",   value: "$4,285,000", badge: "+12.5%", badgeUp: true,  icon: "💳" },
+          { label: "NEW DEPOSITS",    value: "42",          badge: "+8%",   badgeUp: true,  icon: "🏦" },
+          { label: "ACTIVE LISTINGS", value: "186",         badge: "Steady", badgeUp: null, icon: "🚙" },
+          { label: "TOTAL SALES",     value: "1,402",       badge: "-2%",   badgeUp: false, icon: "✅" },
+        ],
+        revenueData: [
+          { month: "JAN", value: 55 },
+          { month: "FEB", value: 72 },
+          { month: "MAR", value: 60 },
+          { month: "APR", value: 80 },
+          { month: "MAY", value: 92 },
+          { month: "JUN", value: 100 },
+        ],
+        brandData: [
+          { name: "Porsche",       pct: 45, color: "#1d4ed8" },
+          { name: "BMW",           pct: 25, color: "#bfdbfe" },
+          { name: "Mercedes-Benz", pct: 30, color: "#6b7280" },
+        ],
+        donutTotal: 842,
+        activities: [
+          {
+            id: 1, icon: "💳", iconBg: "#dcfce7",
+            type: "Deposit Received", detail: "Porsche 911 GT3 (Ref: #8921)",
+            staff: "Alex Reed", avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&q=80&fit=crop&crop=face",
+            time: "14:22 PM", status: "COMPLETED", statusColor: "#16a34a", statusBg: "#dcfce7",
+          },
+          {
+            id: 2, icon: "🚗", iconBg: "#dbeafe",
+            type: "Car Addition", detail: "BMW M4 Competition (2024 Model)",
+            staff: "Sarah Chen", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&q=80&fit=crop&crop=face",
+            time: "12:05 PM", status: "PUBLISHED", statusColor: "#1d4ed8", statusBg: "#dbeafe",
+          },
+          {
+            id: 3, icon: "🔑", iconBg: "#f3f4f6",
+            type: "Staff Login", detail: "Terminal Access granted via Auth0",
+            staff: "Jordan Smith", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&q=80&fit=crop&crop=face",
+            time: "09:12 AM", status: "AUTHONLY", statusColor: "#374151", statusBg: "#f3f4f6",
+          },
+        ],
+      });
+      setLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, []);
 
-    if (!path) {
-      setCar({ ...car, [e.target.name]: value });
-    } else {
-      const keys = path.split(".");
-      const newCar = { ...car };
-      let obj = newCar;
-      for (let i = 0; i < keys.length - 1; i++) {
-        obj = obj[keys[i]];
-      }
-      obj[keys[keys.length - 1]] = value;
-      setCar(newCar);
-    }
-  };
-
-  const handleImageChange = (e) => {
-    const files = Array.from(e.target.files);
-    const newImages = [...images, ...files];
-    setImages(newImages);
-
-    // Create preview URLs
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setPreviewImages(prev => [...prev, e.target.result]);
-      };
-      reader.readAsDataURL(file);
-    });
-  };
-
-  const handleRemoveImage = (index) => {
-    const newImages = images.filter((_, i) => i !== index);
-    const newPreviews = previewImages.filter((_, i) => i !== index);
-    setImages(newImages);
-    setPreviewImages(newPreviews);
-  };
-
-
-  const fetchCarModel = async (e)=>{
-    const res= await axios.get(endpoints["car-model"]);
-    if (res.status === 200 || res.status === 201){
-      setCarModel(res.data.result);
-    }
-
-  }
-
-  useEffect(()=>{
-    fetchCarModel()
-  }, [])
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const formData = new FormData();
-
-    // Basic car info
-    formData.append('name', car.name);
-    formData.append('carModel', car.carModel);
-    formData.append('price', car.price);
-    formData.append('year', car.year);
-    formData.append('carBranch', car.carBranch);
-
-    // Car Comfort Features
-    formData.append('carFeature.carComfort.mayDieuHoa', car.carFeature.carComfortResponse.mayDieuHoa);
-    formData.append('carFeature.carComfort.manHinh', car.carFeature.carComfortResponse.manHinh);
-    formData.append('carFeature.carComfort.ghe', car.carFeature.carComfortResponse.ghe);
-    formData.append('carFeature.carComfort.sacKhongDay', car.carFeature.carComfortResponse.sacKhongDay);
-    formData.append('carFeature.carComfort.copDien', car.carFeature.carComfortResponse.copDien);
-    formData.append('carFeature.carComfort.cuaSo', car.carFeature.carComfortResponse.cuaSo);
-    formData.append('carFeature.carComfort.bluetooth', car.carFeature.carComfortResponse.bluetooth);
-    formData.append('carFeature.carComfort.loa', car.carFeature.carComfortResponse.loa);
-    formData.append('carFeature.carComfort.gps', car.carFeature.carComfortResponse.gps);
-
-    // Car Exterior Features
-    formData.append('carFeature.carExterior.den', car.carFeature.carExteriorResponse.den);
-    formData.append('carFeature.carExterior.gatMua', car.carFeature.carExteriorResponse.gatMua);
-    formData.append('carFeature.carExterior.smartKey', car.carFeature.carExteriorResponse.smartKey);
-    formData.append('carFeature.carExterior.guongDien', car.carFeature.carExteriorResponse.guongDien);
-
-    // Safety Features
-    formData.append('carFeature.featureSafety.tuiKhi', car.carFeature.featureSafetyResponse.tuiKhi);
-    formData.append('carFeature.featureSafety.phanh', car.carFeature.featureSafetyResponse.phanh);
-    formData.append('carFeature.featureSafety.canBangDienTu', car.carFeature.featureSafetyResponse.canBangDienTu);
-    formData.append('carFeature.featureSafety.hoTroGiuLan', car.carFeature.featureSafetyResponse.hoTroGiuLan);
-    formData.append('carFeature.featureSafety.camera', car.carFeature.featureSafetyResponse.camera);
-    formData.append('carFeature.featureSafety.camBienDoXe', car.carFeature.featureSafetyResponse.camBienDoXe);
-
-    // Car Service/Technical Specs
-    formData.append('carService.dongCo', car.carService.dongCo);
-    formData.append('carService.hopSo', car.carService.hopSo);
-    formData.append('carService.congSuat', car.carService.congSuat);
-    formData.append('carService.momenXoan', car.carService.momenXoan);
-    formData.append('carService.dungTichXiLanh', car.carService.dungTichXiLanh);
-    formData.append('carService.dungTichXang', car.carService.dungTichXang);
-    formData.append('carService.chieuDai', car.carService.chieuDai);
-    formData.append('carService.mauSac', car.carService.mauSac);
-    formData.append('carService.tocDoToiDa', car.carService.tocDoToiDa);
-    formData.append('carService.loaiNhienLieu', car.carService.loaiNhienLieu);
-
-    images.forEach((image) => {
-      formData.append('images', image);
-    });
-
-    try {
-
-      // Simulate API call
-      setLoading(true)
-      
-      const res= await authApis().post(endpoints["create-car"], formData, {
-        headers: {
-            'Content-Type': 'multipart/form-data'
-        }
-      })
-
-      if(res.status=== 200 || res.status === 201){
-        console.log("Thanh cong")
-      }
-
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Có lỗi xảy ra khi gửi dữ liệu!");
-    }
-    finally{
-      setLoading(false)
-    }
-  };
+  const maxBar = dashData ? Math.max(...dashData.revenueData.map((d) => d.value)) : 100;
 
   return (
-    <div className="max-w-4xl mx-auto p-6 bg-white" style={{padding:"70px"}}>
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">Tạo Thông Tin Xe</h2>
-        
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Thông tin cơ bản */}
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold mb-4 text-gray-700">Thông Tin Cơ Bản</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Giá (VNĐ)</label>
-                <input
-                  type="number"
-                  name="price"
-                  value={car.price}
-                  onChange={handleChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Năm sản xuất</label>
-                <input
-                  type="date"
-                  name="year"
-                  value={car.year}
-                  onChange={handleChange}
-                  min="1900-01-01"
-                  max="2025-12-31"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  required
-                />
+    <div className="flex h-screen bg-white font-sans text-gray-900 overflow-hidden">
 
-              </div>
-              
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Dòng xe</label>
-                <select
-                  value={car.carModel}
-                  onChange={(e) => handleChange(e, "carModel")}
-                > 
-                  
-                    <option value="">-- Chọn mẫu xe --</option>
-                    {carModel.map((model) => (
-                      <option key={model.id} value={model.id}>
-                        {model.name}
-                      </option>
-                    ))}
-                  </select>
+      {/* ─── LEFT SIDEBAR ───────────────────────────────── */}
+      <aside className="w-52 border-r border-gray-100 flex flex-col shrink-0 h-full bg-white">
+        {/* Logo */}
+        <div className="px-5 py-5 border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center text-white text-sm font-black">ST</div>
+            <div>
+              <p className="text-sm font-black text-gray-900 leading-tight">Staff Terminal</p>
+              <p className="text-[9px] text-gray-400 font-bold tracking-wider uppercase">Automotive Precision</p>
+            </div>
+          </div>
+        </div>
 
-                  
-              </div>
+        {/* Nav items */}
+        <nav className="flex-1 py-4">
+          <NavItem icon="⊞" label="DASHBOARD"  active={activeNav === "DASHBOARD"}  onClick={() => setActiveNav("DASHBOARD")} />
+          <NavItem icon="🚗" label="INVENTORY"  active={activeNav === "INVENTORY"}  onClick={() => { setActiveNav("INVENTORY"); navigate("/staff/inventory"); }} />
+          <NavItem icon="🖼️" label="MEDIA"      active={activeNav === "MEDIA"}      onClick={() => { setActiveNav("MEDIA"); navigate("/staff/media"); }} />
+          <NavItem icon="👤" label="STAFF"      active={activeNav === "STAFF"}      onClick={() => { setActiveNav("STAFF"); navigate("/staff/directory"); }} />
+        </nav>
+
+        {/* Bottom links */}
+        <div className="pb-6 border-t border-gray-100 pt-4">
+          <NavItem icon="❓" label="SUPPORT"  active={false} onClick={() => {}} />
+          <NavItem icon="↪" label="LOGOUT"   active={false} onClick={() => navigate("/login")} />
+        </div>
+      </aside>
+
+      {/* ─── MAIN AREA ──────────────────────────────────── */}
+      <main className="flex-1 flex flex-col h-full overflow-hidden">
+
+        {/* ── TOP BAR ── */}
+        <header className="h-14 bg-white border-b border-gray-100 flex items-center px-6 gap-4 shrink-0">
+          <h1 className="text-base font-black text-gray-900 mr-4 shrink-0">Precision Portal</h1>
+          {/* Search */}
+          <div className="flex-1 max-w-xs relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
+            <input
+              type="text"
+              placeholder="Search terminal..."
+              value={searchVal}
+              onChange={(e) => setSearchVal(e.target.value)}
+              className="w-full pl-9 pr-4 py-1.5 text-sm bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div className="ml-auto flex items-center gap-4">
+            <button className="text-gray-400 hover:text-gray-700 transition-colors text-lg">🔔</button>
+            <button className="text-gray-400 hover:text-gray-700 transition-colors text-lg">⚙️</button>
+            <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200">
+              <img src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&q=80&fit=crop&crop=face" alt="avatar" className="w-full h-full object-cover" />
+            </div>
+          </div>
+        </header>
+
+        {/* ── SCROLLABLE CONTENT ── */}
+        <div className="flex-1 overflow-y-auto bg-gray-50 px-8 py-6">
+
+          {/* Page Title */}
+          <div className="flex items-start justify-between mb-6">
+            <div>
+              <h2 className="text-3xl font-black text-gray-900 leading-tight">Terminal Overview</h2>
+              <p className="text-sm text-gray-500 mt-0.5">System integrity: Optimal. Data synchronized 2m ago.</p>
+            </div>
+            <div className="flex gap-3">
+              <button className="px-4 py-2 text-sm font-bold border border-gray-200 rounded bg-white hover:bg-gray-50 transition-colors shadow-sm">Export PDF</button>
+              <button onClick={() => navigate("/staff/create-car")} className="px-4 py-2 text-sm font-bold bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors shadow-sm">Add Listing</button>
             </div>
           </div>
 
-          {/* Car Comfort */}
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold mb-4 text-blue-800">Tiện Nghi Xe</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={car.carFeature.carComfortResponse.mayDieuHoa}
-                    onChange={(e) => handleChange(e, "carFeature.carComfortResponse.mayDieuHoa")}
-                    className="w-4 h-4 text-blue-600"
-                  />
-                  <label className="text-sm font-medium text-gray-700">Máy điều hòa</label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={car.carFeature.carComfortResponse.sacKhongDay}
-                    onChange={(e) => handleChange(e, "carFeature.carComfortResponse.sacKhongDay")}
-                    className="w-4 h-4 text-blue-600"
-                  />
-                  <label className="text-sm font-medium text-gray-700">Sạc không dây</label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={car.carFeature.carComfortResponse.copDien}
-                    onChange={(e) => handleChange(e, "carFeature.carComfortResponse.copDien")}
-                    className="w-4 h-4 text-blue-600"
-                  />
-                  <label className="text-sm font-medium text-gray-700">Cốp điện</label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={car.carFeature.carComfortResponse.bluetooth}
-                    onChange={(e) => handleChange(e, "carFeature.carComfortResponse.bluetooth")}
-                    className="w-4 h-4 text-blue-600"
-                  />
-                  <label className="text-sm font-medium text-gray-700">Bluetooth</label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={car.carFeature.carComfortResponse.gps}
-                    onChange={(e) => handleChange(e, "carFeature.carComfortResponse.gps")}
-                    className="w-4 h-4 text-blue-600"
-                  />
-                  <label className="text-sm font-medium text-gray-700">GPS</label>
-                </div>
-              </div>
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Màn hình</label>
-                  <input
-                    type="text"
-                    value={car.carFeature.carComfortResponse.manHinh}
-                    onChange={(e) => handleChange(e, "carFeature.carComfortResponse.manHinh")}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="VD: 7 inch touchscreen"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Ghế</label>
-                  <input
-                    type="text"
-                    value={car.carFeature.carComfortResponse.ghe}
-                    onChange={(e) => handleChange(e, "carFeature.carComfortResponse.ghe")}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="VD: Ghế da, chỉnh điện"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Cửa sổ</label>
-                  <input
-                    type="text"
-                    value={car.carFeature.carComfortResponse.cuaSo}
-                    onChange={(e) => handleChange(e, "carFeature.carComfortResponse.cuaSo")}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="VD: Cửa sổ điện"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Loa</label>
-                  <input
-                    type="text"
-                    value={car.carFeature.carComfortResponse.loa}
-                    onChange={(e) => handleChange(e, "carFeature.carComfortResponse.loa")}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="VD: 6 loa, Bose"
-                  />
-                </div>
-              </div>
-            </div>
+          {/* ── STAT CARDS ── */}
+          <div className="grid grid-cols-4 gap-4 mb-6">
+            {loading
+              ? Array(4).fill(0).map((_, i) => (
+                  <div key={i} className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 animate-pulse">
+                    <div className="h-2 bg-gray-100 rounded w-3/4 mb-4"/>
+                    <div className="flex justify-between items-end">
+                      <div className="h-7 bg-gray-100 rounded w-1/2"/>
+                      <div className="w-10 h-10 bg-gray-100 rounded-lg"/>
+                    </div>
+                    <div className="h-2 bg-gray-100 rounded w-1/4 mt-4"/>
+                  </div>
+                ))
+              : dashData.stats.map((card) => (
+                  <div key={card.label} className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3">{card.label}</p>
+                    <div className="flex items-end justify-between">
+                      <p className="text-2xl font-black text-gray-900">{card.value}</p>
+                      <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-lg">{card.icon}</div>
+                    </div>
+                    <div className={`mt-3 text-xs font-bold flex items-center gap-1 ${card.badgeUp === true ? "text-emerald-600" : card.badgeUp === false ? "text-red-500" : "text-gray-500"}`}>
+                      {card.badgeUp === true && "↑"}
+                      {card.badgeUp === false && "↓"}
+                      {card.badge}
+                    </div>
+                  </div>
+                ))
+            }
           </div>
 
-          {/* Car Exterior */}
-          <div className="bg-green-50 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold mb-4 text-green-800">Ngoại Thất</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={car.carFeature.carExteriorResponse.smartKey}
-                    onChange={(e) => handleChange(e, "carFeature.carExteriorResponse.smartKey")}
-                    className="w-4 h-4 text-green-600"
-                  />
-                  <label className="text-sm font-medium text-gray-700">Smart Key</label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={car.carFeature.carExteriorResponse.guongDien}
-                    onChange={(e) => handleChange(e, "carFeature.carExteriorResponse.guongDien")}
-                    className="w-4 h-4 text-green-600"
-                  />
-                  <label className="text-sm font-medium text-gray-700">Gương điện</label>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Đèn</label>
-                  <input
-                    type="text"
-                    value={car.carFeature.carExteriorResponse.den}
-                    onChange={(e) => handleChange(e, "carFeature.carExteriorResponse.den")}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                    placeholder="VD: LED, Xenon"
-                  />
-                </div>
-              </div>
-              <div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Gạt mưa</label>
-                  <input
-                    type="text"
-                    value={car.carFeature.carExteriorResponse.gatMua}
-                    onChange={(e) => handleChange(e, "carFeature.carExteriorResponse.gatMua")}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                    placeholder="VD: Tự động cảm ứng"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
+          {/* ── CHARTS ROW ── */}
+          <div className="grid grid-cols-3 gap-4 mb-6">
 
-          {/* Safety Features */}
-          <div className="bg-red-50 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold mb-4 text-red-800">Tính Năng An Toàn</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-3">
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={car.carFeature.featureSafetyResponse.tuiKhi}
-                    onChange={(e) => handleChange(e, "carFeature.featureSafetyResponse.tuiKhi")}
-                    className="w-4 h-4 text-red-600"
-                  />
-                  <label className="text-sm font-medium text-gray-700">Túi khí</label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={car.carFeature.featureSafetyResponse.canBangDienTu}
-                    onChange={(e) => handleChange(e, "carFeature.featureSafetyResponse.canBangDienTu")}
-                    className="w-4 h-4 text-red-600"
-                  />
-                  <label className="text-sm font-medium text-gray-700">Cân bằng điện tử</label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={car.carFeature.featureSafetyResponse.hoTroGiuLan}
-                    onChange={(e) => handleChange(e, "carFeature.featureSafetyResponse.hoTroGiuLan")}
-                    className="w-4 h-4 text-red-600"
-                  />
-                  <label className="text-sm font-medium text-gray-700">Hỗ trợ giữ làn</label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={car.carFeature.featureSafetyResponse.camera}
-                    onChange={(e) => handleChange(e, "carFeature.featureSafetyResponse.camera")}
-                    className="w-4 h-4 text-red-600"
-                  />
-                  <label className="text-sm font-medium text-gray-700">Camera</label>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <input
-                    type="checkbox"
-                    checked={car.carFeature.featureSafetyResponse.camBienDoXe}
-                    onChange={(e) => handleChange(e, "carFeature.featureSafetyResponse.camBienDoXe")}
-                    className="w-4 h-4 text-red-600"
-                  />
-                  <label className="text-sm font-medium text-gray-700">Cảm biến đỗ xe</label>
-                </div>
-              </div>
-              <div>
+            {/* Bar Chart - Revenue Trend */}
+            <div className="col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+              <div className="flex justify-between items-start mb-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Phanh</label>
-                  <input
-                    type="text"
-                    value={car.carFeature.featureSafetyResponse.phanh}
-                    onChange={(e) => handleChange(e, "carFeature.featureSafetyResponse.phanh")}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
-                    placeholder="VD: ABS, EBD"
-                  />
+                  <h3 className="font-black text-gray-900 text-lg">Revenue Trend</h3>
+                  <p className="text-xs text-gray-400 font-medium">Monthly fiscal performance</p>
                 </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Car Service */}
-          <div className="bg-purple-50 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold mb-4 text-purple-800">Thông Số Kỹ Thuật</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Động cơ</label>
-                <input
-                  type="text"
-                  value={car.carService.dongCo}
-                  onChange={(e) => handleChange(e, "carService.dongCo")}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="VD: 1.5L VTEC Turbo"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Hộp số</label>
-                <input
-                  type="text"
-                  value={car.carService.hopSo}
-                  onChange={(e) => handleChange(e, "carService.hopSo")}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="VD: CVT, 6MT"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Công suất (HP)</label>
-                <input
-                  type="text"
-                  value={car.carService.congSuat}
-                  onChange={(e) => handleChange(e, "carService.congSuat")}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="VD: 182 HP"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Momen xoắn (Nm)</label>
-                <input
-                  type="text"
-                  value={car.carService.momenXoan}
-                  onChange={(e) => handleChange(e, "carService.momenXoan")}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="VD: 240 Nm"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Dung tích xi lanh (cc)</label>
-                <input
-                  type="text"
-                  value={car.carService.dungTichXiLanh}
-                  onChange={(e) => handleChange(e, "carService.dungTichXiLanh")}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="VD: 1498"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Dung tích xăng (L)</label>
-                <input
-                  type="text"
-                  value={car.carService.dungTichXang}
-                  onChange={(e) => handleChange(e, "carService.dungTichXang")}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="VD: 57"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Chiều dài (mm)</label>
-                <input
-                  type="text"
-                  value={car.carService.chieuDai}
-                  onChange={(e) => handleChange(e, "carService.chieuDai")}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="VD: 4300"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Màu sắc</label>
-                <input
-                  type="text"
-                  value={car.carService.mauSac}
-                  onChange={(e) => handleChange(e, "carService.mauSac")}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="VD: Trắng, Đen, Xám"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tốc độ tối đa (km/h)</label>
-                <input
-                  type="text"
-                  value={car.carService.tocDoToiDa}
-                  onChange={(e) => handleChange(e, "carService.tocDoToiDa")}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                  placeholder="VD: 200"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Loại nhiên liệu</label>
-                <select
-                  value={car.carService.loaiNhienLieu}
-                  onChange={(e) => handleChange(e, "carService.loaiNhienLieu")}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
-                >
-                  <option value="">Chọn loại nhiên liệu</option>
-                  <option value="Xăng">Xăng</option>
-                  <option value="Dầu Diesel">Dầu Diesel</option>
-                  <option value="Hybrid">Hybrid</option>
-                  <option value="Điện">Điện</option>
+                <select className="text-xs border border-gray-200 rounded px-3 py-1.5 text-gray-600 bg-white focus:outline-none">
+                  <option>Last 6 Months</option>
+                  <option>Last Year</option>
                 </select>
               </div>
-            </div>
-          </div>
-
-          {/* Image Upload */}
-          <div className="bg-yellow-50 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold mb-4 text-yellow-800">Hình Ảnh Xe</h3>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Chọn hình ảnh (có thể chọn nhiều ảnh)
-              </label>
-              <input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleImageChange}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-yellow-50 file:text-yellow-700 hover:file:bg-yellow-100"
-              />
-            </div>
-            
-            {images.length > 0 && (
-              <div className="mt-4">
-                <h4 className="text-md font-medium text-gray-700 mb-2">
-                  Đã chọn {images.length} hình ảnh:
-                </h4>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                  {previewImages.map((preview, index) => (
-                    <div key={index} className="relative">
-                      <img
-                        src={preview}
-                        alt={`Preview ${index + 1}`}
-                        className="w-full h-24 object-cover rounded-lg border"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveImage(index)}
-                        className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-600"
-                      >
-                        ×
-                      </button>
-                      <p className="text-xs text-gray-600 mt-1 truncate">
-                        {images[index].name}
-                      </p>
+              {/* Bar chart */}
+              {loading ? (
+                <div className="flex items-end gap-5 h-44 px-2 animate-pulse">
+                  {[40,65,50,75,85,100].map((h, i) => (
+                    <div key={i} className="flex-1 flex flex-col items-center gap-2">
+                      <div className="w-full rounded-t bg-gray-100" style={{ height: `${h}%` }} />
+                      <div className="h-2 bg-gray-100 rounded w-8" />
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
-          </div>
+              ) : (() => {
+                const CHART_H = 160; // px
+                const sorted = [...dashData.revenueData].sort((a, b) => b.value - a.value);
+                return (
+                  <div className="flex items-end gap-3 px-2" style={{ height: CHART_H + 24 }}>
+                    {dashData.revenueData.map((d) => {
+                      const barH = Math.round((d.value / maxBar) * CHART_H);
+                      const isHighest = d.value === maxBar;
+                      const isTop2 = d.value >= sorted[1].value;
+                      return (
+                        <div key={d.month} className="flex-1 flex flex-col items-center justify-end gap-2" style={{ height: CHART_H + 24 }}>
+                          <div
+                            className="w-full rounded-t transition-all duration-700"
+                            style={{
+                              height: barH,
+                              backgroundColor: isHighest ? "#1d4ed8" : isTop2 ? "#3b82f6" : "#bfdbfe",
+                            }}
+                          />
+                          <span className="text-[10px] font-bold text-gray-400 uppercase">{d.month}</span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                );
+              })()}
+            </div>
 
-          {/* Submit Button */}
-          <div className="flex justify-end pt-4">
-            <button type="submit" className="btn btn-primary" disabled={loading}>
+            {/* Donut Chart - Sales by Brand */}
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+              <h3 className="font-black text-gray-900 text-lg mb-0.5">Sales by Brand</h3>
+              <p className="text-xs text-gray-400 font-medium mb-4">Inventory distribution</p>
               {loading ? (
-                <>
-                  <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
-                  &nbsp; Đang xử lý...
-                </>
+                <div className="flex flex-col items-center gap-4 animate-pulse">
+                  <div className="w-44 h-44 rounded-full border-[22px] border-gray-100" />
+                  <div className="space-y-2 w-full">
+                    {[1,2,3].map(i => <div key={i} className="h-3 bg-gray-100 rounded w-full" />)}
+                  </div>
+                </div>
               ) : (
-                "Tạo sản phẩm"
+                <>
+                  <div className="flex justify-center mb-4">
+                    <DonutChart data={dashData.brandData} total={dashData.donutTotal} />
+                  </div>
+                  <div className="space-y-2">
+                    {dashData.brandData.map((b) => (
+                      <div key={b.name} className="flex items-center justify-between text-sm">
+                        <div className="flex items-center gap-2">
+                          <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: b.color }} />
+                          <span className="text-gray-700 font-medium">{b.name}</span>
+                        </div>
+                        <span className="font-black text-gray-900">{b.pct}%</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
               )}
-            </button>
-
+            </div>
           </div>
-        </form>
-      </div>
+
+          {/* ── RECENT ACTIVITY ── */}
+          <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-100 flex justify-between items-baseline">
+              <div>
+                <h3 className="font-black text-gray-900 text-lg">Recent Activity</h3>
+                <p className="text-xs text-gray-400 font-medium">Latest system events and ledger entries</p>
+              </div>
+              <button className="text-blue-600 text-xs font-black tracking-wider hover:underline uppercase">VIEW ALL LOG</button>
+            </div>
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="border-b border-gray-50">
+                  <th className="px-6 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Event Type</th>
+                  <th className="px-6 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Detail</th>
+                  <th className="px-6 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Staff</th>
+                  <th className="px-6 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Timestamp</th>
+                  <th className="px-6 py-3 text-left text-[10px] font-bold text-gray-400 uppercase tracking-widest">Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-50">
+                {loading
+                  ? Array(3).fill(0).map((_, i) => (
+                      <tr key={i} className="animate-pulse">
+                        <td className="px-6 py-4"><div className="flex items-center gap-3"><div className="w-8 h-8 bg-gray-100 rounded-lg"/><div className="h-3 bg-gray-100 rounded w-28"/></div></td>
+                        <td className="px-6 py-4"><div className="h-3 bg-gray-100 rounded w-40"/></td>
+                        <td className="px-6 py-4"><div className="flex items-center gap-2"><div className="w-6 h-6 rounded-full bg-gray-100"/><div className="h-3 bg-gray-100 rounded w-20"/></div></td>
+                        <td className="px-6 py-4"><div className="h-3 bg-gray-100 rounded w-16"/></td>
+                        <td className="px-6 py-4"><div className="h-5 bg-gray-100 rounded w-20"/></td>
+                      </tr>
+                    ))
+                  : dashData.activities.map((a) => (
+                      <tr key={a.id} className="hover:bg-gray-50/50 transition-colors">
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-base shrink-0" style={{ backgroundColor: a.iconBg }}>
+                              {a.icon}
+                            </div>
+                            <span className="font-bold text-gray-900 text-sm">{a.type}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-gray-600">{a.detail}</td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            <div className="w-6 h-6 rounded-full overflow-hidden border border-gray-200 shrink-0">
+                              <img src={a.avatar} alt={a.staff} className="w-full h-full object-cover" />
+                            </div>
+                            <span className="text-gray-700 font-medium">{a.staff}</span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-gray-500 font-mono text-xs">{a.time}</td>
+                        <td className="px-6 py-4">
+                          <span className="px-2.5 py-1 text-[10px] font-black rounded uppercase tracking-wider"
+                            style={{ color: a.statusColor, backgroundColor: a.statusBg }}>
+                            {a.status}
+                          </span>
+                        </td>
+                      </tr>
+                    ))
+                }
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+        {/* ─── FOOTER ─────────────────────────────────────── */}
+        <footer className="h-10 bg-white border-t border-gray-100 flex items-center justify-between px-8 shrink-0">
+          <div className="flex gap-6 text-[9px] font-bold text-gray-400 tracking-widest uppercase">
+            <span>Precision Engine V4.2.0</span>
+            <span>Server: US-East-1</span>
+            <span>Uptime: 99.08%</span>
+          </div>
+          <div className="flex gap-5 text-[9px] font-bold text-gray-500 tracking-widest uppercase">
+            <button className="hover:text-blue-600 transition-colors">Terms of Service</button>
+            <button className="hover:text-blue-600 transition-colors">Privacy Protocol</button>
+          </div>
+        </footer>
+
+      </main>
     </div>
   );
 }

@@ -37,11 +37,26 @@ public class AuthFilters implements GlobalFilter, Ordered {
 
     @NonFinal
     private static final String[] PUBLIC_ENDPOINTS = {
-        "/ecommer-car-web/api/profile/register", "/ecommer-car-web/api/profile/login",
-        "/payment/api/checkout/vnpay_ipn", "/ecommer-car-web/api/car/.*",
-        "/ecommer-car-web/api/car-model/.*", "/ecommer-car-web/api/car-branch/.*",
-        "/ecommer-car-web/api/car-category/.*", "/ecommer-car-web/admin/.*",
-            "/ecommer-car-web/api/inventory/.*", "/payment/api/stats/.*"
+            "/auth/api/register",
+            "/auth/api/login",
+            "/auth/api/introspect",
+            "/auth/api/refresh",
+            "/auth/api/logout",
+
+            "/catalog/api/car-branch/get-all-car-branch",
+            "/catalog/api/car-branch/get-branch-by-id/.*",
+            "/catalog/api/car-model/get-all-car-model",
+            "/catalog/api/car-model/get-car-model-by-id/.*",
+            "/catalog/api/car-category/get-car-category-by-id/.*",
+            "/catalog/api/car-category/get-all-car-category",
+            "/catalog/api/car/get-products",
+            "/catalog/api/car/get-product-by-id/.*",
+            "/catalog/api/car/filter-car",
+            "/catalog/api/catalog/api/inventory/get-inventory/.*",
+            "/catalog/api/inventory/get-inventory-by-carId/.*",
+            "/catalog/api/showroom/get-info-showroom",
+
+            "/payment/payments/vnpay-callback/.*"
     };
 
     @Value("${app.api-prefix}")

@@ -4,7 +4,7 @@ import { authApis, endpoints } from "./../../configs/APIs";
 import Apis from "./../../configs/APIs";
 import cookie from "react-cookies";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import {MyDispatchContext } from "./../../configs/MyContexts";
+import { MyDispatchContext } from "./../../configs/MyContexts";
 
 const Login = () => {
     const info = [
@@ -13,9 +13,9 @@ const Login = () => {
     ];
     const dispatch = useContext(MyDispatchContext);
     const [user, setUser] = useState({});
+    const [q] = useSearchParams();
     const [loading, setLoading] = useState(false);
     const nav = useNavigate();
-    const [q] = useSearchParams();
     const setState = (value, field) => {
         setUser({ ...user, [field]: value });
     };
@@ -45,59 +45,83 @@ const Login = () => {
             className="d-flex align-items-center justify-content-center"
             style={{
                 minHeight: "85vh",
-                background: "linear-gradient(135deg, #e3f0ff 0%, #cfe2ff 100%)",
-                padding: "70px"
+                background: "#f8f9fa", /* Light gray background */
+                padding: "70px",
+                fontFamily: "'Montserrat', 'Roboto', sans-serif"
             }}
         >
             <div
                 style={{
-                    width: 370,
-                    padding: "36px 28px",
-                    background: "#fff",
-                    borderRadius: 18,
-                    boxShadow: "0 4px 24px 0 rgba(0,90,255,.08)",
+                    width: 380,
+                    padding: "48px 36px",
+                    background: "#ffffff", /* Pure white form */
+                    borderRadius: 8, /* Minimal rounded corners */
+                    boxShadow: "none", /* Flat design - NO box shadows */
+                    border: "1px solid #e7e8e9", /* Subtle division instead of shadow */
                     marginBottom: "60px"
                 }}
             >
-                <div className="text-center mb-3">
-                    <h2 className="mb-2 mt-2" style={{ color: "#2563eb" }}>Đăng nhập</h2>
+                <div className="text-center mb-4">
+                    <h2 style={{
+                        color: "#1a73e8", /* Primary Dark Blue */
+                        fontWeight: 700,
+                        letterSpacing: "-0.5px",
+                        margin: 0
+                    }}>Đăng nhập</h2>
                 </div>
                 <Form onSubmit={login}>
                     {info.map(f =>
-                        <FloatingLabel key={f.field} controlId={f.field} label={f.label} className="mb-3">
+                        <Form.Group key={f.field} className="mb-3" controlId={f.field}>
+                            <Form.Label style={{
+                                fontSize: "0.85rem",
+                                fontWeight: 600,
+                                color: "#191c1d",
+                                marginBottom: "8px"
+                            }}>{f.label}</Form.Label>
                             <Form.Control
                                 type={f.type}
-                                placeholder={f.label}
+                                placeholder={`Nhập ${f.label.toLowerCase()}`}
                                 value={user[f.field] || ""}
                                 onChange={e => setState(e.target.value, f.field)}
                                 style={{
-                                    background: "#f3f8ff",
-                                    borderColor: "#b6d4fe"
+                                    background: "#f8f9fa",
+                                    border: "1px solid #c1c6d6",
+                                    borderRadius: 4,
+                                    padding: "12px 16px",
+                                    fontSize: "0.95rem",
+                                    boxShadow: "none", /* Remove boostrap default glow */
+                                    color: "#191c1d"
                                 }}
                             />
-                        </FloatingLabel>
+                        </Form.Group>
                     )}
                     <Button
-                        variant="primary"
                         type="submit"
                         disabled={loading}
-                        className="w-100 py-2 mt-1"
+                        className="w-100 mt-4"
                         style={{
-                            fontWeight: 600,
-                            fontSize: 17,
-                            letterSpacing: 1,
-                            background: "linear-gradient(90deg, #388bff 20%, #7dc7ff 100%)",
+                            background: "#1a73e8", /* Solid Dark Blue */
+                            color: "#ffffff",
                             border: "none",
-                            boxShadow: "0 2px 8px #388bff44"
+                            borderRadius: 4,
+                            padding: "14px",
+                            fontWeight: 600,
+                            fontSize: "1rem",
+                            boxShadow: "none" /* Flat button */
                         }}
                     >
-                        {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+                        {loading ? "Đang xử lý..." : "Đăng nhập"}
                     </Button>
                 </Form>
-                <div className="mt-3 text-center">
-                    <span style={{ color: "#4c668a" }}>Bạn chưa có tài khoản? </span>
-                    <Link to="/register" style={{ color: "#2563eb", fontWeight: 500 }}>
-                        Đăng ký
+                <div className="mt-4 text-center">
+                    <span style={{ color: "#5d6571", fontSize: "0.9rem" }}>Bạn chưa có tài khoản? </span>
+                    <Link to="/register" style={{
+                        color: "#1a73e8",
+                        fontWeight: 600,
+                        textDecoration: "none",
+                        fontSize: "0.9rem"
+                    }}>
+                        Đăng ký ngay
                     </Link>
                 </div>
             </div>

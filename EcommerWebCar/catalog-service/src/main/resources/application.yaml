@@ -1,0 +1,71 @@
+server:
+  port: 8082
+  servlet:
+    context-path: /catalog
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 50MB
+  application:
+    name: catalog-service
+  datasource:
+    url: "jdbc:mysql://localhost:3306/catalog-ecommer-car"
+    driverClassName: "com.mysql.cj.jdbc.Driver"
+    username: root
+    password: 12345678
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: root
+    password: 123456
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8180/realms/anhqui
+
+cloudinary:
+  cloud-name: do43r8nr0
+  api-key: 947875495844325
+  api-secret: evQEPk5TbxIMpCWbbXl8sLMbo6A
+
+aws:
+  s3:
+    bucket-name: qui-showroom-assets
+    region: ap-southeast-1
+    access-key: ${AWS_ACCESS_KEY}
+    secret-key: ${AWS_SECRET_KEY}
+
+idp:
+  url: http://localhost:8180
+  client-id: ecommer-app
+  client-secret: 2anScggPiIAmbA5mW5SI5JnGZAcCVveo
+
+app:
+  services:
+    identity:
+      url: http://localhost:8081
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    instance-id: ${spring.application.name}:${server.port}:${random.value}
+    prefer-ip-address: true
+
+logging:
+  level:
+    org.springframework.security.web: DEBUG
+  pattern:
+    correlation: "[${spring.application.name:},%X{traceId:-},%X{spanId:-}]"

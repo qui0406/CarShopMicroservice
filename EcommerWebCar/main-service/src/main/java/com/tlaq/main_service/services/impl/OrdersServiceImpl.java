@@ -54,7 +54,6 @@ public class OrdersServiceImpl implements OrdersService {
 
     @Override
     public OrdersResponse createOrder(OrdersRequest request, String userKeyCloakId) {
-
         if (!inventoryRepository.existsByCarId(request.getCarId())) {
             throw new AppException(ErrorCode.INVENTORY_IS_EMPTY);
         }

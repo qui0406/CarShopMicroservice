@@ -1,16 +1,14 @@
 package com.tlaq.notification_service.exceptions;
 
 
-import com.tlaq.notification_service.response.ApiResponse;
+import com.tlaq.notification_service.dto.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import java.util.Map;
-import java.util.Objects;
 
 @ControllerAdvice
 @Slf4j
