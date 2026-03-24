@@ -1,6 +1,6 @@
 import logo from './logo.svg';
 import './App.css';
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 
 import Footer from "./components/Layouts/Footer";
 import Header from "./components/Layouts/Header";
@@ -12,7 +12,8 @@ import Register from "./components/Auth/Register";
 import Login from "./components/Auth/Login";
 import Profile from "./components/Auth/Profile";
 import CarDetails from "./components/CarDetails";
-import Car from "./components/Car"
+import CarNew from "./components/CarNew"
+import CarOld from "./components/CarOld"
 import Reserve from './components/Reserve';
 import FormConfirm from './components/FormConfirm';
 import PaymentCompleted from './components/PaymentCompleted';
@@ -24,6 +25,7 @@ import Chatbot from "./components/Chatbot";
 import Voucher from "./components/Voucher"
 import News from "./components/News"
 import ScrollToTop from "./components/ScrollToTop"
+import Quotation from "./components/Quotation"
 
 import '@n8n/chat/style.css';
 import "./styles/Chatbot.css"
@@ -31,6 +33,15 @@ import { createChat } from '@n8n/chat';
 
 
 import HomeStaff from "./components/Staff/HomeStaff"
+import Inventory from "./components/Staff/Inventory"
+import Media from "./components/Staff/Media"
+import StaffPage from "./components/Staff/StaffPage"
+import CreateCar from "./components/Staff/CreateCar"
+import AdminDashboard from "./components/Admin/AdminDashboard"
+import MasterData from "./components/Admin/MasterData"
+import AdminUsers from "./components/Admin/AdminUsers"
+import ModerationSettings from "./components/Admin/ModerationSettings"
+import DirectPayment from "./components/Staff/DirectPayment"
 
 
 import { MyDispatchContext, MyUserContext } from "./configs/MyContexts";
@@ -44,7 +55,26 @@ import Category from './components/Staff/Category';
 import Model from './components/Staff/Model';
 import ChatStaff from "./components/Staff/StaffChat"
 import Cashier from "./components/Staff/Cashier"
+// Dùng chung Layout để ẩn hiện Header/Footer/Chatbot cho đúng chuẩn trang Dashboard hiện đại
+const AppLayout = ({ children }) => {
+  const location = useLocation();
+  // Ẩn các thành phần cũ trên các trang được redesign sang trọng
+  const hideLayout =
+    location.pathname.includes("/all-my-reserve") ||
+    location.pathname.includes("/all-my-deposit") ||
+    location.pathname.includes("/payment-result") ||
+    location.pathname.includes("/staff"); // Dành riêng giao diện Admin mới
 
+  return (
+    <>
+      {!hideLayout && <Header />}
+      {!hideLayout && <ScrollToTop />}
+      {children}
+      {!hideLayout && <Footer />}
+      {!hideLayout && <Chatbot />}
+    </>
+  );
+};
 
 function App() {
   const [user, dispatch] = useReducer(MyUserReducer, null);
@@ -65,41 +95,46 @@ function App() {
     loadUser();
   }, []);
 
-
   return (
     <MyUserContext.Provider value={user}>
       <MyDispatchContext.Provider value={dispatch}>
         <BrowserRouter>
-          <Header />
-          <ScrollToTop />
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/register" element={<Register />} />
-            <Route path="/home" element={<Home />} />
-            <Route path="/get-car-by-id/:id" element={<CarDetails />} />
-            <Route path="/car" element={<Car/>} />
-            <Route path="/reserve" element={<Reserve/>} />
-            <Route path="/confirm" element={<FormConfirm/>} />
-            <Route path="/payment-result" element={<PaymentCompleted />} />
-            <Route path="/all-my-reserve" element={<MyReserve/>} />
-            <Route path="/all-my-deposit" element= {<MyDeposit/>} />
-            <Route path="/voucher" element={<Voucher/>} />
-            <Route path="/news" element={<News/>} />
-            <Route path="/about" element= {<About/>} />
-            <Route path="/chat" element= {<Chat/>} />
+          <AppLayout>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/home" element={<Home />} />
+              <Route path="/get-car-by-id/:id" element={<CarDetails />} />
+              <Route path="/car-new" element={<CarNew />} />
+              <Route path="/car-old" element={<CarOld />} />
+              <Route path="/reserve/:id" element={<Reserve />} />
+              <Route path="/confirm" element={<FormConfirm />} />
+              <Route path="/payment-result" element={<PaymentCompleted />} />
+              <Route path="/all-my-reserve" element={<MyReserve />} />
+              <Route path="/all-my-deposit" element={<MyDeposit />} />
+              <Route path="/voucher" element={<Voucher />} />
+              <Route path="/news" element={<News />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/chat" element={<Chat />} />
 
-            <Route path="/staff/home" element= {<HomeStaff/>} />
-            <Route path="/staff/home/branch" element= {<Branch/>} />
-            <Route path="/staff/home/category" element= {<Category/>} />
-            <Route path="/staff/home/model" element= {<Model/>} />
-            <Route path="/staff/home/chat" element= {<ChatStaff/>} />
-            <Route path="/staff/home/cashier" element= {<Cashier />} />
+              <Route path="/staff/home" element={<HomeStaff />} />
+              <Route path="/staff/inventory" element={<Inventory />} />
+              <Route path="/staff/media" element={<Media />} />
+              <Route path="/staff/directory" element={<StaffPage />} />
+              <Route path="/staff/create-car" element={<CreateCar />} />
+              <Route path="/admin" element={<AdminDashboard />} />
+              <Route path="/admin/master-data" element={<MasterData />} />
+              <Route path="/admin/users" element={<AdminUsers />} />
+              <Route path="/admin/moderation" element={<ModerationSettings />} />
+              <Route path="/staff/direct-payment" element={<DirectPayment />} />
+              <Route path="/staff/home/model" element={<Model />} />
+              <Route path="/staff/home/chat" element={<ChatStaff />} />
+              <Route path="/staff/home/cashier" element={<Cashier />} />
+              <Route path="/quotation/:id" element={<Quotation />} />
 
-          </Routes>
-          <Footer />
-          <Chatbot />
-
+            </Routes>
+          </AppLayout>
         </BrowserRouter>
       </MyDispatchContext.Provider>
     </MyUserContext.Provider >
