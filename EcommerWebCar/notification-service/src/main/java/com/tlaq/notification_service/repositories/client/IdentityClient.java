@@ -1,8 +1,8 @@
-package com.tlaq.catalog_service.repo.httpClient;
+package com.tlaq.notification_service.repositories.client;
 
-import com.tlaq.catalog_service.config.AuthenticationRequestInterceptor;
-import com.tlaq.catalog_service.dto.ApiResponse;
-import com.tlaq.catalog_service.dto.response.UserProfileResponse;
+import com.tlaq.notification_service.configs.AuthenticationRequestInterceptor;
+import com.tlaq.notification_service.dto.ApiResponse;
+import com.tlaq.notification_service.dto.responses.UserProfileResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;

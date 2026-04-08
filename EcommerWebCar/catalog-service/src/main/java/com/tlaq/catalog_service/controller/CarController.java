@@ -4,6 +4,7 @@ import com.tlaq.catalog_service.dto.ApiResponse;
 import com.tlaq.catalog_service.dto.PageResponse;
 import com.tlaq.catalog_service.dto.request.CarRequest;
 import com.tlaq.catalog_service.dto.response.CarResponse;
+import com.tlaq.catalog_service.dto.response.CarSummaryResponse;
 import com.tlaq.catalog_service.exceptions.AppException;
 import com.tlaq.catalog_service.service.CarService;
 import com.tlaq.catalog_service.validators.ImageConstraint;
@@ -30,15 +31,14 @@ public class CarController {
     CarService carDetailsService;
 
     @GetMapping(value = "/car/get-products")
-    public ApiResponse<PageResponse<CarResponse>> getCars(
+    public ApiResponse<PageResponse<CarSummaryResponse>> getCars(
             @RequestParam(value ="page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "size", required = false, defaultValue = "12") int size
     ){
-        return ApiResponse.<PageResponse<CarResponse>>builder()
+        return ApiResponse.<PageResponse<CarSummaryResponse>>builder()
                 .result(carDetailsService.getCar(page, size))
                 .build();
     }
-
 
     @GetMapping("/get-price/{carId}")
     public ApiResponse<BigDecimal> getCarPrice(@PathVariable String carId) {
@@ -46,7 +46,6 @@ public class CarController {
                 .result(carDetailsService.getPrice(carId))
                 .build();
     }
-
 
     @GetMapping(value ="/car/get-product-by-id/{carId}")
     public ApiResponse<CarResponse> getCarById(@PathVariable String carId){

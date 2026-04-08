@@ -1,4 +1,4 @@
-package com.tlaq.catalog_service.service;
+package com.tlaq.notification_service.services;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -23,28 +23,35 @@ public class CarModel {
     Long id;
 
     @Column(nullable = false)
-    String name;
+    String name; // Vd: "Mercedes C300 AMG 2026"
 
+    int seatCapacity;
+
+    @Column(columnDefinition = "TEXT")
+    String description;
+
+    String thumbnailImage; // Ảnh đại diện của mẫu xe này hiển thị ở trang chủ
+
+    // --- Quan hệ với Nhóm phân loại ---
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
     CarCategory category;
-
-    int seatCapacity; // Số chỗ ngồi (Vd: 5 chỗ)
-
-    @Enumerated(EnumType.STRING)
-    BodyType bodyType;
-
-    @Enumerated(EnumType.STRING)
-    FuelType fuelType;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "car_branch_id")
     CarBranch carBranch;
 
-    @Column(columnDefinition = "TEXT")
-    String description;
+    // --- Quan hệ với Kỹ thuật & Trang bị (OneToOne) ---
+    // Cascade ALL để khi tạo Model thì lưu luôn Spec và Equipment
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "technical_spec_id", referencedColumnName = "id")
+    TechnicalSpec technicalSpec;
 
-    // Quan hệ ngược lại với danh sách các xe cụ thể trong kho
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "equipment_id", referencedColumnName = "id")
+    Equipment equipment;
+
+    // --- Quan hệ với Kho hàng (Danh sách xe thực tế) ---
     @OneToMany(mappedBy = "carModel", cascade = CascadeType.ALL)
     List<Car> cars;
 }

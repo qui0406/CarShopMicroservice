@@ -11,14 +11,18 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TechSpecResponse {
-    Long id;
+    String trimLevel;
+    String engineSize;
     String engine;
     String transmission;
-    String fuelType;
+    String fuelType;  // Trả về String từ Enum
+    String bodyType;
     BigDecimal horsepower;
     BigDecimal torque;
-    BigDecimal displacement;
-    BigDecimal length;
-    BigDecimal payload;
     BigDecimal topSpeed;
+    BigDecimal length;
+    BigDecimal width;
+    BigDecimal height;
+    BigDecimal groundClearance;
+    BigDecimal fuelCapacity;
 }

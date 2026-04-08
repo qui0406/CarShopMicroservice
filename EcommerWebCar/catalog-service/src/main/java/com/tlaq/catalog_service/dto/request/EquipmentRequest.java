@@ -30,4 +30,7 @@ public class EquipmentRequest {
     boolean laneKeepAssist;
     boolean hasCamera;
     boolean parkingSensor;
+
+    // Đảm bảo EquipmentRequest có đủ:
+    String sunRoof;
 }

@@ -1,5 +1,8 @@
 package com.tlaq.notification_service.services;
 
+import com.tlaq.notification_service.dto.requests.EmailRequest;
+import com.tlaq.notification_service.dto.responses.EmailResponse;
+
 public interface EmailService {
-    void sendEmail(String to, String subject, String content);
+    EmailResponse sendEmail(EmailRequest emailRequest);
 }

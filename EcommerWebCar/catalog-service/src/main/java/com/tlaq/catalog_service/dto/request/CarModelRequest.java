@@ -2,6 +2,7 @@ package com.tlaq.catalog_service.dto.request;
 
 import com.tlaq.catalog_service.entity.enums.BodyType;
 import com.tlaq.catalog_service.entity.enums.FuelType;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -14,19 +15,22 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CarModelRequest {
-    @NotBlank(message = "Tên model không được để trống")
+    @NotBlank(message = "MODEL_NAME_REQUIRED")
     String name;
 
-    @NotNull(message = "Vui lòng chọn phân khúc xe")
-    Long categoryId;
-
-    @NotNull(message = "Vui lòng chọn hãng xe")
+    @NotNull(message = "BRANCH_ID_REQUIRED")
     Long carBranchId;
 
-    @Min(value = 2, message = "Số chỗ ngồi tối thiểu là 2")
-    int seatCapacity;
+    @NotNull(message = "CATEGORY_ID_REQUIRED")
+    Long categoryId;
 
-    BodyType bodyType;
-    FuelType fuelType;
+    int seatCapacity;
     String description;
+    String thumbnailImage;
+
+    @Valid
+    TechSpecRequest technicalSpec;
+
+    @Valid
+    EquipmentRequest equipment;
 }

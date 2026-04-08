@@ -1,4 +1,4 @@
-package com.tlaq.catalog_service.dto.response;
+package com.tlaq.notification_service.dto.responses;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;

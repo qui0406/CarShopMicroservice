@@ -1,5 +1,6 @@
 package com.tlaq.catalog_service.entity;
 
+import com.tlaq.catalog_service.entity.enums.BodyType;
 import com.tlaq.catalog_service.entity.enums.FuelType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,12 +21,19 @@ public class TechnicalSpec {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
 
+    String trimLevel;    // VD: "Luxury", "Premium", "Deluxe"
+    String engineSize;   // VD: "1.5L", "2.0L"
+
     String engine;        // dongCo
     String transmission;  // hopSo
 
     @Enumerated(EnumType.STRING) // Quan trọng: Bảo Hibernate lưu dạng chuỗi [cite: 2026-03-09]
     @Column(name = "fuel_type")
     FuelType fuelType;      // loaiNhienLieu (Xăng, Dầu, Điện)
+
+    @Enumerated(EnumType.STRING)
+    BodyType bodyType;
+
     BigDecimal displacement; // dungTichXiLanh
 
     // Nhóm Hiệu suất [cite: 2026-03-09]

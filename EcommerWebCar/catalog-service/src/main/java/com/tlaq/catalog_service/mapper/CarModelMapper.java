@@ -8,15 +8,19 @@ import org.mapstruct.Mapping;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring",
+        uses = {TechSpecMapper.class,
+                EquipmentMapper.class,
+                CarBranchMapper.class,
+                CarCategoryMapper.class})
 public interface CarModelMapper {
-    @Mapping(target = "category", ignore = true)
-    @Mapping(target = "carBranch", ignore = true)
-    CarModel toCarModel(CarModelRequest request);
-
-    @Mapping(target = "category", ignore = true)
-    @Mapping(target = "carBranch", ignore = true)
-    List<CarModelResponse> toListCarModel(List<CarModel> carModels);
 
     CarModelResponse toCarModelResponse(CarModel carModel);
+
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "cars", ignore = true)
+    @Mapping(source = "thumbnailImage", target = "thumbnailImage")
+    CarModel toCarModel(CarModelRequest request);
+
+    List<CarModelResponse> toListCarModel(List<CarModel> carModels);
 }

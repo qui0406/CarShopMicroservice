@@ -1,6 +1,6 @@
-package com.tlaq.catalog_service.config;
+package com.tlaq.notification_service.configs;
 
-import com.tlaq.catalog_service.service.KeyCloakTokenService;
+import com.tlaq.notification_service.services.KeyCloakTokenService;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import lombok.extern.slf4j.Slf4j;

@@ -8,6 +8,8 @@ import com.tlaq.catalog_service.entity.CarModel;
 import com.tlaq.catalog_service.exceptions.AppException;
 import com.tlaq.catalog_service.exceptions.ErrorCode;
 import com.tlaq.catalog_service.mapper.CarModelMapper;
+import com.tlaq.catalog_service.mapper.EquipmentMapper;
+import com.tlaq.catalog_service.mapper.TechSpecMapper;
 import com.tlaq.catalog_service.repo.CarBranchRepository;
 import com.tlaq.catalog_service.repo.CarCategoryRepository;
 import com.tlaq.catalog_service.repo.CarModelRepository;
@@ -29,6 +31,8 @@ public class CarModelServiceImpl implements CarModelService {
     CarModelMapper carModelMapper;
     CarCategoryRepository carCategoryRepository;
     CarBranchRepository carBranchRepository;
+    TechSpecMapper techSpecMapper;
+    EquipmentMapper equipmentMapper;
 
     @Override
     public List<CarModelResponse> getAll() {
@@ -54,6 +58,13 @@ public class CarModelServiceImpl implements CarModelService {
 
         // 3. Map từ request sang entity [cite: 2026-03-09]
         CarModel carModel = carModelMapper.toCarModel(request);
+
+        if (request.getTechnicalSpec() != null) {
+            carModel.setTechnicalSpec(techSpecMapper.toEntity(request.getTechnicalSpec()));
+        }
+        if (request.getEquipment() != null) {
+            carModel.setEquipment(equipmentMapper.toEntity(request.getEquipment()));
+        }
 
         // 4. THIẾT LẬP MỐI QUAN HỆ (Quan trọng để tránh NULL database) [cite: 2026-03-05, 2026-03-09]
         carModel.setCategory(category);

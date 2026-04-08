@@ -1,47 +1,32 @@
 package com.tlaq.notification_service.controllers;
 
-
-import com.tlaq.event.dto.NotificationEvent;
-import com.tlaq.notification_service.dto.requests.EmailRequest;
-import com.tlaq.notification_service.dto.requests.Recipient;
-import com.tlaq.notification_service.dto.requests.SendEmailRequest;
-import com.tlaq.notification_service.dto.requests.Sender;
-import com.tlaq.notification_service.services.SendGridMailService;
+import com.tlaq.notification_service.dto.PageResponse;
+import com.tlaq.notification_service.dto.responses.NotificationResponse;
+import com.tlaq.notification_service.services.NotificationService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
-import java.util.Collections;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
-@Component
+@RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@RequestMapping("/api/notifications")
 public class NotificationController {
-    @NonFinal
-    @Value("${spring.sendgrid.from-email}")
-    private String sendGridFromEmail;
 
-    SendGridMailService sendGridMailService;
+    NotificationService notificationService;
 
-    public void listenNotificationDelivery(NotificationEvent message) {
-        EmailRequest emailRequest = EmailRequest.builder()
-                .sender(Sender.builder()
-                        .email(sendGridFromEmail)
-                        .build())
-            .subject(message.getSubject())
-            .content(message.getBody())
-                .to(Collections.singletonList(
-                Recipient.builder()
-                        .email(message.getRecipient())
-                        .name("User")
-                        .build()
-                ))
-                .build();
-        sendGridMailService.sendMail(emailRequest);
+    @GetMapping("/my")
+    public PageResponse<NotificationResponse> getMyNotifications(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return notificationService.getMyNotifications(page, size);
+    }
+
+    @PatchMapping("/{id}/read")
+    public void markAsRead(@PathVariable String id) {
+        notificationService.markAsRead(id);
     }
 }

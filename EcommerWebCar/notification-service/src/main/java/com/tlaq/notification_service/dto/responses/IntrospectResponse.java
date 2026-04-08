@@ -1,4 +1,4 @@
-package com.tlaq.identity_service.dto.response;
+package com.tlaq.notification_service.dto.responses;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;

@@ -1,6 +1,5 @@
-package com.tlaq.catalog_service.repo.httpClient;
+package com.tlaq.notification_service.repositories.client;
 
-import com.tlaq.catalog_service.dto.response.IntrospectResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,6 +14,6 @@ public interface KeyCloakClient {
             value = "/realms/anhqui/protocol/openid-connect/token/introspect",
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE
     )
-    IntrospectResponse introspect(@RequestBody Map<String, ?> formParams);
+    com.tlaq.notification_service.dto.responses.IntrospectResponse introspect(@RequestBody Map<String, ?> formParams);
 
 }
