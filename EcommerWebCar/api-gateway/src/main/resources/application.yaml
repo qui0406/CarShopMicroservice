@@ -71,6 +71,13 @@ spring:
           filters:
             - StripPrefix=2
 
+        - id: ai-service
+          uri: lb://ai-service
+          predicates:
+            - Path=${app.api-prefix}/ai/**
+          filters:
+            - StripPrefix=2
+
 
 
 idp:
@@ -78,26 +85,7 @@ idp:
   client-id: ecommer-app
   client-secret: 2anScggPiIAmbA5mW5SI5JnGZAcCVveo
 
-#management:
-#  endpoints:
-#    web:
-#      exposure:
-#        include: health, info, metrics, prometheus
-#  metrics:
-#    distribution:
-#      percentiles-histogram:
-#        http:
-#          server:
-#            requests: true
-#  observations:
-#    key-values:
-#      application: loan-service
-#  tracing:
-#    sampling:
-#      probability: 1.0
 
 logging:
   level:
     org.springframework.security.web: DEBUG
-#  pattern:
-#    correlation: "[${spring.application.name:},%X{traceId:-},%X{spanId:-}]"

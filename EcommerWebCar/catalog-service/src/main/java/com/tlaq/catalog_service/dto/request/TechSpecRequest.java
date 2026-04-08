@@ -12,16 +12,24 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TechSpecRequest {
-    String engine;        // Động cơ (Vd: 2.0L Turbo) [cite: 2026-03-09]
-    String transmission;  // Hộp số (Vd: 9G-TRONIC) [cite: 2026-03-09]
-    String fuelType;      // Loại nhiên liệu [cite: 2026-03-09]
+    String engine;
+    String transmission;
+    String fuelType;
+    String bodyType;
 
     @Min(value = 0, message = "Công suất không được âm")
-    BigDecimal horsepower; // Mã lực [cite: 2026-03-06, 2026-03-09]
-    BigDecimal torque;     // Mô-men xoắn [cite: 2026-03-09]
+    BigDecimal horsepower;
+    BigDecimal torque;
 
-    BigDecimal displacement; // Dung tích xi lanh [cite: 2026-03-09]
-    BigDecimal length;       // Chiều dài [cite: 2026-03-09]
-    BigDecimal payload;      // Tải trọng [cite: 2026-03-09]
-    BigDecimal topSpeed;     // Tốc độ tối đa [cite: 2026-03-09]
+    String trimLevel;
+    String engineSize;
+
+    BigDecimal displacement;
+    BigDecimal length;
+    BigDecimal width;  // THÊM MỚI
+    BigDecimal height; // THÊM MỚI
+    BigDecimal groundClearance; // THÊM MỚI
+    BigDecimal payload;
+    BigDecimal fuelCapacity; // THÊM MỚI
+    BigDecimal topSpeed;
 }

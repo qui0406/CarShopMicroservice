@@ -23,34 +23,33 @@ public class Car {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
-    String name;
-    BigDecimal price;
 
-    @CreationTimestamp
-    LocalDateTime createdAt;
-    @UpdateTimestamp
-    LocalDateTime updatedAt;
-
+    // --- Liên kết ngược về Mẫu xe ---
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "car_model_id")
     CarModel carModel;
 
+    // --- Đặc tính duy nhất của từng chiếc xe ---
+    String vinNumber; // Số khung
+    String color;     // Màu sắc ngoại thất
+    BigDecimal price; // Giá bán cụ thể
+
+    int manufacturingYear; // Năm sản xuất thực tế (Vd: Model 2026 nhưng SX cuối 2025)
+
+    // --- Dành cho mảng xe cũ (Used Car) ---
     boolean isUsed;
-    int mileage;
-    int manufacturingYear;
-    String vinNumber;
+    int mileage; // Odo
     String inspectionReportUrl;
 
+    // --- Media cho chiếc xe cụ thể này ---
     String model3dUrl;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "car_specification_id")
-    Equipment equipment;
-
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "car_service_id", referencedColumnName = "id")
-    TechnicalSpec technicalSpec;
-
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<CarImage> carImages;
+    List<CarImage> carImages; // Ảnh chụp thực tế góc cạnh của chiếc xe này
+
+    @CreationTimestamp
+    LocalDateTime createdAt;
+
+    @UpdateTimestamp
+    LocalDateTime updatedAt;
 }

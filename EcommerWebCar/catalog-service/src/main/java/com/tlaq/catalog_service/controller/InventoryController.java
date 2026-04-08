@@ -27,7 +27,7 @@ public class InventoryController {
                 .build();
     }
 
-    @GetMapping("/inventory/get-inventory-by-carId/{carId}")
+    @GetMapping("/inventory/get-inventory-by-car-id/{carId}")
     public ApiResponse<InventoryResponse> getInventoryByCarId(@PathVariable String carId) {
         return ApiResponse.<InventoryResponse>builder()
                 .result(inventoryService.getInventoryByCarId(carId))

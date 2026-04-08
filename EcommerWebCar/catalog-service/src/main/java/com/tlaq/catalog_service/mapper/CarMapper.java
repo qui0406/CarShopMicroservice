@@ -4,6 +4,7 @@ import com.tlaq.catalog_service.dto.request.CarRequest;
 import com.tlaq.catalog_service.dto.request.EquipmentRequest;
 import com.tlaq.catalog_service.dto.request.TechSpecRequest;
 import com.tlaq.catalog_service.dto.response.CarResponse;
+import com.tlaq.catalog_service.dto.response.CarSummaryResponse;
 import com.tlaq.catalog_service.entity.Car;
 import com.tlaq.catalog_service.entity.CarImage;
 import com.tlaq.catalog_service.entity.Equipment;
@@ -15,25 +16,28 @@ import org.mapstruct.MappingTarget;
 import java.util.Collections;
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {CarModelMapper.class})
 public interface CarMapper {
-    // Thêm 2 dòng này để MapStruct biết cách xử lý TechSpec và Equipment [cite: 2026-03-09]
-    TechnicalSpec toTechnicalSpec(TechSpecRequest request);
-    Equipment toEquipment(EquipmentRequest request);
 
-    @Mapping(target = "equipment", source = "equipment")
-    @Mapping(target = "technicalSpec", source = "technicalSpec")
-    Car toCar(CarRequest request);
-
-    @Mapping(target = "images", expression = "java(mapCarImages(car.getCarImages()))")
+    // Khi trả về CarResponse, nó sẽ tự động dùng CarModelMapper để map field carModel
+    @Mapping(target = "imageUrls", expression = "java(mapCarImages(car.getCarImages()))")
     CarResponse toCarResponse(Car car);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "carModel", ignore = true) // Thường mình set bằng tay trong Service
+    Car toCar(CarRequest request);
+
     default List<String> mapCarImages(List<CarImage> carImages) {
-        if (carImages == null || carImages.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return carImages.stream()
-                .map(CarImage::getImage)
-                .toList();
+        if (carImages == null || carImages.isEmpty()) return Collections.emptyList();
+        return carImages.stream().map(CarImage::getImage).toList();
     }
+
+    @Mapping(target = "name", expression = "java(car.getCarModel().getName())")
+    @Mapping(target = "thumbnail", expression = "java(car.getCarImages().isEmpty() ? null : car.getCarImages().get(0).getImage())")
+    @Mapping(target = "seatCapacity", source = "carModel.seatCapacity")
+    @Mapping(target = "fuelType", source = "carModel.technicalSpec.fuelType")
+    @Mapping(target = "engineSize", source = "carModel.technicalSpec.engineSize")
+    CarSummaryResponse toCarSummaryResponse(Car car);
+
+    List<CarSummaryResponse> toListCarSummaryResponses(List<Car> cars);
 }

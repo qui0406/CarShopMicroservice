@@ -9,8 +9,6 @@ import lombok.experimental.FieldDefaults;
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class EquipmentResponse {
-    Long id;
-
     boolean hasAirConditioning;
     String screenType;
     String seatMaterial;
@@ -19,14 +17,9 @@ public class EquipmentResponse {
     boolean wirelessCharge;
     boolean electricTrunk;
     boolean hasBluetooth;
-    boolean hasGps;
-
     String headlampType;
     boolean smartKey;
-    boolean electricMirror;
     boolean hasAirbags;
-    boolean electronicStability;
     boolean laneKeepAssist;
     boolean hasCamera;
-    boolean parkingSensor;
 }

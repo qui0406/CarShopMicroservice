@@ -21,8 +21,8 @@ import java.util.List;
 public class ProfileController {
     ProfileService profileService;
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/profiles")
+    @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
+    @GetMapping("/all-profiles")
     public ApiResponse<List<ProfileResponse>> getAllProfiles() {
         return ApiResponse.<List<ProfileResponse>>builder()
                 .result(profileService.getAllProfiles())

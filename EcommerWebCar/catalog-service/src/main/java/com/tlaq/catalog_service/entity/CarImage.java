@@ -16,6 +16,7 @@ public class CarImage {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
+
     String image;
 
     @ManyToOne(fetch = FetchType.LAZY)

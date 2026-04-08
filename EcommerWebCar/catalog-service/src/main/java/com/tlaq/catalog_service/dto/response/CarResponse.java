@@ -14,25 +14,22 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class CarResponse {
     String id;
+    CarModelResponse carModel;
+
     String name;
+
+    String vinNumber;
+    String color;
     BigDecimal price;
     int manufacturingYear;
 
-    // Tình trạng thực tế
+    // Dành cho xe cũ
     boolean isUsed;
     int mileage;
-    String vinNumber;
-    String color;
     String inspectionReportUrl;
+
     String model3dUrl;
+    List<String> imageUrls;
 
-    // Các thông tin chi tiết lồng nhau
-    TechSpecResponse technicalSpec;
-    EquipmentResponse equipment;
-
-    // Danh sách ảnh xe
-    List<String> images;
-
-    LocalDateTime createdAt;
     LocalDateTime updatedAt;
 }

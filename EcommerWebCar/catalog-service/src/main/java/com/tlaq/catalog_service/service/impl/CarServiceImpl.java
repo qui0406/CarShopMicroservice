@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tlaq.catalog_service.dto.PageResponse;
 import com.tlaq.catalog_service.dto.request.CarRequest;
 import com.tlaq.catalog_service.dto.response.CarResponse;
+import com.tlaq.catalog_service.dto.response.CarSummaryResponse;
 import com.tlaq.catalog_service.entity.*;
 import com.tlaq.catalog_service.exceptions.AppException;
 import com.tlaq.catalog_service.exceptions.ErrorCode;
@@ -46,27 +47,34 @@ public class CarServiceImpl implements CarService {
     ObjectMapper objectMapper;
 
     @Override
-    public PageResponse<CarResponse> getCar(int page, int size) {
+    public PageResponse<CarSummaryResponse> getCar(int page, int size) {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable pageable = PageRequest.of(page - 1, size, sort);
         var pageData = carRepository.findAll(pageable);
-        return PageResponse.<CarResponse>builder()
+        return PageResponse.<CarSummaryResponse>builder()
                 .currentPage(page)
                 .pageSize(pageData.getSize())
                 .totalPages(pageData.getTotalPages())
                 .totalElements(pageData.getTotalElements())
-                .data(pageData.getContent().stream().map(carMapper::toCarResponse).toList())
+                .data(carMapper.toListCarSummaryResponses(pageData.getContent()))
                 .build();
     }
 
     @Override
     public CarResponse getCarDetails(String carId) {
-        Car car = carRepository.findById(carId).orElseThrow(()-> new AppException(ErrorCode.CAR_NOT_FOUND));
-        CarResponse carDetailsResponse= carMapper.toCarResponse(car);
-        carDetailsResponse.setName(car.getCarModel().getCarBranch().getName() + " " +
-                car.getCarModel().getCategory().getName()+ " " +
-                car.getCarModel().getName() + " " + car.getManufacturingYear());
-        return carDetailsResponse;
+        Car car = carRepository.findById(carId)
+                .orElseThrow(() -> new AppException(ErrorCode.CAR_NOT_FOUND));
+
+        CarResponse response = carMapper.toCarResponse(car);
+
+        // Tạo tên hiển thị: Brand + Model Name + Trim (Vd: Hyundai Santa Fe Luxury)
+        String fullName = String.format("%s %s %s",
+                car.getCarModel().getCarBranch().getName(),
+                car.getCarModel().getName(),
+                car.getCarModel().getTechnicalSpec().getTrimLevel());
+
+        response.setName(fullName);
+        return response;
     }
 
     @Override
@@ -79,49 +87,39 @@ public class CarServiceImpl implements CarService {
     @Override
     @Transactional
     public CarResponse createCarDetail(CarRequest request, List<MultipartFile> images) {
-        // 1. Map thông tin cơ bản
-        Car car = carMapper.toCar(request);
-
-        // 2. PHẢI GÁN TechSpec và Equipment vào Car [cite: 2026-03-09]
-        if (request.getTechnicalSpec() != null) {
-            TechnicalSpec tech = carMapper.toTechnicalSpec(request.getTechnicalSpec());
-            car.setTechnicalSpec(tech);
-        }
-        if (request.getEquipment() != null) {
-            Equipment equip = carMapper.toEquipment(request.getEquipment());
-            car.setEquipment(equip);
-        }
-
-        // 3. XỬ LÝ car_model_id (Đang bị NULL trong hình 4) [cite: 2026-03-09]
+        // 1. Tìm CarModel đã tồn tại trong hệ thống (Model này đã có sẵn Spec và Equipment)
         CarModel model = carModelRepository.findById(request.getCarModelId())
                 .orElseThrow(() -> new AppException(ErrorCode.MODEL_NOT_FOUND));
-        car.setCarModel(model);
 
-        // 4. Xử lý ảnh (Nhớ gắn car vào từng CarImage) [cite: 2026-03-06]
-        // ... (Giữ nguyên đoạn code upload ảnh của bạn nhưng thêm carImage.setCar(car)) [cite: 2026-03-05]
+        // 2. Map thông tin cơ bản của chiếc xe (Màu sắc, số VIN, giá, odo...)
+        Car car = carMapper.toCar(request);
+        car.setCarModel(model); // Gán "bố" cho chiếc xe
+
+        // 3. Xử lý ảnh thực tế cho chiếc xe
         if (images != null && !images.isEmpty()) {
-            List<CarImage> carImageList = new ArrayList<>();
+            List<CarImage> carImages = new ArrayList<>();
             for (MultipartFile img : images) {
                 try {
-                    Map res = cloudinary.uploader().upload(img.getBytes(),
+                    Map uploadResult = cloudinary.uploader().upload(img.getBytes(),
                             ObjectUtils.asMap("resource_type", "auto"));
-                    String imageUrl = res.get("secure_url").toString();
+                    String url = uploadResult.get("secure_url").toString();
 
-                    // Gán car vào carImage để tránh null car_id trong DB [cite: 2026-03-05, 2026-03-06]
-                    carImageList.add(CarImage.builder()
-                            .image(imageUrl)
+                    // Lưu ý: Trường trong Entity của Quí là 'image'
+                    carImages.add(CarImage.builder()
+                            .image(url)
                             .car(car)
                             .build());
                 } catch (IOException ex) {
+                    log.error("Cloudinary upload failed: {}", ex.getMessage());
                     throw new AppException(ErrorCode.UPLOAD_IMAGE_ERROR);
                 }
             }
-            car.setCarImages(carImageList);
-        } else {
-            throw new AppException(ErrorCode.IMAGE_IS_EMPTY);
+            car.setCarImages(carImages);
         }
 
-        return carMapper.toCarResponse(carRepository.save(car));
+        // 4. Lưu vào DB và trả về Response
+        Car savedCar = carRepository.save(car);
+        return carMapper.toCarResponse(savedCar);
     }
 
     @Override
