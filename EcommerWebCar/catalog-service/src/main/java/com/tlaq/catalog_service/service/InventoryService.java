@@ -1,5 +1,6 @@
 package com.tlaq.catalog_service.service;
 
+import com.tlaq.catalog_service.dto.PageResponse;
 import com.tlaq.catalog_service.dto.request.InventoryRequest;
 import com.tlaq.catalog_service.dto.request.InventoryUpdateRequest;
 import com.tlaq.catalog_service.dto.response.InventoryResponse;
@@ -18,4 +19,5 @@ public interface InventoryService {
     Boolean checkStock(String carId, Integer quantity);
     void deduceStock(List<Map<String, Object>> items);
     void restoreInventory(List<Map<String, Object>> items);
+    PageResponse<InventoryResponse> getList(int page, int size);
 }

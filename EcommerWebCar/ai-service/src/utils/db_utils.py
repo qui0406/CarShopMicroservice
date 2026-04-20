@@ -36,6 +36,8 @@ def get_all_cars(
     category_name: Optional[str] = None,
     body_type: Optional[str] = None,
     fuel_type: Optional[str] = None,
+    min_price: Optional[float] = None,
+    max_price: Optional[float] = None,
 ) -> dict:
     conditions = ["c.is_used = 0"]
     params: list = []
@@ -52,6 +54,12 @@ def get_all_cars(
     if fuel_type:
         conditions.append("ts.fuel_type = %s")
         params.append(fuel_type.upper())
+    if min_price is not None:
+        conditions.append("c.price >= %s")
+        params.append(min_price)
+    if max_price is not None:
+        conditions.append("c.price <= %s")
+        params.append(max_price)
 
     sql = f"""
         SELECT
@@ -77,7 +85,7 @@ def get_all_cars(
         LEFT JOIN technical_spec ts  ON ts.id  = cm.technical_spec_id
         WHERE {' AND '.join(conditions)}
         ORDER BY c.price ASC
-        LIMIT 20
+        LIMIT 2
     """
 
     with _db() as cur:
@@ -91,7 +99,7 @@ def get_all_cars(
         if r.get("price"):
             r["price_formatted"] = f"{int(r['price']):,} VNĐ"
 
-    lines = [f"Showroom hiện có {len(rows)} xe:"]
+    lines = ["Dưới đây là một số xe đại diện phù hợp nhất:"]
     for r in rows:
         price_str  = r.get("price_formatted", "Liên hệ")
         body_str   = f" [{r['body_type']}]"    if r.get("body_type")   else ""
@@ -102,6 +110,7 @@ def get_all_cars(
             f"  • {r['car_name']} ({r['year']}){body_str}{fuel_str}{color_str}"
             f" — {price_str}{branch_str}"
         )
+    lines.append("\n(Mời anh/chị xem thêm chi tiết tất cả các xe tại website của showroom ạ!)")
 
     return {"status": "ok", "text": "\n".join(lines), "data": rows}
 
@@ -292,7 +301,7 @@ def get_inventory(
         LEFT JOIN show_room      sr  ON sr.id  = i.show_room_id
         WHERE {' AND '.join(conditions)}
         ORDER BY i.quantity DESC
-        LIMIT 15
+        LIMIT 2
     """
 
     with _db() as cur:
@@ -307,7 +316,7 @@ def get_inventory(
         if r.get("price"):
             r["price_formatted"] = f"{int(r['price']):,} VNĐ"
 
-    lines = ["Tồn kho hiện tại:"]
+    lines = ["Tồn kho hiện tại (hiển thị đại diện):"]
     for r in rows:
         price_str  = r.get("price_formatted", "Liên hệ")
         color_str  = f" — {r['color']}"          if r.get("color")        else ""
@@ -318,6 +327,7 @@ def get_inventory(
             f"  • {r['car_name']} ({r['year']}){color_str}"
             f" — còn {r['quantity']} xe{sr_str} — {price_str}{phone_str}{zalo_str}"
         )
+    lines.append("\n(Mời anh/chị truy cập website để xem danh sách đầy đủ nhé!)")
 
     return {"status": "ok", "text": "\n".join(lines), "data": rows}
 
@@ -439,6 +449,13 @@ def reset_last_result() -> None:
     _last_result["data"]   = None
 
 
+def set_last_result(intent: str, data: any) -> None:
+    if not data:
+        return
+    _last_result["intent"] = intent
+    _last_result["data"]   = data
+
+
 def query_mysql_safe(
     intent: str,
     car_name: str = "",
@@ -449,6 +466,8 @@ def query_mysql_safe(
     fuel_type: str = "",
     user_id: str = "",
     request_id: str = "",
+    min_price: Optional[float] = None,
+    max_price: Optional[float] = None,
 ) -> str:
     intent = intent.strip().lower()
 
@@ -458,7 +477,14 @@ def query_mysql_safe(
 
     try:
         if intent == "list_cars":
-            result = get_all_cars(branch_name or None, category_name or None, body_type or None, fuel_type or None)
+            result = get_all_cars(
+                branch_name=branch_name or None,
+                category_name=category_name or None,
+                body_type=body_type or None,
+                fuel_type=fuel_type or None,
+                min_price=min_price,
+                max_price=max_price
+            )
         elif intent == "car_detail":
             result = get_car_detail(car_name or None, car_id or None)
         elif intent == "inventory":
@@ -470,8 +496,11 @@ def query_mysql_safe(
         else:
             result = {"status": "error", "text": "Intent khong xu ly duoc.", "data": {}}
 
-        _last_result["intent"] = intent
-        _last_result["data"]   = result.get("data", [])
+        data = result.get("data", [])
+        # Chỉ lưu kết quả khi DB thực sự có dữ liệu (tránh ghi đè bằng list rỗng)
+        if data:
+            _last_result["intent"] = intent
+            _last_result["data"]   = data
         return result.get("text", "")
 
     except MySQLError as e:

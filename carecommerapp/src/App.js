@@ -15,10 +15,7 @@ import CarDetails from "./components/CarDetails";
 import CarNew from "./components/CarNew"
 import CarOld from "./components/CarOld"
 import Reserve from './components/Reserve';
-import FormConfirm from './components/FormConfirm';
 import PaymentCompleted from './components/PaymentCompleted';
-import MyReserve from './components/MyReserve';
-import MyDeposit from "./components/MyDeposit"
 import About from "./components/About";
 import Chat from "./components/Chat";
 import Chatbot from "./components/Chatbot";
@@ -26,11 +23,6 @@ import Voucher from "./components/Voucher"
 import News from "./components/News"
 import ScrollToTop from "./components/ScrollToTop"
 import Quotation from "./components/Quotation"
-
-import '@n8n/chat/style.css';
-import "./styles/Chatbot.css"
-import { createChat } from '@n8n/chat';
-
 
 import HomeStaff from "./components/Staff/HomeStaff"
 import Inventory from "./components/Staff/Inventory"
@@ -55,6 +47,9 @@ import Category from './components/Staff/Category';
 import Model from './components/Staff/Model';
 import ChatStaff from "./components/Staff/StaffChat"
 import Cashier from "./components/Staff/Cashier"
+import DepositConfirm from "./components/DepositConfirm"
+import OrderHistory from "./components/OrderHistory";
+
 // Dùng chung Layout để ẩn hiện Header/Footer/Chatbot cho đúng chuẩn trang Dashboard hiện đại
 const AppLayout = ({ children }) => {
   const location = useLocation();
@@ -70,8 +65,8 @@ const AppLayout = ({ children }) => {
       {!hideLayout && <Header />}
       {!hideLayout && <ScrollToTop />}
       {children}
-      {!hideLayout && <Footer />}
       {!hideLayout && <Chatbot />}
+      {!hideLayout && <Footer />}
     </>
   );
 };
@@ -109,14 +104,12 @@ function App() {
               <Route path="/car-new" element={<CarNew />} />
               <Route path="/car-old" element={<CarOld />} />
               <Route path="/reserve/:id" element={<Reserve />} />
-              <Route path="/confirm" element={<FormConfirm />} />
               <Route path="/payment-result" element={<PaymentCompleted />} />
-              <Route path="/all-my-reserve" element={<MyReserve />} />
-              <Route path="/all-my-deposit" element={<MyDeposit />} />
+              <Route path="/all-my-reserve" element={<OrderHistory />} />
+              <Route path="/all-my-deposit" element={<OrderHistory />} />
               <Route path="/voucher" element={<Voucher />} />
               <Route path="/news" element={<News />} />
               <Route path="/about" element={<About />} />
-              <Route path="/chat" element={<Chat />} />
 
               <Route path="/staff/home" element={<HomeStaff />} />
               <Route path="/staff/inventory" element={<Inventory />} />
@@ -132,6 +125,7 @@ function App() {
               <Route path="/staff/home/chat" element={<ChatStaff />} />
               <Route path="/staff/home/cashier" element={<Cashier />} />
               <Route path="/quotation/:id" element={<Quotation />} />
+              <Route path="/deposit-confirm" element={<DepositConfirm />} />
 
             </Routes>
           </AppLayout>

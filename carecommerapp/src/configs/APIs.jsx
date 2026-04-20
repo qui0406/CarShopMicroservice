@@ -4,65 +4,102 @@ import cookie from "react-cookies";
 const BASE_URL = "http://localhost:8888/api/v1";
 
 export const endpoints = {
+    //Identity service
+    "login": "/identity/api/login",
+    "register": "/identity/api/register",
+    "refresh": "/identity/api/refresh",
+    "logout": "/identity/api/logout",
+    "create-staff": "/identy/api/create-staff",
+    "my-profile": "/identity/api/profile/my-profile",
+    "all-profiles": "/identity/api/profile/all-profiles",
 
-    // USER
-    "showroom-info": "/ecommer-car-web/api/showroom/get-info-showroom",
+    //Catalog service
+    "get-all-branch": "/catalog/api/car-branch/get-all-car-branch",
+    "get-branch-by-id": id => `/catalog/api/car-branch/get-branch-by-id/${id}`,
+    "create-branch": "/catalog/api/staff/car-branch/create-branch",
+    "delete-branch": id => `/catalog/api/staff/delete-branch/${id}`,
+    "update-branch": id => `/catalog/api/staff/update-branch/${id}`,
 
-    "login": "/ecommer-car-web/api/profile/login",
-    "register": "/ecommer-car-web/api/profile/register",
+    "get-all-category": "/catalog/api/car-category/get-all-car-category",
+    "get-category-by-id": id => `/catalog/api/car-category/get-car-category-by-id/${id}`,
+    "create-category": "/catalog/api/staff/car-category/create-category",
+    "delete-category": id => `/catalog/api/staff/car-category/delete-category/${id}`,
+    "update-category": id => `/catalog/api/staff/car-category/update-category/${id}`,
 
-    "my-profile": "/ecommer-car-web/api/profile/my-profile",
-    "car-branch": "/ecommer-car-web/api/car-branch/get-all-car-branch",
-    "car-model": "/ecommer-car-web/api/car-model/get-all-car-model",
-    "car-category": "/ecommer-car-web/api/car-category/get-all-car-category",
-    "get-cars": "/ecommer-car-web/api/car/get-products",
-    "filter-cars": "/ecommer-car-web/api/car/filter-car",
-    "get-car-by-id": id => `/ecommer-car-web/api/car/get-product-by-id/${id}`,
+    "get-all-model": "/catalog/api/car-model/get-all-car-model",
+    "get-model-by-id": id => `/catalog/api/car-model/get-car-model-by-id/${id}`,
+    "create-model": "/catalog/api/staff/car-model/create-car-model",
+    "delete-model": id => `/catalog/api/staff/car-model/delete-car-model/${id}`,
+    "update-model": id => `/catalog/api/staff/car-model/update-car-model/${id}`,
 
-    "get-order": orderId => `/ecommer-car-web/api/orders/orders-car/${orderId}`,
-    "get-reserves": "/ecommer-car-web/api/orders/get-history-order",
-    "get-deposits": "/ecommer-car-web/api/orders/get-order-deposit",
-    "create-orders": "/ecommer-car-web/api/orders/create-order",
+    "get-products": (page = 1, size = 12) => `/catalog/api/car/get-products?page=${page}&size=${size}`,
+    "get-price": id => `/catalog/api/get-price/${id}`,
+    "get-product-by-id": id => `/catalog/api/car/get-product-by-id/${id}`,
+    "filter-car": params => `/catalog/api/car/filter-car?${new URLSearchParams(params).toString()}`,
 
-    "checkout-vnpay": "/payment/api/checkout/url",
-    "vnpay": "/payment/api/checkout/vnpay_ipn",
-    "payment-response": orderId => `/payment/api/installment/${orderId}`,
+    "create-product": "/catalog/api/staff/car/create-product",
+    "upload-3d-model": id => `/catalog/api/staff/car/upload-3d-model/${id}`,
+    "delete-product": id => `/catalog/api/staff/car/delete-product/${id}`,
 
-    "get-or-create-conversation": "/chat/api/conversations/create-or-get",
-    "my-conversation": "/chat/api/conversations/my-coversation",
-    "get-all-conversation": "/chat/api/conversations/get-all-conversation",
+    "get-inventory": id => `/catalog/api/inventory/get-inventory/${id}`,
+    "get-inventory-by-car-id": carId => `/catalog/api/inventory/get-inventory-by-car-id/${carId}`,
+    "get-all-inventory": (page = 1, size = 12) => `/catalog/api/inventory/get-all-inventory?page=${page}&size=${size}`,
+    "check-inventory": (carId, quantity) => `/catalog/api/cars/check-inventory/${carId}/${quantity}`,
+
+    "create-inventory": "/catalog/api/staff/inventory/create-inventory",
+    "update-inventory": id => `/catalog/api/staff/inventory/update-inventory/${id}`,
+    "delete-inventory": id => `/catalog/api/staff/inventory/delete-inventory/${id}`,
+
+    "get-info-showroom": "/catalog/api/showroom/get-info-showroom",
+
+    "create-showroom": "/catalog/api/admin/create-showroom",
+    "update-showroom": id => `/catalog/api/admin/update-showroom/${id}`,
+    "delete-showroom": id => `/catalog/api/admin/delete-showroom/${id}`,
+
+
+    // Ordering Service
+    "check-order-by-id": id => `/ordering/orders/check-order-by-id/${id}`,
+    "create-order": "/ordering/orders/create",
+    "get-my-orders": "/ordering/orders/my-orders",
+    "get-order-by-id": id => `/ordering/orders/get-order-by-id/${id}`,
+    "cancel-order": (id, reason) => `/ordering/orders/cancel-order-id/${id}?reason=${encodeURIComponent(reason)}`,
+
+    "confirm-delivery": id => `/ordering/orders/confirm-delivery/${id}`,
+
+    "download-order-pdf": id => `/ordering/orders/export/${id}/pdf`,
+    "send-order-email": (id, email) => `/ordering/orders/export/${id}/send-email?email=${encodeURIComponent(email)}`,
+
+    "get-order-timeline": id => `/ordering/orders/history/${id}/timeline`,
+
+    "get-all-orders-management": (page = 1, size = 10, status = "") => `/ordering/staff/orders/all-orders?page=${page}&size=${size}${status ? `&status=${status}` : ""}`,
+    "admin-cancel-order": (id, note = "") => `/ordering/staff/orders/cancel-order/${id}${note ? `?note=${encodeURIComponent(note)}` : ""}`,
+    "get-revenue": (start, end) => `/ordering/staff/orders/revenue?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`,
+    "get-status-count": "/ordering/staff/orders/stats/status-count",
+    "get-monthly-revenue": (year = 2026) => `/ordering/staff/orders/revenue/monthly?year=${year}`,
+
+    // Payment Service
+    "create-vnpay-url": (orderId, amount, type) => `/payment/payments/create-vnpay-url?orderId=${orderId}&amount=${amount}&type=${type}`,
+    "confirm-offline": "/payment/payments/staff/confirm-offline",
+    "create-offline-payment": "/payment/payments/staff/create-payment",
+    "get-payment-status": orderId => `/payment/payments/status/${orderId}`,
+
+    // Chat Service
     "create-message": "/chat/api/messages/create",
-    "get-message": "/chat/api/messages/get-all-message",
+    "get-all-messages": conversationId => `/chat/api/messages/get-all-message?conversationId=${conversationId}`,
+    "create-or-get-conversation": "/chat/api/conversations/create-or-get",
+    "customer-get-conversation": "/chat/api/conversations/customer-get-conversation",
+    "staff-join-conversation": id => `/chat/api/conversations/join/${id}`,
+    "get-all-conversations": (page = 1, size = 12) => `/chat/api/conversations/get-all-conversation?page=${page}&size=${size}`,
 
-    "my-payment": "payment/api/get-my-payment",
+    //AI Service
+    "chat": "/ai/chat",
+    "clear-chat-history": "/ai/clear-history",
+    "identify-car": "/ai/identify-car-pro",
+    "predict-car-price": "/ai/predict-price",
+    "ai-health": "/ai/health",
+    "ai-root": "/ai/",
 
-    "create-car": "/ecommer-car-web/api/staff/car/create-product",
-    "delete-car": carId => `/ecommer-car-web/api/staff/car/delete-product/${carId}`,
-
-    "get-all-model": "/ecommer-car-web/api/car-model/get-all-car-model",
-    "create-model": "/ecommer-car-web/api/staff/car-model/create-car-model",
-    "delete-model": carModelId => `/ecommer-car-web/api/staff/car-model/delete-car-model/${carModelId}`,
-
-    "create-branch": "/ecommer-car-web/api/staff/car-branch/create-branch",
-    "delete-branch": branchId => `/ecommer-car-web/api/staff/delete-branch/${branchId}`,
-
-    "create-category": "/ecommer-car-web/api/staff/car-category/create-category",
-    "delete-category": carCategoryId => `/ecommer-car-web/api/staff/car-category/delete-caterory/${carCategoryId}`,
-
-    "get-inventory-by-car-id":  carId => `/ecommer-car-web/api/inventory/get-inventory-by-carId/${carId}`,
-    "create-inventory": "/ecommer-car-web/api/inventory/create-inventory",
-    "update-inventory": inventoryId => `/ecommer-car-web/api/inventory/update-inventory/${inventoryId}`,
-    "delete-inventory": inventoryId => `/ecommer-car-web/api/inventory/delete-inventory/${inventoryId}`,
-
-    "get-bill": id => `/payment/api/staff/get-bill/${id}`,
-    "get-bill-by-order-id": orderId => `/payment/api/staff/get-bill-deposit/${orderId}`,
-    "payment-cashier": "/payment/api/staff/payment",
-    "get-all-deposit": "/payment/api/staff/get-all-deposit",
-
-    "payment-not-deposit": "/payment/api/staff/payment-order-not-deposit",
-    
-    "search-by-image": "localhost:5000/predict"
-};
+}
 
 export const authApis = () => {
 

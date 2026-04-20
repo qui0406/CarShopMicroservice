@@ -4,7 +4,7 @@ from ultralytics import YOLO
 _HERE = os.path.dirname(os.path.abspath(__file__))
 
 # models/ nằm ở root: src/services/ -> root -> models/
-_YOLOV8_PATH = os.path.join(_HERE, "..", "..", "models", "yolov8n.pt")
+_YOLOV8_PATH = os.path.join(_HERE, "..", "..", "model", "weights", "yolov8n.pt")
 
 _yolo = YOLO(_YOLOV8_PATH)
 

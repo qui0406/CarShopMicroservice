@@ -20,5 +20,5 @@ public interface AppraisalService {
     AppraisalResponse updateStatus(String id, AppraisalStatus status);
 
     // Hàm "đinh": Chuyển đổi từ yêu cầu thu mua thành xe trong kho để bán
-    void convertToInventory(String appraisalId);
+    Boolean convertToInventory(String appraisalId);
 }

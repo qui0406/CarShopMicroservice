@@ -12,58 +12,6 @@ export default function CarOldSection() {
   const [error, setError] = useState("");
   const [priceRange, setPriceRange] = useState(50);
 
-  // Mock data for used/premium-owned cars
-  const mockCars = [
-    {
-      id: 1,
-      name: "Porsche 911 Carrera S",
-      subtitle: "MODEL 2023 • SIÊU LƯỚT",
-      price: "4.450 tỷ",
-      odo: "3,200 KM",
-      year: "2023",
-      transmission: "PDK 8-SPEED",
-      fuel: "GASOLINE",
-      badge: "XE LƯỚT",
-      image: "https://images.unsplash.com/photo-1503376710356-6cb021d7bfa0?q=80&w=2070&auto=format&fit=crop"
-    },
-    {
-      id: 2,
-      name: "Mercedes-AMG GT",
-      subtitle: "MODEL 2022 • NHẬP ĐỨC",
-      price: "3.120 tỷ",
-      odo: "12,500 KM",
-      year: "2022",
-      transmission: "AMG SPEED",
-      fuel: "V8 BI-TURBO",
-      badge: "XE LƯỚT",
-      image: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?q=80&w=2070&auto=format&fit=crop"
-    },
-    {
-      id: 3,
-      name: "BMW M4 Competition",
-      subtitle: "MODEL 2021 • BẢN FULL",
-      price: "2.890 tỷ",
-      odo: "24,000 KM",
-      year: "2021",
-      transmission: "M STEPTRONIC",
-      fuel: "STRAIGHT-6",
-      badge: "XE LƯỚT",
-      image: "https://images.unsplash.com/photo-1556189250-72ba954cfc2b?q=80&w=2070&auto=format&fit=crop"
-    },
-    {
-      id: 4,
-      name: "Audi RS6 Avant",
-      subtitle: "MODEL 2022 • CUSTOM PAINT",
-      price: "4.200 tỷ",
-      odo: "8,800 KM",
-      year: "2022",
-      transmission: "QUATTRO AWD",
-      fuel: "HYBRID V8",
-      badge: "XE LƯỚT",
-      image: "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?q=80&w=2070&auto=format&fit=crop"
-    }
-  ];
-
   useEffect(() => {
     fetchCars(carPage);
   }, [carPage]);
@@ -71,11 +19,24 @@ export default function CarOldSection() {
   const fetchCars = async (pageNum) => {
     try {
       setLoading(true);
-      setTimeout(() => {
-        setCars(mockCars);
-        setCarTotalPages(3);
-        setLoading(false);
-      }, 500);
+      const res = await axios.get(endpoints["get-products"](pageNum, 12));
+      const resData = res.data?.result || {};
+      const fetchedCars = Array.isArray(resData.data) ? resData.data.map(car => ({
+        id: car.id,
+        name: car.name,
+        subtitle: `MODEL 2023 • SIÊU LƯỚT`,
+        price: car.price ? car.price.toLocaleString("vi-VN") + " VND" : "Liên hệ",
+        odo: "10,000 KM",
+        year: "2023",
+        transmission: "AUTO",
+        fuel: car.fuelType || "GASOLINE",
+        badge: "XE LƯỚT",
+        image: car.thumbnail || "https://images.unsplash.com/photo-1503376710356-6cb021d7bfa0?q=80&w=2070&auto=format&fit=crop"
+      })) : [];
+
+      setCars(fetchedCars);
+      setCarTotalPages(resData.totalPages || 1);
+      setLoading(false);
     } catch (err) {
       console.error("Error fetching cars:", err);
       setError("Không thể tải danh sách xe. Vui lòng thử lại.");
@@ -188,14 +149,10 @@ export default function CarOldSection() {
                         </div>
 
                         <Card.Body style={{ padding: "30px 24px" }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "24px" }}>
-                            <div>
-                              <Card.Title style={{ fontSize: "1.4rem", fontWeight: 800, color: "#191c1d", margin: 0, letterSpacing: "-0.5px", marginBottom: "6px" }}>{car.name}</Card.Title>
-                              <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#8c949c", textTransform: "uppercase", letterSpacing: "1px" }}>{car.subtitle}</div>
-                            </div>
-                            <div style={{ textAlign: "right" }}>
-                              <div style={{ fontSize: "1.5rem", fontWeight: 800, color: "#1a73e8" }}>{car.price}</div>
-                            </div>
+                          <div style={{ marginBottom: "24px" }}>
+                            <Card.Title style={{ fontSize: "1.4rem", fontWeight: 800, color: "#191c1d", margin: 0, letterSpacing: "-0.5px", marginBottom: "6px" }}>{car.name}</Card.Title>
+                            <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#8c949c", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "6px" }}>{car.subtitle}</div>
+                            <div style={{ fontSize: "1.5rem", fontWeight: 800, color: "red" }}>{car.price}</div>
                           </div>
 
                           <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "28px", paddingBottom: "24px", borderBottom: "1px solid #f1f5f9" }}>

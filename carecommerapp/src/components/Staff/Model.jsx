@@ -5,6 +5,7 @@ import {
     FaBolt, FaCheckCircle, FaExclamationCircle, FaTimes, FaThLarge
 } from "react-icons/fa";
 import axios, { authApis, endpoints } from "./../../configs/APIs";
+import StaffLayout from "./StaffLayout";
 
 export default function UnifiedDashboard() {
     const [carModels, setCarModels] = useState([]);
@@ -181,86 +182,19 @@ export default function UnifiedDashboard() {
     const formatCurrency = (val) => val ? `$${Number(val).toLocaleString()}` : 'N/A';
 
     return (
-        <div className="flex h-screen bg-gray-50 text-gray-900 font-sans overflow-hidden">
-            
-            {/* LEFT SIDEBAR — same style as HomeStaff */}
-            <aside className="w-52 bg-white border-r border-gray-100 flex flex-col shrink-0 h-full">
-                {/* Logo */}
-                <div className="px-5 py-5 border-b border-gray-100">
-                    <div className="flex items-center gap-2">
-                        <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center text-white text-sm font-black">ST</div>
-                        <div>
-                            <p className="text-sm font-black text-gray-900 leading-tight">Staff Terminal</p>
-                            <p className="text-[9px] text-gray-400 font-bold tracking-wider uppercase">Automotive Precision</p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Nav items */}
-                <nav className="flex-1 py-4">
-                    {[
-                        { icon: <FaThLarge/>, label: "Dashboard",  key: "Dashboard" },
-                        { icon: <FaStore/>,   label: "Branches",   key: "Branches" },
-                        { icon: <FaShapes/>,  label: "Categories", key: "Categories" },
-                        { icon: <FaCar/>,     label: "Models",     key: "Models" },
-                    ].map(item => (
-                        <button
-                            key={item.key}
-                            onClick={() => setActiveSidebar(item.key)}
-                            className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-bold tracking-wide transition-colors rounded-none text-left ${
-                                activeSidebar === item.key
-                                    ? "text-blue-600 border-l-4 border-blue-600 bg-blue-50 pl-3"
-                                    : "text-gray-500 border-l-4 border-transparent hover:bg-gray-50 hover:text-gray-800"
-                            }`}
-                        >
-                            <span className="text-base">{item.icon}</span>
-                            {item.label}
-                        </button>
-                    ))}
-                </nav>
-
-                {/* Bottom links */}
-                <div className="pb-6 border-t border-gray-100 pt-4">
-                    <button className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-500 border-l-4 border-transparent hover:bg-gray-50 hover:text-gray-800 transition-colors">
-                        <FaQuestionCircle className="text-base"/> Support
-                    </button>
-                    <button className="w-full flex items-center gap-3 px-4 py-3 text-sm font-bold text-gray-500 border-l-4 border-transparent hover:bg-gray-50 hover:text-gray-800 transition-colors">
-                        <FaSignOutAlt className="text-base"/> Log Out
-                    </button>
-                </div>
-            </aside>
-
-            {/* MAIN CONTENT AREA */}
-            <main className="flex-1 flex flex-col h-full overflow-hidden relative">
+        <StaffLayout searchPlaceholder="Search models, VIN, or SKU..." searchVal={searchQuery} onSearchChange={e => setSearchQuery(e.target.value)}>
+            <div className="px-8 py-6 relative h-full flex flex-col">
                 
-                {/* TOP NAVBAR — same style as HomeStaff */}
-                <header className="h-16 bg-white border-b border-gray-200 flex items-center px-8 shrink-0">
-                    {/* Left: Logo */}
-                    <div className="w-48 shrink-0">
-                        <p className="text-sm font-black text-gray-900 leading-tight">Staff Terminal</p>
-                        <p className="text-[9px] text-gray-400 font-bold tracking-wider uppercase">Automotive Precision</p>
-                    </div>
-                    {/* Center: Tab nav */}
-                    <div className="flex-1 flex justify-center gap-8 h-full">
-                        <button onClick={()=>{setActiveTopNav("Dashboard"); setActiveSidebar("Dashboard");}} className={`h-full text-sm font-bold border-b-2 transition-colors ${activeTopNav === "Dashboard" ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-800"}`}>Dashboard</button>
-                        <button onClick={()=>{setActiveTopNav("Inventory"); setActiveSidebar("Models");}} className={`h-full text-sm font-medium border-b-2 transition-colors ${activeTopNav === "Inventory" ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-800"}`}>Inventory</button>
-                        <button onClick={()=>{setActiveTopNav("Branches"); setActiveSidebar("Branches");}} className={`h-full text-sm font-medium border-b-2 transition-colors ${activeTopNav === "Branches" ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-800"}`}>Branches</button>
-                        <button onClick={()=>{setActiveTopNav("Categories"); setActiveSidebar("Categories");}} className={`h-full text-sm font-medium border-b-2 transition-colors ${activeTopNav === "Categories" ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-800"}`}>Categories</button>
-                    </div>
-                    {/* Right: icons + avatar */}
-                    <div className="flex items-center gap-5">
-                        <button className="text-gray-400 hover:text-gray-600 transition-colors"><FaRegBell size={18}/></button>
-                        <button className="text-gray-400 hover:text-gray-600 transition-colors"><FaCog size={18}/></button>
-                        <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200 cursor-pointer">
-                            <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=100&q=80&fit=crop" alt="Profile" className="w-full h-full object-cover"/>
-                        </div>
-                    </div>
-                </header>
+                {/* Local View Switcher */}
+                <div className="flex border-b border-gray-200 mb-6 gap-8">
+                    <button onClick={()=>{setActiveTopNav("Dashboard"); setActiveSidebar("Dashboard");}} className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTopNav === "Dashboard" ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-800"}`}>Dashboard</button>
+                    <button onClick={()=>{setActiveTopNav("Inventory"); setActiveSidebar("Models");}} className={`pb-3 text-sm font-medium border-b-2 transition-colors ${activeTopNav === "Inventory" ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-800"}`}>Models Inventory</button>
+                    <button onClick={()=>{setActiveTopNav("Branches"); setActiveSidebar("Branches");}} className={`pb-3 text-sm font-medium border-b-2 transition-colors ${activeTopNav === "Branches" ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-800"}`}>Branches</button>
+                    <button onClick={()=>{setActiveTopNav("Categories"); setActiveSidebar("Categories");}} className={`pb-3 text-sm font-medium border-b-2 transition-colors ${activeTopNav === "Categories" ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-800"}`}>Categories</button>
+                </div>
 
-                {/* SCROLLABLE VIEW */}
-                <div className="flex-1 overflow-y-auto px-8 py-8 relative">
-                    
-                    <div className="max-w-6xl mx-auto space-y-8 pb-32">
+                <div className="flex-1 overflow-y-auto no-scrollbar pb-32">
+                    <div className="max-w-6xl mx-auto space-y-8">
 
                         {/* ====== DASHBOARD VIEW ====== */}
                         {activeSidebar === "Dashboard" && (<>
@@ -661,8 +595,7 @@ export default function UnifiedDashboard() {
                     </div>
                 )}
 
-            </main>
-
+            </div>
             <style>{`
                 @keyframes fade-in-up {
                     from { opacity: 0; transform: translateY(10px); }
@@ -672,7 +605,6 @@ export default function UnifiedDashboard() {
                     animation: fade-in-up 0.3s ease-out forwards;
                 }
             `}</style>
-
-        </div>
+        </StaffLayout>
     );
 }

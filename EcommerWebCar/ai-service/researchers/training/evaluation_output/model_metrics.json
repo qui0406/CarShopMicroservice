@@ -1,0 +1,30 @@
+{
+  "=== THÔNG TIN TẬP DỮ LIỆU ===": "",
+  "n_total": 1554,
+  "n_train": 1242,
+  "n_val": 156,
+  "n_test": 156,
+  "price_range_trieu": {
+    "min": 55.0,
+    "max": 975.0,
+    "median": 482.5
+  },
+  "=== THÔNG SỐ MODEL ===": "",
+  "architecture": "EfficientNetB0 (frozen) + Metadata (13 feat) + TF-IDF (100 feat)",
+  "target": "log1p(price_million) — học trong log-space",
+  "optimizer": "Adam lr=3e-4",
+  "loss_fn": "Huber(delta=0.5)",
+  "epochs_max": 200,
+  "patience_early_stop": 25,
+  "dropout": "0.5 (img), 0.3 (meta), 0.3 (text), 0.4 (fusion)",
+  "l2_reg": "1e-4",
+  "batch_size": 16,
+  "NOTE_train_val_gap": "Train MAE >> Val MAE là hiện tượng bình thường với Dropout+BatchNorm. Dropout inflate Train MAE; Inference mode cho Val MAE thực. Đây KHÔNG phải overfitting hay data leakage.",
+  "=== KẾT QUẢ ĐÁNH GIÁ (tập Test) ===": "",
+  "MAE_trieu_VND": 109.95,
+  "RMSE_trieu_VND": 140.54,
+  "MAPE_percent": 23.07,
+  "R2_score": 0.405,
+  "Ti_le_du_doan_sai_so_under_10pct": 23.08,
+  "Ti_le_du_doan_sai_so_under_20pct": 51.92
+}

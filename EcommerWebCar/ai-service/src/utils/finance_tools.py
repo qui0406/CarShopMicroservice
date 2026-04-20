@@ -12,12 +12,19 @@ def get_car_and_calculate_rolling(car_name: str, address: str, quantity: int = 1
     cursor = conn.cursor(dictionary=True)
 
     try:
-        query = "SELECT model_name, base_price, fuel_type FROM cars WHERE model_name LIKE %s LIMIT 1"
+        query = """
+            SELECT cm.name as model_name, c.price as base_price, ts.fuel_type
+            FROM car_model cm
+            JOIN car c ON c.car_model_id = cm.id
+            LEFT JOIN technical_spec ts ON ts.id = cm.technical_spec_id
+            WHERE cm.name LIKE %s AND c.is_used = 0
+            LIMIT 1
+        """
         cursor.execute(query, (f"%{car_name}%",))
         car = cursor.fetchone()
 
         if not car:
-            return f"Xin lỗi Quí, mình không tìm thấy xe '{car_name}' trong kho."
+            return f"Xin lỗi Quí, mình không tìm thấy xe '{car_name}' trong kho.", None
 
         result = calculate_rolling_price(
             base_price=car['base_price'],
@@ -26,7 +33,14 @@ def get_car_and_calculate_rolling(car_name: str, address: str, quantity: int = 1
             quantity=quantity
         )
 
-        return result["summary"]
+        data = {
+            "car_name": car['model_name'],
+            "price": int(car['base_price']),
+            "price_formatted": result["unit_rolling_price"],
+            "rolling_price_detail": result
+        }
+
+        return result["summary"], data
     finally:
         cursor.close()
         conn.close()

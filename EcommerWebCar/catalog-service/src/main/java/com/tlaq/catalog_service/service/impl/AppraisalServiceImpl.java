@@ -9,12 +9,14 @@ import com.tlaq.catalog_service.dto.response.AppraisalResponse;
 import com.tlaq.catalog_service.dto.response.UserProfileResponse;
 import com.tlaq.catalog_service.entity.AppraisalImage;
 import com.tlaq.catalog_service.entity.AppraisalRequest;
+import com.tlaq.catalog_service.entity.Car;
 import com.tlaq.catalog_service.entity.enums.AppraisalStatus;
 import com.tlaq.catalog_service.exceptions.AppException;
 import com.tlaq.catalog_service.exceptions.ErrorCode;
 import com.tlaq.catalog_service.mapper.AppraisalMapper;
 import com.tlaq.catalog_service.repo.AppraisalImageRepository;
 import com.tlaq.catalog_service.repo.AppraisalRequestRepository;
+import com.tlaq.catalog_service.repo.CarRepository;
 import com.tlaq.catalog_service.repo.httpClient.IdentityClient;
 import com.tlaq.catalog_service.service.AppraisalService;
 import lombok.AccessLevel;
@@ -26,6 +28,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -44,6 +47,7 @@ import org.springframework.data.domain.Pageable;
 public class AppraisalServiceImpl implements AppraisalService {
     AppraisalRequestRepository appraisalRepository;
     AppraisalImageRepository imageRepository;
+    CarRepository carRepository;
     AppraisalMapper appraisalMapper;
     Cloudinary cloudinary;
     IdentityClient identityClient;
@@ -92,15 +96,12 @@ public class AppraisalServiceImpl implements AppraisalService {
         if (profileRes.getResult() == null) throw new AppException(ErrorCode.USER_NOT_EXISTED);
         String profileId = profileRes.getResult().getId();
 
-        // 2. Map DTO sang Entity (Sử dụng Mapper Quí đã viết)
         AppraisalRequest request = appraisalMapper.toEntity(dto);
         request.setUserId(profileId);
         request.setStatus(AppraisalStatus.PENDING);
 
-        // 3. Xử lý Upload ảnh thực tế của xe [cite: 2026-02-25]
         uploadAppraisalImages(images, request);
 
-        // 4. Lưu vào Database (Lưu cả Request và Images nhờ Cascade)
         AppraisalRequest savedRequest = appraisalRepository.save(request);
         return appraisalMapper.toResponse(savedRequest);
     }
@@ -112,7 +113,7 @@ public class AppraisalServiceImpl implements AppraisalService {
 
         request.setOfferedPrice(price);
         request.setConditionNote(request.getConditionNote() + "\n[Phản hồi Showroom]: " + note);
-        request.setStatus(AppraisalStatus.INSPECTING); // Chuyển sang trạng thái đang thẩm định
+        request.setStatus(AppraisalStatus.INSPECTING);
 
         return appraisalMapper.toResponse(appraisalRepository.save(request));
     }
@@ -136,7 +137,8 @@ public class AppraisalServiceImpl implements AppraisalService {
     }
 
     @Override
-    public void convertToInventory(String appraisalId) {
+    @Transactional
+    public Boolean convertToInventory(String appraisalId) {
         AppraisalRequest request = appraisalRepository.findById(appraisalId)
                 .orElseThrow(() -> new AppException(ErrorCode.APPRAISAL_NOT_FOUND));
 
@@ -144,15 +146,18 @@ public class AppraisalServiceImpl implements AppraisalService {
             throw new AppException(ErrorCode.INVALID_STATUS_FOR_INVENTORY);
         }
 
-        // Logic: Tạo mới một Entity Car từ dữ liệu của AppraisalRequest
-        // Car car = Car.builder()
-        //      .branch(request.getBranch())
-        //      .model(request.getModel())
-        //      .price(request.getOfferedPrice())
-        //      .isUsed(true)
-        //      .status(CarStatus.AVAILABLE)
-        //      .build();
-        // carRepository.save(car);
+        Car car = Car.builder()
+                .carModel(request.getModel())
+                .isUsed(true)
+                .isReady(false)
+                .manufacturingYear(request.getManufacturingYear())
+                .build();
+
+        carRepository.save(car);
+
+        request.setStatus(AppraisalStatus.INVENTORIED);
+        appraisalRepository.save(request);
+        return true;
     }
 
     private void uploadAppraisalImages(List<MultipartFile> images, AppraisalRequest appraisalRequest) {
@@ -161,19 +166,17 @@ public class AppraisalServiceImpl implements AppraisalService {
         List<AppraisalImage> appraisalImages = new ArrayList<>();
         for (MultipartFile img : images) {
             try {
-                // Upload lên Cloudinary [cite: 2026-02-25]
                 Map res = cloudinary.uploader().upload(img.getBytes(),
                         ObjectUtils.asMap(
                                 "resource_type", "auto",
-                                "folder", "appraisals" // Lưu vào thư mục riêng cho ô tô cũ
+                                "folder", "appraisals"
                         ));
 
                 String imageUrl = res.get("secure_url").toString();
 
-                // Build Entity Image và thiết lập quan hệ 2 chiều [cite: 2026-02-25]
                 appraisalImages.add(AppraisalImage.builder()
                         .imageUrl(imageUrl)
-                        .imageType("EXTERIOR") // Mặc định là ảnh ngoại thất
+                        .imageType("EXTERIOR")
                         .appraisalRequest(appraisalRequest)
                         .build());
 
@@ -182,18 +185,7 @@ public class AppraisalServiceImpl implements AppraisalService {
                 throw new AppException(ErrorCode.UPLOAD_IMAGE_ERROR);
             }
         }
-        // Gán danh sách ảnh vào đơn định giá để JPA Cascade lưu xuống [cite: 2026-02-25]
+
         appraisalRequest.setImages(appraisalImages);
-    }
-
-    private boolean checkRoleStaff() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication == null || !authentication.isAuthenticated()) {
-            return false;
-        }
-
-        return authentication.getAuthorities().stream()
-                .anyMatch(authority -> authority.getAuthority().equals("ROLE_STAFF")
-                        || authority.getAuthority().equals("ROLE_ADMIN"));
     }
 }

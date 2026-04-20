@@ -8,15 +8,17 @@ import logging
 logger = logging.getLogger(__name__)
 
 # src/services/ -> root -> data/info/
-BASE_DIR      = Path(__file__).resolve().parents[2]
-_PENALTY_CSV  = BASE_DIR / "data" / "info" / "mazda_standard.csv"
+BASE_DIR     = Path(__file__).resolve().parents[2]
+_PENALTY_CSV = BASE_DIR / "data" / "info" / "mazda_standard.csv"
 
-_penalty_cache: dict[str, float] = {}
+# penalty_price > 0 → trừ giá  |  penalty_price < 0 → cộng thêm giá (bonus)
+_adjustment_cache: dict[str, float] = {}
+_type_cache:       dict[str, str]   = {}   # "PENALTY" | "BONUS"
 
 
 def _load_penalty_table() -> None:
     if not _PENALTY_CSV.exists():
-        logger.warning(f"Penalty table không tìm thấy: {_PENALTY_CSV}")
+        logger.warning(f"Adjustment table không tìm thấy: {_PENALTY_CSV}")
         return
 
     try:
@@ -25,21 +27,20 @@ def _load_penalty_table() -> None:
             reader.fieldnames = [name.strip() for name in reader.fieldnames]
 
             for row in reader:
-                key = row.get("item_key", "").strip()
-                val = (
-                    row.get("penalty_price") or
-                    row.get("penalty") or
-                    "0"
-                ).strip()
+                key      = row.get("item_key", "").strip()
+                val_str  = (row.get("penalty_price") or row.get("penalty") or "0").strip()
+                row_type = row.get("type", "PENALTY").strip().upper()
 
                 if not key:
                     continue
 
                 try:
-                    _penalty_cache[key] = float(val.replace(",", "."))
+                    _adjustment_cache[key] = float(val_str.replace(",", "."))
+                    _type_cache[key]       = row_type
                 except ValueError:
-                    logger.warning(f"Giá trị penalty không hợp lệ cho key: {key}")
-                    _penalty_cache[key] = 0.0
+                    logger.warning(f"Giá trị không hợp lệ cho key: {key}")
+                    _adjustment_cache[key] = 0.0
+                    _type_cache[key]       = "PENALTY"
 
     except Exception as e:
         logger.error(e)
@@ -48,16 +49,35 @@ def _load_penalty_table() -> None:
 _load_penalty_table()
 
 
-def get_penalty(item_key: str) -> float:
-    val = _penalty_cache.get(item_key)
+def _get_raw(item_key: str) -> float:
+    """Trả về raw value trong CSV (dương = penalty, âm = bonus)."""
+    val = _adjustment_cache.get(item_key)
     if val is None:
         logger.warning(
-            f"[PENALTY] Không tìm thấy key: '{item_key}' "
-            f"(repr={repr(item_key)}) | "
-            f"Cache hiện có: {list(_penalty_cache.keys())}"
+            f"[ADJUSTMENT] Không tìm thấy key: '{item_key}' | "
+            f"Cache hiện có: {list(_adjustment_cache.keys())}"
         )
         return 0.0
     return val
+
+
+def get_penalty(item_key: str) -> float:
+    """Trả về giá trị khấu trừ (luôn dương). Dùng cho penalty keys."""
+    return abs(_get_raw(item_key))
+
+
+def get_bonus(item_key: str) -> float:
+    """Trả về giá trị cộng thêm (luôn dương). Dùng cho bonus keys."""
+    return abs(_get_raw(item_key))
+
+
+def get_item_type(item_key: str) -> str:
+    """Trả về 'PENALTY' hoặc 'BONUS' cho một item_key."""
+    return _type_cache.get(item_key, "PENALTY")
+
+
+def is_bonus_key(item_key: str) -> bool:
+    return _type_cache.get(item_key, "PENALTY") == "BONUS"
 
 
 def to_base64(image_bgr: np.ndarray) -> str:

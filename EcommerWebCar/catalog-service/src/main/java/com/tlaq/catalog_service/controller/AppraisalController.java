@@ -20,7 +20,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/appraisals")
+@RequestMapping("/api/appraisals")
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Slf4j
@@ -75,6 +75,14 @@ public class AppraisalController {
 
         return ApiResponse.<AppraisalResponse>builder()
                 .result(appraisalService.updateStatus(id, status))
+                .build();
+    }
+
+    @PreAuthorize("hasRole('STAFF')")
+    @PostMapping("/convert-to-inventory/{appraisalId}")
+    public ApiResponse<Boolean> convertToInventory(@PathVariable String appraisalId) {
+        return ApiResponse.<Boolean>builder()
+                .result(appraisalService.convertToInventory(appraisalId))
                 .build();
     }
 }

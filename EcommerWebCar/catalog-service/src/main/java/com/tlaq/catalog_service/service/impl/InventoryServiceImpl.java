@@ -1,5 +1,6 @@
 package com.tlaq.catalog_service.service.impl;
 
+import com.tlaq.catalog_service.dto.PageResponse;
 import com.tlaq.catalog_service.dto.request.InventoryRequest;
 import com.tlaq.catalog_service.dto.request.InventoryUpdateRequest;
 import com.tlaq.catalog_service.dto.response.InventoryResponse;
@@ -18,11 +19,16 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -37,22 +43,26 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     public InventoryResponse get(String inventoryId) {
         Inventory inventory = inventoryRepository.findById(inventoryId)
-                .orElseThrow(()-> new AppException(ErrorCode.INVENTORY_IS_EMPTY));
-        return inventoryMapper.toInventoryResponse(inventory);
+                .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_NOT_FOUND));
+
+        Car car = carRepository.findById(inventory.getCarId())
+                .orElseThrow(() -> new AppException(ErrorCode.CAR_NOT_FOUND));
+
+        return inventoryMapper.toInventoryResponse(inventory, car);
     }
 
     @Override
     @Transactional
     public InventoryResponse create(InventoryRequest request) {
-        // 1. Kiểm tra xe có tồn tại trong hệ thống không
+        // 1. Check Car
         Car car = carRepository.findById(request.getCarId())
                 .orElseThrow(() -> new AppException(ErrorCode.CAR_NOT_FOUND));
 
-        // 2. Kiểm tra Showroom có tồn tại không
+        // 2. Check Showroom
         ShowRoom showRoom = showRoomRepository.findById(request.getShowRoomId())
                 .orElseThrow(() -> new AppException(ErrorCode.SHOWROOM_NOT_FOUND));
 
-        // 3. Kiểm tra xem mẫu xe này ĐÃ CÓ trong kho của Showroom này chưa
+        // 3. Check exist
         Optional<Inventory> existingInventory = inventoryRepository
                 .findByCarIdAndShowRoomId(request.getCarId(), request.getShowRoomId());
 
@@ -62,11 +72,12 @@ public class InventoryServiceImpl implements InventoryService {
             inventory.setQuantity(inventory.getQuantity() + request.getQuantity());
         } else {
             inventory = inventoryMapper.toInventory(request);
-            inventory.setCarId(car.getId());       // Gán object Car thực tế
-            inventory.setShowRoom(showRoom); // Gán object ShowRoom thực tế
+            inventory.setCarId(car.getId());
+            inventory.setShowRoom(showRoom);
         }
 
-        return inventoryMapper.toInventoryResponse(inventoryRepository.save(inventory));
+        Inventory savedInventory = inventoryRepository.save(inventory);
+        return inventoryMapper.toInventoryResponse(savedInventory, car);
     }
 
     @Override
@@ -79,47 +90,39 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     @Transactional
     public InventoryResponse update(InventoryUpdateRequest request, String inventoryId) {
-        // 1. Tìm bản ghi kho theo ID
         Inventory inventory = inventoryRepository.findById(inventoryId)
                 .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_NOT_FOUND));
 
-        // 2. Kiểm tra số lượng mới (đảm bảo không bị âm từ phía Request)
         if (request.getQuantity() < 0) {
             throw new AppException(ErrorCode.INVALID_QUANTITY);
         }
 
-        // 3. Cập nhật số lượng
         inventory.setQuantity(request.getQuantity());
+        Inventory savedInventory = inventoryRepository.save(inventory);
 
-        // 4. Lưu và trả về
-        return inventoryMapper.toInventoryResponse(inventoryRepository.save(inventory));
+        Car car = carRepository.findById(savedInventory.getCarId())
+                .orElseThrow(() -> new AppException(ErrorCode.CAR_NOT_FOUND));
+
+        return inventoryMapper.toInventoryResponse(savedInventory, car);
     }
 
     @Override
     @Transactional
     public void delete(String inventoryId) {
-        // Kiểm tra tồn tại trước khi xóa để báo lỗi chính xác
         Inventory inventory = inventoryRepository.findById(inventoryId)
                 .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_NOT_FOUND));
-
         inventoryRepository.delete(inventory);
     }
 
     @Override
-    public void updateInventoryAfterPay(String orderId) {
-
-    }
-
-    @Override
-    public void restoreInventory(String orderId) {
-
-    }
-
-    @Override
     public InventoryResponse getInventoryByCarId(String carId) {
-        Inventory inventory= inventoryRepository.findInventoryByCarId(carId)
-                .orElseThrow(()-> new AppException(ErrorCode.INVENTORY_IS_EMPTY));
-        return inventoryMapper.toInventoryResponse(inventoryRepository.save(inventory));
+        Inventory inventory = inventoryRepository.findInventoryByCarId(carId)
+                .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_IS_EMPTY));
+
+        Car car = carRepository.findById(carId)
+                .orElseThrow(() -> new AppException(ErrorCode.CAR_NOT_FOUND));
+
+        return inventoryMapper.toInventoryResponse(inventory, car);
     }
 
     @Override
@@ -131,7 +134,6 @@ public class InventoryServiceImpl implements InventoryService {
 
             log.info("Đang trừ kho cho CarId: {} với số lượng: {}", carId, quantity);
 
-            // 1. Kiểm tra tồn kho hiện tại trước khi trừ (Optional nhưng nên có)
             int currentStock = inventoryRepository.findQuantityByCarId(carId)
                     .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_IS_EMPTY));
 
@@ -139,12 +141,12 @@ public class InventoryServiceImpl implements InventoryService {
                 throw new AppException(ErrorCode.QUANTITY_NOT_ENOUGH);
             }
 
-            // 2. Gọi phương thức reduceStock đã có trong Repository
             inventoryRepository.reduceStock(carId, quantity);
         }
     }
 
     @Override
+    @Transactional
     public void restoreInventory(List<Map<String, Object>> items) {
         for (Map<String, Object> item : items) {
             String carId = String.valueOf(item.get("carId"));
@@ -152,11 +154,48 @@ public class InventoryServiceImpl implements InventoryService {
 
             log.info("Khôi phục kho cho CarId: {} số lượng: {}", carId, quantity);
 
-            Inventory inventory = inventoryRepository.findByCarId(carId)
+            Inventory inventory = inventoryRepository.findInventoryByCarId(carId)
                     .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_NOT_FOUND));
 
             inventory.setQuantity(inventory.getQuantity() + quantity);
             inventoryRepository.save(inventory);
         }
     }
+
+    @Override
+    public PageResponse<InventoryResponse> getList(int page, int size) {
+        // Sắp xếp theo ngày cập nhật mới nhất
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("updatedAt").descending());
+
+        Page<Inventory> inventoryPage = inventoryRepository.findAll(pageable);
+
+        // Gom tất cả carId trong Page hiện tại
+        List<String> carIds = inventoryPage.getContent().stream()
+                .map(Inventory::getCarId)
+                .collect(Collectors.toList());
+
+        // Lấy Map Car để truy xuất nhanh, tránh N+1 Query
+        Map<String, Car> carMap = carRepository.findAllById(carIds).stream()
+                .collect(Collectors.toMap(Car::getId, c -> c));
+
+        List<InventoryResponse> responses = inventoryPage.getContent().stream()
+                .map(inventory -> {
+                    Car car = carMap.get(inventory.getCarId());
+                    // Lưu ý: Nếu Car bị xóa khỏi DB, car có thể null
+                    return inventoryMapper.toInventoryResponse(inventory, car);
+                })
+                .collect(Collectors.toList());
+
+        return PageResponse.<InventoryResponse>builder()
+                .currentPage(page)
+                .pageSize(size)
+                .totalPages(inventoryPage.getTotalPages())
+                .totalElements(inventoryPage.getTotalElements())
+                .data(responses)
+                .build();
+    }
+
+    // Các hàm này sẽ dùng khi Quí tích hợp với luồng Payment/Order
+    @Override public void updateInventoryAfterPay(String orderId) { }
+    @Override public void restoreInventory(String orderId) { }
 }

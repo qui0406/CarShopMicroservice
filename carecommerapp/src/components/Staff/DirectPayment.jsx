@@ -1,14 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import StaffLayout from "./StaffLayout";
 import { authApis, endpoints } from "../../configs/APIs";
 
-/* ─── Sidebar nav ────────────────────────────────────────── */
-const NAV = [
-  { icon: "⊞", label: "DASHBOARD",    key: "dashboard",    to: "/staff/home" },
-  { icon: "🚗", label: "INVENTORY",    key: "inventory",    to: "/staff/inventory" },
-  { icon: "💳", label: "TRANSACTIONS", key: "transactions", to: "/staff/cashier" },
-  { icon: "📊", label: "REPORTS",      key: "reports",      to: null },
-];
+
 
 const PAYMENT_METHODS = [
   { key: "CASH",          label: "Tiền mặt",              icon: "💵" },
@@ -20,19 +15,7 @@ const PAYMENT_METHODS = [
 const TAX_RATE = 0.10;
 const fmt = (n) => Number(n || 0).toLocaleString("vi-VN");
 
-/* ─── NavItem ────────────────────────────────────────────── */
-function NavItem({ icon, label, active, onClick }) {
-  return (
-    <button onClick={onClick}
-      className={`w-full flex items-center gap-3 px-5 py-3 text-xs font-black tracking-widest text-left transition-colors ${
-        active
-          ? "text-blue-600 border-l-4 border-blue-600 bg-blue-50/60 pl-4"
-          : "text-gray-400 border-l-4 border-transparent hover:bg-gray-50 hover:text-gray-700"
-      }`}>
-      <span className="text-sm">{icon}</span>{label}
-    </button>
-  );
-}
+
 
 /* ─── Field ──────────────────────────────────────────────── */
 function Field({ label, required, error, children }) {
@@ -175,52 +158,8 @@ export default function DirectPayment() {
   const pmLabel = PAYMENT_METHODS.find(m => m.key === form.paymentMethod);
 
   return (
-    <div className="flex h-screen bg-white font-sans text-gray-900 overflow-hidden">
-
-      {/* ─── SIDEBAR ─────────────────────────────────────── */}
-      <aside className="w-52 bg-white border-r border-gray-100 flex flex-col shrink-0 h-full">
-        <div className="px-5 py-5 border-b border-gray-100">
-          <p className="text-xs font-black tracking-widest uppercase text-gray-900">Showroom Ops</p>
-          <p className="text-[9px] text-gray-400 font-bold tracking-widest uppercase mt-0.5">Terminal V1</p>
-        </div>
-        <nav className="flex-1 py-3">
-          {NAV.map(item => (
-            <NavItem key={item.key} icon={item.icon} label={item.label}
-              active={item.key === "dashboard"}
-              onClick={() => item.to ? navigate(item.to) : null}
-            />
-          ))}
-        </nav>
-        <div className="pb-5 border-t border-gray-100 pt-3">
-          <NavItem icon="❓" label="SUPPORT" active={false} onClick={() => {}}/>
-          <NavItem icon="↪" label="LOGOUT"  active={false} onClick={() => navigate("/login")}/>
-        </div>
-      </aside>
-
-      {/* ─── MAIN ────────────────────────────────────────── */}
-      <main className="flex-1 flex flex-col h-full overflow-hidden">
-
-        {/* TOP BAR */}
-        <header className="h-14 bg-white border-b border-gray-100 flex items-center px-8 gap-5 shrink-0">
-          <h1 className="text-base font-black text-gray-900 tracking-tight shrink-0">VELOCITY MONO</h1>
-          <div className="relative max-w-sm w-full">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
-            <input placeholder="Tìm kiếm mã đơn, khách hàng..."
-              className="w-full pl-9 pr-4 py-1.5 text-sm bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"/>
-          </div>
-          <button onClick={() => navigate("/staff/cashier")}
-            className="ml-auto flex items-center gap-2 px-4 py-2 border border-gray-200 bg-white text-xs font-black uppercase tracking-wide rounded-lg hover:bg-gray-50 transition-colors shrink-0 text-gray-700">
-            ← Xem Đặt Cọc
-          </button>
-          <button className="text-gray-400 hover:text-gray-700 text-lg shrink-0">🔔</button>
-          <button className="text-gray-400 hover:text-gray-700 text-lg shrink-0">⚙️</button>
-          <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200 shrink-0">
-            <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=40&q=80&fit=crop&crop=face" alt="user" className="w-full h-full object-cover"/>
-          </div>
-        </header>
-
-        {/* CONTENT */}
-        <div className="flex-1 overflow-y-auto bg-gray-50 px-8 py-6">
+    <StaffLayout>
+      <div className="flex-1 overflow-y-auto bg-gray-50 px-8 py-6">
 
           {/* Page header */}
           <div className="mb-6">
@@ -474,7 +413,6 @@ export default function DirectPayment() {
             </div>
           </form>
         </div>
-      </main>
 
       {/* ─── TOAST ───────────────────────────────────────── */}
       {toast && (
@@ -483,6 +421,6 @@ export default function DirectPayment() {
           <button onClick={() => setToast(null)} className="text-gray-400 hover:text-white ml-1">✕</button>
         </div>
       )}
-    </div>
+    </StaffLayout>
   );
 }

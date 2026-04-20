@@ -11,11 +11,23 @@ from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-IMAGE_ROOT = os.path.join(BASE_DIR, "data", "raw_images")
-RAW_DATA_DIR = os.path.join(BASE_DIR, "data", "car_details")
+# Đường dẫn đến file hiện tại
+CURRENT_FILE_PATH = os.path.abspath(__file__)
+
+# Lùi lại 2 cấp để về thư mục gốc của dự án (ai-service)
+# researchers/training/car_scraper.py -> researchers -> ai-service
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(CURRENT_FILE_PATH)))
+
+# Định nghĩa các thư mục đích dựa trên PROJECT_ROOT
+RAW_DATA_DIR = os.path.join(PROJECT_ROOT, "data", "raw", "car_details")
+IMAGE_ROOT = os.path.join(PROJECT_ROOT, "data", "raw", "images")
 FILE_PATH = os.path.join(RAW_DATA_DIR, "mazda_full_dataset.csv")
 
+# Tạo thư mục nếu chưa có
+os.makedirs(RAW_DATA_DIR, exist_ok=True)
+os.makedirs(IMAGE_ROOT, exist_ok=True)
+
+print(f"Dữ liệu sẽ được lưu tại: {FILE_PATH}")
 CHOTOT_MAZDA_BASE_URL = "https://xe.chotot.com/mua-ban-oto-mazda-sdcb7"
 
 os.makedirs(IMAGE_ROOT, exist_ok=True)
@@ -63,6 +75,17 @@ def save_to_csv(car_data):
         if not file_exists:
             writer.writeheader()
         writer.writerow(car_data)
+        f.flush()
+
+def load_scraped_urls():
+    scraped_urls = set()
+    if os.path.isfile(FILE_PATH):
+        with open(FILE_PATH, mode='r', encoding='utf-8-sig') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if 'url' in row:
+                    scraped_urls.add(row['url'])
+    return scraped_urls
 
 
 def get_car_detail(driver, url, car_id):
@@ -151,16 +174,21 @@ def get_car_detail(driver, url, car_id):
         save_to_csv(car_data)
         return True
     except Exception as e:
+        print(f"Lỗi khi cào dữ liệu xe tại {url}: {e}")
         return False
 
 
 def main():
     driver = init_driver()
     base_search_url = CHOTOT_MAZDA_BASE_URL
-    current_page = 30
-    max_pages = 50
+    current_page = 70
+    max_pages = 80
+
+    scraped_urls = load_scraped_urls()
+    print(f"Đã tải {len(scraped_urls)} bài viết cũ. Sẽ tự động bỏ qua nếu trùng.")
 
     while current_page <= max_pages:
+        print(f"Đang cào trang {current_page}...")
         driver.get(f"{base_search_url}?page={current_page}")
         time.sleep(4)
 
@@ -172,8 +200,15 @@ def main():
         links = list(dict.fromkeys([l for l in links if l]))
 
         for i, link in enumerate(links):
+            if link in scraped_urls:
+                print(f"Bỏ qua (đã có): {link}")
+                continue
+
             unique_id = f"p{current_page}_s{i}_{int(time.time())}"
-            get_car_detail(driver, link, unique_id)
+            print(f"Đang cào dữ liệu: {link}")
+            success = get_car_detail(driver, link, unique_id)
+            if success:
+                scraped_urls.add(link)
             time.sleep(2)
 
         current_page += 1

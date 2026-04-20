@@ -24,24 +24,22 @@ public class Car {
     @GeneratedValue(strategy = GenerationType.UUID)
     String id;
 
-    // --- Liên kết ngược về Mẫu xe ---
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "car_model_id")
     CarModel carModel;
 
-    // --- Đặc tính duy nhất của từng chiếc xe ---
-    String vinNumber; // Số khung
-    String color;     // Màu sắc ngoại thất
-    BigDecimal price; // Giá bán cụ thể
+    String vinNumber;
+    String color;
+    BigDecimal price;
 
-    int manufacturingYear; // Năm sản xuất thực tế (Vd: Model 2026 nhưng SX cuối 2025)
+    int manufacturingYear;
 
-    // --- Dành cho mảng xe cũ (Used Car) ---
     boolean isUsed;
-    int mileage; // Odo
+    int mileage;
     String inspectionReportUrl;
 
-    // --- Media cho chiếc xe cụ thể này ---
+    boolean isReady;
+
     String model3dUrl;
 
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -27,9 +27,9 @@ public class TechnicalSpec {
     String engine;        // dongCo
     String transmission;  // hopSo
 
-    @Enumerated(EnumType.STRING) // Quan trọng: Bảo Hibernate lưu dạng chuỗi [cite: 2026-03-09]
+    @Enumerated(EnumType.STRING)
     @Column(name = "fuel_type")
-    FuelType fuelType;      // loaiNhienLieu (Xăng, Dầu, Điện)
+    FuelType fuelType;
 
     @Enumerated(EnumType.STRING)
     BodyType bodyType;

@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 _HERE = os.path.dirname(os.path.abspath(__file__))
 
 # models/ nằm ở root: src/services/ -> root -> models/
-YOLO_WEIGHTS = os.path.join(_HERE, "..", "..", "models", "yolo_car_damage_best.pt")
+YOLO_WEIGHTS = os.path.join(_HERE, "..", "..", "model", "weights", "yolo_car_damage_best.pt")
 
 try:
     print(f"Đang nạp YOLO damage model: {YOLO_WEIGHTS}")

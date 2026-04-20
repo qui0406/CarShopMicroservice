@@ -24,7 +24,7 @@ public class AppraisalRequest {
     String id;
 
     @Column(name = "user_id", nullable = false)
-    String userId; // ID từ Identity Service
+    String userId;
 
     // Thay đổi từ String sang quan hệ Entity
     @ManyToOne(fetch = FetchType.LAZY)

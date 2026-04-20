@@ -54,7 +54,13 @@ def _llm_sentiment(text: str) -> str:
         max_tokens=5,
         temperature=0,
     )
-    raw = response.choices[0].message.content.strip().upper()
+
+    # ✅ Guard None trước khi gọi .strip()
+    content = response.choices[0].message.content
+    if not content:
+        return "NEUTRAL"
+
+    raw = content.strip().upper()
 
     for label in ("POSITIVE", "NEGATIVE", "NEUTRAL"):
         if label in raw:

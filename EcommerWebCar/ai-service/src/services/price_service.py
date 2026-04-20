@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from datetime import datetime
 from typing import Tuple, Optional
 import logging
 
@@ -21,15 +22,38 @@ def preprocess_image(image_bytes: bytes) -> Tuple[Optional[np.ndarray], Optional
 
 
 def safe_encode(encoder, value: str) -> float:
+    """Encode categorical value; dùng fuzzy-match khi không tìm thấy exact match."""
     if encoder is None:
         return 0.0
     try:
-        if value in encoder.classes_:
-            idx     = encoder.transform([value])[0]
-            max_val = len(encoder.classes_) - 1
-            return float(idx) / max_val if max_val > 0 else 0.0
-        else:
-            return 0.0
+        classes = list(encoder.classes_)
+        max_val = len(classes) - 1
+
+        # 1. Exact match
+        if value in classes:
+            idx = encoder.transform([value])[0]
+            return float(idx) / (max_val + 1e-7) if max_val > 0 else 0.0
+
+        # 2. Case-insensitive match
+        val_lower = value.lower().strip()
+        for cls in classes:
+            if cls.lower().strip() == val_lower:
+                idx = encoder.transform([cls])[0]
+                return float(idx) / (max_val + 1e-7) if max_val > 0 else 0.0
+
+        # 3. Substring match — tìm class chứa value (ưu tiên class dài nhất để chính xác nhất)
+        candidates = [cls for cls in classes if val_lower in cls.lower() or cls.lower() in val_lower]
+        if candidates:
+            best = max(candidates, key=lambda c: len(c))  # chọn class dài nhất (chi tiết nhất)
+            idx  = encoder.transform([best])[0]
+            logger.debug(f"safe_encode fuzzy match: '{value}' → '{best}'")
+            return float(idx) / (max_val + 1e-7) if max_val > 0 else 0.0
+
+        # 4. Fallback: dùng class giữa (median) thay vì 0 để tránh bias cực đoan
+        mid_idx = max_val // 2
+        logger.debug(f"safe_encode fallback median for '{value}' (not in encoder)")
+        return float(mid_idx) / (max_val + 1e-7) if max_val > 0 else 0.0
+
     except Exception:
         return 0.0
 
@@ -49,22 +73,29 @@ def preprocess_tabular(
 ) -> Tuple[Optional[np.ndarray], str]:
     full_name = f"{model_name} {trim_name}".strip()
 
-    num_s           = model_loader.scaler.transform([[year, odo]])
+    car_age = max(0, datetime.now().year - year)
+    log_odo = float(np.log1p(max(0, odo)))
+    
+    num_s           = model_loader.scaler.transform([[year, odo, car_age, log_odo]])
     is_single_owner = 1.0 if owner_count == 1 else 0.0
     seats_scaled    = float(seats) / 8.0
-    meta_in         = np.zeros((1, 11), dtype="float32")
+    meta_in         = np.zeros((1, 13), dtype="float32")
 
     meta_in[0, 0]  = num_s[0, 0]                                           # year
     meta_in[0, 1]  = num_s[0, 1]                                           # odo
-    meta_in[0, 2]  = safe_encode(model_loader.le_model,     model_name)    # model
-    meta_in[0, 3]  = safe_encode(model_loader.le_version,   trim_name)     # version_extracted
-    meta_in[0, 4]  = safe_encode(model_loader.le_gearbox,   gearbox.capitalize())
-    meta_in[0, 5]  = safe_encode(model_loader.le_fuel,      fuel.capitalize())
-    meta_in[0, 6]  = safe_encode(model_loader.le_body_type, body_type.upper())
-    meta_in[0, 7]  = safe_encode(model_loader.le_origin,    origin.capitalize())
-    meta_in[0, 8]  = safe_encode(model_loader.le_color,     color.capitalize())
-    meta_in[0, 9]  = is_single_owner
-    meta_in[0, 10] = seats_scaled
+    meta_in[0, 2]  = num_s[0, 2]                                           # car_age
+    meta_in[0, 3]  = num_s[0, 3]                                           # log_odo
+    bt_val = "SUV" if body_type.strip().upper() == "SUV" else body_type.strip().capitalize()
+    
+    meta_in[0, 4]  = safe_encode(model_loader.le_model,     model_name)    # model
+    meta_in[0, 5]  = safe_encode(model_loader.le_version,   trim_name)     # version_extracted
+    meta_in[0, 6]  = safe_encode(model_loader.le_gearbox,   gearbox.capitalize())
+    meta_in[0, 7]  = safe_encode(model_loader.le_fuel,      fuel.capitalize())
+    meta_in[0, 8]  = safe_encode(model_loader.le_body_type, bt_val)
+    meta_in[0, 9]  = safe_encode(model_loader.le_origin,    origin.title())
+    meta_in[0, 10] = safe_encode(model_loader.le_color,     color.capitalize())
+    meta_in[0, 11] = is_single_owner
+    meta_in[0, 12] = seats_scaled
 
     return meta_in, full_name
 
@@ -97,4 +128,4 @@ def predict_price(img_in: np.ndarray, meta_in: np.ndarray, text_in: np.ndarray) 
         {"image_input": img_in, "meta_input": meta_in, "text_input": text_in},
         verbose=0,
     )
-    return float(pred[0][0]) * 100.0
+    return float(np.expm1(float(pred[0][0])))

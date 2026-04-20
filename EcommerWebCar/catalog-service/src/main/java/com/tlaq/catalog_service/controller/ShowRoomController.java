@@ -34,8 +34,8 @@ public class ShowRoomController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping(value = "/admin/create-showroom", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ApiResponse<ShowRoomResponse> createCar(@ModelAttribute ShowRoomRequest request,
-                                                   @RequestParam("images") @Valid
+    public ApiResponse<ShowRoomResponse> createCar(@RequestPart("request") @Valid ShowRoomRequest request,
+                                                   @RequestPart("images") @Valid
                                                    @ImageConstraint(min = 1, max = 5, message = "Chọn từ 1 tới 5 ảnh")
                                                    List<MultipartFile> images) {
         return ApiResponse.<ShowRoomResponse>builder()

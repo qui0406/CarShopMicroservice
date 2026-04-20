@@ -37,11 +37,11 @@ public class AuthFilters implements GlobalFilter, Ordered {
 
     @NonFinal
     private static final String[] PUBLIC_ENDPOINTS = {
-            "/auth/api/register",
-            "/auth/api/login",
-            "/auth/api/introspect",
-            "/auth/api/refresh",
-            "/auth/api/logout",
+            "/identity/api/register",
+            "/identity/api/login",
+            "/identity/api/introspect",
+            "/identity/api/refresh",
+            "/identity/api/logout",
 
             "/catalog/api/car-branch/get-all-car-branch",
             "/catalog/api/car-branch/get-branch-by-id/.*",
@@ -53,10 +53,12 @@ public class AuthFilters implements GlobalFilter, Ordered {
             "/catalog/api/car/get-product-by-id/.*",
             "/catalog/api/car/filter-car",
             "/catalog/api/catalog/api/inventory/get-inventory/.*",
-            "/catalog/api/inventory/get-inventory-by-carId/.*",
+            "/catalog/api/inventory/get-inventory-by-car-id/.*",
             "/catalog/api/showroom/get-info-showroom",
 
-            "/payment/payments/vnpay-callback/.*"
+            "/payment/payments/vnpay-callback/.*",
+
+            "/ai/.*"
     };
 
     @Value("${app.api-prefix}")

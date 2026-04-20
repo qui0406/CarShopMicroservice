@@ -1,6 +1,7 @@
 package com.tlaq.catalog_service.controller;
 
 import com.tlaq.catalog_service.dto.ApiResponse;
+import com.tlaq.catalog_service.dto.PageResponse;
 import com.tlaq.catalog_service.dto.request.InventoryRequest;
 import com.tlaq.catalog_service.dto.request.InventoryUpdateRequest;
 import com.tlaq.catalog_service.dto.response.InventoryResponse;
@@ -11,6 +12,8 @@ import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,6 +34,16 @@ public class InventoryController {
     public ApiResponse<InventoryResponse> getInventoryByCarId(@PathVariable String carId) {
         return ApiResponse.<InventoryResponse>builder()
                 .result(inventoryService.getInventoryByCarId(carId))
+                .build();
+    }
+
+    @PreAuthorize("hasRole('STAFF')")
+    @GetMapping("/inventory/get-all-inventory")
+    public ApiResponse<PageResponse<InventoryResponse>> getAllInventory(
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "12") int size) {
+        return ApiResponse.<PageResponse<InventoryResponse>>builder()
+                .result(inventoryService.getList(page, size))
                 .build();
     }
 

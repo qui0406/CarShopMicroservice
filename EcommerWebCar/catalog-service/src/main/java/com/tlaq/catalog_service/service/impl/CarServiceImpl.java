@@ -8,6 +8,7 @@ import com.tlaq.catalog_service.dto.PageResponse;
 import com.tlaq.catalog_service.dto.request.CarRequest;
 import com.tlaq.catalog_service.dto.response.CarResponse;
 import com.tlaq.catalog_service.dto.response.CarSummaryResponse;
+import com.tlaq.catalog_service.dto.response.Model3DResponse;
 import com.tlaq.catalog_service.entity.*;
 import com.tlaq.catalog_service.exceptions.AppException;
 import com.tlaq.catalog_service.exceptions.ErrorCode;
@@ -155,6 +156,27 @@ public class CarServiceImpl implements CarService {
                 .totalPages(pageData.getTotalPages())
                 .totalElements(pageData.getTotalElements())
                 .data(pageData.getContent().stream().map(carMapper::toCarResponse).toList())
+                .build();
+    }
+
+    @Override
+    public Model3DResponse upload3DModel(String carId, MultipartFile file) throws IOException {
+        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
+                "resource_type", "raw",
+                "public_id", "car_models/" + file.getOriginalFilename(),
+                "folder", "ecommerce_cars"
+        ));
+        String url = uploadResult.get("secure_url").toString();
+
+        Car car = carRepository.findById(carId)
+                .orElseThrow(() -> new AppException(ErrorCode.CAR_NOT_FOUND));
+
+        car.setModel3dUrl(url);
+        carRepository.save(car);
+
+        return Model3DResponse.builder()
+                .model3dUrl(url)
+                .carId(car.getId())
                 .build();
     }
 }

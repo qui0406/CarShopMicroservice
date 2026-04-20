@@ -1,182 +1,287 @@
-import React, { useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { FaCheck, FaDownload, FaHistory } from "react-icons/fa";
-import { ShieldCheck } from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import { useSearchParams, useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { endpoints, authApis } from '../configs/APIs';
+
+const fmt = (n) => (n == null ? '0 đ' : Number(n).toLocaleString('vi-VN') + ' đ');
 
 export default function PaymentCompleted() {
-  const location = useLocation();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [car, setCar] = useState(null);
+  const [status, setStatus] = useState('loading'); // 'loading', 'success', 'failed'
+  const [orderInfo, setOrderInfo] = useState(null);
+  const [carInfo, setCarInfo] = useState(null);
+
+  // VNPAY return params
+  const vnp_ResponseCode = searchParams.get('vnp_ResponseCode');
+  const vnp_TxnRef = searchParams.get('vnp_TxnRef');
+  const vnp_Amount = searchParams.get('vnp_Amount'); // in VND * 100
+  const vnp_BankCode = searchParams.get('vnp_BankCode');
+  const vnp_PayDate = searchParams.get('vnp_PayDate');
 
   useEffect(() => {
-    // Lấy thông tin xe đã lưu từ quá trình đặt cọc trước đó
-    const savedCar = sessionStorage.getItem("car");
-    if (savedCar) {
+    const checkPayment = async () => {
       try {
-        setCar(JSON.parse(savedCar));
-      } catch (e) {
-        console.error("Failed to parse car info from session storage", e);
+        if (!vnp_TxnRef) {
+          setStatus('failed');
+          return;
+        }
+
+        // Call status API if needed, or just rely on vnp_ResponseCode
+        if (vnp_ResponseCode === '00') {
+           setStatus('success');
+           // Fetch order details to show on the success page
+           try {
+             // Assuming TxnRef contains the order ID or we can fetch it
+             // Let's try to get the order status from our backend
+             const orderRes = await authApis().get(endpoints['get-order-by-id'](vnp_TxnRef));
+             const orderData = orderRes.data.result || orderRes.data;
+             setOrderInfo(orderData);
+
+             if (orderData?.carId) {
+                 const carRes = await axios.get(endpoints['get-product-by-id'](orderData.carId));
+                 setCarInfo(carRes.data.result || carRes.data);
+             }
+           } catch (e) {
+               console.error("Could not fetch order/car details", e);
+           }
+        } else {
+           setStatus('failed');
+        }
+
+      } catch (error) {
+        console.error('Error checking payment:', error);
+        setStatus('failed');
       }
-    } else {
-      // Mock data cho chiếc xe nếu test trực tiếp
-      setCar({
-        name: "Porsche 911 GT3",
-        vinNumber: "WP0ZZZ99ZLS123456",
-        images: ["https://images.unsplash.com/photo-1503376710356-6cb021d7bfa0?q=80&w=1000&auto=format&fit=crop"]
-      });
-    }
-  }, []);
-
-  // Lấy dữ liệu từ query parameters VNPay trả về
-  const params = new URLSearchParams(location.search);
-  let data = Object.fromEntries(params.entries());
-
-  // NẾU TRUY CẬP TRỰC TIẾP KHÔNG CÓ PARAM (CHẾ ĐỘ TEST/MOCK DATA)
-  if (Object.keys(data).length === 0) {
-    data = {
-      vnp_Amount: "50000000000", // 500.000.000 VND (VNPay format * 100)
-      vnp_TransactionNo: "VNP12345678",
-      vnp_BankCode: "VNPAY-QR",
-      vnp_PayDate: "20260525143000", // 14:30 25/05/2026
-      vnp_OrderInfo: "Nguyễn Văn A" // Tên khách mock
     };
+
+    checkPayment();
+  }, [vnp_ResponseCode, vnp_TxnRef]);
+
+  // Format VNPAY valid Date string (yyyyMMddHHmmss)
+  const formatVnpDate = (dateStr) => {
+    if (!dateStr || dateStr.length !== 14) return new Date().toLocaleString('vi-VN');
+    const yyyy = dateStr.slice(0, 4);
+    const MM = dateStr.slice(4, 6);
+    const dd = dateStr.slice(6, 8);
+    const HH = dateStr.slice(8, 10);
+    const mm = dateStr.slice(10, 12);
+    return `${HH}:${mm} - ${dd}/${MM}/${yyyy}`;
+  };
+
+  const amountDisplay = vnp_Amount ? fmt(parseInt(vnp_Amount) / 100) : '0 đ';
+  const payDateDisplay = formatVnpDate(vnp_PayDate);
+
+  if (status === 'loading') {
+    return (
+      <div style={s.pageCenter}>
+        <div style={s.spinner}></div>
+        <p style={{ marginTop: 16, color: '#6c757d', fontWeight: 600 }}>Đang kiểm tra trạng thái thanh toán...</p>
+        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+      </div>
+    );
   }
 
-  // Format số tiền
-  const formatAmount = (amountStr) => {
-    const raw = parseInt(amountStr || 0);
-    // VNPay amount is multiplied by 100
-    const finalAmount = raw > 0 ? raw / 100 : 50000000; // fallback to 50M if missing
-    return new Intl.NumberFormat("vi-VN").format(finalAmount) + " đ";
-  };
+  if (status === 'failed') {
+    return (
+      <div style={s.pageCenter}>
+        <div style={s.failedIcon}>✖</div>
+        <h2 style={s.failedTitle}>Thanh toán thất bại</h2>
+        <p style={s.failedText}>Giao dịch không thành công hoặc đã bị hủy.</p>
+        <div style={{ display: 'flex', gap: 12, marginTop: 24 }}>
+           <button onClick={() => navigate(-1)} style={s.outlineBtn}>Thử lại</button>
+           <button onClick={() => navigate('/home')} style={s.primaryBtn}>Về trang chủ</button>
+        </div>
+      </div>
+    );
+  }
 
-  // Format thời gian từ chuỗi kiểu 20240525143000
-  const formatPayDate = (payDateStr) => {
-    if (!payDateStr || payDateStr.length !== 14) return "14:30 - 25/05/2026"; // mockup fallback
-    const yyyy = payDateStr.slice(0,4);
-    const MM = payDateStr.slice(4,6);
-    const dd = payDateStr.slice(6,8);
-    const hh = payDateStr.slice(8,10);
-    const mm = payDateStr.slice(10,12);
-    return `${hh}:${mm} - ${dd}/${MM}/${yyyy}`;
-  };
-
-  const transactionNo = data["vnp_TransactionNo"] || "VNP12345678";
-  const bankCode = data["vnp_BankCode"] || "VNPAY-QR";
-  const orderInfo = data["vnp_OrderInfo"] ? decodeURIComponent(data["vnp_OrderInfo"]).replace(/\+/g, " ") : "Thanh toán giao dịch";
-  
-  // Trích xuất tên từ orderInfo giả định nếu có, hoặc để fallback
-  const customerName = orderInfo.length < 20 && orderInfo !== "Thanh toán giao dịch" ? orderInfo : "Nguyễn Văn A";
+  const carImg = carInfo?.imageUrls?.[0] || carInfo?.carModel?.thumbnailImage || 'https://images.unsplash.com/photo-1503376713431-155e81fcae13?q=80&w=800&auto=format';
+  const carName = carInfo?.name || 'Porsche 911 GT3';
+  const carModelName = carInfo?.carModel?.name || carName;
 
   return (
-    <div className="min-h-screen bg-[#f8f9fc] pt-32 pb-24 px-4 font-['Inter',_sans-serif]">
-      <div className="max-w-4xl mx-auto">
+    <div style={s.page}>
+      {/* NAV */}
+      <nav style={s.nav}>
+        <button onClick={() => navigate('/')} style={s.logo}>PRECISION MOTORS</button>
+        <div style={s.navLinks}>
+          {['INVENTORY','CONFIGURE','FINANCE', 'OWNERS'].map(item => (
+            <span key={item} style={{ ...s.navLink, ...(item==='OWNERS' ? s.navLinkActive : {}) }}>{item}</span>
+          ))}
+        </div>
+        <button style={s.reserveBtn}>Reserve Now</button>
+      </nav>
+
+      {/* CONTENT */}
+      <div style={s.content}>
         
-        {/* HEADER TRẠNG THÁI */}
-        <div className="text-center mb-10">
-          <div className="w-16 h-16 bg-blue-100 text-[#0056b3] rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm border border-blue-50">
-            <FaCheck size={30} />
-          </div>
-          <h1 className="text-3xl md:text-4xl font-black text-gray-900 uppercase tracking-tight mb-4">
-            Thanh toán đặt cọc thành công!
-          </h1>
-          <p className="text-gray-600 text-[15px] mb-1">
-            Mã giao dịch: <strong className="text-gray-900">{transactionNo}</strong>.
-          </p>
-          <p className="text-gray-600 text-[15px]">
-            Chúc mừng Quý khách đã đặt giữ chỗ thành công chiếc xe <strong className="text-[#0056b3]">{car?.name || "Porsche 911 GT3"}</strong>.
-          </p>
+        {/* Header Icon & Title */}
+        <div style={s.headerWrap}>
+           <div style={s.successIconWrap}>
+              <div style={s.successIcon}>✓</div>
+           </div>
+           <h1 style={s.pageTitle}>THANH TOÁN ĐẶT CỌC THÀNH CÔNG!</h1>
+           <p style={s.pageSub}>
+             Mã giao dịch: <span style={{fontWeight: 800}}>{vnp_TxnRef || 'VNP12345678'}</span>.<br/>
+             Chúc mừng Quý khách đã đặt giữ chỗ thành công chiếc xe <span style={{color: '#0a58ca', fontWeight: 700}}>{carName}</span>.
+           </p>
         </div>
 
-        {/* THẺ HÓA ĐƠN ĐIỆN TỬ */}
-        <div className="bg-white rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.03)] border border-gray-100 flex flex-col md:flex-row overflow-hidden mb-10">
-          
-          {/* Cột Trái: Ảnh xe và thông tin cơ bản */}
-          <div className="w-full md:w-[45%] bg-[#f4f4f5] p-6 lg:p-8 flex flex-col justify-center relative">
-            <div className="aspect-[16/10] bg-transparent rounded-xl flex items-center justify-center overflow-hidden mb-8 mix-blend-multiply">
-              <img 
-                src={car?.images?.[0] || car?.image || "https://images.unsplash.com/photo-1542282088-fe8426682b8f?q=80&w=1000&auto=format&fit=crop"} 
-                alt="Car" 
-                className="w-full h-full object-contain mix-blend-multiply scale-110 drop-shadow-2xl" 
-                style={{ filter: "contrast(1.1) brightness(0.9)" }}
-              />
-            </div>
-            
-            <div className="mb-6">
-              <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Vehicle Model</div>
-              <h2 className="text-xl font-extrabold text-gray-900 uppercase">{car?.name || "Porsche 911 GT3"}</h2>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4 border-t border-gray-200/60 pt-6">
-              <div>
-                 <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">VIN</div>
-                 <div className="text-sm font-mono text-gray-800">{car?.vinNumber || "WP0ZZZ99ZLS123456"}</div>
+        {/* Receipt Card */}
+        <div style={s.receiptCard}>
+           {/* Left: Car Image */}
+           <div style={s.receiptLeft}>
+              <div style={s.imgWrap}>
+                 <img src={carImg} alt="Car" style={s.carImg} />
               </div>
-              <div>
-                 <div className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-1">Config ID</div>
-                 <div className="text-sm font-mono text-gray-800">GT3-2026-PM99</div>
+              <div style={s.carInfoWrap}>
+                 <p style={s.carLabel}>VEHICLE MODEL</p>
+                 <h3 style={s.carName}>{carModelName}</h3>
+                 <div style={s.carMetaGrid}>
+                    <div>
+                       <p style={s.metaLabel}>VIN</p>
+                       <p style={s.metaValue}>WP0ZZZ99ZLS123456</p>
+                    </div>
+                    <div>
+                       <p style={s.metaLabel}>CONFIG ID</p>
+                       <p style={s.metaValue}>GT3-2026-PM99</p>
+                    </div>
+                 </div>
               </div>
-            </div>
-          </div>
+           </div>
 
-          {/* Cột Phải: Bảng Tóm tắt Giao dịch */}
-          <div className="w-full md:w-[55%] p-6 lg:p-8 bg-white flex flex-col justify-center">
-            
-            <div className="mb-8">
-               <div className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Total Deposit Amount</div>
-               <div className="text-4xl text-[#0056b3] font-black tracking-tight">{formatAmount(data["vnp_Amount"])}</div>
-            </div>
+           {/* Right: Payment Details */}
+           <div style={s.receiptRight}>
+              <div style={{ marginBottom: 24 }}>
+                 <p style={s.totalLabel}>TOTAL DEPOSIT AMOUNT</p>
+                 <p style={s.totalAmount}>{amountDisplay}</p>
+              </div>
 
-            <div className="space-y-5">
-              <div className="flex justify-between items-center border-b border-gray-100 pb-4">
-                 <span className="text-gray-500 text-sm font-medium">Phương thức thanh toán</span>
-                 <span className="font-bold text-gray-900">{bankCode}</span>
+              <div style={s.detailRows}>
+                 <div style={s.row}>
+                    <span style={s.rowLabel}>Phương thức thanh toán</span>
+                    <span style={s.rowValue}>VNPAY-QR{vnp_BankCode ? ` (${vnp_BankCode})` : ''}</span>
+                 </div>
+                 <div style={s.row}>
+                    <span style={s.rowLabel}>Tên khách hàng</span>
+                    <span style={s.rowValue}>{orderInfo?.receiverName || 'Nguyễn Văn A'}</span>
+                 </div>
+                 <div style={s.row}>
+                    <span style={s.rowLabel}>Thời gian</span>
+                    <span style={s.rowValue}>{payDateDisplay}</span>
+                 </div>
+                 <div style={s.row}>
+                    <span style={s.rowLabel}>Trạng thái</span>
+                    <span style={s.statusBadge}>HOÀN TẤT</span>
+                 </div>
               </div>
-              <div className="flex justify-between items-center border-b border-gray-100 pb-4">
-                 <span className="text-gray-500 text-sm font-medium">Tên khách hàng</span>
-                 <span className="font-bold text-gray-900">{customerName}</span>
-              </div>
-              <div className="flex justify-between items-center border-b border-gray-100 pb-4">
-                 <span className="text-gray-500 text-sm font-medium">Thời gian</span>
-                 <span className="font-bold text-gray-900">{formatPayDate(data["vnp_PayDate"])}</span>
-              </div>
-              <div className="flex justify-between items-center pb-2">
-                 <span className="text-gray-500 text-sm font-medium">Trạng thái</span>
-                 <span className="px-3 py-1 bg-green-100 text-green-700 font-bold text-[11px] rounded-[4px] uppercase tracking-wider">
-                   Hoàn tất
-                 </span>
-              </div>
-            </div>
 
-            <div className="mt-8 flex gap-2 items-center italic text-gray-500 text-xs">
-              <ShieldCheck size={14} className="text-gray-400" />
-              <span>Chứng từ điện tử có giá trị pháp lý theo quy định hiện hành.</span>
-            </div>
-
-          </div>
+              <div style={s.disclaimerWrap}>
+                 <span style={s.checkMark}>✔</span>
+                 <span style={s.disclaimerText}>Chứng từ điện tử có giá trị pháp lý theo quy định hiện hành.</span>
+              </div>
+           </div>
         </div>
 
-        {/* NÚT ACTION */}
-        <div className="flex flex-col sm:flex-row justify-center items-center gap-4 mb-16">
-          <button className="w-full sm:w-auto bg-[#0056b3] text-white py-3.5 px-8 rounded-[8px] font-bold hover:bg-[#004494] transition-colors shadow-lg shadow-blue-500/20 text-sm uppercase tracking-wider flex justify-center items-center gap-2">
-            <FaDownload size={14} /> Tải biên lai (PDF)
-          </button>
-          <button 
-             onClick={() => navigate("/all-my-reserve")}
-             className="w-full sm:w-auto bg-transparent text-[#0056b3] border-2 border-[#0056b3] py-[12px] px-8 rounded-[8px] font-bold hover:bg-blue-50/50 transition-colors text-sm uppercase tracking-wider flex justify-center items-center gap-2"
-          >
-            <FaHistory size={14} /> Xem lịch sử đơn hàng
-          </button>
+        {/* Actions */}
+        <div style={s.actionsWrap}>
+           <button style={s.actionBtnPrimary}>
+             <span style={{marginRight: 6}}>📥</span> TÀI BIÊN LAI (PDF)
+           </button>
+           <button onClick={() => navigate('/all-my-reserve')} style={s.actionBtnSecondary}>
+             <span style={{marginRight: 6}}>🕒</span> XEM LỊCH SỬ ĐƠN HÀNG
+           </button>
         </div>
 
-        {/* GHI CHÚ CUỐI TRANG */}
-        <div className="border-t border-gray-200 pt-8 text-center max-w-2xl mx-auto">
-          <p className="text-[10px] text-gray-500 font-bold uppercase tracking-[1px] leading-relaxed">
-            Quý khách vui lòng kiểm tra email để nhận xác nhận chi tiết. Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ bộ phận hỗ trợ Precision Motors qua số <span className="text-gray-900">1900-XXXX</span>.
-          </p>
-        </div>
+        {/* Footer Note */}
+        <div style={s.footerNoteLine}></div>
+        <p style={s.footerNoteText}>
+           QUÝ KHÁCH VUI LÒNG KIỂM TRA EMAIL ĐỂ NHẬN XÁC NHẬN CHI TIẾT. NẾU CÓ<br/>
+           BẤT KỲ THẮC MẮC NÀO, VUI LÒNG LIÊN HỆ BỘ PHẬN HỖ TRỢ PRECISION MOTORS<br/>
+           QUA SỐ <strong>1900-XXXX</strong>.
+        </p>
 
       </div>
+
+      {/* FOOTER */}
+      <footer style={s.footer}>
+        <div style={s.footerLogoWrap}>
+           <span style={s.footerLogo}>PRECISION MOTORS</span>
+        </div>
+        <div style={s.footerLinks}>
+          {['PRIVACY POLICY','TERMS OF SERVICE','LEGAL SPECS','CONTACT SUPPORT'].map(l => (
+            <a key={l} href="#" style={s.footerLink}>{l}</a>
+          ))}
+        </div>
+        <span style={s.footerCopy}>© 2026 PRECISION MOTORS. ENGINEERED EXCELLENCE.</span>
+      </footer>
+
     </div>
   );
 }
+
+const s = {
+  pageCenter: { minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#f8f9fa' },
+  spinner: { width: 40, height: 40, border: '4px solid #e5e7eb', borderTopColor: '#0a58ca', borderRadius: '50%', animation: 'spin 1s linear infinite' },
+  
+  failedIcon: { width: 64, height: 64, borderRadius: '50%', background: '#fee2e2', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', marginBottom: 20 },
+  failedTitle: { fontSize: '1.8rem', fontWeight: 900, color: '#111', margin: '0 0 12px' },
+  failedText: { fontSize: '0.95rem', color: '#6c757d', textAlign: 'center' },
+  primaryBtn: { background: '#0a58ca', color: '#fff', border: 'none', borderRadius: 6, padding: '12px 24px', fontWeight: 800, cursor: 'pointer' },
+  outlineBtn: { background: 'transparent', color: '#0a58ca', border: '2px solid #0a58ca', borderRadius: 6, padding: '10px 24px', fontWeight: 800, cursor: 'pointer' },
+
+  page: { minHeight: '100vh', background: '#f8f9fa', fontFamily: "'Inter', sans-serif", display: 'flex', flexDirection: 'column' },
+  
+  nav: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 56px', height: 68, borderBottom: '1px solid #e5e7eb', background: '#fff', position: 'sticky', top: 0, zIndex: 100 },
+  logo: { fontWeight: 900, fontSize: '1rem', letterSpacing: '1px', background: 'none', border: 'none', cursor: 'pointer', color: '#111' },
+  navLinks: { display: 'flex', gap: 36 },
+  navLink: { fontSize: '0.78rem', fontWeight: 600, color: '#6c757d', cursor: 'pointer', letterSpacing: '0.3px', paddingBottom: 4, borderBottom: '2px solid transparent' },
+  navLinkActive: { color: '#0a58ca', borderBottom: '2px solid #0a58ca' },
+  reserveBtn: { background: '#0a58ca', color: '#fff', border: 'none', borderRadius: 4, padding: '9px 22px', fontWeight: 800, fontSize: '0.78rem', cursor: 'pointer' },
+
+  content: { flex: 1, padding: '60px 20px', maxWidth: 900, margin: '0 auto', width: '100%' },
+
+  headerWrap: { textAlign: 'center', marginBottom: 40 },
+  successIconWrap: { display: 'inline-flex', padding: 12, background: '#e0e7ff', borderRadius: '50%', marginBottom: 24 },
+  successIcon: { width: 48, height: 48, borderRadius: '50%', background: '#4f46e5', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.5rem', fontWeight: 900 },
+  pageTitle: { fontSize: '2rem', fontWeight: 900, color: '#111', letterSpacing: '-0.5px', marginBottom: 16 },
+  pageSub: { fontSize: '0.95rem', color: '#495057', lineHeight: 1.6 },
+
+  receiptCard: { display: 'flex', flexWrap: 'wrap', background: '#fff', border: '1px solid #e5e7eb', borderRadius: 8, overflow: 'hidden', marginBottom: 40 },
+  receiptLeft: { flex: '1 1 350px', background: '#f8fafc', borderRight: '1px solid #e5e7eb' },
+  imgWrap: { padding: '24px 24px 0' },
+  carImg: { width: '100%', height: 'auto', display: 'block', borderRadius: 4, border: '1px solid #f1f5f9' },
+  carInfoWrap: { padding: '24px' },
+  carLabel: { fontSize: '0.65rem', fontWeight: 800, color: '#9ca3af', letterSpacing: '1px', marginBottom: 4 },
+  carName: { fontSize: '1.2rem', fontWeight: 900, color: '#111', margin: '0 0 20px' },
+  carMetaGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 },
+  metaLabel: { fontSize: '0.65rem', fontWeight: 800, color: '#9ca3af', letterSpacing: '1px', marginBottom: 4 },
+  metaValue: { fontSize: '0.75rem', fontWeight: 600, color: '#374151', fontFamily: 'monospace' },
+
+  receiptRight: { flex: '1 1 400px', padding: '40px' },
+  totalLabel: { fontSize: '0.65rem', fontWeight: 800, color: '#6c757d', letterSpacing: '1.5px', marginBottom: 8 },
+  totalAmount: { fontSize: '2rem', fontWeight: 900, color: '#0a58ca', margin: 0, letterSpacing: '-0.5px' },
+  detailRows: { borderTop: '1px solid #f1f5f9', borderBottom: '1px solid #f1f5f9', padding: '24px 0', display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 24 },
+  row: { display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
+  rowLabel: { fontSize: '0.8rem', color: '#6c757d', fontWeight: 500 },
+  rowValue: { fontSize: '0.85rem', fontWeight: 800, color: '#111' },
+  statusBadge: { background: '#dcfce7', color: '#166534', padding: '4px 10px', borderRadius: 4, fontSize: '0.65rem', fontWeight: 800, letterSpacing: '0.5px' },
+  disclaimerWrap: { display: 'flex', alignItems: 'flex-start', gap: 8 },
+  checkMark: { color: '#6b7280', fontSize: '0.8rem', marginTop: 2 },
+  disclaimerText: { fontStyle: 'italic', fontSize: '0.75rem', color: '#6b7280' },
+
+  actionsWrap: { display: 'flex', justifyContent: 'center', gap: 16, marginBottom: 48, flexWrap: 'wrap' },
+  actionBtnPrimary: { background: '#0a58ca', color: '#fff', border: 'none', borderRadius: 4, padding: '14px 28px', fontWeight: 800, fontSize: '0.8rem', letterSpacing: '0.5px', cursor: 'pointer', display: 'flex', alignItems: 'center' },
+  actionBtnSecondary: { background: '#fff', color: '#0a58ca', border: '1px solid #0a58ca', borderRadius: 4, padding: '14px 28px', fontWeight: 800, fontSize: '0.8rem', letterSpacing: '0.5px', cursor: 'pointer', display: 'flex', alignItems: 'center' },
+
+  footerNoteLine: { height: 1, background: '#e5e7eb', marginBottom: 24 },
+  footerNoteText: { textAlign: 'center', fontSize: '0.7rem', color: '#6c757d', lineHeight: 1.8, letterSpacing: '1px' },
+
+  footer: { borderTop: '1px solid #e5e7eb', background: '#f8fafc', padding: '32px 56px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 },
+  footerLogoWrap: { flex: '1 1 100%' },
+  footerLogo: { fontWeight: 900, fontSize: '1rem', letterSpacing: '1px', color: '#111' },
+  footerLinks: { display: 'flex', gap: 24, flexWrap: 'wrap' },
+  footerLink: { fontSize: '0.7rem', color: '#6c757d', fontWeight: 700, letterSpacing: '0.5px', textDecoration: 'none', borderBottom: '1px solid #cbd5e1' },
+  footerCopy: { fontSize: '0.7rem', color: '#9ca3af', fontWeight: 600 },
+};

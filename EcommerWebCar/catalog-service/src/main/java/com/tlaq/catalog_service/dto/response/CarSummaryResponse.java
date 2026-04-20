@@ -15,9 +15,9 @@ public class CarSummaryResponse {
     String name;
     String thumbnail;
 
-    int seatCapacity;    // 5 CHỖ
-    String fuelType;     // XĂNG
-    String engineSize;   // 1.8L
+    int seatCapacity;
+    String fuelType;
+    String engineSize;
 
-    BigDecimal price;    // 1.250.000.000
+    BigDecimal price;
 }

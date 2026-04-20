@@ -70,67 +70,59 @@ export default function Home (){
 
   // Fetch branches
   const fetchBranches = async () => {
-    setLoading(true);
-    setTimeout(() => {
-      setBranches([
-        { id: 1, name: "Toyota", imageBranch: "https://www.carlogos.org/car-logos/toyota-logo-2005-download.png" },
-        { id: 2, name: "Honda", imageBranch: "https://www.carlogos.org/car-logos/honda-logo-2000-full-download.png" },
-        { id: 3, name: "Mercedes-Benz", imageBranch: "https://www.carlogos.org/car-logos/mercedes-benz-logo-2011-download.png" },
-        { id: 4, name: "BMW", imageBranch: "https://www.carlogos.org/car-logos/bmw-logo-2020-blue-white.png" },
-        { id: 5, name: "Audi", imageBranch: "https://www.carlogos.org/car-logos/audi-logo-2016.png" },
-        { id: 6, name: "Lexus", imageBranch: "https://www.carlogos.org/car-logos/lexus-logo-2015-download.png" }
-      ]);
+    try {
+      setLoading(true);
+      const res = await axios.get(endpoints["get-all-branch"]);
+      const resData = res.data?.result;
+      setBranches(Array.isArray(resData) ? resData : []);
       setLoading(false);
-    }, 500);
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+    }
   };
 
   // Fetch categories
   const fetchCategories = async () => {
-    setLoading(true);
-    setTimeout(() => {
-      setCategories([
-        { id: 1, name: "SUV" },
-        { id: 2, name: "Sedan" },
-        { id: 3, name: "Hatchback" },
-        { id: 4, name: "Coupe" },
-        { id: 5, name: "Truck" }
-      ]);
+    try {
+      setLoading(true);
+      const res = await axios.get(endpoints["get-all-category"]);
+      const resData = res.data?.result;
+      setCategories(Array.isArray(resData) ? resData : []);
       setLoading(false);
-    }, 500);
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+    }
   };
 
   // Fetch models
   const fetchModels = async () => {
-    setLoading(true);
-    setTimeout(() => {
-      setModels([
-        { id: 1, name: "Corolla Cross" },
-        { id: 2, name: "Civic" },
-        { id: 3, name: "C-Class" },
-        { id: 4, name: "X5" },
-        { id: 5, name: "Q7" },
-      ]);
+    try {
+      setLoading(true);
+      const res = await axios.get(endpoints["get-all-model"]);
+      const resData = res.data?.result;
+      setModels(Array.isArray(resData) ? resData : []);
       setLoading(false);
-    }, 500);
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+    }
   };
 
   // Fetch cars
   const fetchCars = async (pageNum) => {
-    setLoading(true);
-    setTimeout(() => {
-      setCars([
-        { id: 1, name: "Toyota Corolla Cross 1.8V", carImage: "https://toyota-vietnam.vn/wp-content/uploads/2021/08/Cross-V-300x200.png", year: "2024-01-01", price: 860000000 },
-        { id: 2, name: "Honda Civic RS", carImage: "https://hondaotoosales.com/wp-content/uploads/2022/07/civic-rs-trang-300x200.png", year: "2023-01-01", price: 870000000 },
-        { id: 3, name: "Mercedes-Benz C 300 AMG", carImage: "https://www.mercedes-benz.com.vn/content/dam/hq/passengercars/cars/c-class/saloon-w206-pi/model-overview/04-2021/images/mercedes-benz-c-class-w206-model-overview-300x200-04-2021.png", year: "2024-05-10", price: 2199000000 },
-        { id: 4, name: "BMW X5 xDrive40i", carImage: "https://www.bmw.vn/content/dam/bmw/common/all-models/x-series/x5/2023/navigation/bmw-x5-lci-modelfinder.png", year: "2022-12-10", price: 4169000000 },
-        { id: 5, name: "Audi Q7 45 TFSI", carImage: "https://www.audi.vn/content/dam/nemo/models/q7/q7/my-2024/NeMo-Derivate-Startpage/Silhouette-Q7-TFSI-e-my2024.png", year: "2023-08-01", price: 3400000000 },
-        { id: 6, name: "Lexus RX 350", carImage: "https://lexus.com.vn/content/dam/lexus-v3-blueprint/models/suv/rx/rx-350-premium/1.png", year: "2024-02-15", price: 3430000000 },
-        { id: 7, name: "Toyota Camry 2.5Q", carImage: "https://toyota-vietnam.vn/wp-content/uploads/2021/12/Camry-2.5Q-300x200.png", year: "2023-05-20", price: 1405000000 },
-        { id: 8, name: "Honda CR-V L AWD", carImage: "https://hondaotoosales.com/wp-content/uploads/2023/10/crv-l-awd-trang-300x200.png", year: "2024-03-05", price: 1310000000 }
-      ]);
-      setCarTotalPages(2);
+    try {
+      setLoading(true);
+      const res = await axios.get(endpoints["get-products"](pageNum, 12));
+      const resData = res.data?.result || {};
+      setCars(Array.isArray(resData.data) ? resData.data : []);
+      setCarTotalPages(resData.totalPages || 1);
       setLoading(false);
-    }, 600);
+    } catch (err) {
+      console.error(err);
+      setLoading(false);
+    }
   };
 
   // Load data on mount and page changes
@@ -392,7 +384,7 @@ export default function Home (){
                   <Col md={4} key={car.id}>
                     <Card style={{ border: "none", borderRadius: "0", boxShadow: "none", backgroundColor: "transparent" }}>
                       <div style={{ height: "240px", backgroundColor: "#f1f5f9", overflow: "hidden" }}>
-                        <Card.Img variant="top" src={car.carImage} style={{ height: "100%", objectFit: "cover" }} />
+                        <Card.Img variant="top" src={car.thumbnail || "https://via.placeholder.com/400x240?text=No+Image"} style={{ height: "100%", objectFit: "cover" }} />
                       </div>
                       <Card.Body style={{ padding: "24px 0" }}>
                         <Card.Title style={{ color: "#1a73e8", fontWeight: 700, fontSize: "1.1rem", marginBottom: "15px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{car.name || "Unknown Car"}</Card.Title>
@@ -400,15 +392,15 @@ export default function Home (){
                         <div style={{ backgroundColor: "#f8f9fa", padding: "12px", display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
                           <div style={{ textAlign: "center", color: "#191c1d" }}>
                             <GiCarSeat size={18} style={{ marginBottom: "5px" }} />
-                            <div style={{ fontSize: "0.6rem", fontWeight: 700 }}>5 CHỖ</div>
+                            <div style={{ fontSize: "0.6rem", fontWeight: 700, textTransform: "uppercase" }}>{car.seatCapacity ? `${car.seatCapacity} CHỖ` : "N/A"}</div>
                           </div>
                           <div style={{ textAlign: "center", color: "#191c1d" }}>
                             <GiGearStick size={18} style={{ marginBottom: "5px" }} />
-                            <div style={{ fontSize: "0.6rem", fontWeight: 700 }}>XĂNG</div>
+                            <div style={{ fontSize: "0.6rem", fontWeight: 700, textTransform: "uppercase" }}>{car.fuelType || "N/A"}</div>
                           </div>
                           <div style={{ textAlign: "center", color: "#191c1d" }}>
                             <FaCarSide size={18} style={{ marginBottom: "5px" }} />
-                            <div style={{ fontSize: "0.6rem", fontWeight: 700 }}>1.8L</div>
+                            <div style={{ fontSize: "0.6rem", fontWeight: 700, textTransform: "uppercase" }}>{car.engineSize || "N/A"}</div>
                           </div>
                         </div>
 

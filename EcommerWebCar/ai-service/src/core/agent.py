@@ -10,7 +10,8 @@ from src.utils.finance_tools import get_car_and_calculate_rolling
 
 from src.core.rag_engine import RAGEngine
 from src.utils.db_utils import (
-    query_mysql_safe
+    query_mysql_safe,
+    set_last_result
 )
 
 logging.basicConfig(
@@ -40,6 +41,8 @@ class MySQLQueryInput(BaseModel):
     fuel_type: str = Field(default="", description="Nhien lieu ENUM. VD: 'XANG', 'DIEN', 'HYBRID'")
     user_id: str = Field(default="", description="User ID, dung khi intent='appraisal'")
     request_id: str = Field(default="", description="Ma yeu cau dinh gia.")
+    min_price: float = Field(default=None, description="Gia thap nhat (VNĐ). VD: 500000000 cho 500 trieu.")
+    max_price: float = Field(default=None, description="Gia cao nhat (VNĐ). VD: 1000000000 cho 1 ty.")
 
 class RollingPriceInput(BaseModel):
     car_name: str = Field(description="Tên xe cần tính giá lăn bánh. VD: 'Mazda 3', 'CX-5'")
@@ -51,6 +54,12 @@ class CarFAQInput(BaseModel):
     query: str = Field(description="Cau hoi tu van, FAQ, so sanh xe bang tieng Viet")
 
 
+class LoanFinanceInput(BaseModel):
+    query: str = Field(
+        description="Cau hoi ve tra gop, lai suat, thoi han vay, tai chinh mua xe bang tieng Viet"
+    )
+
+
 def get_car_agent():
     llm = ChatGroq(
         model_name="llama-3.3-70b-versatile",
@@ -60,7 +69,12 @@ def get_car_agent():
     )
 
     def rolling_price_logic(car_name: str, address: str, quantity: int = 1) -> str:
-        return get_car_and_calculate_rolling(car_name, address, quantity)
+        summary, data = get_car_and_calculate_rolling(car_name, address, quantity)
+        if data:
+            set_last_result("rolling_price", data)
+        else:
+            set_last_result("rolling_price", {"car_name": car_name, "address": address})
+        return summary
 
     retriever = RAGEngine().get_retriever(use_threshold=False)
 
@@ -75,6 +89,8 @@ def get_car_agent():
         fuel_type: str = "",
         user_id: str = "",
         request_id: str = "",
+        min_price: float = None,
+        max_price: float = None,
     ) -> str:
         return query_mysql_safe(
             intent=intent,
@@ -86,6 +102,8 @@ def get_car_agent():
             fuel_type=fuel_type,
             user_id=user_id,
             request_id=request_id,
+            min_price=min_price,
+            max_price=max_price,
         )
 
 
@@ -105,15 +123,17 @@ def get_car_agent():
             return "\n\n".join(results)
         except Exception as e:
             logger.error(e)
+            return f"[LOI_FAQ] Khong doc duoc kho tai lieu FAQ. Chi tiet: {e!s}"
 
+
+    def loan_finance_guidance(query: str) -> str:
+        return (
+            "[TRA_GOP_TAI_CHINH] He thong chua tinh tra gop tu dong. "
+            "Hay tom tat nhu cau cua khach (xe quan tam, so tien tra truoc neu co) "
+            "va de nghi anh/chi lien he truc tiep showroom de duoc tu van lai suat va thoi han vay chinh xac."
+        )
 
     tools = [
-        StructuredTool.from_function(
-            func=mysql_query,
-            name="MySQL_Query_Tool",
-            args_schema=MySQLQueryInput,
-        ),
-
         StructuredTool.from_function(
             func=rolling_price_logic,
             name="Calculate_Rolling_Price",
@@ -151,8 +171,13 @@ def get_car_agent():
             return_direct=False,
         ),
         StructuredTool.from_function(
-            name="Loan_Calculator",
-            description="Tinh tien tra gop hang thang khi biet gia xe, % tra truoc, so nam vay.",
+            func=loan_finance_guidance,
+            name="Loan_Finance_Guidance",
+            description=(
+                "Dung khi khach hoi ve tra gop, vay ngan hang, lai suat, thoi han vay, "
+                "so tien hang thang, tai chinh mua xe. Tra ve huong dan: chua tinh tu dong, can lien he showroom."
+            ),
+            args_schema=LoanFinanceInput,
             return_direct=False,
         ),
     ]
@@ -161,6 +186,13 @@ def get_car_agent():
     prompt = ChatPromptTemplate.from_messages([
         ("system", """Ban la Tu van vien Showroom o to chuyen nghiep, nhiet tinh.
 Xung "em", goi khach la "anh/chi".
+
+NGUYEN TAC LOC DU LIEU (MySQL_Query_Tool):
+- Kiem tra ky yeu cau ve GIA (min_price, max_price). 
+  + 1 ty = 1000000000
+  + 500 trieu = 500000000
+- Chi dung filter (category, body_type, fuel_type) khi khach thuc su yeu cau. 
+- Neu khach noi "xe gia dinh", "xe di lam" ma khong noi ro kieu dang -> KHONG tu y dien body_type hoac category_name vao tool, hay de trong de tim tat ca cac xe phu hop gia.
 
 NGUYEN TAC SU DUNG TOOL:
 - "Gia xe / Con xe gi"              -> MySQL_Query_Tool
@@ -172,7 +204,7 @@ NGUYEN TAC SU DUNG TOOL:
 - "Dia chi / SDT / Zalo showroom"    -> MySQL_Query_Tool intent="showroom_info"
 - "Dinh gia / xe cu"                 -> MySQL_Query_Tool intent="appraisal"
 - "So sanh / quy trinh / bao hanh"   -> Car_FAQ_Knowledge
-- "Tra gop / tai chinh"              -> Loan_Calculator
+- "Tra gop / tai chinh / vay mua xe" -> Loan_Finance_Guidance
 
 QUY TAC:
 1. Goi tool TOI DA 1 lan moi loai. Sau khi co ket qua -> TRA LOI NGAY.
@@ -193,6 +225,6 @@ QUY TAC:
         max_iterations=6,
         max_execution_time=30,
         handle_parsing_errors=True,
-        early_stopping_method="generate",
+        early_stopping_method="force_robot",
         return_intermediate_steps=False,
     )

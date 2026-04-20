@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 _HERE = os.path.dirname(os.path.abspath(__file__))
 
 # src/services/ -> root -> models/
-_BASE_MODEL_PATH   = os.path.join(_HERE, "..", "..", "models")
+_BASE_MODEL_PATH   = os.path.join(_HERE, "..", "..", "model")
 _TRANSFORMERS_PATH = os.path.join(_BASE_MODEL_PATH, "transformers")
 
 price_model  = None
@@ -32,7 +32,9 @@ def load_all() -> None:
     if _loaded:
         return
 
-    _load(name="price_model", path=os.path.join(_BASE_MODEL_PATH,   "car_price_model.keras"),         loader_fn=_load_keras)
+    print("Loading model...")
+
+    _load(name="price_model", path=os.path.join(_BASE_MODEL_PATH,   "car_price_model1.keras"),         loader_fn=_load_keras)
     _load(name="scaler",      path=os.path.join(_TRANSFORMERS_PATH, "scaler_numeric.pkl"),             loader_fn=_load_pickle)
     _load(name="tfidf",       path=os.path.join(_TRANSFORMERS_PATH, "tfidf_vectorizer.pkl"),           loader_fn=_load_pickle)
     _load(name="le_model",    path=os.path.join(_TRANSFORMERS_PATH, "le_model.pkl"),                   loader_fn=_load_pickle)
@@ -44,6 +46,8 @@ def load_all() -> None:
     _load(name="le_version",  path=os.path.join(_TRANSFORMERS_PATH, "le_version_extracted.pkl"),       loader_fn=_load_pickle)
 
     _loaded = True
+
+    print("Model loaded.")
 
 
 def is_ready() -> bool:

@@ -1,358 +1,377 @@
-import React, { useState, useEffect } from "react";
-import { useLocation, useNavigate, useParams } from "react-router-dom";
-import { Container, Row, Col, Form, Button } from "react-bootstrap";
-import { FaUserAlt, FaCreditCard, FaCheckCircle, FaCarSide } from "react-icons/fa";
-import { BsQrCode, BsCreditCard2Front, BsGlobe } from "react-icons/bs";
-import axios, { authApis, endpoints } from "./../configs/APIs";
+import React, { useState, useEffect, useContext } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import axios, { endpoints, authApis } from '../configs/APIs';
+import { MyUserContext } from '../configs/MyContexts';
+
+const DEPOSIT_AMOUNT = 50_000_000;
+const fmt = (n) => (n == null ? '0 đ' : Number(n).toLocaleString('vi-VN') + ' đ');
 
 export default function Reserve() {
-  const { id } = useParams();
-  const location = useLocation();
   const navigate = useNavigate();
+  const { id } = useParams();
+  const user = useContext(MyUserContext);
 
-  const [car, setCar] = useState(location.state?.car || null);
-  const [loading, setLoading] = useState(!car);
+  const [car, setCar] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState('');
+  const [agreed, setAgreed] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState('vnpay-qr');
 
-  const [formData, setFormData] = useState({
-    fullName: "",
-    phoneNumber: "",
-    address: "",
-    dob: "",
-    cccd: "",
-    quantity: 1
+  const [form, setForm] = useState({
+    fullName: '',
+    phone: '',
+    idNumber: '',
+    dob: '',
+    address: '',
   });
 
-  const [paymentMethod, setPaymentMethod] = useState("vnpay");
+  useEffect(() => {
+    if (user !== undefined && user === null) {
+      // Not logged in → redirect to login then come back
+      navigate(`/login?next=/reserve/${id}`);
+    }
+    if (user) {
+      setForm(prev => ({
+        ...prev,
+        fullName: [user.firstName, user.lastName].filter(Boolean).join(' '),
+      }));
+    }
+  }, [user, id, navigate]);
 
   useEffect(() => {
-    const fetchCarDetails = async () => {
-      const carId = id || location.state?.car?.id || new URLSearchParams(location.search).get("id");
-      
-      if (!carId) {
-        setLoading(false);
-        return;
-      }
-
-      setLoading(true);
-      // Giả lập delay mạng
-      setTimeout(() => {
-        const mockCar = {
-          id: carId,
-          name: "Porsche Taycan",
-          subtitle: "Performance Plus Battery",
-          price: 4260000000,
-          color: "Ice Grey Metallic",
-          manufacturingYear: 2024,
-          images: [
-            "https://images.unsplash.com/photo-1614200187524-dc4b892acf16?q=80&w=1000&auto=format&fit=crop"
-          ],
-          equipment: {
-            seatMaterial: "Black / Slate Grey",
-            wheels: "21\" Mission E Design"
-          },
-          technicalSpec: {
-            horsepower: "560"
-          }
-        };
-
-        setCar(mockCar);
-        setLoading(false);
-      }, 600);
+    const fetchCar = async () => {
+      try {
+        const res = await axios.get(endpoints['get-product-by-id'](id));
+        setCar(res.data?.result || res.data);
+      } catch (err) { console.error(err); }
+      finally { setLoading(false); }
     };
-
-    fetchCarDetails();
-  }, [id, location, location.search]);
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
+    fetchCar();
+  }, [id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setFormError('');
+    if (!form.fullName.trim()) return setFormError('Vui lòng nhập họ và tên.');
+    if (!form.phone.trim()) return setFormError('Vui lòng nhập số điện thoại.');
+    if (!form.address.trim()) return setFormError('Vui lòng nhập địa chỉ thường trú.');
+    if (!agreed) return setFormError('Bạn cần đồng ý với điều khoản dịch vụ.');
 
-    if (!formData.fullName || !formData.phoneNumber || !formData.address || !formData.dob || !formData.cccd) {
-      alert("Vui lòng nhập đầy đủ thông tin trước khi đặt cọc!");
-      return;
-    }
-
-    // Giá xe thật
-    const unitPrice = car?.price || 18500000000;
-    const totalAmount = unitPrice * formData.quantity;
-
-    const orders = {
-      carId: car?.id || "CAR-15565",
-      unitPrice: unitPrice,
-      quantity: formData.quantity,
-      orderDetailsRequest: {
-        address: formData.address,
-        fullName: formData.fullName,
-        dob: formData.dob,
-        cccd: formData.cccd,
-        phoneNumber: formData.phoneNumber,
-        unitPrice: unitPrice,
-        quantity: formData.quantity,
-        totalAmount: totalAmount,
-      },
-    };
-
-    console.log("Submitting order:", orders);
-
+    setSubmitting(true);
     try {
-      const response = await authApis().post(endpoints["create-orders"], orders);
-      if (response.status === 200 || response.status === 201) {
-        navigate("/confirm", { state: { car, orders: response.data.result } }); 
-      } else {
-        console.error("Error:", response.data);
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      alert("Lỗi kết nối server!");
+      const orderRes = await authApis().post(endpoints['create-order'], {
+        carId: id,
+        quantity: 1,
+        receiverName: form.fullName,
+        receiverPhone: form.phone,
+        deliveryAddress: form.address,
+        note: form.idNumber ? `CCCD: ${form.idNumber}` : '',
+      });
+      const order = orderRes.data?.result || orderRes.data;
+
+      // Navigate to confirmation page, passing form + order data
+      navigate('/deposit-confirm', {
+        state: {
+          order,
+          form,
+          car,
+          paymentMethod,
+          depositAmount: DEPOSIT_AMOUNT,
+        }
+      });
+    } catch (err) {
+      const msg = err?.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại.';
+      setFormError(msg);
+    } finally {
+      setSubmitting(false);
     }
   };
 
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('vi-VN').format(price) + " đ";
-  };
+  const carImg = car?.imageUrls?.[0] || car?.carModel?.thumbnailImage || 'https://images.unsplash.com/photo-1617469767524-4f5eb3b2b2f1?w=900';
 
-  if (loading) {
-    return (
-      <Container className="my-5 text-center" style={{ paddingTop: "100px", minHeight: "100vh" }}>
-        <div className="spinner-border text-primary" role="status" style={{ width: "3rem", height: "3rem" }}>
-          <span className="visually-hidden">Đang tải thông tin xe...</span>
-        </div>
-      </Container>
-    );
-  }
+  const paymentMethods = [
+    { key: 'vnpay-qr', label: 'VNPAY-QR', icon: '▦' },
+    { key: 'atm', label: 'Domestic Bank Card', icon: '🏦' },
+    { key: 'intl', label: 'International Card', icon: '🌐' },
+  ];
 
-  if (!car) {
-    return (
-      <Container className="my-5 text-center" style={{ paddingTop: "100px", minHeight: "100vh" }}>
-        <h2>Không có thông tin xe</h2>
-        <p>Vui lòng quay lại trang danh sách chọn xe.</p>
-        <Button onClick={() => navigate("/home")} variant="primary">Quay lại Trang Chủ</Button>
-      </Container>
-    );
-  }
+  if (loading) return (
+    <div style={s.centerPage}>
+      <div style={s.spinner}></div>
+      <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+    </div>
+  );
 
-  // Số tiền đặt cọc mô phỏng (theo Mockup)
-  const depositAmount = 50000000;
-  const carPrice = car?.price || 18500000000;
+  if (!car) return (
+    <div style={s.centerPage}>
+      <p style={{ color:'#6c757d', fontWeight:600 }}>Không tìm thấy thông tin xe.</p>
+      <button onClick={() => navigate(-1)} style={s.blueBtn}>← Quay lại</button>
+    </div>
+  );
 
   return (
-    <div style={{ backgroundColor: "#f8f9fc", minHeight: "100vh", paddingTop: "80px", paddingBottom: "100px", fontFamily: "'Inter', sans-serif" }}>
-      <Container style={{ maxWidth: "1100px", paddingTop: "40px" }}>
-        
-        {/* TIÊU ĐỀ TRANG */}
-        <div style={{ marginBottom: "40px" }}>
-          <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "#0056b3", textTransform: "uppercase", letterSpacing: "1.5px", marginBottom: "8px" }}>Reservation Portal</div>
-          <h1 style={{ fontSize: "2.5rem", fontWeight: 900, color: "#111", textTransform: "uppercase", margin: 0 }}>ĐẶT CỌC TRỰC TUYẾN</h1>
-          <div style={{ width: "80px", height: "4px", backgroundColor: "#0056b3", marginTop: "16px" }}></div>
+    <div style={s.page}>
+      {/* NAV */}
+      <nav style={s.nav}>
+        <button onClick={() => navigate('/')} style={s.logo}>PRECISION</button>
+        <div style={s.navLinks}>
+          {['MODELS','PURCHASE','SERVICE','EXPERIENCE','SHOP'].map(item => (
+            <span key={item} style={{ ...s.navLink, ...(item==='PURCHASE' ? s.navLinkActive : {}) }}>{item}</span>
+          ))}
+        </div>
+        <button style={s.reserveBtn}>Reserve Now</button>
+      </nav>
+
+      {/* STEPPER */}
+      <div style={s.stepperWrap}>
+        <div style={s.stepperInner}>
+          {/* Step 1: Quote (done) */}
+          <div style={s.step}>
+            <div style={{ ...s.stepCircle, ...s.stepDone }}>✓</div>
+            <span style={s.stepLabel}>QUOTE</span>
+          </div>
+          <div style={{ ...s.stepLine, background: '#0a58ca' }}></div>
+          {/* Step 2: Info (active) */}
+          <div style={s.step}>
+            <div style={{ ...s.stepCircle, ...s.stepActive }}>2</div>
+            <span style={{ ...s.stepLabel, color: '#0a58ca', fontWeight: 800 }}>INFO</span>
+          </div>
+          <div style={{ ...s.stepLine, background: '#e5e7eb' }}></div>
+          {/* Step 3: Payment */}
+          <div style={s.step}>
+            <div style={{ ...s.stepCircle, ...s.stepInactive }}>3</div>
+            <span style={{ ...s.stepLabel, color: '#9ca3af' }}>PAYMENT</span>
+          </div>
+        </div>
+      </div>
+
+      {/* MAIN CONTENT */}
+      <div style={s.content}>
+        {/* LEFT: Form */}
+        <div style={s.leftCol}>
+          <div style={{ borderLeft: '4px solid #0a58ca', paddingLeft: 20, marginBottom: 32 }}>
+            <h2 style={s.formTitle}>Registration Details</h2>
+            <p style={s.formSub}>Please provide your legal information for the vehicle deposit agreement.</p>
+          </div>
+
+          <form onSubmit={handleSubmit} id="reserve-form">
+            <div style={s.fieldGrid}>
+              <div style={s.fieldWrap}>
+                <label style={s.label}>FULL NAME</label>
+                <div style={s.inputWrap}>
+                  <span style={s.inputIcon}>👤</span>
+                  <input style={s.input} placeholder="Enter full name" value={form.fullName}
+                    onChange={e => setForm(p => ({...p, fullName: e.target.value}))} required />
+                </div>
+              </div>
+              <div style={s.fieldWrap}>
+                <label style={s.label}>PHONE NUMBER</label>
+                <div style={s.inputWrap}>
+                  <span style={s.inputIcon}>📞</span>
+                  <input style={s.input} placeholder="+84 XXX XXX XXX" type="tel" value={form.phone}
+                    onChange={e => setForm(p => ({...p, phone: e.target.value}))} required />
+                </div>
+              </div>
+              <div style={s.fieldWrap}>
+                <label style={s.label}>ID / CCCD NUMBER</label>
+                <div style={s.inputWrap}>
+                  <span style={s.inputIcon}>🪪</span>
+                  <input style={s.input} placeholder="Enter identification number" value={form.idNumber}
+                    onChange={e => setForm(p => ({...p, idNumber: e.target.value}))} />
+                </div>
+              </div>
+              <div style={s.fieldWrap}>
+                <label style={s.label}>DATE OF BIRTH</label>
+                <div style={s.inputWrap}>
+                  <span style={s.inputIcon}>📅</span>
+                  <input style={{ ...s.input, color: form.dob ? '#111' : '#9ca3af' }} type="date" value={form.dob}
+                    onChange={e => setForm(p => ({...p, dob: e.target.value}))} />
+                </div>
+              </div>
+            </div>
+
+            <div style={{ ...s.fieldWrap, marginTop: 20 }}>
+              <label style={s.label}>PERMANENT ADDRESS</label>
+              <div style={{ ...s.inputWrap, alignItems: 'flex-start', paddingTop: 12 }}>
+                <span style={{ ...s.inputIcon, marginTop: 2 }}>📍</span>
+                <textarea style={{ ...s.input, height: 100, resize: 'vertical' }} rows={3}
+                  placeholder="Street name, District, City" value={form.address}
+                  onChange={e => setForm(p => ({...p, address: e.target.value}))} required />
+              </div>
+            </div>
+
+            {/* Terms */}
+            <label style={s.termsRow}>
+              <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} style={s.checkbox} />
+              <span style={s.termsText}>
+                I hereby agree to the <a href="#" style={s.termsLink}>Terms of Service</a> and{' '}
+                <a href="#" style={s.termsLink}>Deposit Policy</a>. I confirm that all information provided above is accurate and legally binding as per the vehicle purchase agreement.
+              </span>
+            </label>
+
+            {formError && <div style={s.errorBox}>⚠️ {formError}</div>}
+          </form>
         </div>
 
-        <Row className="g-5">
-          {/* CỘT TRÁI - FORM NHẬP XUẤT */}
-          <Col lg={7}>
-            {/* Box 1: Thông tin khách hàng */}
-            <div style={{ backgroundColor: "#ffffff", borderRadius: "12px", padding: "32px", marginBottom: "32px", boxShadow: "0 10px 40px rgba(0,0,0,0.03)" }}>
-              <h4 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#111", marginBottom: "24px", display: "flex", alignItems: "center", gap: "12px" }}>
-                <FaUserAlt color="#0056b3" /> Thông tin khách hàng
-              </h4>
-              
-              <Form>
-                <Row className="g-4">
-                  <Col md={6}>
-                    <Form.Group>
-                      <Form.Label style={{ fontSize: "0.8rem", fontWeight: 700, color: "#444", textTransform: "uppercase" }}>Họ và Tên</Form.Label>
-                      <Form.Control
-                        type="text"
-                        name="fullName"
-                        value={formData.fullName}
-                        onChange={handleChange}
-                        placeholder="Nguyễn Văn A"
-                        style={{ backgroundColor: "#f1f5f9", border: "none", padding: "14px", borderRadius: "8px", fontWeight: 600 }}
-                        required
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={6}>
-                    <Form.Group>
-                      <Form.Label style={{ fontSize: "0.8rem", fontWeight: 700, color: "#444", textTransform: "uppercase" }}>Số điên thoại</Form.Label>
-                      <Form.Control
-                        type="text"
-                        name="phoneNumber"
-                        value={formData.phoneNumber}
-                        onChange={handleChange}
-                        placeholder="090 123 4567"
-                        style={{ backgroundColor: "#f1f5f9", border: "none", padding: "14px", borderRadius: "8px", fontWeight: 600 }}
-                        required
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={6}>
-                    <Form.Group>
-                      <Form.Label style={{ fontSize: "0.8rem", fontWeight: 700, color: "#444", textTransform: "uppercase" }}>Số CCCD / Hộ Chiếu</Form.Label>
-                      <Form.Control
-                        type="text"
-                        name="cccd"
-                        value={formData.cccd}
-                        onChange={handleChange}
-                        placeholder="012345678901"
-                        style={{ backgroundColor: "#f1f5f9", border: "none", padding: "14px", borderRadius: "8px", fontWeight: 600 }}
-                        required
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col md={6}>
-                    <Form.Group>
-                      <Form.Label style={{ fontSize: "0.8rem", fontWeight: 700, color: "#444", textTransform: "uppercase" }}>Ngày sinh</Form.Label>
-                      <Form.Control
-                        type="date"
-                        name="dob"
-                        value={formData.dob}
-                        onChange={handleChange}
-                        style={{ backgroundColor: "#f1f5f9", border: "none", padding: "14px", borderRadius: "8px", fontWeight: 600, color: "#555" }}
-                        required
-                      />
-                    </Form.Group>
-                  </Col>
-                  <Col xs={12}>
-                    <Form.Group>
-                      <Form.Label style={{ fontSize: "0.8rem", fontWeight: 700, color: "#444", textTransform: "uppercase" }}>Địa chỉ thường trú</Form.Label>
-                      <Form.Control
-                        as="textarea"
-                        rows={3}
-                        name="address"
-                        value={formData.address}
-                        onChange={handleChange}
-                        placeholder="Nhập địa chỉ chính xác của bạn"
-                        style={{ backgroundColor: "#f1f5f9", border: "none", padding: "14px", borderRadius: "8px", fontWeight: 600 }}
-                        required
-                      />
-                    </Form.Group>
-                  </Col>
-                </Row>
-              </Form>
-            </div>
+        {/* RIGHT: Summary + Payment */}
+        <div style={s.rightCol}>
 
-            {/* Box 2: Phương thức thanh toán */}
-            <div style={{ backgroundColor: "#ffffff", borderRadius: "12px", padding: "32px", boxShadow: "0 10px 40px rgba(0,0,0,0.03)" }}>
-              <h4 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#111", marginBottom: "24px", display: "flex", alignItems: "center", gap: "12px" }}>
-                <FaCreditCard color="#0056b3" /> Phương thức thanh toán
-              </h4>
-              
-              <Row className="g-3">
-                <Col xs={4}>
-                  <div 
-                    onClick={() => setPaymentMethod("vnpay")}
-                    style={{ border: paymentMethod === "vnpay" ? "2px solid #0056b3" : "1px solid #eaeaea", backgroundColor: paymentMethod === "vnpay" ? "#ffffff" : "#f8f9fc", padding: "24px 12px", borderRadius: "12px", textAlign: "center", cursor: "pointer", transition: "all 0.2s" }}
-                  >
-                    <BsQrCode size={28} color={paymentMethod === "vnpay" ? "#0056b3" : "#666"} style={{ marginBottom: "12px" }} />
-                    <div style={{ fontSize: "0.85rem", fontWeight: 700, color: paymentMethod === "vnpay" ? "#0056b3" : "#444" }}>VNPAY-QR</div>
-                  </div>
-                </Col>
-                <Col xs={4}>
-                  <div 
-                    onClick={() => setPaymentMethod("atm")}
-                    style={{ border: paymentMethod === "atm" ? "2px solid #0056b3" : "1px solid #eaeaea", backgroundColor: paymentMethod === "atm" ? "#ffffff" : "#f8f9fc", padding: "24px 12px", borderRadius: "12px", textAlign: "center", cursor: "pointer", transition: "all 0.2s" }}
-                  >
-                    <BsCreditCard2Front size={28} color={paymentMethod === "atm" ? "#0056b3" : "#666"} style={{ marginBottom: "12px" }} />
-                    <div style={{ fontSize: "0.85rem", fontWeight: 700, color: paymentMethod === "atm" ? "#0056b3" : "#444" }}>Thẻ ATM</div>
-                  </div>
-                </Col>
-                <Col xs={4}>
-                  <div 
-                    onClick={() => setPaymentMethod("international")}
-                    style={{ border: paymentMethod === "international" ? "2px solid #0056b3" : "1px solid #eaeaea", backgroundColor: paymentMethod === "international" ? "#ffffff" : "#f8f9fc", padding: "24px 12px", borderRadius: "12px", textAlign: "center", cursor: "pointer", transition: "all 0.2s" }}
-                  >
-                    <BsGlobe size={28} color={paymentMethod === "international" ? "#0056b3" : "#666"} style={{ marginBottom: "12px" }} />
-                    <div style={{ fontSize: "0.85rem", fontWeight: 700, color: paymentMethod === "international" ? "#0056b3" : "#444" }}>Thẻ Quốc tế</div>
-                  </div>
-                </Col>
-              </Row>
-            </div>
-          </Col>
+          {/* Transaction Summary */}
+          <div style={s.summaryCard}>
+            <p style={s.sectionLabel}>TRANSACTION SUMMARY</p>
 
-          {/* CỘT PHẢI - THÔNG TIN ĐƠN & THANH TOÁN */}
-          <Col lg={5}>
-            
-            {/* Box Tóm tắt xe */}
-            <div style={{ backgroundColor: "#f1f5f9", borderRadius: "12px", padding: "24px", marginBottom: "24px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "16px" }}>
-                <div>
-                  <h3 style={{ fontSize: "1.3rem", fontWeight: 900, color: "#111", margin: "0 0 4px 0" }}>{car?.name || car?.carModel || "Porsche Taycan"}</h3>
-                  <div style={{ fontSize: "0.85rem", color: "#555" }}>{car?.subtitle || "Phiên bản cao cấp tiêu chuẩn"}</div>
-                </div>
-                <FaCarSide size={24} color="#0056b3" />
+            <div style={s.summaryGrid}>
+              <div>
+                <p style={s.summaryMeta}>ORDER TYPE</p>
+                <p style={s.summaryVal}>Vehicle Reservation</p>
               </div>
-              
-              <img src={car?.images?.[0] || car?.image || "https://images.unsplash.com/photo-1614200187524-dc4b892acf16?q=80&w=1000&auto=format&fit=crop"} alt="car" style={{ width: "100%", height: "200px", objectFit: "cover", borderRadius: "8px", marginBottom: "24px" }} />
-              
-              <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: "12px", borderBottom: "1px solid #e2e8f0", marginBottom: "12px", fontSize: "0.85rem", fontWeight: 700 }}>
-                <span style={{ color: "#64748b", textTransform: "uppercase" }}>Màu ngoại thất</span>
-                <span style={{ color: "#111" }}>{car?.color || "Ice Grey Metallic"}</span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", paddingBottom: "12px", borderBottom: "1px solid #e2e8f0", marginBottom: "12px", fontSize: "0.85rem", fontWeight: 700 }}>
-                <span style={{ color: "#64748b", textTransform: "uppercase" }}>Nội thất</span>
-                <span style={{ color: "#111" }}>{car?.equipment?.seatMaterial || "Black / Slate Grey"}</span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.85rem", fontWeight: 700 }}>
-                <span style={{ color: "#64748b", textTransform: "uppercase" }}>Năm sản xuất</span>
-                <span style={{ color: "#111" }}>{car?.manufacturingYear || car?.year || "2024"}</span>
+              <div style={{ textAlign: 'right' }}>
+                <p style={s.summaryMeta}>MODEL</p>
+                <p style={{ ...s.summaryVal, color: '#0a58ca' }}>{car.name}</p>
               </div>
             </div>
 
-            {/* Box Đặt cọc (Màu xanh) */}
-            <div style={{ backgroundColor: "#0056b3", borderRadius: "12px", padding: "32px", color: "#fff", position: "relative", overflow: "hidden" }}>
-              <div style={{ position: "absolute", top: "24px", right: "24px", opacity: 0.1 }}>
-                <FaCheckCircle size={100} />
-              </div>
+            <div style={s.divider}></div>
 
-              <div style={{ fontSize: "0.8rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>Số tiền đặt cọc tối thiểu</div>
-              <div style={{ fontSize: "2.5rem", fontWeight: 900, marginBottom: "32px", display: "flex", alignItems: "center", gap: "10px" }}>
-                {formatPrice(depositAmount)}
-                <FaCheckCircle size={28} color="#60a5fa" />
-              </div>
+            <p style={s.summaryMeta}>DEPOSIT AMOUNT</p>
+            <p style={{ fontSize: '1.8rem', fontWeight: 900, color: '#111', margin: '4px 0 2px', fontStyle: 'italic' }}>
+              {fmt(DEPOSIT_AMOUNT)}
+            </p>
+            <p style={{ fontSize: '0.72rem', color: '#9ca3af', margin: '0 0 16px' }}>
+              *Final amount will be calculated based on your configuration in the next step.
+            </p>
 
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "12px", fontSize: "0.9rem" }}>
-                <span style={{ opacity: 0.9 }}>Giá trị xe dự tính</span>
-                <span style={{ fontWeight: 800 }}>{formatPrice(carPrice)}</span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "32px", fontSize: "0.9rem" }}>
-                <span style={{ opacity: 0.9 }}>Phí dịch vụ trực tuyến</span>
-                <span style={{ fontWeight: 800 }}>Miễn phí</span>
-              </div>
+            <div style={s.suggestionBox}>
+              <span style={{ fontWeight: 800, color: '#0a58ca' }}>Suggestion: </span>
+              Please ensure your daily transfer limit is sufficient for the deposit amount to avoid transaction failure.
+            </div>
+          </div>
 
-              <Button 
-                onClick={handleSubmit} 
-                style={{ width: "100%", backgroundColor: "#ffffff", color: "#0056b3", border: "none", padding: "16px", fontWeight: 800, borderRadius: "8px", fontSize: "1.1rem", textTransform: "uppercase", letterSpacing: "1px", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px" }}
-              >
-                TIẾN HÀNH THANH TOÁN ➔
-              </Button>
-
-              <div style={{ fontSize: "0.65rem", textAlign: "center", marginTop: "20px", opacity: 0.7, lineHeight: 1.5, letterSpacing: "0.5px" }}>
-                BẰNG VIỆC NHẤN ĐẶT CỌC, BẠN ĐỒNG Ý VỚI ĐIỀU KHOẢN VÀ CHÍNH SÁCH CỦA CHÚNG TÔI
-              </div>
+          {/* Payment Method */}
+          <div style={s.summaryCard}>
+            <p style={s.sectionLabel}>SELECT PAYMENT METHOD</p>
+            <div style={s.methodList}>
+              {paymentMethods.map(m => (
+                <label key={m.key} style={{ ...s.methodRow, ...(paymentMethod === m.key ? s.methodRowActive : {}) }}>
+                  <input type="radio" name="paymethod" value={m.key} checked={paymentMethod === m.key}
+                    onChange={() => setPaymentMethod(m.key)} style={{ accentColor: '#0a58ca' }} />
+                  <span style={{ flex: 1, fontWeight: 700, fontSize: '0.9rem', color: '#111' }}>{m.label}</span>
+                  <span style={{ fontSize: '1.3rem' }}>{m.icon}</span>
+                </label>
+              ))}
             </div>
 
-            {/* Box mini stats */}
-            <Row className="g-3 mt-3">
-              <Col xs={6}>
-                <div style={{ backgroundColor: "#f1f5f9", padding: "20px", borderRadius: "12px" }}>
-                  <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>Tăng tốc 0-100km/h</div>
-                  <div style={{ fontSize: "1.2rem", fontWeight: 900, color: "#111" }}>2.8 s</div>
-                </div>
-              </Col>
-              <Col xs={6}>
-                <div style={{ backgroundColor: "#f1f5f9", padding: "20px", borderRadius: "12px" }}>
-                  <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "8px" }}>Công suất cực đại</div>
-                  <div style={{ fontSize: "1.2rem", fontWeight: 900, color: "#111" }}>{car?.technicalSpec?.horsepower || "502"} HP</div>
-                </div>
-              </Col>
-            </Row>
+            <button type="submit" form="reserve-form" disabled={submitting}
+              style={{ ...s.payBtn, opacity: submitting ? 0.7 : 1 }}>
+              {submitting
+                ? <><span style={s.spinnerSmall}></span> Processing...</>
+                : 'Confirm and Pay via VNPAY →'}
+            </button>
 
-          </Col>
-        </Row>
-      </Container>
+            <div style={s.pciRow}>
+              <span style={s.pciIcon}>🔒</span>
+              <span style={s.pciText}>PCI-DSS COMPLIANT INFRASTRUCTURE</span>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      {/* FOOTER */}
+      <footer style={s.footer}>
+        <div style={s.footerLeft}>
+          <span style={s.footerLogo}>PRECISION</span>
+          {['LEGAL NOTICE','PRIVACY POLICY','COOKIES','ACCESSIBILITY','WHISTLEBLOWER SYSTEM'].map(l => (
+            <a key={l} href="#" style={s.footerLink}>{l}</a>
+          ))}
+        </div>
+        <span style={{ fontSize: '0.7rem', color: '#9ca3af' }}>© 2026 PRECISION AUTOMOTIVE GROUP, INC.</span>
+      </footer>
+
+      <style>{`
+        @keyframes spin{to{transform:rotate(360deg)}}
+        input[type="checkbox"]{width:16px;height:16px;cursor:pointer}
+        input::placeholder,textarea::placeholder{color:#9ca3af;}
+        input:focus,textarea:focus{outline:none;border-color:#0a58ca !important;box-shadow:0 0 0 3px rgba(10,88,202,0.07);}
+      `}</style>
     </div>
   );
 }
+
+const s = {
+  page:{ minHeight:'100vh', background:'#f8f9fa', fontFamily:"'Inter','Segoe UI',sans-serif", display:'flex', flexDirection:'column' },
+  centerPage:{ minHeight:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:16, background:'#fff' },
+  spinner:{ width:36, height:36, border:'3px solid #e5e7eb', borderTopColor:'#0a58ca', borderRadius:'50%', animation:'spin .8s linear infinite' },
+  spinnerSmall:{ width:14, height:14, border:'2px solid rgba(255,255,255,0.3)', borderTopColor:'#fff', borderRadius:'50%', display:'inline-block', animation:'spin .8s linear infinite' },
+  blueBtn:{ background:'#0a58ca', color:'#fff', border:'none', borderRadius:8, padding:'10px 22px', fontWeight:800, cursor:'pointer', fontSize:'0.85rem' },
+
+  // Nav
+  nav:{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 56px', height:68, borderBottom:'1px solid #e5e7eb', background:'#fff', position:'sticky', top:0, zIndex:100 },
+  logo:{ fontWeight:900, fontSize:'1rem', letterSpacing:'3px', background:'none', border:'none', cursor:'pointer', color:'#111' },
+  navLinks:{ display:'flex', gap:36 },
+  navLink:{ fontSize:'0.78rem', fontWeight:600, color:'#6c757d', cursor:'pointer', letterSpacing:'0.3px', paddingBottom:2, borderBottom:'2px solid transparent' },
+  navLinkActive:{ color:'#0a58ca', borderBottom:'2px solid #0a58ca' },
+  reserveBtn:{ background:'#0a58ca', color:'#fff', border:'none', borderRadius:6, padding:'9px 22px', fontWeight:800, fontSize:'0.78rem', cursor:'pointer' },
+
+  // Stepper
+  stepperWrap:{ background:'#fff', borderBottom:'1px solid #e5e7eb', padding:'28px 56px' },
+  stepperInner:{ display:'flex', alignItems:'center', maxWidth:480 },
+  step:{ display:'flex', flexDirection:'column', alignItems:'center', gap:8 },
+  stepCircle:{ width:44, height:44, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:900, fontSize:'0.9rem' },
+  stepDone:{ background:'#fff', border:'2px solid #0a58ca', color:'#0a58ca' },
+  stepActive:{ background:'#0a58ca', color:'#fff', border:'2px solid #0a58ca' },
+  stepInactive:{ background:'#fff', border:'2px solid #e5e7eb', color:'#9ca3af' },
+  stepLabel:{ fontSize:'0.65rem', fontWeight:700, color:'#6c757d', letterSpacing:'1.5px', textTransform:'uppercase' },
+  stepLine:{ flex:1, height:2, margin:'0 12px', marginBottom:24 },
+
+  // Content
+  content:{ display:'grid', gridTemplateColumns:'1fr 420px', gap:32, padding:'48px 56px', flex:1, alignItems:'start' },
+  leftCol:{ display:'flex', flexDirection:'column' },
+  rightCol:{ display:'flex', flexDirection:'column', gap:20 },
+
+  formTitle:{ fontSize:'1.7rem', fontWeight:900, color:'#111', margin:'0 0 6px', letterSpacing:'-0.5px' },
+  formSub:{ fontSize:'0.85rem', color:'#6c757d', margin:0, fontWeight:500 },
+
+  // Form fields
+  fieldGrid:{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'20px 24px', marginBottom:8 },
+  fieldWrap:{ display:'flex', flexDirection:'column', gap:8 },
+  label:{ fontSize:'0.65rem', fontWeight:900, color:'#6c757d', textTransform:'uppercase', letterSpacing:'1.5px', margin:0 },
+  inputWrap:{ display:'flex', alignItems:'center', gap:8, border:'1px solid #e5e7eb', borderRadius:8, padding:'0 12px', background:'#fff', transition:'border .2s' },
+  inputIcon:{ fontSize:'0.9rem', flexShrink:0, lineHeight:1, opacity:0.5 },
+  input:{ border:'none', outline:'none', width:'100%', padding:'12px 0', fontSize:'0.88rem', fontWeight:600, color:'#111', background:'transparent' },
+  textarea:{ border:'none', outline:'none', width:'100%', padding:'12px 0', fontSize:'0.88rem', fontWeight:600, color:'#111', background:'transparent', resize:'vertical' },
+
+  // Terms
+  termsRow:{ display:'flex', gap:12, alignItems:'flex-start', cursor:'pointer', marginTop:28 },
+  checkbox:{ marginTop:2, flexShrink:0 },
+  termsText:{ fontSize:'0.82rem', color:'#374151', lineHeight:1.6, fontWeight:500 },
+  termsLink:{ color:'#0a58ca', fontWeight:700, textDecoration:'none' },
+
+  errorBox:{ background:'#fef2f2', border:'1px solid #fecaca', borderRadius:10, padding:'12px 16px', color:'#dc2626', fontWeight:700, fontSize:'0.82rem', marginTop:16 },
+
+  // Right summary
+  summaryCard:{ background:'#fff', border:'1px solid #e5e7eb', borderRadius:14, padding:'28px 24px' },
+  sectionLabel:{ fontSize:'0.6rem', fontWeight:900, color:'#9ca3af', letterSpacing:'2.5px', margin:'0 0 20px', textTransform:'uppercase' },
+  summaryGrid:{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 },
+  summaryMeta:{ fontSize:'0.65rem', fontWeight:800, color:'#9ca3af', textTransform:'uppercase', letterSpacing:'1px', margin:'0 0 4px' },
+  summaryVal:{ fontWeight:900, color:'#111', margin:0, fontSize:'0.95rem' },
+  divider:{ height:1, background:'#f1f5f9', margin:'20px 0' },
+  suggestionBox:{ background:'#f0f7ff', border:'1px solid #bfdbfe', borderRadius:8, padding:'12px 14px', fontSize:'0.78rem', color:'#374151', lineHeight:1.6 },
+
+  // Payment method
+  methodList:{ display:'flex', flexDirection:'column', gap:4, marginBottom:20 },
+  methodRow:{ display:'flex', alignItems:'center', gap:14, padding:'14px 16px', borderRadius:10, cursor:'pointer', transition:'background .15s', border:'1.5px solid transparent', userSelect:'none' },
+  methodRowActive:{ border:'1.5px solid #0a58ca', background:'#eff6ff' },
+
+  payBtn:{ width:'100%', background:'#0a58ca', color:'#fff', border:'none', borderRadius:10, padding:'16px', fontWeight:900, fontSize:'0.85rem', letterSpacing:'0.5px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:10, marginBottom:18, transition:'background .2s' },
+  pciRow:{ display:'flex', alignItems:'center', justifyContent:'center', gap:8 },
+  pciIcon:{ fontSize:'0.9rem', opacity:0.5 },
+  pciText:{ fontSize:'0.65rem', fontWeight:800, color:'#9ca3af', letterSpacing:'1.5px' },
+
+  // Footer
+  footer:{ borderTop:'1px solid #e5e7eb', background:'#fff', padding:'24px 56px', display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:12, marginTop:'auto' },
+  footerLeft:{ display:'flex', alignItems:'center', gap:28, flexWrap:'wrap' },
+  footerLogo:{ fontWeight:900, fontSize:'0.85rem', letterSpacing:'3px', color:'#111' },
+  footerLink:{ fontSize:'0.72rem', color:'#6c757d', fontWeight:600, textDecoration:'none', letterSpacing:'0.5px' },
+};

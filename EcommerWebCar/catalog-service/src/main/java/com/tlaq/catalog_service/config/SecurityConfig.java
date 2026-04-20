@@ -15,6 +15,18 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableMethodSecurity
 public class SecurityConfig {
     private static final String[] PUBLIC_ENDPOINTS = {
+        "/api/car-branch/get-all-car-branch",
+        "/api/car-branch/get-branch-by-id/**",
+        "/api/car-model/get-all-car-model",
+        "/api/car-model/get-car-model-by-id/**",
+        "/api/car-category/get-car-category-by-id/**",
+        "/api/car-category/get-all-car-category",
+        "/api/car/get-products",
+        "/api/car/get-product-by-id/**",
+        "/api/car/filter-car",
+        "/api/inventory/get-inventory/**",
+        "/api/inventory/get-inventory-by-car-id/**",
+        "/api/showroom/get-info-showroom",
     };
 
 

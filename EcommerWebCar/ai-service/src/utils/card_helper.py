@@ -83,6 +83,12 @@ def _build_card(item: dict, intent: str) -> dict:
             "longitude": _to_float(item.get("longitude")),
         })
 
+    elif intent == "rolling_price":
+        card.update({
+            "rolling_price":        item.get("rolling_price_detail", {}).get("unit_rolling_price", ""),
+            "rolling_price_detail": item.get("rolling_price_detail", {})
+        })
+
     return card
 
 

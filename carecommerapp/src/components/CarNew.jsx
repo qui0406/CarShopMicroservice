@@ -16,60 +16,6 @@ export default function CarSection() {
   const [selectedBrands, setSelectedBrands] = useState(["BMW"]);
   const [priceRange, setPriceRange] = useState(80);
 
-  // Mock data to match mockup perfectly
-  const mockCars = [
-    {
-      id: 1,
-      brand: "MERCEDES-BENZ",
-      name: "S-Class Maybach S680",
-      price: 15900000000,
-      year: "2025",
-      seats: "4 Chỗ",
-      engine: "V12 BiTurbo",
-      fuel: "Xăng",
-      status: "SẴN CÓ",
-      statusColor: "#1a73e8",
-      image: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?q=80&w=2070&auto=format&fit=crop"
-    },
-    {
-      id: 2,
-      brand: "BMW",
-      name: "iX xDrive50 Electric",
-      price: 4800000000,
-      year: "2024",
-      seats: "5 Chỗ",
-      engine: "523 hp",
-      fuel: "Thuần điện",
-      status: "SẮP VỀ",
-      statusColor: "#f57c00",
-      image: "https://images.unsplash.com/photo-1556189250-72ba954cfc2b?q=80&w=2070&auto=format&fit=crop"
-    },
-    {
-      id: 3,
-      brand: "PORSCHE",
-      name: "911 Carrera GTS",
-      price: 9500000000,
-      year: "2024",
-      seats: "2+2 Chỗ",
-      engine: "480 hp",
-      fuel: "Xăng",
-      status: "",
-      image: "https://images.unsplash.com/photo-1503376710356-6cb021d7bfa0?q=80&w=2070&auto=format&fit=crop"
-    },
-    {
-      id: 4,
-      brand: "AUDI",
-      name: "A8 L Quattro",
-      price: 6200000000,
-      year: "2025",
-      seats: "5 Chỗ",
-      engine: "3.0 V6",
-      fuel: "Hybrid Nhẹ",
-      status: "",
-      image: "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?q=80&w=2070&auto=format&fit=crop"
-    }
-  ];
-
   useEffect(() => {
     fetchCars(carPage);
   }, [carPage]);
@@ -77,11 +23,26 @@ export default function CarSection() {
   const fetchCars = async (pageNum) => {
     try {
       setLoading(true);
-      setTimeout(() => {
-        setCars(mockCars);
-        setCarTotalPages(3);
-        setLoading(false);
-      }, 500);
+      
+      const res = await axios.get(endpoints["get-products"](pageNum, 12));
+      const resData = res.data?.result || {};
+      const fetchedCars = Array.isArray(resData.data) ? resData.data.map(car => ({
+        id: car.id,
+        brand: "CAR SHOP",
+        name: car.name,
+        price: car.price,
+        year: 2024,
+        seats: car.seatCapacity ? `${car.seatCapacity} Chỗ` : "5 Chỗ",
+        engine: car.engineSize || "1.8L",
+        fuel: car.fuelType || "Xăng",
+        status: "XE MỚI",
+        statusColor: "#1a73e8",
+        image: car.thumbnail || "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?q=80&w=2070&auto=format&fit=crop"
+      })) : [];
+
+      setCars(fetchedCars);
+      setCarTotalPages(resData.totalPages || 1);
+      setLoading(false);
     } catch (err) {
       console.error("Error fetching cars:", err);
       setError("Không thể tải danh sách xe. Vui lòng thử lại.");
@@ -95,12 +56,7 @@ export default function CarSection() {
     }
   };
 
-  const formatPriceToString = (price) => {
-    if (price >= 1000000000) {
-      return (Math.floor((price / 1000000000) * 10) / 10) + " Tỷ";
-    }
-    return (price / 1000000) + " Tr";
-  };
+
 
   return (
     <div style={{ backgroundColor: "#f8f9fa", minHeight: "100vh", paddingTop: "100px", paddingBottom: "60px", fontFamily: "'Montserrat', 'Roboto', sans-serif" }}>
@@ -232,15 +188,10 @@ export default function CarSection() {
                         </div>
 
                         <Card.Body style={{ padding: "30px 24px" }}>
-                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "24px" }}>
-                            <div>
-                              <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#8c949c", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "6px" }}>{car.brand}</div>
-                              <Card.Title style={{ fontSize: "1.4rem", fontWeight: 800, color: "#191c1d", margin: 0, letterSpacing: "-0.5px" }}>{car.name}</Card.Title>
-                            </div>
-                            <div style={{ textAlign: "right" }}>
-                              <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#8c949c", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "6px" }}>GIÁ TỪ</div>
-                              <div style={{ fontSize: "1.5rem", fontWeight: 800, color: "#1a73e8" }}>{formatPriceToString(car.price)}</div>
-                            </div>
+                          <div style={{ marginBottom: "24px" }}>
+                            <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#8c949c", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "6px" }}>{car.brand}</div>
+                            <Card.Title style={{ fontSize: "1.4rem", fontWeight: 800, color: "#191c1d", margin: 0, letterSpacing: "-0.5px", marginBottom: "6px" }}>{car.name}</Card.Title>
+                            <div style={{ fontSize: "1.5rem", fontWeight: 800, color: "red" }}>{car.price ? car.price.toLocaleString("vi-VN") + " VND" : "Liên hệ"}</div>
                           </div>
 
                           <div style={{ backgroundColor: "#f8f9fa", borderRadius: "4px", padding: "16px", display: "flex", justifyContent: "space-between", marginBottom: "24px" }}>

@@ -1,9 +1,13 @@
-category,item_key,item_name,penalty_price,ai_method,description
-EXTERIOR,EXT_01,Tray xuoc nhe,2.5,Edge Density,Xuoc dam lop bong
-EXTERIOR,EXT_02,Tray xuoc sau,4.0,Edge Density,Lech mau son/Xuoc sau
-EXTERIOR,EXT_03,Mop meo than vo,8.0,Grad-CAM,Bien dang cac duong gan KODO
-EXTERIOR,EXT_04,Nut vo den LED,12.0,YOLO,Nut mat kinh den pha/hau
-USAGE,ODO_01,Van hanh qua tai,1.0,Calculation,Moi 1000km vuot chuan
-HISTORY,HIS_01,Thieu lich su hang,15.0,RAG,Khong co so bao duong
-HISTORY,HIS_02,Qua nhieu doi chu,10.0,RAG,Tu doi chu thu 2 tro di
-OPTION,OPT_01,Thieu goi Premium,35.0,NLP,Thieu loa Bose/i-Activsense
+category,item_key,item_name,penalty_price,type,ai_method,description
+EXTERIOR,EXT_01,Tray xuoc nhe,2.5,PENALTY,Edge Density,Xuoc dam lop bong
+EXTERIOR,EXT_02,Tray xuoc sau,4.0,PENALTY,Edge Density,Lech mau son/Xuoc sau
+EXTERIOR,EXT_03,Mop meo than vo,8.0,PENALTY,Grad-CAM,Bien dang cac duong gan KODO
+EXTERIOR,EXT_04,Nut vo den LED,12.0,PENALTY,YOLO,Nut mat kinh den pha/hau
+USAGE,ODO_01,Van hanh qua tai,1.0,PENALTY,Calculation,Moi 1000km vuot chuan
+HISTORY,HIS_01,Thieu lich su hang,15.0,PENALTY,RAG,Khong co so bao duong
+HISTORY,HIS_02,Qua nhieu doi chu,10.0,PENALTY,RAG,Tu doi chu thu 2 tro di
+OPTION,OPT_01,Thieu goi Premium,35.0,PENALTY,NLP,Thieu loa Bose/i-Activsense
+HISTORY,BON_01,Lich su bao duong day du,-10.0,BONUS,RAG,Co day du so bao duong chinh hang
+HISTORY,BON_02,Mot doi chu,-5.0,BONUS,RAG,Chi co duy nhat 1 chu so huu
+USAGE,BON_03,Hanh trinh thap,-8.0,BONUS,Calculation,ODO thap hon chuan tu 20%% tro len
+EXTERIOR,BON_04,Ngoai that nguyen ban,-6.0,BONUS,Vision,Khong co vet tray nao duoc phat hien

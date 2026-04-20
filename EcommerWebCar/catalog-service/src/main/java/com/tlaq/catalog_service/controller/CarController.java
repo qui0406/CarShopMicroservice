@@ -5,6 +5,7 @@ import com.tlaq.catalog_service.dto.PageResponse;
 import com.tlaq.catalog_service.dto.request.CarRequest;
 import com.tlaq.catalog_service.dto.response.CarResponse;
 import com.tlaq.catalog_service.dto.response.CarSummaryResponse;
+import com.tlaq.catalog_service.dto.response.Model3DResponse;
 import com.tlaq.catalog_service.exceptions.AppException;
 import com.tlaq.catalog_service.service.CarService;
 import com.tlaq.catalog_service.validators.ImageConstraint;
@@ -18,6 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
@@ -71,6 +73,16 @@ public class CarController {
                 .result(carDetailsService.createCarDetail(request, images))
                 .build();
     }
+
+    @PreAuthorize("hasRole('STAFF')")
+    @PostMapping(value = "/staff/car/upload-3d-model/{carId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<Model3DResponse> upload3DModel( @PathVariable String carId,
+                                                       @RequestPart("file") MultipartFile file) throws IOException {
+        return ApiResponse.<Model3DResponse>builder()
+                .result(carDetailsService.upload3DModel(carId, file))
+                .build();
+    }
+
 
     @PreAuthorize("hasRole('STAFF')")
     @DeleteMapping("/staff/car/delete-product/{carId}")

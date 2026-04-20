@@ -1,5 +1,6 @@
 import React, { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
+import StaffLayout from "./StaffLayout";
 
 /* ─── Static options ────────────────────────────────────── */
 const BRANDS = ["Porsche", "BMW", "Audi", "Mercedes-Benz", "Ferrari", "Toyota", "Honda", "Ford", "Tesla", "Lamborghini"];
@@ -8,23 +9,6 @@ const STATUSES = ["NEW", "USED", "CERTIFIED PRE-OWNED"];
 const FUELS = ["Gasoline", "Diesel", "Electric", "Hybrid", "Plug-in Hybrid"];
 const TRANSMISSIONS = ["Automatic", "Manual", "CVT", "DCT"];
 const COLORS_LIST = ["#1a1a1a", "#ffffff", "#c0392b", "#2980b9", "#27ae60", "#f39c12", "#8e44ad", "#7f8c8d", "#e8d5b7", "#2c3e50"];
-
-/* ─── Sidebar NavItem ───────────────────────────────────── */
-function NavItem({ icon, label, active, onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`w-full flex items-center gap-3 px-4 py-3 text-xs font-black tracking-widest uppercase transition-colors rounded-none text-left ${
-        active
-          ? "text-blue-600 border-l-4 border-blue-600 bg-blue-50 pl-3"
-          : "text-gray-500 border-l-4 border-transparent hover:bg-gray-50 hover:text-gray-800"
-      }`}
-    >
-      <span className="text-base">{icon}</span>
-      {label}
-    </button>
-  );
-}
 
 /* ─── Section wrapper ───────────────────────────────────── */
 function Section({ title, subtitle, children }) {
@@ -131,55 +115,8 @@ export default function CreateCar() {
   );
 
   return (
-    <div className="flex h-screen bg-gray-50 font-sans text-gray-900 overflow-hidden">
-
-      {/* ─── SIDEBAR ──────────────────────────────────────── */}
-      <aside className="w-52 bg-white border-r border-gray-100 flex flex-col shrink-0 h-full">
-        <div className="px-5 py-5 border-b border-gray-100">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center text-white text-sm font-black">ST</div>
-            <div>
-              <p className="text-sm font-black text-gray-900 leading-tight">Staff Terminal</p>
-              <p className="text-[9px] text-gray-400 font-bold tracking-wider uppercase">Automotive Precision</p>
-            </div>
-          </div>
-        </div>
-        <nav className="flex-1 py-4">
-          <NavItem icon="⊞"  label="Dashboard"  active={false} onClick={() => navigate("/staff/home")} />
-          <NavItem icon="🚗" label="Inventory"   active={false} onClick={() => navigate("/staff/inventory")} />
-          <NavItem icon="➕" label="Add New"     active={true}  onClick={() => {}} />
-          <NavItem icon="🖼️" label="Media"       active={false} onClick={() => navigate("/staff/media")} />
-          <NavItem icon="👤" label="Staff"       active={false} onClick={() => navigate("/staff/directory")} />
-        </nav>
-        <div className="pb-6 border-t border-gray-100 pt-4">
-          <NavItem icon="❓" label="Support"  active={false} onClick={() => {}} />
-          <NavItem icon="↪"  label="Logout"   active={false} onClick={() => navigate("/login")} />
-        </div>
-      </aside>
-
-      {/* ─── MAIN ─────────────────────────────────────────── */}
-      <main className="flex-1 flex flex-col h-full overflow-hidden">
-
-        {/* TOP BAR */}
-        <header className="h-14 bg-white border-b border-gray-100 flex items-center px-8 shrink-0">
-          <div className="flex items-center gap-3">
-            <h1 className="text-base font-black text-gray-900">Precision Portal</h1>
-            <span className="text-gray-300">|</span>
-            <button onClick={() => navigate("/staff/inventory")} className="text-sm text-gray-400 font-medium hover:text-blue-600 transition-colors">Inventory</button>
-            <span className="text-gray-300">/</span>
-            <span className="text-sm font-bold text-blue-600">Add New Car</span>
-          </div>
-          <div className="ml-auto flex items-center gap-4">
-            <button className="text-gray-400 hover:text-gray-700 text-lg">🔔</button>
-            <button className="text-gray-400 hover:text-gray-700 text-lg">⚙️</button>
-            <div className="w-8 h-8 rounded-full bg-orange-400 flex items-center justify-center">
-              <span className="text-white font-black text-xs">MV</span>
-            </div>
-          </div>
-        </header>
-
-        {/* CONTENT */}
-        <div className="flex-1 overflow-y-auto bg-gray-50 px-8 py-6">
+    <StaffLayout searchPlaceholder="Search configurations...">
+      <div className="px-8 py-6 pb-20">
 
           {/* Page header */}
           <div className="flex items-center justify-between mb-6">
@@ -490,8 +427,7 @@ export default function CreateCar() {
               </Section>
             </div>
           </form>
-        </div>
-      </main>
-    </div>
+      </div>
+    </StaffLayout>
   );
 }

@@ -1,5 +1,5 @@
 package com.tlaq.catalog_service.entity.enums;
 
 public enum AppraisalStatus {
-    PENDING, INSPECTING, BOUGHT, REJECTED
+    PENDING, INSPECTING, BOUGHT, REJECTED, INVENTORIED
 }

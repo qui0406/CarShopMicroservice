@@ -1,0 +1,13 @@
+{
+  "model": "HistGradientBoosting (sklearn, tabular-only, no image, no text)",
+  "n_train": 1242,
+  "n_val": 156,
+  "n_test": 156,
+  "n_iter": 500,
+  "MAE_trieu_VND": 24.68,
+  "RMSE_trieu_VND": 35.42,
+  "MAPE_percent": 6.09,
+  "R2_score": 0.9622,
+  "Ti_le_sai_so_under_10pct": 83.33,
+  "Ti_le_sai_so_under_20pct": 96.15
+}

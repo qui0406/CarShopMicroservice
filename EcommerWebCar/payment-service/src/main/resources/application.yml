@@ -58,26 +58,6 @@ payment:
     url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
 
 
-#resilience4j:
-#  circuitbreaker:
-#    instances:
-#      vnpayCircuitBreaker:
-#        registerHealthIndicator: true
-#        slidingWindowType: COUNT_BASED
-#        slidingWindowSize: 5
-#        minimumNumberOfCalls: 3
-#        failureRateThreshold: 50
-#        waitDurationInOpenState: 30s
-#  retry:
-#    instances:
-#      vnpayRetry:
-#        maxAttempts: 3
-#        waitDuration: 2s
-#  timelimiter:
-#    instances:
-#      vnpayTimeLimiter:
-#        timeoutDuration: 5s
-
 idp:
   url: http://localhost:8180/realms/anhqui/protocol/openid-connect/token
   client-id: ecommer-app
