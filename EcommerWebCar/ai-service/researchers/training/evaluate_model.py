@@ -30,7 +30,7 @@ os.makedirs(OUT_DIR, exist_ok=True)
 
 CAT_COLUMNS = [
     "model", "version_extracted", "gearbox", "fuel",
-    "body_type_clean", "origin_clean", "exterior_color",
+    "body_type_clean", "origin_clean", "exterior_color", "drivetrain_clean"
 ]
 CURRENT_YEAR = 2025
 
@@ -78,6 +78,10 @@ def encode_metadata(df, encoders, scaler):
 
     parts.append((df["is_single_owner"].astype(int).values / 1.0).reshape(-1, 1))
     parts.append((df["seats_clean"].values / 8.0).reshape(-1, 1))
+    
+    # New features
+    parts.append((df["engine_capacity"].values / 5.0).reshape(-1, 1))
+    parts.append((df["airbags_clean"].values / 10.0).reshape(-1, 1))
 
     numeric = df[["year", "odo", "car_age", "log_odo"]].values
     scaled  = scaler.transform(numeric)
@@ -230,7 +234,7 @@ def main():
             "median": float(df_test["price_million"].median()),
         },
         "=== THÔNG SỐ MODEL ===": "",
-        "architecture": "EfficientNetB0 (frozen) + Metadata (13 feat) + TF-IDF (100 feat)",
+        "architecture": "EfficientNetB0 (frozen) + Metadata (16 feat) + TF-IDF (100 feat)",
         "target": "log1p(price_million) — học trong log-space",
         "optimizer": "Adam lr=3e-4",
         "loss_fn": "Huber(delta=0.5)",

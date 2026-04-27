@@ -1,5 +1,3 @@
-# Showroom Ô Tô ABC
-
 ## Câu hỏi thường gặp
 
 ### Quy trình mua xe
@@ -107,3 +105,25 @@ Creta tốt hơn nếu anh/chị: ngân sách hạn chế hơn, chủ yếu đi 
 - Bảo hiểm thân vỏ: 0.5-1.5% giá trị xe/năm (khuyến nghị mua)
 - Phí đăng ký biển số: 20-200 triệu tùy tỉnh thành
 - Phụ kiện tối thiểu: 5-15 triệu (thảm sàn, phim cách nhiệt...)
+
+---
+
+## Các câu hỏi khó thường gặp (Góc giải đáp chi tiết)
+
+### 1. Đặt cọc xe rồi nhưng ngân hàng từ chối cho vay, tôi có bị mất tiền cọc (10-20 triệu) không?
+**Trả lời:** Showroom cam kết sẽ hoàn lại 100% tiền đặt cọc nếu nguyên nhân từ chối xuất phát từ phía ngân hàng (không đủ hạn mức, chính sách thắt chặt tỷ lệ giải ngân...), và khách hàng đã cung cấp thông tin trung thực ngay từ đầu. Tuy nhiên, nếu khách hàng cố tình cung cấp hồ sơ giả mạo hoặc tự ý đổi ý không mua nữa, số tiền cọc sẽ chiếu theo quy định hợp đồng để xử lý.
+
+### 2. Tôi lắp thêm camera hành trình, độ đèn LED và màn hình Android thì có bị mất bảo hành chính hãng không?
+**Trả lời:** Theo chính sách bảo hành 3 năm/100.000km, các hỏng hóc trích xuất do việc can thiệp vào hệ thống điện nguyên bản (cắt nối dây) sẽ không được bảo hành. Tuy nhiên, nếu bạn chỉ cắm giắc zin (plug & play) hoặc độ thiết bị ở ngoài nhưng bị lỗi ở phần cơ khí (ví dụ: gầm, động cơ, phuộc) thì xe vẫn được bảo hành bộ phận đó. Showroom tư vấn khách hàng nên ưu tiên lắp các gói phụ kiện chính hãng tại đại lý để giữ 100% quyền lợi bảo hành toàn xe.
+
+### 3. Khách bị nợ chú ý hoặc nợ xấu (Nhóm 2, Nhóm 3) thì có vay được tối đa 80% với lãi suất 7.5% như thông báo không?
+**Trả lời:** Đối với vay có lịch sử nợ chú ý hoặc nợ xấu, bộ phận thẩm định của ngân hàng sẽ xét duyệt rất khắt khe. Các trường hợp này thường **không** thể vay đến mức tối đa 80% chuẩn mực và mức lãi suất cũng có thể bị điều chỉnh cao hơn so với gói ưu đãi. Showroom sẽ hỗ trợ đưa hồ sơ cho các đối tác tín dụng chuyên biệt xử lý, nhưng tỷ lệ vay thực tế sẽ phụ thuộc sau khi ngân hàng check CIC.
+
+### 4. So sánh mức tiêu hao nhiên liệu thực tế của CX-5 và Creta khi đi phố tắc đường? Tôi không tin số liệu của hãng.
+**Trả lời:** Thực tế sử dụng, Mazda CX-5 do sử dụng xác xe nặng của SUV hạng C và động cơ 2.0L sẽ ăn xăng vào khoảng 9 - 11 lít/100km cho vòng tua thấp đường kẹt xe. Trái lại, Creta (nhẹ hơn, động cơ 1.5L) tiết kiệm hơn đáng kể ở mức 7 - 8.5 lít/100km. Tuy Creta ăn ít xăng hơn đi phố, nhưng nếu ra đường trường hoặc chở đủ 5 người, CX-5 lại bốc, đầm chắc và có trớn vượt xe tải an toàn hơn hẳn.
+
+### 5. Tôi mua xe bên mình có bị tình trạng "bia kèm lạc" (bắt mua phụ kiện 20-30 triệu) mới được giao xe sớm không?
+**Trả lời:** Showroom cam kết chính sách bán hàng cực kì minh bạch: **Không ép mua phụ kiện**. Nếu xe có sẵn trong kho, anh/chị hoàn tất thủ tục ngân hàng/tiền mặt là có thể nhận xe ngay trong ngày. Với những phiên bản đặc biệt hoặc màu hiếm phải ký chờ 7-30 ngày, showrom đảm bảo trả xe đúng thứ tự ưu tiên của khách đã cọc trước trong hợp đồng, hoàn toàn không có việc ép mua thêm gói trang bị.
+
+### 6. Khi xe đang đi trên đường cao tốc bị chết máy, dịch vụ cứu hộ 24/7 có được miễn phí hoàn toàn không?
+**Trả lời:** Dịch vụ cứu hộ sẽ **miễn phí** kéo xe về xưởng đại lý gần nhất nếu xe bạn vẫn còn trong thời hạn bảo hành (3 năm/100.000km) và lỗi sự cố xuất phát từ nhà sản xuất (ví dụ lỗi bộ điều khiển bơm xăng, lỗi hộp số). Nếu nguyên nhân là do lỗi chủ quan của người lái (như hết xăng, đâm đụng, lội nước ngập quỷ thủy kích hoặc nổ lốp), chi phí gọi xe thớt kéo sẽ do chủ xe hoặc phía bên Bảo hiểm thân vỏ (nếu có mua) chi trả.

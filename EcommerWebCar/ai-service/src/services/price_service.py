@@ -22,34 +22,29 @@ def preprocess_image(image_bytes: bytes) -> Tuple[Optional[np.ndarray], Optional
 
 
 def safe_encode(encoder, value: str) -> float:
-    """Encode categorical value; dùng fuzzy-match khi không tìm thấy exact match."""
     if encoder is None:
         return 0.0
     try:
         classes = list(encoder.classes_)
         max_val = len(classes) - 1
 
-        # 1. Exact match
         if value in classes:
             idx = encoder.transform([value])[0]
             return float(idx) / (max_val + 1e-7) if max_val > 0 else 0.0
 
-        # 2. Case-insensitive match
         val_lower = value.lower().strip()
         for cls in classes:
             if cls.lower().strip() == val_lower:
                 idx = encoder.transform([cls])[0]
                 return float(idx) / (max_val + 1e-7) if max_val > 0 else 0.0
 
-        # 3. Substring match — tìm class chứa value (ưu tiên class dài nhất để chính xác nhất)
         candidates = [cls for cls in classes if val_lower in cls.lower() or cls.lower() in val_lower]
         if candidates:
-            best = max(candidates, key=lambda c: len(c))  # chọn class dài nhất (chi tiết nhất)
+            best = max(candidates, key=lambda c: len(c))
             idx  = encoder.transform([best])[0]
             logger.debug(f"safe_encode fuzzy match: '{value}' → '{best}'")
             return float(idx) / (max_val + 1e-7) if max_val > 0 else 0.0
 
-        # 4. Fallback: dùng class giữa (median) thay vì 0 để tránh bias cực đoan
         mid_idx = max_val // 2
         logger.debug(f"safe_encode fallback median for '{value}' (not in encoder)")
         return float(mid_idx) / (max_val + 1e-7) if max_val > 0 else 0.0
@@ -59,17 +54,20 @@ def safe_encode(encoder, value: str) -> float:
 
 
 def preprocess_tabular(
-        model_name:  str,
-        trim_name:   str,
-        year:        int,
-        odo:         int,
-        fuel:        str,
-        body_type:   str,
-        color:       str,
-        gearbox:     str,
-        origin:      str,
-        owner_count: int,
-        seats:       int
+        model_name:      str,
+        trim_name:       str,
+        year:            int,
+        odo:             int,
+        fuel:            str,
+        body_type:       str,
+        color:           str,
+        gearbox:         str,
+        origin:          str,
+        owner_count:     int,
+        seats:           int,
+        engine_capacity: float = 2.0,
+        drivetrain:      str = "FWD",
+        airbags:         int = 6
 ) -> Tuple[Optional[np.ndarray], str]:
     full_name = f"{model_name} {trim_name}".strip()
 
@@ -79,23 +77,31 @@ def preprocess_tabular(
     num_s           = model_loader.scaler.transform([[year, odo, car_age, log_odo]])
     is_single_owner = 1.0 if owner_count == 1 else 0.0
     seats_scaled    = float(seats) / 8.0
-    meta_in         = np.zeros((1, 13), dtype="float32")
+    cap_scaled      = float(engine_capacity) / 5.0
+    air_scaled      = float(airbags) / 10.0
+    
+    meta_in         = np.zeros((1, 16), dtype="float32") # Updated to 16
 
     meta_in[0, 0]  = num_s[0, 0]                                           # year
     meta_in[0, 1]  = num_s[0, 1]                                           # odo
     meta_in[0, 2]  = num_s[0, 2]                                           # car_age
     meta_in[0, 3]  = num_s[0, 3]                                           # log_odo
+    
     bt_val = "SUV" if body_type.strip().upper() == "SUV" else body_type.strip().capitalize()
     
-    meta_in[0, 4]  = safe_encode(model_loader.le_model,     model_name)    # model
-    meta_in[0, 5]  = safe_encode(model_loader.le_version,   trim_name)     # version_extracted
-    meta_in[0, 6]  = safe_encode(model_loader.le_gearbox,   gearbox.capitalize())
-    meta_in[0, 7]  = safe_encode(model_loader.le_fuel,      fuel.capitalize())
-    meta_in[0, 8]  = safe_encode(model_loader.le_body_type, bt_val)
-    meta_in[0, 9]  = safe_encode(model_loader.le_origin,    origin.title())
-    meta_in[0, 10] = safe_encode(model_loader.le_color,     color.capitalize())
-    meta_in[0, 11] = is_single_owner
-    meta_in[0, 12] = seats_scaled
+    meta_in[0, 4]  = safe_encode(model_loader.le_model,      model_name)
+    meta_in[0, 5]  = safe_encode(model_loader.le_version,    trim_name)
+    meta_in[0, 6]  = safe_encode(model_loader.le_gearbox,    gearbox.capitalize())
+    meta_in[0, 7]  = safe_encode(model_loader.le_fuel,       fuel.capitalize())
+    meta_in[0, 8]  = safe_encode(model_loader.le_body_type,  bt_val)
+    meta_in[0, 9]  = safe_encode(model_loader.le_origin,     origin.title())
+    meta_in[0, 10] = safe_encode(model_loader.le_color,      color.capitalize())
+    meta_in[0, 11] = safe_encode(model_loader.le_drivetrain, drivetrain.upper()) # New
+    
+    meta_in[0, 12] = is_single_owner
+    meta_in[0, 13] = seats_scaled
+    meta_in[0, 14] = cap_scaled # New
+    meta_in[0, 15] = air_scaled # New
 
     return meta_in, full_name
 

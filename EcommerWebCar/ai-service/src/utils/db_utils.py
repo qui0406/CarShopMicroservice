@@ -32,15 +32,20 @@ def _db():
 
 
 def get_all_cars(
+    car_name: Optional[str] = None,
     branch_name: Optional[str] = None,
     category_name: Optional[str] = None,
     body_type: Optional[str] = None,
     fuel_type: Optional[str] = None,
-    min_price: Optional[float] = None,
-    max_price: Optional[float] = None,
+    min_price: Optional[float | str] = None,
+    max_price: Optional[float | str] = None,
 ) -> dict:
     conditions = ["c.is_used = 0"]
     params: list = []
+
+    if car_name:
+        conditions.append("cm.name LIKE %s")
+        params.append(f"%{car_name}%")
 
     if branch_name:
         conditions.append("cb.name LIKE %s")
@@ -56,10 +61,10 @@ def get_all_cars(
         params.append(fuel_type.upper())
     if min_price is not None:
         conditions.append("c.price >= %s")
-        params.append(min_price)
+        params.append(float(min_price))
     if max_price is not None:
         conditions.append("c.price <= %s")
-        params.append(max_price)
+        params.append(float(max_price))
 
     sql = f"""
         SELECT
@@ -466,8 +471,8 @@ def query_mysql_safe(
     fuel_type: str = "",
     user_id: str = "",
     request_id: str = "",
-    min_price: Optional[float] = None,
-    max_price: Optional[float] = None,
+    min_price: Optional[float | str] = None,
+    max_price: Optional[float | str] = None,
 ) -> str:
     intent = intent.strip().lower()
 
@@ -478,6 +483,7 @@ def query_mysql_safe(
     try:
         if intent == "list_cars":
             result = get_all_cars(
+                car_name=car_name or None,
                 branch_name=branch_name or None,
                 category_name=category_name or None,
                 body_type=body_type or None,
@@ -497,7 +503,6 @@ def query_mysql_safe(
             result = {"status": "error", "text": "Intent khong xu ly duoc.", "data": {}}
 
         data = result.get("data", [])
-        # Chỉ lưu kết quả khi DB thực sự có dữ liệu (tránh ghi đè bằng list rỗng)
         if data:
             _last_result["intent"] = intent
             _last_result["data"]   = data

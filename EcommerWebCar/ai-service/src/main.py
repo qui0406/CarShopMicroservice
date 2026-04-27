@@ -7,14 +7,15 @@ os.environ["TOKENIZERS_PARALLELISM"]             = "false"
 import re
 import ssl
 import uvicorn
-from datetime import datetime
-from typing import List
 
-from fastapi import FastAPI, UploadFile, File, Form
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 from pydantic import BaseModel
 from dotenv import load_dotenv
+from typing import List, Optional
+from fastapi import FastAPI, File, Form, UploadFile, HTTPException
+import os
+from datetime import datetime
 from fastapi.middleware.cors import CORSMiddleware
 
 from langchain_core.globals import set_llm_cache
@@ -38,7 +39,6 @@ from src.services.vision_helpers import get_penalty, to_base64
 
 import py_eureka_client.eureka_client as eureka_client
 
-# ─────────────────────────── Setup ───────────────────────────────────────────
 logger           = get_logger("MAIN_SERVICE")
 sentiment_logger = get_logger("SENTIMENT_ANALYSIS")
 
@@ -58,7 +58,6 @@ vision_llm = ChatGoogleGenerativeAI(
     temperature=0,
 )
 
-# ─────────────────────────── Eureka ──────────────────────────────────────────
 async def register_eureka():
     await eureka_client.init_async(
         eureka_server="http://localhost:8761/eureka",
@@ -72,11 +71,8 @@ async def lifespan(app: FastAPI):
     await register_eureka()
     yield
 
-# ─────────────────────────── App ─────────────────────────────────────────────
 app = FastAPI(title="Chatbot Showroom Ô tô", version="2.0.0", lifespan=lifespan)
 
-# CORS middleware is removed because API Gateway already handles CORS.
-# Adding it here causes Duplicate CORS headers ('*, *') and breaks the browser request.
 
 engine = RAGEngine()
 
@@ -93,7 +89,6 @@ except Exception as e:
 agent_executor = get_car_agent()
 print("Agent ready")
 
-# ─────────────────────────── Schemas ─────────────────────────────────────────
 class ChatRequest(BaseModel):
     message:    str
     session_id: str = "default_user"
@@ -103,9 +98,7 @@ class ClearHistoryRequest(BaseModel):
     session_id: str = "default_user"
 
 
-# ─────────────────────────── Helpers ─────────────────────────────────────────
 def extract_faults_from_description(text: str) -> list:
-    """Trích xuất các key lỗi từ mô tả người dùng nhập."""
     if not text:
         return []
     text = text.lower()
@@ -118,7 +111,6 @@ def extract_faults_from_description(text: str) -> list:
     return detected_keys
 
 
-# ─────────────────────────── Routes ──────────────────────────────────────────
 @app.get("/")
 def read_root():
     return {
@@ -282,26 +274,34 @@ async def identify_car_pro(file: UploadFile = File(...)):
         return {"success": False, "message": "Lỗi hệ thống.", "data": []}
 
 
+
+
 @app.post("/predict-price")
 async def predict_price_endpoint(
-    files:           List[UploadFile] = File(...),
-    model_name:      str  = Form(...),
-    trim_name:       str  = Form(...),
-    year:            int  = Form(...),
-    odo:             int  = Form(...),
-    fuel:            str  = Form(...),
-    origin:          str  = Form("Việt Nam"),
-    owner_count:     int  = Form(1),
-    service_history: bool = Form(True),
-    description:     str  = Form(""),
-    body_type:       str  = Form("SUV"),
-    color:           str  = Form("Trắng"),
-    gearbox:         str  = Form("Tự động"),
-    seats:           int  = Form(5),
+    model_name: str = Form(...),
+    trim_name: str = Form(...),
+    year: int = Form(...),
+    odo: int = Form(...),
+    fuel: str = Form(...),
+    origin: Optional[str] = Form("Việt Nam"),
+    owner_count: Optional[int] = Form(1),
+    service_history: Optional[str] = Form("true"),
+    description: Optional[str] = Form(""),
+    body_type: Optional[str] = Form("SUV"),
+    color: Optional[str] = Form("Trắng"),
+    gearbox: Optional[str] = Form("Tự động"),
+    seats: Optional[int] = Form(5),
+    engine_capacity: Optional[float] = Form(2.0),
+    drivetrain: Optional[str] = Form("FWD"),
+    airbags: Optional[int] = Form(6),
+    files: List[UploadFile] = File(...),
 ):
     logger.info(f"is_ready() = {is_ready()}")
     if not is_ready():
         return {"success": False, "error": "Model chưa sẵn sàng."}
+
+    if not files or len(files) == 0:
+        return {"success": False, "error": "Cần ít nhất 1 ảnh."}
 
     first_bytes = await files[0].read()
     temp_path   = f"_temp_{files[0].filename}"
@@ -309,14 +309,10 @@ async def predict_price_endpoint(
         f.write(first_bytes)
 
     try:
-        # Level 1: YOLO — loại ảnh không phải xe ô tô
         is_car, label, conf = is_valid_car_image(temp_path)
         if not is_car:
             return {"success": False, "error": "Ảnh không phải xe hơi hoặc quá mờ."}
 
-        # Level 2: GROQ — kiểm tra đúng dòng xe khai báo (TODO)
-
-        # Level 3: Dự đoán giá gốc
         img_bgr_main, img_in = preprocess_image(first_bytes)
         if img_in is None:
             return {"success": False, "error": "Không đọc được ảnh."}
@@ -333,19 +329,22 @@ async def predict_price_endpoint(
             origin=origin,
             owner_count=owner_count,
             seats=seats,
+            engine_capacity=engine_capacity,
+            drivetrain=drivetrain,
+            airbags=airbags
         )
-        text_in   = preprocess_text(full_name, year, origin, owner_count, service_history, description)
+
+        service_history_bool = str(service_history).lower() in ("true", "1", "yes")
+
+        text_in   = preprocess_text(full_name, year, origin, owner_count, service_history_bool, description)
         raw_price = round(predict_price(img_in, meta_in, text_in), 2)
 
-        # Trích xuất lỗi từ mô tả người dùng đã khai báo
-        declared_keys = extract_faults_from_description(description)
-
-        processed_keys = set()   # tránh tính trùng
-        total_penalty  = 0.0     # tổng điểm trừ
-        deduction_list = []      # chi tiết các khoản trừ
+        declared_keys  = extract_faults_from_description(description)
+        processed_keys = set()
+        total_penalty  = 0.0
+        deduction_list = []
         processed_images = []
 
-        # ── 1. Lỗi người dùng khai báo ─────────────────────────────────────
         for key in declared_keys:
             if key in processed_keys:
                 continue
@@ -360,37 +359,34 @@ async def predict_price_endpoint(
                 "source":   "description",
             })
 
-        # ── 2. Phát hiện trầy xước từ ảnh (AI) ────────────────────────────
-        for f in files:
-            await f.seek(0)
-            content = await f.read()
-            if not content:
-                continue
+        # await files[0].seek(0)
+        # for f in files:
+        #     content = await f.read()
+        #     if not content:
+        #         continue
+        #
+        #     img_bgr, _ = preprocess_image(content)
+        #     if img_bgr is None:
+        #         continue
+        #
+        #     annotated, damages = detect_damage(img_bgr)
+        #     processed_images.append(to_base64(annotated))
+        #
+        #     for d in damages:
+        #         key = d["item_key"]
+        #         if key in processed_keys:
+        #             continue
+        #         processed_keys.add(key)
+        #         amt = get_penalty(key)
+        #         total_penalty += amt
+        #         deduction_list.append({
+        #             "category": "EXTERIOR_AI",
+        #             "label":    f"{d['label']} ",
+        #             "key":      key,
+        #             "amount":   amt,
+        #             "file":     f.filename,
+        #         })
 
-            img_bgr, _ = preprocess_image(content)
-            if img_bgr is None:
-                continue
-
-            annotated, damages = detect_damage(img_bgr)
-            processed_images.append(to_base64(annotated))
-
-            for d in damages:
-                key = d["item_key"]
-                if key in processed_keys:
-                    logger.info(f"Bỏ qua trùng lặp: {key} trên {f.filename}")
-                    continue
-                processed_keys.add(key)
-                amt = get_penalty(key)
-                total_penalty += amt
-                deduction_list.append({
-                    "category": "EXTERIOR_AI",
-                    "label":    f"{d['label']} (AI phát hiện)",
-                    "key":      key,
-                    "amount":   amt,
-                    "file":     f.filename,
-                })
-
-        # ── 3. Khấu trừ ODO vượt chuẩn ────────────────────────────────────
         std_odo = max(1, datetime.now().year - year) * 15_000
         over_km = max(0, (odo - std_odo) // 1_000)
         if over_km > 0:
@@ -403,7 +399,6 @@ async def predict_price_endpoint(
                 "amount":   p_odo,
             })
 
-        # ── 4. Khấu trừ nhiều đời chủ ──────────────────────────────────────
         if owner_count >= 2:
             p = get_penalty("HIS_02")
             total_penalty += p
@@ -414,10 +409,7 @@ async def predict_price_endpoint(
                 "amount":   p,
             })
 
-        # ── 5. Penalty: thiếu lịch sử bảo dưỡng ──────────────────────────
-        # Lý do không bonus service_history: giá thị trường đã phản ánh
-        # những điểm tốt (người bán sẽ tự khoe). Chỉ trừ khi không có.
-        if not service_history:
+        if not service_history_bool:
             mp = get_penalty("HIS_01")
             total_penalty += mp
             deduction_list.append({
@@ -427,8 +419,6 @@ async def predict_price_endpoint(
                 "amount":   mp,
             })
 
-        # ── Tổng hợp ──────────────────────────────────────────────────────
-        # Chỉ trừ điểm, không cộng: giá thị trường đã phản ánh mặt tốt rồi.
         final_price = max(0.0, round(raw_price - total_penalty, 2))
 
         return {
@@ -454,4 +444,4 @@ async def predict_price_endpoint(
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="penalty")

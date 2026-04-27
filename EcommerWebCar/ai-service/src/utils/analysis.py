@@ -55,7 +55,6 @@ def _llm_sentiment(text: str) -> str:
         temperature=0,
     )
 
-    # ✅ Guard None trước khi gọi .strip()
     content = response.choices[0].message.content
     if not content:
         return "NEUTRAL"

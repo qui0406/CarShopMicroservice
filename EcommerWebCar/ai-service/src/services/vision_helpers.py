@@ -7,11 +7,9 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-# src/services/ -> root -> data/info/
 BASE_DIR     = Path(__file__).resolve().parents[2]
-_PENALTY_CSV = BASE_DIR / "data" / "info" / "mazda_standard.csv"
+_PENALTY_CSV = BASE_DIR / "data" / "penalty" / "mazda_penalty.csv"
 
-# penalty_price > 0 → trừ giá  |  penalty_price < 0 → cộng thêm giá (bonus)
 _adjustment_cache: dict[str, float] = {}
 _type_cache:       dict[str, str]   = {}   # "PENALTY" | "BONUS"
 
@@ -50,7 +48,6 @@ _load_penalty_table()
 
 
 def _get_raw(item_key: str) -> float:
-    """Trả về raw value trong CSV (dương = penalty, âm = bonus)."""
     val = _adjustment_cache.get(item_key)
     if val is None:
         logger.warning(
@@ -62,17 +59,14 @@ def _get_raw(item_key: str) -> float:
 
 
 def get_penalty(item_key: str) -> float:
-    """Trả về giá trị khấu trừ (luôn dương). Dùng cho penalty keys."""
     return abs(_get_raw(item_key))
 
 
 def get_bonus(item_key: str) -> float:
-    """Trả về giá trị cộng thêm (luôn dương). Dùng cho bonus keys."""
     return abs(_get_raw(item_key))
 
 
 def get_item_type(item_key: str) -> str:
-    """Trả về 'PENALTY' hoặc 'BONUS' cho một item_key."""
     return _type_cache.get(item_key, "PENALTY")
 
 

@@ -20,14 +20,15 @@ le_body_type = None
 le_color     = None
 le_gearbox   = None
 le_origin    = None
-le_version   = None
+le_version      = None
+le_drivetrain   = None
 
 _loaded = False
 
 
 def load_all() -> None:
     global price_model, scaler, tfidf, le_model, le_fuel
-    global le_body_type, le_color, le_gearbox, le_origin, le_version, _loaded
+    global le_body_type, le_color, le_gearbox, le_origin, le_version, le_drivetrain, _loaded
 
     if _loaded:
         return
@@ -44,6 +45,7 @@ def load_all() -> None:
     _load(name="le_gearbox",  path=os.path.join(_TRANSFORMERS_PATH, "le_gearbox.pkl"),                 loader_fn=_load_pickle)
     _load(name="le_origin",   path=os.path.join(_TRANSFORMERS_PATH, "le_origin_clean.pkl"),            loader_fn=_load_pickle)
     _load(name="le_version",  path=os.path.join(_TRANSFORMERS_PATH, "le_version_extracted.pkl"),       loader_fn=_load_pickle)
+    _load(name="le_drivetrain",path=os.path.join(_TRANSFORMERS_PATH, "le_drivetrain_clean.pkl"),        loader_fn=_load_pickle)
 
     _loaded = True
 

@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 CAT_COLUMNS = [
     'model', 'version_extracted', 'gearbox', 'fuel',
-    'body_type_clean', 'origin_clean', 'exterior_color'
+    'body_type_clean', 'origin_clean', 'exterior_color', 'drivetrain_clean'
 ]
 
 CURRENT_YEAR = 2025
@@ -72,6 +72,10 @@ def _encode_metadata(df: pd.DataFrame,
 
     encoded_features.append((df["is_single_owner"].astype(int).values / 1.0).reshape(-1, 1))
     encoded_features.append((df["seats_clean"].values / 8.0).reshape(-1, 1))
+    
+    # New features scaling
+    encoded_features.append((df["engine_capacity"].values / 5.0).reshape(-1, 1))
+    encoded_features.append((df["airbags_clean"].values / 10.0).reshape(-1, 1))
 
     numeric = df[["year", "odo", "car_age", "log_odo"]].values
     scaled  = scaler.transform(numeric)

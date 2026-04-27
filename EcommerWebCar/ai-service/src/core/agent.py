@@ -41,13 +41,13 @@ class MySQLQueryInput(BaseModel):
     fuel_type: str = Field(default="", description="Nhien lieu ENUM. VD: 'XANG', 'DIEN', 'HYBRID'")
     user_id: str = Field(default="", description="User ID, dung khi intent='appraisal'")
     request_id: str = Field(default="", description="Ma yeu cau dinh gia.")
-    min_price: float = Field(default=None, description="Gia thap nhat (VNĐ). VD: 500000000 cho 500 trieu.")
-    max_price: float = Field(default=None, description="Gia cao nhat (VNĐ). VD: 1000000000 cho 1 ty.")
+    min_price: str | float = Field(default=None, description="Gia thap nhat (VNĐ). VD: 500000000 cho 500 trieu.")
+    max_price: str | float = Field(default=None, description="Gia cao nhat (VNĐ). VD: 1000000000 cho 1 ty.")
 
 class RollingPriceInput(BaseModel):
     car_name: str = Field(description="Tên xe cần tính giá lăn bánh. VD: 'Mazda 3', 'CX-5'")
     address: str = Field(default="HCM", description="Tỉnh thành đăng ký xe. VD: 'Hà Nội', 'HCM', 'Đà Nẵng'")
-    quantity: int = Field(default=1, description="Số lượng xe mua.")
+    quantity: str | int = Field(default=1, description="Số lượng xe mua.")
 
 
 class CarFAQInput(BaseModel):
@@ -68,7 +68,7 @@ def get_car_agent():
         max_tokens=1000,
     )
 
-    def rolling_price_logic(car_name: str, address: str, quantity: int = 1) -> str:
+    def rolling_price_logic(car_name: str, address: str, quantity: str | int = 1) -> str:
         summary, data = get_car_and_calculate_rolling(car_name, address, quantity)
         if data:
             set_last_result("rolling_price", data)
@@ -89,8 +89,8 @@ def get_car_agent():
         fuel_type: str = "",
         user_id: str = "",
         request_id: str = "",
-        min_price: float = None,
-        max_price: float = None,
+        min_price: float | str = None,
+        max_price: float | str = None,
     ) -> str:
         return query_mysql_safe(
             intent=intent,
@@ -184,33 +184,25 @@ def get_car_agent():
 
 
     prompt = ChatPromptTemplate.from_messages([
-        ("system", """Ban la Tu van vien Showroom o to chuyen nghiep, nhiet tinh.
-Xung "em", goi khach la "anh/chi".
+        ("system", """Bạn là Chuyên viên Tư vấn cấp cao của Showroom Ô tô, tên là 'Em'.
+Hãy trò chuyện TỰ NHIÊN, THÔNG MINH và NHIỆT TÌNH. Xưng "em", gọi khách là "anh/chi".
 
-NGUYEN TAC LOC DU LIEU (MySQL_Query_Tool):
-- Kiem tra ky yeu cau ve GIA (min_price, max_price). 
-  + 1 ty = 1000000000
-  + 500 trieu = 500000000
-- Chi dung filter (category, body_type, fuel_type) khi khach thuc su yeu cau. 
-- Neu khach noi "xe gia dinh", "xe di lam" ma khong noi ro kieu dang -> KHONG tu y dien body_type hoac category_name vao tool, hay de trong de tim tat ca cac xe phu hop gia.
+MỤC TIÊU:
+1. Giải đáp chính xác thắc mắc của khách hàng dựa trên dữ liệu thực tế.
+2. Nếu khách thắc mắc "tại sao giá cao", "chi tiết thế nào" -> Hãy phân tích kỹ các thành phần (thuế, phí, trang bị) từ kết quả của tool để giải thích cho khách hiểu, đừng chỉ lặp lại con số tổng.
+3. Nếu khách có vẻ không hài lòng hoặc ngạc nhiên về giá -> Hãy kiên nhẫn, lịch sự giải thích đây là các chi phí bắt buộc theo quy định nhà nước (đối với giá lăn bánh) hoặc giá trị tương xứng với tình trạng xe.
 
-NGUYEN TAC SU DUNG TOOL:
-- "Gia xe / Con xe gi"              -> MySQL_Query_Tool
-- "Gia lan banh / Tong chi phi mua" -> Calculate_Rolling_Price
-- "So sanh / Tu van / Bao hanh"     -> Car_FAQ_Knowledge
-- "Co xe gi / dang ban gi"           -> MySQL_Query_Tool intent="list_cars"
-- "Thong so / gia xe X"              -> MySQL_Query_Tool intent="car_detail"
-- "Con hang khong / ton kho"         -> MySQL_Query_Tool intent="inventory"
-- "Dia chi / SDT / Zalo showroom"    -> MySQL_Query_Tool intent="showroom_info"
-- "Dinh gia / xe cu"                 -> MySQL_Query_Tool intent="appraisal"
-- "So sanh / quy trinh / bao hanh"   -> Car_FAQ_Knowledge
-- "Tra gop / tai chinh / vay mua xe" -> Loan_Finance_Guidance
+NGUYÊN TẮC TRUY VẤN (MySQL_Query_Tool):
+- 'list_cars': Dùng khi khách muốn xem danh sách xe theo tiêu chí (giá, loại xe, tên xe). 
+- 'car_detail': Dùng khi khách hỏi chi tiết CỤ THỂ 1 chiếc xe (trang bị, thông số, ảnh).
+- Luôn ưu tiên điền 'car_name' nếu khách nhắc tới một dòng xe cụ thể để lọc chính xác nhất.
+- 1 tỷ = 1000000000, 500 triệu = 500000000.
 
-QUY TAC:
-1. Goi tool TOI DA 1 lan moi loai. Sau khi co ket qua -> TRA LOI NGAY.
-2. Neu tool tra "[DB_ERROR]" -> "Da em chua tim duoc thong tin, anh/chi lien he truc tiep nhe."
-3. Neu hoi ngoai chu de xe -> "Em chi tu van ve xe o to thoi a."
-4. Tra loi ngan gon 2-4 cau, ket thuc bang 1 cau hoi goi mo."""),
+NGUYÊN TẮC TRẢ LỜI:
+1. TRẢ LỜI ĐÚNG TRỌNG TÂM: Khách hỏi gì trả lời nấy. Nếu khách hỏi "tại sao", hãy giải thích lý do.
+2. KHÔNG COPY-PASTE TOÀN BỘ TOOL OUTPUT: Hãy tóm tắt lại một cách thông minh, dễ hiểu. Đối với danh sách xe, chỉ nêu các xe nổi bật nhất.
+3. TÔNG GIỌNG: Chuyên nghiệp nhưng gần gũi. Tránh trả lời như robot (ví dụ: không lặp đi lặp lại câu "Anh/chị muốn mua xe này không?").
+4. CÂU HỎI GỢI MỞ: Chỉ đặt câu hỏi ở cuối nếu thực sự cần thêm thông tin để tư vấn tiếp. Đừng ép buộc mỗi câu đều phải có câu hỏi."""),
         MessagesPlaceholder(variable_name="chat_history"),
         ("human", "{input}"),
         MessagesPlaceholder(variable_name="agent_scratchpad"),

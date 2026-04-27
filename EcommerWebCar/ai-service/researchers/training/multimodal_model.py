@@ -5,7 +5,7 @@ import tensorflow as tf
 from tensorflow.keras import layers, models, regularizers
 
 
-def create_multimodal_model(input_shape_img=(224, 224, 3), num_metadata_features=13):
+def create_multimodal_model(input_shape_img=(224, 224, 3), num_metadata_features=16):
     l2_reg = regularizers.l2(1e-4)
 
     base_model = tf.keras.applications.EfficientNetB0(
