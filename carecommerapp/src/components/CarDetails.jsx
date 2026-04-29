@@ -64,7 +64,7 @@ export default function CarDetails() {
   return (
     <div style={{ backgroundColor: "#f5f6f8", minHeight: "100vh", paddingTop: "80px", paddingBottom: "100px", fontFamily: "'Inter', sans-serif" }}>
       <Container style={{ maxWidth: "1250px" }}>
-        
+
         {/* HEADER SECTION */}
         <Row className="mb-4">
           {/* LEFT SIDE: Images */}
@@ -96,29 +96,29 @@ export default function CarDetails() {
             <h1 style={{ fontSize: "2rem", fontWeight: 800, color: "#111", lineHeight: 1.2, marginBottom: "12px", letterSpacing: "-0.5px" }}>
               {car.name}
             </h1>
-            <div style={{ fontSize: "0.85rem", color: "#6c757d", fontWeight: 600, marginBottom: "4px", textTransform: "uppercase", letterSpacing: "1px" }}>Estimated Price</div>
+            <div style={{ fontSize: "0.85rem", color: "#6c757d", fontWeight: 600, marginBottom: "4px", textTransform: "uppercase", letterSpacing: "1px" }}>Giá dự kiến</div>
             <div style={{ display: "flex", alignItems: "center", gap: "20px", marginBottom: "24px", flexWrap: "wrap" }}>
               <h2 style={{ fontSize: "1.8rem", fontWeight: 900, color: "#0a58ca", margin: 0 }}>
                 {formatPrice(car.price)}
               </h2>
               <Button onClick={() => navigate(`/reserve/${id}`)} style={{ backgroundColor: "#0a58ca", color: "#fff", border: "none", padding: "12px 30px", fontWeight: 800, borderRadius: "4px", fontSize: "0.9rem", textTransform: "uppercase", letterSpacing: "1px", boxShadow: "0 4px 12px rgba(10, 88, 202, 0.2)" }}>
-                Order Car
+                Đặt xe ngay
               </Button>
             </div>
 
             <div style={{ backgroundColor: "#f8f9fa", border: "1px solid #e0e5f2", padding: "24px", borderRadius: "4px", fontSize: "0.95rem", color: "#495057", lineHeight: 1.6, marginBottom: "24px" }}>
-              Precision engineering meets breathtaking design. The {car.manufacturingYear || "2026"} {car.name} continues to push the boundaries of design language with refined luxury.
+              Sự kết hợp giữa kỹ thuật chính xác và thiết kế ngoạn mục. Mẫu {car.name} {car.manufacturingYear || "2026"} tiếp tục bứt phá các giới hạn thiết kế với sự sang trọng tinh tế.
             </div>
 
             <Row className="g-3">
               <Col xs={6}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "16px", border: "1px solid #e9ecef", borderRadius: "4px", backgroundColor: "#fff", fontWeight: 700, fontSize: "0.9rem", color: "#212529" }}>
-                  <FaMedal color="#0a58ca" size={20} /> Official Dealer
+                  <FaMedal color="#0a58ca" size={20} /> Đại lý chính hãng
                 </div>
               </Col>
               <Col xs={6}>
                 <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "16px", border: "1px solid #e9ecef", borderRadius: "4px", backgroundColor: "#fff", fontWeight: 700, fontSize: "0.9rem", color: "#212529" }}>
-                  <BiCheckShield color="#0a58ca" size={22} /> 5-Year Warranty
+                  <BiCheckShield color="#0a58ca" size={22} /> Bảo hành 5 năm
                 </div>
               </Col>
             </Row>
@@ -130,22 +130,22 @@ export default function CarDetails() {
           <Col md={3}>
             <div style={{ border: "1px solid #e0e5f2", borderRadius: "4px", backgroundColor: "#fff", padding: "24px 16px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%" }}>
               <FaWrench color="#0a58ca" size={24} style={{ marginBottom: "12px" }} />
-              <div style={{ fontSize: "0.75rem", fontWeight: 800, color: "#111", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "4px" }}>Engine</div>
+              <div style={{ fontSize: "0.75rem", fontWeight: 800, color: "#111", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "4px" }}>Động cơ</div>
               <div style={{ fontSize: "1.1rem", fontWeight: 700, color: "#111" }}>{car.carModel?.technicalSpec?.engine || "1.5L SkyActiv"}</div>
             </div>
           </Col>
           <Col md={3}>
             <div style={{ border: "1px solid #e0e5f2", borderRadius: "4px", backgroundColor: "#fff", padding: "24px 16px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%" }}>
               <LuSettings2 color="#0a58ca" size={26} style={{ marginBottom: "12px" }} />
-              <div style={{ fontSize: "0.75rem", fontWeight: 800, color: "#111", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "4px" }}>Transmission</div>
+              <div style={{ fontSize: "0.75rem", fontWeight: 800, color: "#111", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "4px" }}>Hộp số</div>
               <div style={{ fontSize: "1.1rem", fontWeight: 700, color: "#111" }}>{car.carModel?.technicalSpec?.transmission || "Automatic"}</div>
             </div>
           </Col>
           <Col md={3}>
             <div style={{ border: "1px solid #e0e5f2", borderRadius: "4px", backgroundColor: "#fff", padding: "24px 16px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100%" }}>
               <MdOutlineLocalGasStation color="#0a58ca" size={28} style={{ marginBottom: "12px" }} />
-              <div style={{ fontSize: "0.75rem", fontWeight: 800, color: "#111", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "4px" }}>Seats</div>
-              <div style={{ fontSize: "1.1rem", fontWeight: 700, color: "#111" }}>{car.carModel?.seatCapacity || 5} Seats</div>
+              <div style={{ fontSize: "0.75rem", fontWeight: 800, color: "#111", letterSpacing: "1px", textTransform: "uppercase", marginBottom: "4px" }}>Chỗ ngồi</div>
+              <div style={{ fontSize: "1.1rem", fontWeight: 700, color: "#111" }}>{car.carModel?.seatCapacity || 5} Chỗ</div>
             </div>
           </Col>
           <Col md={3}>
@@ -162,54 +162,54 @@ export default function CarDetails() {
           {/* LEFT TABS AND INFO */}
           <Col lg={8}>
             <div style={{ display: "flex", gap: "30px", borderBottom: "1px solid #dee2e6", marginBottom: "30px", backgroundColor: "#fff", padding: "15px 30px 0 30px", borderRadius: "4px" }}>
-              <div style={{ paddingBottom: "15px", borderBottom: "3px solid #0a58ca", color: "#0a58ca", fontWeight: 800, fontSize: "0.95rem", cursor: "pointer" }}>Overview</div>
-              <div style={{ paddingBottom: "15px", color: "#495057", fontWeight: 600, fontSize: "0.95rem", cursor: "pointer" }}>Technical Specs</div>
-              <div style={{ paddingBottom: "15px", color: "#495057", fontWeight: 600, fontSize: "0.95rem", cursor: "pointer" }}>Equipment</div>
+              <div style={{ paddingBottom: "15px", borderBottom: "3px solid #0a58ca", color: "#0a58ca", fontWeight: 800, fontSize: "0.95rem", cursor: "pointer" }}>Tổng quan</div>
+              <div style={{ paddingBottom: "15px", color: "#495057", fontWeight: 600, fontSize: "0.95rem", cursor: "pointer" }}>Thông số kỹ thuật</div>
+              <div style={{ paddingBottom: "15px", color: "#495057", fontWeight: 600, fontSize: "0.95rem", cursor: "pointer" }}>Trang bị</div>
             </div>
 
             <div style={{ backgroundColor: "#fff", padding: "40px 30px", borderRadius: "4px", border: "1px solid #e0e5f2" }}>
-              <h4 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#212529", marginBottom: "24px" }}>Vehicle Performance & Details</h4>
-              
+              <h4 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#212529", marginBottom: "24px" }}>Hiệu suất & Chi tiết xe</h4>
+
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "45px" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", backgroundColor: "#f8f9fa", padding: "16px 20px", borderRadius: "4px" }}>
-                  <span style={{ color: "#6c757d", fontSize: "0.9rem" }}>Engine Capacity</span>
+                  <span style={{ color: "#6c757d", fontSize: "0.9rem" }}>Dung tích động cơ</span>
                   <span style={{ fontWeight: 800, color: "#212529", fontSize: "0.9rem" }}>{car.carModel?.technicalSpec?.engineSize || "1.5L"}</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", backgroundColor: "#f8f9fa", padding: "16px 20px", borderRadius: "4px" }}>
-                  <span style={{ color: "#6c757d", fontSize: "0.9rem" }}>Max Power</span>
+                  <span style={{ color: "#6c757d", fontSize: "0.9rem" }}>Công suất tối đa</span>
                   <span style={{ fontWeight: 800, color: "#212529", fontSize: "0.9rem" }}>{car.carModel?.technicalSpec?.horsepower || "110"} Hp</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", backgroundColor: "#f8f9fa", padding: "16px 20px", borderRadius: "4px" }}>
-                  <span style={{ color: "#6c757d", fontSize: "0.9rem" }}>Max Torque</span>
+                  <span style={{ color: "#6c757d", fontSize: "0.9rem" }}>Mô-men xoắn tối đa</span>
                   <span style={{ fontWeight: 800, color: "#212529", fontSize: "0.9rem" }}>{car.carModel?.technicalSpec?.torque || "146"} Nm</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", backgroundColor: "#f8f9fa", padding: "16px 20px", borderRadius: "4px" }}>
-                  <span style={{ color: "#6c757d", fontSize: "0.9rem" }}>Fuel Tank</span>
+                  <span style={{ color: "#6c757d", fontSize: "0.9rem" }}>Bình nhiên liệu</span>
                   <span style={{ fontWeight: 800, color: "#212529", fontSize: "0.9rem" }}>{car.carModel?.technicalSpec?.fuelCapacity || "51"} L</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", backgroundColor: "#f8f9fa", padding: "16px 20px", borderRadius: "4px" }}>
-                  <span style={{ color: "#6c757d", fontSize: "0.9rem" }}>Wheelbase</span>
+                  <span style={{ color: "#6c757d", fontSize: "0.9rem" }}>Chiều dài cơ sở</span>
                   <span style={{ fontWeight: 800, color: "#212529", fontSize: "0.9rem" }}>{car.carModel?.technicalSpec?.length || "2,725"} mm</span>
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", backgroundColor: "#f8f9fa", padding: "16px 20px", borderRadius: "4px" }}>
-                  <span style={{ color: "#6c757d", fontSize: "0.9rem" }}>Ground Clearance</span>
+                  <span style={{ color: "#6c757d", fontSize: "0.9rem" }}>Khoảng sáng gầm</span>
                   <span style={{ fontWeight: 800, color: "#212529", fontSize: "0.9rem" }}>{car.carModel?.technicalSpec?.groundClearance || "145"} mm</span>
                 </div>
               </div>
 
-              <h4 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#212529", marginBottom: "24px" }}>Safety & Smart Equipment</h4>
-              
+              <h4 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#212529", marginBottom: "24px" }}>An toàn & Trang bị thông minh</h4>
+
               <div style={{ display: "flex", flexWrap: "wrap", gap: "20px", paddingBottom: "20px" }}>
                 {[
-                  car.carModel?.equipment?.laneKeepAssist ? "Lane Keep Assist" : null, 
-                  car.carModel?.equipment?.hasBluetooth ? "Bluetooth System" : null,
-                  car.carModel?.equipment?.hasAirbags ? "Airbags Protection" : null,
-                  car.carModel?.equipment?.smartKey ? "Smart Key Technology" : null,
-                  car.carModel?.equipment?.hasCamera ? "Camera System" : null,
-                  car.carModel?.equipment?.electricTrunk ? "Electric Trunk" : null,
-                  car.carModel?.equipment?.wirelessCharge ? "Wireless Charge" : null,
-                  car.carModel?.equipment?.headlampType ? `${car.carModel?.equipment?.headlampType} Lights` : null,
-                  car.carModel?.equipment?.seatMaterial || "Premium Seats",
+                  car.carModel?.equipment?.laneKeepAssist ? "Hỗ trợ giữ làn" : null,
+                  car.carModel?.equipment?.hasBluetooth ? "Hệ thống Bluetooth" : null,
+                  car.carModel?.equipment?.hasAirbags ? "Bảo vệ túi khí" : null,
+                  car.carModel?.equipment?.smartKey ? "Công nghệ chìa khóa thông minh" : null,
+                  car.carModel?.equipment?.hasCamera ? "Hệ thống Camera" : null,
+                  car.carModel?.equipment?.electricTrunk ? "Cốp điện" : null,
+                  car.carModel?.equipment?.wirelessCharge ? "Sạc không dây" : null,
+                  car.carModel?.equipment?.headlampType ? `Đèn ${car.carModel?.equipment?.headlampType}` : null,
+                  car.carModel?.equipment?.seatMaterial || "Ghế cao cấp",
                 ].filter(Boolean).map((feat, idx) => (
                   <div key={idx} style={{ width: "calc(33.33% - 15px)", display: "flex", alignItems: "center", gap: "10px", fontSize: "0.85rem", color: "#111", fontWeight: 600 }}>
                     <FaCheckCircle color="#0a58ca" size={16} /> {feat}
@@ -222,8 +222,8 @@ export default function CarDetails() {
             <Row className="g-3 mt-3">
               <Col md={6}>
                 <div style={{ backgroundColor: "#e9ecef", borderRadius: "4px", padding: "30px", height: "100%", display: "flex", flexDirection: "column", justifyContent: "flex-end", minHeight: "220px", position: "relative", overflow: "hidden", background: "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)" }}>
-                  <h5 style={{ fontWeight: 800, color: "#111", marginBottom: "12px", zIndex: 2 }}>Artisan Craftsmanship</h5>
-                  <p style={{ color: "#495057", fontSize: "0.9rem", margin: 0, zIndex: 2, lineHeight: 1.5 }}>Every detail in the cabin is curated to provide a tactile experience that connects the driver to the machine.</p>
+                  <h5 style={{ fontWeight: 800, color: "#111", marginBottom: "12px", zIndex: 2 }}>Tay nghề thủ công Artisan</h5>
+                  <p style={{ color: "#495057", fontSize: "0.9rem", margin: 0, zIndex: 2, lineHeight: 1.5 }}>Mọi chi tiết trong khoang lái đều được trau chuốt để mang lại trải nghiệm cảm xúc gắn kết người lái với cỗ máy.</p>
                 </div>
               </Col>
               <Col md={6}>
@@ -231,8 +231,8 @@ export default function CarDetails() {
                   <div style={{ marginBottom: "auto" }}>
                     <BiCube color="#fff" size={28} />
                   </div>
-                  <h5 style={{ fontWeight: 800, color: "#fff", marginBottom: "12px" }}>Eco Efficiency</h5>
-                  <p style={{ color: "rgba(255,255,255,0.9)", fontSize: "0.9rem", margin: 0, lineHeight: 1.5 }}>Optimized combustion for lower emissions without compromising power.</p>
+                  <h5 style={{ fontWeight: 800, color: "#fff", marginBottom: "12px" }}>Hiệu suất Sinh thái</h5>
+                  <p style={{ color: "rgba(255,255,255,0.9)", fontSize: "0.9rem", margin: 0, lineHeight: 1.5 }}>Tối ưu hóa quá trình đốt cháy để giảm phát thải mà không làm giảm công suất.</p>
                 </div>
               </Col>
             </Row>
@@ -242,33 +242,32 @@ export default function CarDetails() {
           <Col lg={4}>
             <Card style={{ border: "1px solid #e0e5f2", borderRadius: "4px", boxShadow: "0 10px 40px rgba(0,0,0,0.02)", marginBottom: "24px" }}>
               <Card.Body style={{ padding: "30px 24px" }}>
-                
+
                 <div style={{ display: "flex", alignItems: "center", gap: "15px", marginBottom: "30px" }}>
                   <div style={{ width: "50px", height: "50px", borderRadius: "50%", backgroundColor: "#e8f0fe", display: "flex", alignItems: "center", justifyContent: "center" }}>
                     <div style={{ width: "22px", height: "22px", backgroundColor: "#0a58ca", borderRadius: "50%" }}></div>
                   </div>
                   <div>
-                    <div style={{ fontWeight: 800, color: "#111", fontSize: "1.05rem" }}>Le Anh Tuan</div>
-                    <div style={{ fontSize: "0.85rem", color: "#6c757d", fontWeight: 500 }}>Sales Consultant</div>
+                    <div style={{ fontWeight: 800, color: "#111", fontSize: "1.05rem" }}>Lê Anh Tuấn</div>
+                    <div style={{ fontSize: "0.85rem", color: "#6c757d", fontWeight: 500 }}>Tư vấn bán hàng</div>
                   </div>
                 </div>
-
                 <Button style={{ width: "100%", backgroundColor: "#0a58ca", border: "none", padding: "16px", fontWeight: 700, borderRadius: "4px", fontSize: "0.95rem", marginBottom: "14px", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px" }} onClick={handleBookNow}>
-                  <FaPhoneAlt size={14} /> Call Now
-                </Button>
-                
-                <Button style={{ width: "100%", backgroundColor: "#fff", color: "#0a58ca", border: "1px solid #0a58ca", padding: "16px", fontWeight: 800, borderRadius: "4px", fontSize: "0.95rem", marginBottom: "14px", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px" }} onClick={() => setShowSchedule(true)}>
-                  <FaRegCalendarAlt size={16} /> Book Test Drive
+                  <FaPhoneAlt size={14} /> Gọi ngay
                 </Button>
 
-                <Button 
+                <Button style={{ width: "100%", backgroundColor: "#fff", color: "#0a58ca", border: "1px solid #0a58ca", padding: "16px", fontWeight: 800, borderRadius: "4px", fontSize: "0.95rem", marginBottom: "14px", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px" }} onClick={() => setShowSchedule(true)}>
+                  <FaRegCalendarAlt size={16} /> Đặt lịch lái thử
+                </Button>
+
+                <Button
                   onClick={() => setShow3DModel(true)}
                   style={{ width: "100%", backgroundColor: "#e9ecef", color: "#212529", border: "none", padding: "16px", fontWeight: 800, borderRadius: "4px", fontSize: "0.95rem", marginBottom: "40px", display: "flex", justifyContent: "center", alignItems: "center", gap: "8px" }}
                 >
-                  <BiCube size={20} /> View 3D Model
+                  <BiCube size={20} /> Xem mô hình 3D
                 </Button>
 
-                <div style={{ fontSize: "0.75rem", fontWeight: 800, color: "#495057", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "16px" }}>Share This Model</div>
+                <div style={{ fontSize: "0.75rem", fontWeight: 800, color: "#495057", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "16px" }}>Chia sẻ mẫu xe này</div>
                 <div style={{ display: "flex", gap: "12px" }}>
                   <div style={{ width: "40px", height: "40px", borderRadius: "4px", backgroundColor: "#e8f0fe", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#0a58ca" }}>
                     <FaShareAlt size={16} />
@@ -283,15 +282,15 @@ export default function CarDetails() {
 
             <Card style={{ border: "1px solid #e0e5f2", borderRadius: "4px", backgroundColor: "#e9ecef", boxShadow: "none" }}>
               <Card.Body style={{ padding: "30px 24px" }}>
-                <div style={{ fontSize: "1rem", fontWeight: 800, color: "#212529", marginBottom: "8px" }}>Location</div>
-                <div style={{ fontSize: "0.9rem", color: "#6c757d", marginBottom: "24px", fontWeight: 500 }}>68 Le Van Luong, Thanh Xuan, Hanoi</div>
-                
+                <div style={{ fontSize: "1rem", fontWeight: 800, color: "#212529", marginBottom: "8px" }}>Vị trí</div>
+                <div style={{ fontSize: "0.9rem", color: "#6c757d", marginBottom: "24px", fontWeight: 500 }}>68 Lê Văn Lương, Thanh Xuân, Hà Nội</div>
+
                 <div style={{ width: "100%", height: "200px", backgroundColor: "#dee2e6", borderRadius: "4px", display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <FaMapMarkerAlt size={30} color="#adb5bd" />
                 </div>
               </Card.Body>
             </Card>
-            
+
           </Col>
         </Row>
 
@@ -301,13 +300,13 @@ export default function CarDetails() {
       <Offcanvas placement="bottom" show={showSchedule} onHide={() => setShowSchedule(false)} style={{ borderTopLeftRadius: "24px", borderTopRightRadius: "24px", height: "auto", minHeight: "50vh", padding: "10px 0 30px" }}>
         {/* Handlebar */}
         <div style={{ width: "40px", height: "5px", backgroundColor: "#e0e0e0", borderRadius: "100px", margin: "10px auto 16px" }}></div>
-        
+
         <Offcanvas.Header style={{ padding: "0 24px 16px", borderBottom: "none" }}>
           <Offcanvas.Title style={{ fontSize: "1.4rem", fontWeight: 800, color: "#0056b3", margin: 0 }}>
             Đặt lịch xem {car.name}
           </Offcanvas.Title>
         </Offcanvas.Header>
-        
+
         <Offcanvas.Body style={{ padding: "0 24px" }}>
           <Form>
             {/* Ngày và Giờ */}
@@ -349,21 +348,76 @@ export default function CarDetails() {
         </Offcanvas.Body>
       </Offcanvas>
 
-      {/* 3D MODAL */}
-      <Modal show={show3DModel} onHide={() => setShow3DModel(false)} size="xl" centered>
-        <Modal.Header closeButton>
-          <Modal.Title style={{ fontWeight: 800 }}>Mô hình 3D - {car.name}</Modal.Title>
-        </Modal.Header>
-        <Modal.Body style={{ height: "75vh", padding: 0 }}>
-          <iframe 
-            src="https://drive.google.com/file/d/13aqW3hVVtaDSECYHKp6SzAwYO3znqZ7D/preview" 
-            width="100%" 
-            height="100%" 
-            style={{ border: "none", borderRadius: "0 0 4px 4px" }}
-            allow="autoplay"
-            title="3D Model Preview"
-          ></iframe>
-        </Modal.Body>
+      {/* 3D MODAL - PREMIUM REDESIGN */}
+      <Modal 
+        show={show3DModel} 
+        onHide={() => setShow3DModel(false)} 
+        size="xl" 
+        centered
+        contentClassName="border-0 shadow-lg"
+        style={{ backdropFilter: "blur(10px)", backgroundColor: "rgba(0,0,0,0.4)" }}
+      >
+        <div style={{ position: "relative", backgroundColor: "#111", borderRadius: "12px", overflow: "hidden" }}>
+          {/* Custom Header - Transparent & Floating */}
+          <div style={{ position: "absolute", top: 0, left: 0, right: 0, padding: "24px 30px", zIndex: 10, display: "flex", justifyContent: "space-between", alignItems: "center", background: "linear-gradient(to bottom, rgba(0,0,0,0.7) 0%, transparent 100%)" }}>
+            <div>
+              <h4 style={{ color: "#fff", margin: 0, fontWeight: 800, fontSize: "1.4rem", letterSpacing: "-0.5px" }}>Trải nghiệm 360°</h4>
+              <div style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.85rem", fontWeight: 500 }}>{car.name} - Mô hình thời gian thực</div>
+            </div>
+            <div 
+              onClick={() => setShow3DModel(false)} 
+              style={{ width: "40px", height: "40px", borderRadius: "50%", background: "rgba(255,255,255,0.1)", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#fff", transition: "all 0.2s" }}
+              onMouseOver={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.2)"}
+              onMouseOut={(e) => e.currentTarget.style.background = "rgba(255,255,255,0.1)"}
+            >
+              <FaCube size={18} />
+            </div>
+          </div>
+
+          <Modal.Body style={{ height: "85vh", padding: 0, backgroundColor: "#0a0a0a" }}>
+            <model-viewer
+              src="/models/audi_a7_55_tfsi.glb"
+              alt={`3D model of ${car.name}`}
+              ar
+              ar-modes="webxr scene-viewer quick-look"
+              camera-controls
+              shadow-intensity="2"
+              shadow-softness="1"
+              auto-rotate
+              auto-rotate-delay="2000"
+              exposure="1"
+              environment-image="neutral"
+              style={{ width: "100%", height: "100%", outline: "none", "--poster-color": "transparent" }}
+            >
+              {/* Progress Bar Slot */}
+              <div slot="progress-bar" style={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", zIndex: 10, textAlign: "center" }}>
+                <Spinner animation="grow" style={{ color: "#007bff", width: "3.5rem", height: "3.5rem" }} />
+                <div style={{ color: "#fff", marginTop: "15px", fontWeight: 700, fontSize: "0.9rem", letterSpacing: "1px" }}>ĐANG TẢI MÔ HÌNH...</div>
+              </div>
+
+              {/* Interaction Guide */}
+              <div style={{ position: "absolute", bottom: "30px", left: "30px", backgroundColor: "rgba(255,255,255,0.08)", padding: "16px 20px", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.1)", color: "#fff", pointerEvents: "none", backdropFilter: "blur(12px)", animation: "fadeIn 0.5s ease-out" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "8px" }}>
+                  <FaWrench size={14} color="#007bff" />
+                  <span style={{ fontSize: "0.85rem", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.5px" }}>Hướng dẫn điều khiển</span>
+                </div>
+                <div style={{ fontSize: "0.8rem", opacity: 0.8, lineHeight: 1.5 }}>
+                  Theo dõi mọi góc cạnh bằng cách giữ chuột để quay,<br />lăn chuột để phóng to và quan sát chi tiết.
+                </div>
+              </div>
+
+              {/* Status Badge */}
+              <div style={{ position: "absolute", bottom: "30px", right: "30px", display: "flex", gap: "10px" }}>
+                <div style={{ backgroundColor: "#007bff", color: "#fff", padding: "8px 18px", borderRadius: "100px", fontSize: "0.75rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px", boxShadow: "0 4px 15px rgba(0,123,255,0.3)" }}>
+                  High Fidelity
+                </div>
+                <div style={{ backgroundColor: "rgba(255,255,255,0.1)", color: "#fff", padding: "8px 18px", borderRadius: "100px", fontSize: "0.75rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "1px", backdropFilter: "blur(10px)" }}>
+                  Ready to Configure
+                </div>
+              </div>
+            </model-viewer>
+          </Modal.Body>
+        </div>
       </Modal>
 
     </div>

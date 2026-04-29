@@ -23,6 +23,7 @@ import Voucher from "./components/Voucher"
 import News from "./components/News"
 import ScrollToTop from "./components/ScrollToTop"
 import Quotation from "./components/Quotation"
+import AIValuation from "./components/AIValuation"
 
 import HomeStaff from "./components/Staff/HomeStaff"
 import Inventory from "./components/Staff/Inventory"
@@ -96,6 +97,7 @@ function App() {
         <BrowserRouter>
           <AppLayout>
             <Routes>
+              <Route path="/" element={<Home />} />
               <Route path="/login" element={<Login />} />
               <Route path="/profile" element={<Profile />} />
               <Route path="/register" element={<Register />} />
@@ -125,6 +127,7 @@ function App() {
               <Route path="/staff/home/chat" element={<ChatStaff />} />
               <Route path="/staff/home/cashier" element={<Cashier />} />
               <Route path="/quotation/:id" element={<Quotation />} />
+              <Route path="/valuation" element={<AIValuation />} />
               <Route path="/deposit-confirm" element={<DepositConfirm />} />
 
             </Routes>

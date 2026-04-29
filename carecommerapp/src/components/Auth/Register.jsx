@@ -28,7 +28,7 @@ const Register = () => {
         field: "lastName"
     },
     {
-        label: "Email address",
+        label: "Địa chỉ Email",
         type: "email",
         field: "email"
     }, {

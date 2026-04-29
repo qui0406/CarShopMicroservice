@@ -3,13 +3,13 @@ import { useNavigate } from "react-router-dom";
 
 /* ─── Sidebar nav ────────────────────────────────────────── */
 const NAV = [
-  { icon: "⊞",  label: "DASHBOARD",   key: "dashboard",  to: "/admin" },
-  { icon: "🚗", label: "INVENTORY",    key: "inventory",  to: "/staff/inventory" },
-  { icon: "👥", label: "USERS",        key: "users",      to: "/admin/users" },
-  { icon: "🗃️", label: "MASTER DATA",  key: "master",     to: "/admin/master-data" },
-  { icon: "🛡️", label: "MODERATION",   key: "moderation", to: "/admin/moderation" },
-  { icon: "📊", label: "ANALYTICS",    key: "analytics",  to: null },
-  { icon: "⚙️", label: "SETTINGS",     key: "settings",   to: "/admin/moderation" },
+  { icon: "⊞",  label: "BẢNG ĐIỀU KHIỂN",   key: "dashboard",  to: "/admin" },
+  { icon: "🚗", label: "KHO XE",    key: "inventory",  to: "/staff/inventory" },
+  { icon: "👥", label: "NGƯỜI DÙNG",        key: "users",      to: "/admin/users" },
+  { icon: "🗃️", label: "DỮ LIỆU GỐC",  key: "master",     to: "/admin/master-data" },
+  { icon: "🛡️", label: "KIỂM DUYỆT",   key: "moderation", to: "/admin/moderation" },
+  { icon: "📊", label: "PHÂN TÍCH",    key: "analytics",  to: null },
+  { icon: "⚙️", label: "CÀI ĐẶT",     key: "settings",   to: "/admin/moderation" },
 ];
 
 /* ─── Mock queue items ───────────────────────────────────── */
@@ -30,8 +30,8 @@ const INIT_QUEUE = [
     vin: "WBS53CH01LB7••••",
     image: "https://images.unsplash.com/photo-1555215695-3004980ad54e?w=120&q=80&fit=crop",
     scan: "pending", scanLabel: "Pending Scan", scanColor: "#f59e0b",
-    date: "Oct 23, 2023",
-    sellerType: "VERIFIED PRIVATE",
+    date: "23 Tháng 10, 2023",
+    sellerType: "CÁ NHÂN XÁC MINH",
     sellerStyle: "border-gray-300 text-gray-700 bg-white",
   },
 ];
@@ -98,22 +98,22 @@ export default function ModerationSettings() {
 
   const approveItem = (id) => {
     setQueue(p => p.filter(q => q.id !== id));
-    showToast("✅ Listing approved");
+    showToast("✅ Tin đăng đã được duyệt");
   };
   const rejectItem = (id) => {
     setQueue(p => p.filter(q => q.id !== id));
-    showToast("🗑️ Listing rejected");
+    showToast("🗑️ Tin đăng đã bị từ chối");
   };
   const approveAll = () => {
     setQueue([]);
-    showToast(`✅ All ${queue.length} listings approved`);
+    showToast(`✅ Tất cả ${queue.length} tin đăng đã được duyệt`);
   };
 
   const saveSettings = async () => {
     setSavingSettings(true);
     await new Promise(r => setTimeout(r, 1200));
     setSavingSettings(false);
-    showToast("✅ Settings saved");
+    showToast("✅ Cài đặt đã được lưu");
   };
 
   return (
@@ -134,8 +134,8 @@ export default function ModerationSettings() {
           ))}
         </nav>
         <div className="pb-5 border-t border-gray-100 pt-3">
-          <NavItem icon="❓" label="SUPPORT" active={false} onClick={() => {}}/>
-          <NavItem icon="↪" label="LOGOUT"  active={false} onClick={() => navigate("/login")}/>
+          <NavItem icon="❓" label="HỖ TRỢ" active={false} onClick={() => {}}/>
+          <NavItem icon="↪" label="ĐĂNG XUẤT"  active={false} onClick={() => navigate("/login")}/>
         </div>
       </aside>
 
@@ -146,7 +146,7 @@ export default function ModerationSettings() {
         <header className="h-14 bg-white border-b border-gray-100 flex items-center px-8 gap-5 shrink-0">
           <div className="relative max-w-xs w-full">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
-            <input placeholder="Search system..." className="w-full pl-9 pr-4 py-1.5 text-sm bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+            <input placeholder="Tìm kiếm hệ thống..." className="w-full pl-9 pr-4 py-1.5 text-sm bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"/>
           </div>
           <div className="ml-auto flex items-center gap-4">
             <button className="text-gray-400 hover:text-gray-700 text-lg">🔔</button>
@@ -163,16 +163,16 @@ export default function ModerationSettings() {
           {/* ── MODERATION QUEUE ── */}
           <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
             <div className="px-6 pt-5 pb-4 border-b border-gray-50">
-              <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-1">Queue Management</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-1">Quản lý hàng đợi</p>
               <div className="flex items-center justify-between">
-                <h2 className="text-2xl font-black text-gray-900">Moderation Queue</h2>
+                <h2 className="text-2xl font-black text-gray-900">Hàng đợi kiểm duyệt</h2>
                 <div className="flex gap-3">
                   <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 bg-white text-sm font-bold text-gray-700 rounded-lg hover:bg-gray-50 shadow-sm transition-colors">
-                    ⚖️ Filter
+                    ⚖️ Bộ lọc
                   </button>
                   <button onClick={approveAll} disabled={queue.length === 0}
                     className="px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700 shadow-sm transition-colors disabled:opacity-40">
-                    Approve All
+                    Duyệt tất cả
                   </button>
                 </div>
               </div>
@@ -180,7 +180,7 @@ export default function ModerationSettings() {
 
             {/* Table header */}
             <div className="grid grid-cols-[2.5fr_1.5fr_1fr_1.3fr_1fr] px-6 py-3 border-b border-gray-50">
-              {["Vehicle Details","3D Scan Status","Listing Date","Seller Type","Actions"].map(h=>(
+              {["Chi tiết xe","Trạng thái quét 3D","Ngày đăng","Loại người bán","Thao tác"].map(h=>(
                 <p key={h} className="text-[10px] font-black uppercase tracking-widest text-gray-400">{h}</p>
               ))}
             </div>
@@ -200,8 +200,8 @@ export default function ModerationSettings() {
                 ? (
                   <div className="py-14 text-center text-gray-400">
                     <p className="text-3xl mb-2">✅</p>
-                    <p className="text-sm font-black uppercase tracking-wider">Queue Clear</p>
-                    <p className="text-xs mt-1">No listings pending moderation.</p>
+                    <p className="text-sm font-black uppercase tracking-wider">Hàng đợi trống</p>
+                    <p className="text-xs mt-1">Không có tin đăng nào đang chờ duyệt.</p>
                   </div>
                 )
                 : queue.map(item => (
@@ -247,24 +247,24 @@ export default function ModerationSettings() {
             {/* System Settings */}
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
               <div className="px-6 pt-5 pb-4 border-b border-gray-50">
-                <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-1">Global Configuration</p>
-                <h3 className="text-2xl font-black text-gray-900">System Settings</h3>
+                <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-1">Cấu hình toàn cầu</p>
+                <h3 className="text-2xl font-black text-gray-900">Cài đặt hệ thống</h3>
               </div>
               <div className="p-6 space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5 block">Customer Hotline</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5 block">Hotline khách hàng</label>
                     <input value={settings.hotline} onChange={e=>setSettings({...settings,hotline:e.target.value})}
                       className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
                   </div>
                   <div>
-                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5 block">Admin Email</label>
+                    <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5 block">Email Admin</label>
                     <input value={settings.email} onChange={e=>setSettings({...settings,email:e.target.value})}
                       className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500"/>
                   </div>
                 </div>
                 <div>
-                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5 block">Headquarters Address</label>
+                  <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1.5 block">Địa chỉ trụ sở</label>
                   <textarea
                     rows={3} value={settings.address}
                     onChange={e=>setSettings({...settings,address:e.target.value})}
@@ -275,8 +275,8 @@ export default function ModerationSettings() {
                   <button onClick={saveSettings} disabled={savingSettings}
                     className="px-6 py-2.5 bg-blue-600 text-white text-sm font-black uppercase tracking-widest rounded-lg hover:bg-blue-700 disabled:opacity-60 transition-colors flex items-center gap-2">
                     {savingSettings
-                      ? <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"/>Saving...</>
-                      : "Save Changes"
+                      ? <><span className="w-4 h-4 border-2 border-white/40 border-t-white rounded-full animate-spin"/>Đang lưu...</>
+                      : "Lưu thay đổi"
                     }
                   </button>
                 </div>
@@ -286,8 +286,8 @@ export default function ModerationSettings() {
             {/* Banner Ads */}
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
               <div className="px-6 pt-5 pb-4 border-b border-gray-50">
-                <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-1">Visual Merchandising</p>
-                <h3 className="text-2xl font-black text-gray-900">Banner Ads</h3>
+                <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-1">Trưng bày trực quan</p>
+                <h3 className="text-2xl font-black text-gray-900">Banner Quảng cáo</h3>
               </div>
               <div className="p-5 space-y-3">
                 {ads.map(ad => (
@@ -306,11 +306,11 @@ export default function ModerationSettings() {
 
                 {/* New Ad Slider */}
                 <button
-                  onClick={() => showToast("🚧 Ad builder coming soon")}
+                  onClick={() => showToast("🚧 Tính năng tạo quảng cáo sắp ra mắt")}
                   className="w-full py-5 border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center gap-2 hover:border-blue-400 hover:bg-blue-50/30 transition-all group"
                 >
                   <div className="w-8 h-8 rounded-full bg-gray-100 group-hover:bg-blue-100 flex items-center justify-center text-gray-400 group-hover:text-blue-500 text-lg transition-colors">+</div>
-                  <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 group-hover:text-blue-500 transition-colors">New Ad Slider</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-gray-400 group-hover:text-blue-500 transition-colors">Tạo Banner mới</span>
                 </button>
               </div>
             </div>
@@ -320,9 +320,9 @@ export default function ModerationSettings() {
 
       {/* ─── FAB (floating action button) ────────────────── */}
       <button
-        onClick={() => showToast("🖼️ Media library opened")}
+        onClick={() => showToast("🖼️ Thư viện phương tiện đã mở")}
         className="fixed bottom-6 right-6 w-13 h-13 w-14 h-14 bg-blue-600 rounded-full shadow-xl flex items-center justify-center text-white text-xl hover:bg-blue-700 transition-colors z-40"
-        title="Open Media Library"
+        title="Mở thư viện phương tiện"
       >
         🖼️
       </button>

@@ -796,10 +796,120 @@ html {
   margin-top: 1rem;
 }
 
-/* Prediction Result */
-.prediction-result h5 {
-  margin-bottom: 1.5rem;
+/* Modern Input & Select */
+.modern-input {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 2px solid transparent !important;
+  border-radius: 12px !important;
+  padding: 0.875rem 1rem !important;
+  font-family: var(--font-secondary) !important;
+  font-size: 0.95rem !important;
+  font-weight: 500 !important;
+  color: var(--text-primary) !important;
+  outline: none !important;
+  transition: all 0.3s ease !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+.modern-input:focus {
+  border-color: var(--accent-color) !important;
+  background: rgba(255, 255, 255, 0.95) !important;
+  box-shadow: 0 0 0 4px rgba(79, 172, 254, 0.2) !important;
+  transform: translateY(-2px) !important;
+}
+
+/* Price Range Styling */
+.price-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.5rem;
+}
+
+.price-value {
   font-family: var(--font-primary);
+  font-weight: 700;
+  color: #4facfe;
+  font-size: 0.95rem;
+}
+
+.modern-range {
+  width: 100%;
+  accent-color: var(--accent-color);
+  cursor: pointer;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 3px;
+  outline: none;
+}
+
+/* Modal Enhancements */
+.premium-modal .modal-content {
+  border: none;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: var(--shadow-large);
+}
+
+.premium-modal .modal-header {
+  background: var(--accent-gradient);
+  padding: 1.5rem 2rem;
+}
+
+.premium-modal .modal-body {
+  padding: 2.5rem 2rem;
+}
+
+.premium-modal .modal-footer {
+  padding: 1.5rem 2rem;
+  background: var(--background-light);
+  border-top: 1px solid var(--border-color);
+}
+
+.prediction-card {
+  background: var(--background-light);
+  border-radius: 20px;
+  padding: 2rem;
+  border: 1px solid var(--border-color);
+  margin-top: 1.5rem;
+  transition: all 0.3s ease;
+}
+
+.prediction-card:hover {
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-medium);
+}
+
+.confidence-badge {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 0.85rem;
+  background: rgba(52, 168, 83, 0.1);
+  color: #34a853;
+  margin-top: 1rem;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.home-page {
+  animation: fadeIn 0.8s ease-in;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .confidence-bar {

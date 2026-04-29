@@ -3,13 +3,13 @@ import { useNavigate } from "react-router-dom";
 
 /* ─── Nav config ─────────────────────────────────────────── */
 const NAV = [
-  { icon: "⊞",  label: "DASHBOARD",   key: "dashboard" },
-  { icon: "🚗", label: "INVENTORY",    key: "inventory" },
-  { icon: "👥", label: "USERS",        key: "users" },
-  { icon: "🗃️", label: "MASTER DATA",  key: "master",   to: "/admin/master-data" },
-  { icon: "🛡️", label: "MODERATION",   key: "moderation" },
-  { icon: "📊", label: "ANALYTICS",    key: "analytics" },
-  { icon: "⚙️", label: "SETTINGS",     key: "settings" },
+  { icon: "⊞",  label: "BẢNG ĐIỀU KHIỂN",   key: "dashboard" },
+  { icon: "🚗", label: "KHO XE",    key: "inventory" },
+  { icon: "👥", label: "NGƯỜI DÙNG",        key: "users" },
+  { icon: "🗃️", label: "DỮ LIỆU GỐC",  key: "master",   to: "/admin/master-data" },
+  { icon: "🛡️", label: "KIỂM DUYỆT",   key: "moderation" },
+  { icon: "📊", label: "PHÂN TÍCH",    key: "analytics" },
+  { icon: "⚙️", label: "CÀI ĐẶT",     key: "settings" },
 ];
 
 /* ─── Mock revenue data (JAN–AUG) ───────────────────────── */
@@ -32,10 +32,10 @@ const BRANDS = [
 ];
 
 const FEED = [
-  { dot: "#2563eb", user: "Qui",         action: "added BMW M4 Competition",           time: "2 minutes ago", tag: "Inventory" },
-  { dot: "#9ca3af", user: "Staff #123",  action: "updated price for Tesla Model S",    time: "14 minutes ago", tag: "Pricing" },
-  { dot: "#9ca3af", user: "Auto-System", action: "verified Seller ID: #9822",          time: "1 hour ago",     tag: "Security" },
-  { dot: "#2563eb", user: "Qui",         action: "modified listing Audi RS6",          time: "2 hours ago",    tag: "Moderation" },
+  { dot: "#2563eb", user: "Qui",         action: "vừa thêm BMW M4 Competition",           time: "2 phút trước", tag: "Kho xe" },
+  { dot: "#9ca3af", user: "Nhân viên #123",  action: "cập nhật giá cho Tesla Model S",    time: "14 phút trước", tag: "Giá cả" },
+  { dot: "#9ca3af", user: "Hệ thống", action: "xác minh ID người bán: #9822",          time: "1 giờ trước",     tag: "Bảo mật" },
+  { dot: "#2563eb", user: "Qui",         action: "thay đổi tin đăng Audi RS6",          time: "2 giờ trước",    tag: "Kiểm duyệt" },
 ];
 
 /* ─── SVG Line Chart ─────────────────────────────────────── */
@@ -191,8 +191,8 @@ export default function AdminDashboard() {
 
         {/* Bottom */}
         <div className="pb-5 border-t border-gray-100 pt-3">
-          <NavItem icon="❓" label="SUPPORT" active={false} onClick={() => {}}/>
-          <NavItem icon="↪"  label="LOGOUT"  active={false} onClick={() => navigate("/login")}/>
+          <NavItem icon="❓" label="HỖ TRỢ" active={false} onClick={() => {}}/>
+          <NavItem icon="↪"  label="ĐĂNG XUẤT"  active={false} onClick={() => navigate("/login")}/>
         </div>
       </aside>
 
@@ -205,7 +205,7 @@ export default function AdminDashboard() {
           {/* Search */}
           <div className="relative max-w-xs w-full">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
-            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search parameters..."
+            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Tìm kiếm thông số..."
               className="w-full pl-9 pr-4 py-1.5 text-sm bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"/>
           </div>
           <div className="ml-auto flex items-center gap-4">
@@ -223,15 +223,15 @@ export default function AdminDashboard() {
           {/* Page header */}
           <div className="flex items-end justify-between mb-6">
             <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-1">Executive Overview</p>
-              <h2 className="text-3xl font-black text-gray-900 leading-tight">Dashboard Overview</h2>
+              <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-1">Tổng quan điều hành</p>
+              <h2 className="text-3xl font-black text-gray-900 leading-tight">Bảng tổng quan</h2>
             </div>
             <div className="flex gap-3">
               <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 bg-white text-sm font-bold text-gray-700 rounded-lg hover:bg-gray-50 shadow-sm transition-colors">
-                📅 Last 30 Days
+                📅 30 ngày qua
               </button>
               <button className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700 shadow-sm transition-colors">
-                📥 Generate Report
+                📥 Xuất báo cáo
               </button>
             </div>
           </div>
@@ -250,17 +250,17 @@ export default function AdminDashboard() {
           ) : (
             <div className="grid grid-cols-4 gap-4 mb-6">
               <KpiCard
-                title="Total Revenue" value="$4,281,090"
+                title="Tổng doanh thu" value="$4,281,090"
                 badge="+12.4%" badgeUp={true}
                 miniChart={true}
               />
               <KpiCard
-                title="Active Listings" value="12,842"
-                sub="Live across 14 markets"
+                title="Tin đăng hoạt động" value="12,842"
+                sub="Trực tiếp trên 14 thị trường"
               />
               <KpiCard
-                title="New Users" value="849"
-                sub="+42 today"
+                title="Người dùng mới" value="849"
+                sub="+42 hôm nay"
                 avatars={[
                   "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=40&q=80&fit=crop&crop=face",
                   "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=40&q=80&fit=crop&crop=face",
@@ -268,8 +268,8 @@ export default function AdminDashboard() {
                 ]}
               />
               <KpiCard
-                title="Total Models" value="312"
-                sub="42 manufacturers registered"
+                title="Tổng mẫu xe" value="312"
+                sub="42 nhà sản xuất đã đăng ký"
               />
             </div>
           )}
@@ -281,17 +281,17 @@ export default function AdminDashboard() {
             <div className="col-span-2 bg-white rounded-xl border border-gray-100 shadow-sm p-6">
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <p className="text-xs font-black uppercase tracking-widest text-gray-900">Sales &amp; Revenue Analytics</p>
-                  <p className="text-[11px] text-gray-400 mt-0.5">Monthly performance comparison</p>
+                  <p className="text-xs font-black uppercase tracking-widest text-gray-900">Phân tích doanh số & Doanh thu</p>
+                  <p className="text-[11px] text-gray-400 mt-0.5">So sánh hiệu suất hàng tháng</p>
                 </div>
                 <div className="flex items-center gap-4">
                   <div className="flex items-center gap-1.5">
                     <div className="w-2.5 h-2.5 rounded-full bg-blue-600"/>
-                    <span className="text-[10px] font-black text-gray-600 uppercase">Revenue</span>
+                    <span className="text-[10px] font-black text-gray-600 uppercase">Doanh thu</span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <div className="w-2.5 h-2.5 rounded-full bg-gray-300"/>
-                    <span className="text-[10px] font-black text-gray-400 uppercase">Projection</span>
+                    <span className="text-[10px] font-black text-gray-400 uppercase">Dự kiến</span>
                   </div>
                 </div>
               </div>
@@ -304,8 +304,8 @@ export default function AdminDashboard() {
 
             {/* Activity Feed */}
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex flex-col">
-              <p className="text-xs font-black uppercase tracking-widest text-gray-900 mb-0.5">Recent Activity Feed</p>
-              <p className="text-[11px] text-gray-400 mb-4">Real-time system event log</p>
+              <p className="text-xs font-black uppercase tracking-widest text-gray-900 mb-0.5">Luồng hoạt động gần đây</p>
+              <p className="text-[11px] text-gray-400 mb-4">Nhật ký sự kiện hệ thống thời gian thực</p>
 
               <div className="flex-1 space-y-5">
                 {loading
@@ -331,7 +331,7 @@ export default function AdminDashboard() {
                 }
               </div>
               <button className="mt-4 text-[10px] font-black uppercase tracking-widest text-blue-600 hover:text-blue-800 text-center">
-                View All Logs →
+                Xem tất cả nhật ký →
               </button>
             </div>
           </div>
@@ -341,7 +341,7 @@ export default function AdminDashboard() {
 
             {/* Top Selling Brands */}
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
-              <p className="text-xs font-black uppercase tracking-widest text-gray-900 mb-5">Top Selling Brands</p>
+              <p className="text-xs font-black uppercase tracking-widest text-gray-900 mb-5">Thương hiệu bán chạy nhất</p>
               {loading
                 ? Array(4).fill(0).map((_,i) => (
                     <div key={i} className="mb-4 animate-pulse">
@@ -353,7 +353,7 @@ export default function AdminDashboard() {
                     <div key={b.name} className="mb-4 last:mb-0">
                       <div className="flex justify-between items-baseline mb-1.5">
                         <span className="text-sm font-bold text-gray-800">{b.name}</span>
-                        <span className="text-[11px] font-black text-blue-600">{b.units.toLocaleString()} Units</span>
+                        <span className="text-[11px] font-black text-blue-600">{b.units.toLocaleString()} Chiếc</span>
                       </div>
                       <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
                         <div
@@ -373,18 +373,18 @@ export default function AdminDashboard() {
               <div className="absolute -right-4 top-4 w-24 h-24 rounded-full bg-blue-600/10"/>
 
               <div>
-                <p className="text-[10px] font-black uppercase tracking-widest text-blue-400 mb-2">Inventory Status</p>
-                <h3 className="text-xl font-black text-white leading-tight mb-3">Active Fleet Performance</h3>
+                <p className="text-[10px] font-black uppercase tracking-widest text-blue-400 mb-2">Tình trạng kho hàng</p>
+                <h3 className="text-xl font-black text-white leading-tight mb-3">Hiệu suất hạm đội hoạt động</h3>
                 <p className="text-sm text-gray-400 leading-relaxed mb-6">
-                  System analytics show a 14% increase in premium sedan availability across the North American region this quarter.
+                  Phân tích hệ thống cho thấy lượng xe sedan cao cấp tăng 14% tại khu vực Bắc Mỹ trong quý này.
                 </p>
               </div>
 
               <div className="grid grid-cols-3 gap-4 border-t border-white/10 pt-5">
                 {[
-                  { label: "Awaiting QA",    value: "42" },
-                  { label: "On Transit",     value: "118" },
-                  { label: "Sold / Archive", value: "2,411" },
+                  { label: "Đang chờ QA",    value: "42" },
+                  { label: "Đang vận chuyển",     value: "118" },
+                  { label: "Đã bán / Lưu trữ", value: "2,411" },
                 ].map(s => (
                   <div key={s.label}>
                     <p className="text-[9px] font-black uppercase tracking-widest text-gray-500 mb-1">{s.label}</p>

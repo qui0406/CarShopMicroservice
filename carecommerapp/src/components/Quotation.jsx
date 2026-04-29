@@ -61,7 +61,7 @@ export default function Quotation() {
         <div style={{ position: "relative", marginBottom: "20px", borderRadius: "12px", overflow: "hidden", backgroundColor: "#1e1e1e", height: "auto" }}>
           <img src={car.image} alt={car.name} style={{ width: "100%", height: "240px", objectFit: "cover", display: "block" }} />
           <div style={{ position: "absolute", bottom: "16px", left: "16px", backgroundColor: "rgba(255,255,255,0.9)", color: "#111", padding: "6px 12px", fontSize: "0.75rem", fontWeight: 800, borderRadius: "4px", letterSpacing: "0.5px" }}>
-            MODEL {car.manufacturingYear}
+            PHIÊN BẢN {car.manufacturingYear}
           </div>
         </div>
 
@@ -73,19 +73,19 @@ export default function Quotation() {
         
         <div style={{ backgroundColor: "#ffffff", borderRadius: "12px", border: "1px solid #eaeaea", overflow: "hidden", marginBottom: "16px" }}>
           <div style={{ display: "flex", justifyContent: "space-between", padding: "16px", borderBottom: "1px solid #eaeaea" }}>
-            <span style={{ color: "#444", fontSize: "0.95rem" }}>Giá xe (Base Price)</span>
+            <span style={{ color: "#444", fontSize: "0.95rem" }}>Giá xe (Giá niêm yết)</span>
             <span style={{ fontWeight: 700, color: "#111" }}>{formatPrice(basePrice)}</span>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", padding: "16px", borderBottom: "1px solid #eaeaea" }}>
-            <span style={{ color: "#444", fontSize: "0.95rem" }}>Phí biển số (Plate Fee)</span>
+            <span style={{ color: "#444", fontSize: "0.95rem" }}>Phí biển số</span>
             <span style={{ fontWeight: 700, color: "#111" }}>{formatPrice(plateFee)}</span>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", padding: "16px", borderBottom: "1px solid #eaeaea" }}>
-            <span style={{ color: "#444", fontSize: "0.95rem" }}>Bảo trì đường bộ (Road Fee)</span>
+            <span style={{ color: "#444", fontSize: "0.95rem" }}>Bảo trì đường bộ</span>
             <span style={{ fontWeight: 700, color: "#111" }}>{formatPrice(roadFee)}</span>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", padding: "16px", backgroundColor: "#f0f7ff", border: "1px solid #bae6fd", borderRadius: "0 0 12px 12px", margin: "-1px" }}>
-            <span style={{ color: "#1d4ed8", fontSize: "0.95rem", fontWeight: 600 }}>Thuế trước bạ (Tax - 10%)</span>
+            <span style={{ color: "#1d4ed8", fontSize: "0.95rem", fontWeight: 600 }}>Thuế trước bạ (Lệ phí trước bạ - 10%)</span>
             <span style={{ fontWeight: 800, color: "#1d4ed8" }}>{formatPrice(tax)}</span>
           </div>
         </div>

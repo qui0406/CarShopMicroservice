@@ -92,8 +92,8 @@ export default function Reserve() {
 
   const paymentMethods = [
     { key: 'vnpay-qr', label: 'VNPAY-QR', icon: '▦' },
-    { key: 'atm', label: 'Domestic Bank Card', icon: '🏦' },
-    { key: 'intl', label: 'International Card', icon: '🌐' },
+    { key: 'atm', label: 'Thẻ ngân hàng nội địa', icon: '🏦' },
+    { key: 'intl', label: 'Thẻ quốc tế', icon: '🌐' },
   ];
 
   if (loading) return (
@@ -116,11 +116,11 @@ export default function Reserve() {
       <nav style={s.nav}>
         <button onClick={() => navigate('/')} style={s.logo}>PRECISION</button>
         <div style={s.navLinks}>
-          {['MODELS','PURCHASE','SERVICE','EXPERIENCE','SHOP'].map(item => (
-            <span key={item} style={{ ...s.navLink, ...(item==='PURCHASE' ? s.navLinkActive : {}) }}>{item}</span>
+          {['DÒNG XE','MUA XE','DỊCH VỤ','TRẢI NGHIỆM','CỬA HÀNG'].map(item => (
+            <span key={item} style={{ ...s.navLink, ...(item==='MUA XE' ? s.navLinkActive : {}) }}>{item}</span>
           ))}
         </div>
-        <button style={s.reserveBtn}>Reserve Now</button>
+        <button style={s.reserveBtn}>Đặt xe ngay</button>
       </nav>
 
       {/* STEPPER */}
@@ -129,19 +129,19 @@ export default function Reserve() {
           {/* Step 1: Quote (done) */}
           <div style={s.step}>
             <div style={{ ...s.stepCircle, ...s.stepDone }}>✓</div>
-            <span style={s.stepLabel}>QUOTE</span>
+            <span style={s.stepLabel}>BÁO GIÁ</span>
           </div>
           <div style={{ ...s.stepLine, background: '#0a58ca' }}></div>
           {/* Step 2: Info (active) */}
           <div style={s.step}>
             <div style={{ ...s.stepCircle, ...s.stepActive }}>2</div>
-            <span style={{ ...s.stepLabel, color: '#0a58ca', fontWeight: 800 }}>INFO</span>
+            <span style={{ ...s.stepLabel, color: '#0a58ca', fontWeight: 800 }}>THÔNG TIN</span>
           </div>
           <div style={{ ...s.stepLine, background: '#e5e7eb' }}></div>
           {/* Step 3: Payment */}
           <div style={s.step}>
             <div style={{ ...s.stepCircle, ...s.stepInactive }}>3</div>
-            <span style={{ ...s.stepLabel, color: '#9ca3af' }}>PAYMENT</span>
+            <span style={{ ...s.stepLabel, color: '#9ca3af' }}>THANH TOÁN</span>
           </div>
         </div>
       </div>
@@ -151,22 +151,22 @@ export default function Reserve() {
         {/* LEFT: Form */}
         <div style={s.leftCol}>
           <div style={{ borderLeft: '4px solid #0a58ca', paddingLeft: 20, marginBottom: 32 }}>
-            <h2 style={s.formTitle}>Registration Details</h2>
-            <p style={s.formSub}>Please provide your legal information for the vehicle deposit agreement.</p>
+            <h2 style={s.formTitle}>Thông tin Đăng ký</h2>
+            <p style={s.formSub}>Vui lòng cung cấp thông tin pháp lý của bạn cho thỏa thuận đặt cọc xe.</p>
           </div>
 
           <form onSubmit={handleSubmit} id="reserve-form">
             <div style={s.fieldGrid}>
               <div style={s.fieldWrap}>
-                <label style={s.label}>FULL NAME</label>
+                <label style={s.label}>HỌ VÀ TÊN</label>
                 <div style={s.inputWrap}>
                   <span style={s.inputIcon}>👤</span>
-                  <input style={s.input} placeholder="Enter full name" value={form.fullName}
+                  <input style={s.input} placeholder="Nhập họ và tên" value={form.fullName}
                     onChange={e => setForm(p => ({...p, fullName: e.target.value}))} required />
                 </div>
               </div>
               <div style={s.fieldWrap}>
-                <label style={s.label}>PHONE NUMBER</label>
+                <label style={s.label}>SỐ ĐIỆN THOẠI</label>
                 <div style={s.inputWrap}>
                   <span style={s.inputIcon}>📞</span>
                   <input style={s.input} placeholder="+84 XXX XXX XXX" type="tel" value={form.phone}
@@ -174,15 +174,15 @@ export default function Reserve() {
                 </div>
               </div>
               <div style={s.fieldWrap}>
-                <label style={s.label}>ID / CCCD NUMBER</label>
+                <label style={s.label}>SỐ CMND / CCCD</label>
                 <div style={s.inputWrap}>
                   <span style={s.inputIcon}>🪪</span>
-                  <input style={s.input} placeholder="Enter identification number" value={form.idNumber}
+                  <input style={s.input} placeholder="Nhập số định danh" value={form.idNumber}
                     onChange={e => setForm(p => ({...p, idNumber: e.target.value}))} />
                 </div>
               </div>
               <div style={s.fieldWrap}>
-                <label style={s.label}>DATE OF BIRTH</label>
+                <label style={s.label}>NGÀY SINH</label>
                 <div style={s.inputWrap}>
                   <span style={s.inputIcon}>📅</span>
                   <input style={{ ...s.input, color: form.dob ? '#111' : '#9ca3af' }} type="date" value={form.dob}
@@ -192,11 +192,11 @@ export default function Reserve() {
             </div>
 
             <div style={{ ...s.fieldWrap, marginTop: 20 }}>
-              <label style={s.label}>PERMANENT ADDRESS</label>
+              <label style={s.label}>ĐỊA CHỈ THƯỜNG TRÚ</label>
               <div style={{ ...s.inputWrap, alignItems: 'flex-start', paddingTop: 12 }}>
                 <span style={{ ...s.inputIcon, marginTop: 2 }}>📍</span>
                 <textarea style={{ ...s.input, height: 100, resize: 'vertical' }} rows={3}
-                  placeholder="Street name, District, City" value={form.address}
+                  placeholder="Tên đường, Quận/Huyện, Tỉnh/Thành phố" value={form.address}
                   onChange={e => setForm(p => ({...p, address: e.target.value}))} required />
               </div>
             </div>
@@ -205,8 +205,8 @@ export default function Reserve() {
             <label style={s.termsRow}>
               <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} style={s.checkbox} />
               <span style={s.termsText}>
-                I hereby agree to the <a href="#" style={s.termsLink}>Terms of Service</a> and{' '}
-                <a href="#" style={s.termsLink}>Deposit Policy</a>. I confirm that all information provided above is accurate and legally binding as per the vehicle purchase agreement.
+                Tôi đồng ý với <a href="#" style={s.termsLink}>Điều khoản dịch vụ</a> và{' '}
+                <a href="#" style={s.termsLink}>Chính sách đặt cọc</a>. Tôi xác nhận rằng tất cả thông tin cung cấp ở trên là chính xác và có giá trị ràng buộc về mặt pháp lý theo hợp đồng mua bán xe.
               </span>
             </label>
 
@@ -219,38 +219,38 @@ export default function Reserve() {
 
           {/* Transaction Summary */}
           <div style={s.summaryCard}>
-            <p style={s.sectionLabel}>TRANSACTION SUMMARY</p>
+            <p style={s.sectionLabel}>TÓM TẮT GIAO DỊCH</p>
 
             <div style={s.summaryGrid}>
               <div>
-                <p style={s.summaryMeta}>ORDER TYPE</p>
-                <p style={s.summaryVal}>Vehicle Reservation</p>
+                <p style={s.summaryMeta}>LOẠI ĐƠN HÀNG</p>
+                <p style={s.summaryVal}>Đặt cọc mua xe</p>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <p style={s.summaryMeta}>MODEL</p>
+                <p style={s.summaryMeta}>MẪU XE</p>
                 <p style={{ ...s.summaryVal, color: '#0a58ca' }}>{car.name}</p>
               </div>
             </div>
 
             <div style={s.divider}></div>
 
-            <p style={s.summaryMeta}>DEPOSIT AMOUNT</p>
+            <p style={s.summaryMeta}>SỐ TIỀN ĐẶT CỌC</p>
             <p style={{ fontSize: '1.8rem', fontWeight: 900, color: '#111', margin: '4px 0 2px', fontStyle: 'italic' }}>
               {fmt(DEPOSIT_AMOUNT)}
             </p>
             <p style={{ fontSize: '0.72rem', color: '#9ca3af', margin: '0 0 16px' }}>
-              *Final amount will be calculated based on your configuration in the next step.
+              *Số tiền cuối cùng sẽ được tính toán dựa trên cấu hình của bạn trong bước tiếp theo.
             </p>
 
             <div style={s.suggestionBox}>
-              <span style={{ fontWeight: 800, color: '#0a58ca' }}>Suggestion: </span>
-              Please ensure your daily transfer limit is sufficient for the deposit amount to avoid transaction failure.
+              <span style={{ fontWeight: 800, color: '#0a58ca' }}>Gợi ý: </span>
+              Vui lòng đảm bảo hạn mức chuyển khoản hàng ngày của bạn đủ cho số tiền đặt cọc để tránh lỗi giao dịch.
             </div>
           </div>
 
           {/* Payment Method */}
           <div style={s.summaryCard}>
-            <p style={s.sectionLabel}>SELECT PAYMENT METHOD</p>
+            <p style={s.sectionLabel}>CHỌN PHƯƠNG THỨC THANH TOÁN</p>
             <div style={s.methodList}>
               {paymentMethods.map(m => (
                 <label key={m.key} style={{ ...s.methodRow, ...(paymentMethod === m.key ? s.methodRowActive : {}) }}>
@@ -265,13 +265,13 @@ export default function Reserve() {
             <button type="submit" form="reserve-form" disabled={submitting}
               style={{ ...s.payBtn, opacity: submitting ? 0.7 : 1 }}>
               {submitting
-                ? <><span style={s.spinnerSmall}></span> Processing...</>
-                : 'Confirm and Pay via VNPAY →'}
+                ? <><span style={s.spinnerSmall}></span> Đang xử lý...</>
+                : 'Xác nhận và Thanh toán qua VNPAY →'}
             </button>
 
             <div style={s.pciRow}>
               <span style={s.pciIcon}>🔒</span>
-              <span style={s.pciText}>PCI-DSS COMPLIANT INFRASTRUCTURE</span>
+              <span style={s.pciText}>HẠ TẦNG TUÂN THỦ TIÊU CHUẨN PCI-DSS</span>
             </div>
           </div>
 
@@ -282,11 +282,11 @@ export default function Reserve() {
       <footer style={s.footer}>
         <div style={s.footerLeft}>
           <span style={s.footerLogo}>PRECISION</span>
-          {['LEGAL NOTICE','PRIVACY POLICY','COOKIES','ACCESSIBILITY','WHISTLEBLOWER SYSTEM'].map(l => (
+          {['THÔNG BÁO PHÁP LÝ','CHÍNH SÁCH BẢO MẬT','COOKIE','KHẢ NĂNG TRUY CẬP','HỆ THỐNG TỐ GIÁC'].map(l => (
             <a key={l} href="#" style={s.footerLink}>{l}</a>
           ))}
         </div>
-        <span style={{ fontSize: '0.7rem', color: '#9ca3af' }}>© 2026 PRECISION AUTOMOTIVE GROUP, INC.</span>
+        <span style={{ fontSize: '0.7rem', color: '#9ca3af' }}>© 2026 TẬP ĐOÀN Ô TÔ PRECISION, INC.</span>
       </footer>
 
       <style>{`

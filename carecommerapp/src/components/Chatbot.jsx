@@ -130,10 +130,10 @@ export default function Chatbot() {
   }, []);
 
   const quickSuggestions = useMemo(() => [
-    "🚗 Xe gia đình dưới 1 tỷ",
-    "⚡ Xe tiết kiệm nhiên liệu",
-    "🏎️ Xe SUV đang có",
-    "💼 So sánh 2 mẫu xe",
+    "Xe gia đình dưới 1 tỷ",
+    "Xe tiết kiệm nhiên liệu",
+    "Xe SUV đang có",
+    "Xe điện đang có",
   ], []);
 
   const addMessage = useCallback((payload) => {
@@ -186,7 +186,7 @@ export default function Chatbot() {
 
       // AI service might return data directly or wrapped in 'result'
       const payload = response.data?.result || response.data || {};
-      
+
       if (payload.session_id && payload.session_id !== sessionId) {
         setSessionId(payload.session_id);
       }
@@ -217,7 +217,7 @@ export default function Chatbot() {
     } catch (error) {
       const server = error.response?.data;
       const fallbackCards = buildLocalCards(text);
-      
+
       // If server returned an error but included a reply/cards, use them
       const errorReply = server?.reply || server?.message;
       const errorCards = server?.cards || server?.cars || [];
@@ -229,14 +229,14 @@ export default function Chatbot() {
         time: now(),
         cards: Array.isArray(errorCards) && errorCards.length
           ? errorCards.slice(0, 2).map((c) => ({
-              id: c.id,
-              name: c.name || c.model || "Mẫu xe",
-              price: c.price || 0,
-              priceLabel: c.price_formatted || toCurrency(c.price),
-              image: c.image || c.thumbnail || fallbackCarImage,
-              link: c.id ? `/get-car-by-id/${c.id}` : "/car-new",
-              bodyType: c.body_type || c.bodyType || "",
-            }))
+            id: c.id,
+            name: c.name || c.model || "Mẫu xe",
+            price: c.price || 0,
+            priceLabel: c.price_formatted || toCurrency(c.price),
+            image: c.image || c.thumbnail || fallbackCarImage,
+            link: c.id ? `/get-car-by-id/${c.id}` : "/car-new",
+            bodyType: c.body_type || c.bodyType || "",
+          }))
           : fallbackCards,
       });
     } finally {
@@ -356,16 +356,16 @@ export default function Chatbot() {
         }
         .chatbot-msg { animation: messageIn 0.25s ease-out; }
         .chatbot-quick-btn:hover {
-          background: rgba(99,102,241,0.15) !important;
-          border-color: rgba(99,102,241,0.6) !important;
-          color: #a5b4fc !important;
+          background: rgba(99,102,241,0.08) !important;
+          border-color: rgba(99,102,241,0.4) !important;
+          color: #4f46e5 !important;
           transform: translateY(-1px);
         }
-        .chatbot-send-btn:hover { background: #4f46e5 !important; transform: scale(1.05); }
-        .chatbot-new-btn:hover { background: rgba(255,255,255,0.3) !important; }
-        .chatbot-tab:hover { background: rgba(255,255,255,0.05) !important; }
-        .chatbot-car-card:hover { border-color: rgba(99,102,241,0.5) !important; background: rgba(99,102,241,0.08) !important; transform: translateX(2px); }
-        .chatbot-link-btn:hover { color: #a5b4fc !important; }
+        .chatbot-send-btn:hover { background: #4338ca !important; transform: scale(1.05); }
+        .chatbot-new-btn:hover { background: rgba(255,255,255,0.2) !important; }
+        .chatbot-tab:hover { background: rgba(0,0,0,0.02) !important; }
+        .chatbot-car-card:hover { border-color: rgba(99,102,241,0.3) !important; background: rgba(99,102,241,0.04) !important; transform: translateX(2px); }
+        .chatbot-link-btn:hover { color: #4338ca !important; }
         .chatbot-identify-btn:hover:not(:disabled) { background: linear-gradient(135deg,#7c3aed,#4f46e5) !important; }
       `}</style>
 
@@ -739,7 +739,7 @@ const styles = {
     height: 10,
     borderRadius: "50%",
     background: "#f43f5e",
-    border: "2px solid #1e1b4b",
+    border: "2px solid #fff",
   },
 
   /* Widget */
@@ -751,9 +751,9 @@ const styles = {
     height: 620,
     maxWidth: "92vw",
     maxHeight: "82vh",
-    background: "linear-gradient(180deg, #0f0e1a 0%, #12111f 100%)",
+    background: "#ffffff",
     borderRadius: 20,
-    boxShadow: "0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(99,102,241,0.2)",
+    boxShadow: "0 20px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.05)",
     display: "flex",
     flexDirection: "column",
     overflow: "hidden",
@@ -765,12 +765,12 @@ const styles = {
 
   /* Header */
   header: {
-    background: "linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e40af 100%)",
+    background: "linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)",
     padding: "14px 16px",
     display: "flex",
     justifyContent: "space-between",
     alignItems: "center",
-    borderBottom: "1px solid rgba(99,102,241,0.3)",
+    borderBottom: "none",
   },
   headerLeft: {
     display: "flex",
@@ -799,7 +799,7 @@ const styles = {
     height: 9,
     borderRadius: "50%",
     background: "#22c55e",
-    border: "2px solid #1e1b4b",
+    border: "2px solid #5560ff",
   },
   headerTitle: {
     fontWeight: 700,
@@ -839,15 +839,15 @@ const styles = {
   /* Tabs */
   tabRow: {
     display: "flex",
-    background: "#0d0c18",
-    borderBottom: "1px solid rgba(99,102,241,0.15)",
+    background: "#f8fafc",
+    borderBottom: "1px solid rgba(0,0,0,0.05)",
   },
   tabBtn: {
     flex: 1,
     padding: "11px 8px",
     border: "none",
     background: "transparent",
-    color: "rgba(255,255,255,0.45)",
+    color: "#64748b",
     fontWeight: 600,
     fontSize: "0.82rem",
     cursor: "pointer",
@@ -859,9 +859,9 @@ const styles = {
     fontFamily: "Inter, sans-serif",
   },
   tabActive: {
-    color: "#a5b4fc",
-    borderBottom: "2px solid #6366f1",
-    background: "rgba(99,102,241,0.08)",
+    color: "#3b82f6",
+    borderBottom: "2px solid #3b82f6",
+    background: "rgba(59,130,246,0.05)",
   },
 
   /* Chat */
@@ -887,13 +887,13 @@ const styles = {
     width: 28,
     height: 28,
     borderRadius: "50%",
-    background: "rgba(99,102,241,0.2)",
+    background: "#eff6ff",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     fontSize: "0.9rem",
     flexShrink: 0,
-    border: "1px solid rgba(99,102,241,0.3)",
+    border: "1px solid #dbeafe",
   },
   bubble: {
     borderRadius: 14,
@@ -901,16 +901,16 @@ const styles = {
     lineHeight: 1.5,
   },
   bubbleBot: {
-    background: "rgba(255,255,255,0.06)",
-    border: "1px solid rgba(255,255,255,0.1)",
-    color: "#e2e8f0",
+    background: "#f1f5f9",
+    border: "1px solid #e2e8f0",
+    color: "#1e293b",
     borderBottomLeftRadius: 4,
   },
   bubbleUser: {
-    background: "linear-gradient(135deg, #4338ca, #2563eb)",
+    background: "linear-gradient(135deg, #4f46e5, #3b82f6)",
     color: "#fff",
     borderBottomRightRadius: 4,
-    boxShadow: "0 4px 12px rgba(37,99,235,0.3)",
+    boxShadow: "0 4px 12px rgba(59,130,246,0.25)",
   },
   messageText: {
     fontSize: "0.875rem",
@@ -920,7 +920,7 @@ const styles = {
   time: {
     marginTop: 5,
     fontSize: "0.68rem",
-    color: "rgba(255,255,255,0.3)",
+    color: "#94a3b8",
     textAlign: "right",
   },
 
@@ -930,7 +930,7 @@ const styles = {
     width: 7,
     height: 7,
     borderRadius: "50%",
-    background: "#818cf8",
+    background: "#3b82f6",
     animation: "typingDot 1.2s infinite ease-in-out",
   },
 
@@ -940,8 +940,8 @@ const styles = {
     display: "flex",
     gap: 10,
     alignItems: "center",
-    background: "rgba(255,255,255,0.04)",
-    border: "1px solid rgba(255,255,255,0.1)",
+    background: "#ffffff",
+    border: "1px solid #e2e8f0",
     borderRadius: 12,
     padding: "8px 10px",
     cursor: "pointer",
@@ -953,13 +953,13 @@ const styles = {
     objectFit: "cover",
     borderRadius: 8,
     flexShrink: 0,
-    border: "1px solid rgba(255,255,255,0.1)",
+    border: "1px solid #f1f5f9",
   },
   cardBody: { flex: 1, minWidth: 0 },
   carName: {
     fontWeight: 700,
     fontSize: "0.82rem",
-    color: "#e2e8f0",
+    color: "#1e293b",
     marginBottom: 3,
     overflow: "hidden",
     textOverflow: "ellipsis",
@@ -967,8 +967,8 @@ const styles = {
   },
   carBadge: {
     display: "inline-block",
-    background: "rgba(99,102,241,0.2)",
-    color: "#a5b4fc",
+    background: "#eff6ff",
+    color: "#3b82f6",
     fontSize: "0.68rem",
     borderRadius: 6,
     padding: "2px 6px",
@@ -977,13 +977,13 @@ const styles = {
   },
   carPrice: {
     fontSize: "0.77rem",
-    color: "#34d399",
+    color: "#059669",
     fontWeight: 700,
     marginBottom: 4,
   },
   linkBtn: {
     textDecoration: "none",
-    color: "#818cf8",
+    color: "#4f46e5",
     fontWeight: 600,
     fontSize: "0.75rem",
     transition: "color 0.2s",
@@ -992,16 +992,16 @@ const styles = {
   /* Quick suggestions */
   quickRow: {
     padding: "8px 10px",
-    borderTop: "1px solid rgba(255,255,255,0.06)",
+    borderTop: "1px solid #f1f5f9",
     display: "flex",
     gap: 6,
     flexWrap: "wrap",
-    background: "rgba(0,0,0,0.2)",
+    background: "#fff",
   },
   quickBtn: {
-    border: "1px solid rgba(99,102,241,0.25)",
-    background: "rgba(99,102,241,0.08)",
-    color: "rgba(165,180,252,0.85)",
+    border: "1px solid #dbeafe",
+    background: "#f0f9ff",
+    color: "#4f46e5",
     borderRadius: 20,
     padding: "5px 10px",
     fontSize: "0.72rem",
@@ -1015,31 +1015,31 @@ const styles = {
   /* Input */
   inputRow: {
     padding: "10px 12px",
-    borderTop: "1px solid rgba(255,255,255,0.06)",
+    borderTop: "1px solid #f1f5f9",
     display: "flex",
     gap: 8,
     alignItems: "flex-end",
-    background: "rgba(0,0,0,0.2)",
+    background: "#fff",
   },
   input: {
     flex: 1,
-    background: "rgba(255,255,255,0.06)",
-    border: "1px solid rgba(99,102,241,0.3)",
+    background: "#f8fafc",
+    border: "1px solid #e2e8f0",
     borderRadius: 14,
     padding: "10px 14px",
     resize: "none",
     outline: "none",
     fontFamily: "Inter, sans-serif",
     fontSize: "0.875rem",
-    color: "#e2e8f0",
+    color: "#1e293b",
     lineHeight: 1.5,
-    transition: "border-color 0.2s",
+    transition: "all 0.2s",
     maxHeight: 100,
   },
   sendBtn: {
     border: "none",
     borderRadius: 12,
-    background: "linear-gradient(135deg, #6366f1, #2563eb)",
+    background: "linear-gradient(135deg, #4f46e5, #3b82f6)",
     color: "#fff",
     width: 40,
     height: 40,
@@ -1051,7 +1051,7 @@ const styles = {
     justifyContent: "center",
     flexShrink: 0,
     transition: "all 0.2s ease",
-    boxShadow: "0 4px 12px rgba(99,102,241,0.4)",
+    boxShadow: "0 4px 12px rgba(59,130,246,0.3)",
   },
 
   /* Vision tab */
@@ -1066,14 +1066,14 @@ const styles = {
     scrollbarColor: "rgba(99,102,241,0.3) transparent",
   },
   uploadZone: {
-    border: "2px dashed rgba(99,102,241,0.4)",
+    border: "2px dashed #cbd5e1",
     borderRadius: 14,
     minHeight: 160,
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
     cursor: "pointer",
-    background: "rgba(99,102,241,0.05)",
+    background: "#f8fafc",
     transition: "all 0.2s",
     overflow: "hidden",
     position: "relative",
@@ -1107,19 +1107,19 @@ const styles = {
     padding: 20,
   },
   uploadIconBig: { fontSize: "2.5rem" },
-  uploadTitle: { color: "#a5b4fc", fontWeight: 700, fontSize: "0.9rem" },
-  uploadSub: { color: "rgba(255,255,255,0.4)", fontSize: "0.78rem" },
+  uploadTitle: { color: "#1e293b", fontWeight: 700, fontSize: "0.9rem" },
+  uploadSub: { color: "#64748b", fontSize: "0.78rem" },
   uploadFormats: {
-    color: "rgba(255,255,255,0.25)",
+    color: "#94a3b8",
     fontSize: "0.7rem",
-    background: "rgba(255,255,255,0.05)",
+    background: "#f1f5f9",
     borderRadius: 6,
     padding: "2px 8px",
   },
   identifyBtn: {
     border: "none",
     borderRadius: 12,
-    background: "linear-gradient(135deg, #6366f1, #2563eb)",
+    background: "linear-gradient(135deg, #4f46e5, #3b82f6)",
     color: "#fff",
     padding: "12px",
     fontWeight: 700,
@@ -1127,7 +1127,7 @@ const styles = {
     fontSize: "0.875rem",
     fontFamily: "Inter, sans-serif",
     transition: "all 0.2s ease",
-    boxShadow: "0 4px 14px rgba(99,102,241,0.4)",
+    boxShadow: "0 4px 14px rgba(59,130,246,0.3)",
   },
   resultCard: {
     background: "rgba(99,102,241,0.08)",
@@ -1137,7 +1137,7 @@ const styles = {
   },
   resultHeader: {
     fontWeight: 700,
-    color: "#a5b4fc",
+    color: "#3b82f6",
     fontSize: "0.875rem",
     marginBottom: 10,
     display: "flex",
@@ -1150,12 +1150,12 @@ const styles = {
     justifyContent: "space-between",
     alignItems: "center",
     padding: "5px 0",
-    borderBottom: "1px solid rgba(255,255,255,0.05)",
+    borderBottom: "1px solid #f1f5f9",
   },
-  resultLabel: { color: "rgba(255,255,255,0.45)", fontSize: "0.78rem" },
-  resultValue: { color: "#e2e8f0", fontWeight: 600, fontSize: "0.82rem" },
+  resultLabel: { color: "#64748b", fontSize: "0.78rem" },
+  resultValue: { color: "#1e293b", fontWeight: 600, fontSize: "0.82rem" },
   resultSubtitle: {
-    color: "rgba(255,255,255,0.5)",
+    color: "#64748b",
     fontSize: "0.78rem",
     marginBottom: 8,
     fontWeight: 600,
@@ -1187,8 +1187,8 @@ const styles = {
     width: 72,
     height: 72,
     borderRadius: "50%",
-    background: "linear-gradient(135deg, rgba(99,102,241,0.2), rgba(37,99,235,0.2))",
-    border: "1px solid rgba(99,102,241,0.35)",
+    background: "#eff6ff",
+    border: "1px solid #dbeafe",
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
@@ -1197,12 +1197,12 @@ const styles = {
   loginTitle: {
     fontWeight: 800,
     fontSize: "1.05rem",
-    color: "#e2e8f0",
+    color: "#1e293b",
     letterSpacing: "0.01em",
   },
   loginDesc: {
     fontSize: "0.82rem",
-    color: "rgba(255,255,255,0.5)",
+    color: "#64748b",
     lineHeight: 1.6,
     maxWidth: 280,
   },
@@ -1211,8 +1211,8 @@ const styles = {
     flexDirection: "column",
     gap: 8,
     width: "100%",
-    background: "rgba(99,102,241,0.06)",
-    border: "1px solid rgba(99,102,241,0.15)",
+    background: "#f8fafc",
+    border: "1px solid #e2e8f0",
     borderRadius: 12,
     padding: "12px 16px",
   },
@@ -1224,7 +1224,7 @@ const styles = {
   loginFeatureIcon: { fontSize: "1rem", flexShrink: 0 },
   loginFeatureText: {
     fontSize: "0.82rem",
-    color: "rgba(255,255,255,0.65)",
+    color: "#475569",
     textAlign: "left",
     fontWeight: 500,
   },
@@ -1232,22 +1232,22 @@ const styles = {
     width: "100%",
     border: "none",
     borderRadius: 12,
-    background: "linear-gradient(135deg, #6366f1, #2563eb)",
+    background: "linear-gradient(135deg, #4f46e5, #3b82f6)",
     color: "#fff",
     padding: "12px",
     fontWeight: 700,
     cursor: "pointer",
     fontSize: "0.9rem",
     fontFamily: "Inter, sans-serif",
-    boxShadow: "0 4px 14px rgba(99,102,241,0.4)",
+    boxShadow: "0 4px 14px rgba(59,130,246,0.3)",
     transition: "opacity 0.2s",
   },
   registerBtn: {
     width: "100%",
-    border: "1px solid rgba(255,255,255,0.12)",
+    border: "1px solid #e2e8f0",
     borderRadius: 12,
     background: "transparent",
-    color: "rgba(255,255,255,0.5)",
+    color: "#64748b",
     padding: "10px",
     fontWeight: 500,
     cursor: "pointer",

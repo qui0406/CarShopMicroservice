@@ -3,13 +3,13 @@ import { useNavigate } from "react-router-dom";
 
 /* ─── Nav config ─────────────────────────────────────────── */
 const NAV = [
-  { icon: "⊞",  label: "DASHBOARD",   key: "dashboard",  to: "/admin" },
-  { icon: "🚗", label: "INVENTORY",    key: "inventory",  to: "/staff/inventory" },
-  { icon: "👥", label: "USERS",        key: "users",      to: "/admin/users" },
-  { icon: "🗃️", label: "MASTER DATA",  key: "master",     to: "/admin/master-data" },
-  { icon: "🛡️", label: "MODERATION",   key: "moderation", to: null },
-  { icon: "📊", label: "ANALYTICS",    key: "analytics",  to: null },
-  { icon: "⚙️", label: "SETTINGS",     key: "settings",   to: null },
+  { icon: "⊞",  label: "BẢNG ĐIỀU KHIỂN",   key: "dashboard",  to: "/admin" },
+  { icon: "🚗", label: "KHO XE",    key: "inventory",  to: "/staff/inventory" },
+  { icon: "👥", label: "NGƯỜI DÙNG",        key: "users",      to: "/admin/users" },
+  { icon: "🗃️", label: "DỮ LIỆU GỐC",  key: "master",     to: "/admin/master-data" },
+  { icon: "🛡️", label: "KIỂM DUYỆT",   key: "moderation", to: null },
+  { icon: "📊", label: "PHÂN TÍCH",    key: "analytics",  to: null },
+  { icon: "⚙️", label: "CÀI ĐẶT",     key: "settings",   to: null },
 ];
 
 /* ─── Mock users ─────────────────────────────────────────── */
@@ -40,31 +40,31 @@ const INIT_USERS = [
 const EVENTS = [
   {
     type: "PERMISSION_CHANGE_GRANTED",
-    desc: "Admin @m_vance modified role 'Moderator' permissions.",
-    time: "2m ago", iconBg: "#dbeafe", iconColor: "#2563eb", icon: "🔑",
+    desc: "Admin @m_vance đã thay đổi quyền hạn của 'Moderator'.",
+    time: "2ph trước", iconBg: "#dbeafe", iconColor: "#2563eb", icon: "🔑",
   },
   {
     type: "ENTITY_AUTH_BLOCKED",
-    desc: "System automatically restricted @blackwell_j due to suspicious egress.",
-    time: "45m ago", iconBg: "#fee2e2", iconColor: "#dc2626", icon: "🔒",
+    desc: "Hệ thống tự động hạn chế @blackwell_j do lưu lượng truy cập bất thường.",
+    time: "45ph trước", iconBg: "#fee2e2", iconColor: "#dc2626", icon: "🔒",
   },
 ];
 
 /* ─── Authority Matrix config ────────────────────────────── */
 const INIT_PERMS = {
-  "Can Edit Vehicle Data":    true,
-  "Can Provision New VINs":   false,
-  "Can Approve Listings":     true,
-  "User Creation":            false,
-  "Log Deletion":             false,
-  "Financial Reports":        false,
-  "System Health Metrics":    true,
+  "Sửa dữ liệu xe":    true,
+  "Cấp mã VIN mới":   false,
+  "Phê duyệt tin đăng":     true,
+  "Tạo người dùng":            false,
+  "Xóa nhật ký":             false,
+  "Báo cáo tài chính":        false,
+  "Thông số sức khỏe hệ thống":    true,
 };
 
 const PERM_GROUPS = [
-  { label: "Fleet Operations", keys: ["Can Edit Vehicle Data", "Can Provision New VINs", "Can Approve Listings"] },
-  { label: "Access Control",   keys: ["User Creation", "Log Deletion"] },
-  { label: "Analytics View",   keys: ["Financial Reports", "System Health Metrics"] },
+  { label: "Vận hành kho xe", keys: ["Sửa dữ liệu xe", "Cấp mã VIN mới", "Phê duyệt tin đăng"] },
+  { label: "Kiểm soát truy cập",   keys: ["Tạo người dùng", "Xóa nhật ký"] },
+  { label: "Xem phân tích",   keys: ["Báo cáo tài chính", "Thông số sức khỏe hệ thống"] },
 ];
 
 /* ─── NavItem ────────────────────────────────────────────── */
@@ -103,14 +103,14 @@ function ProvisionModal({ onClose, onSave }) {
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden" onClick={e=>e.stopPropagation()}>
         <div className="bg-blue-600 px-6 py-4 flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-blue-200">Identity Engine</p>
-            <h3 className="text-white font-black text-base">Provision New User</h3>
+            <p className="text-[10px] font-black uppercase tracking-widest text-blue-200">Động cơ nhận dạng</p>
+            <h3 className="text-white font-black text-base">Cấp người dùng mới</h3>
           </div>
           <button onClick={onClose} className="w-8 h-8 bg-white/20 rounded-full text-white flex items-center justify-center hover:bg-white/30">✕</button>
         </div>
         <div className="p-6 space-y-4">
           {[
-            { label: "Full Name",    key: "name",   placeholder: "e.g. Marcus Vance", type:"text" },
+            { label: "Họ và tên",    key: "name",   placeholder: "VD: Marcus Vance", type:"text" },
             { label: "Handle",       key: "handle", placeholder: "@username",          type:"text" },
             { label: "Email",        key: "email",  placeholder: "user@domain.com",    type:"email" },
           ].map(f=>(
@@ -121,15 +121,15 @@ function ProvisionModal({ onClose, onSave }) {
             </div>
           ))}
           <div>
-            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 block">System Role</label>
+            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 block">Vai trò hệ thống</label>
             <select value={form.role} onChange={e=>setForm({...form,role:e.target.value})}
               className="w-full px-3 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
               {["ADMIN","STAFF","MODERATOR"].map(r=><option key={r}>{r}</option>)}
             </select>
           </div>
           <div className="flex gap-3 pt-2">
-            <button onClick={()=>onSave(form)} className="flex-1 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700">Provision</button>
-            <button onClick={onClose} className="flex-1 py-2.5 border border-gray-200 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-50">Cancel</button>
+            <button onClick={()=>onSave(form)} className="flex-1 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700">Cấp quyền</button>
+            <button onClick={onClose} className="flex-1 py-2.5 border border-gray-200 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-50">Hủy</button>
           </div>
         </div>
       </div>
@@ -145,29 +145,29 @@ function EditModal({ user, onClose, onSave }) {
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xs overflow-hidden" onClick={e=>e.stopPropagation()}>
         <div className="bg-gray-900 px-6 py-4 flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Edit Entity</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Sửa đối tượng</p>
             <h3 className="text-white font-black">{user.name}</h3>
           </div>
           <button onClick={onClose} className="w-7 h-7 bg-white/10 rounded-full text-white flex items-center justify-center hover:bg-white/20 text-sm">✕</button>
         </div>
         <div className="p-5 space-y-4">
           <div>
-            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 block">System Role</label>
+            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 block">Vai trò hệ thống</label>
             <select value={form.role} onChange={e=>setForm({...form,role:e.target.value})}
               className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
               {["ADMIN","STAFF","MODERATOR"].map(r=><option key={r}>{r}</option>)}
             </select>
           </div>
           <div>
-            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 block">Connectivity</label>
+            <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 block">Kết nối</label>
             <select value={form.status} onChange={e=>setForm({...form,status:e.target.value})}
               className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
               {["Active","Blocked","Suspended"].map(s=><option key={s}>{s}</option>)}
             </select>
           </div>
           <div className="flex gap-3 pt-1">
-            <button onClick={()=>onSave(form)} className="flex-1 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700">Save</button>
-            <button onClick={onClose} className="flex-1 py-2 border border-gray-200 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-50">Cancel</button>
+            <button onClick={()=>onSave(form)} className="flex-1 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700">Lưu</button>
+            <button onClick={onClose} className="flex-1 py-2 border border-gray-200 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-50">Hủy</button>
           </div>
         </div>
       </div>
@@ -206,7 +206,7 @@ export default function AdminUsers() {
     };
     setUsers(p=>[newUser,...p]);
     setModal(null);
-    showToast(`✅ ${form.name} provisioned`);
+    showToast(`✅ ${form.name} đã được cấp quyền`);
   };
 
   const saveEdit = (userId, form) => {
@@ -217,13 +217,13 @@ export default function AdminUsers() {
       : u
     ));
     setModal(null);
-    showToast(`✏️ User updated`);
+    showToast(`✏️ Đã cập nhật người dùng`);
   };
 
   const handlePropagate = () => {
     setPropagated(true);
     setTimeout(()=>setPropagated(false),2500);
-    showToast("🔄 Authority matrix propagated");
+    showToast("🔄 Đã lan truyền ma trận quyền hạn");
   };
 
   const filtered = users.filter(u=>
@@ -254,8 +254,8 @@ export default function AdminUsers() {
           ))}
         </nav>
         <div className="pb-5 border-t border-gray-100 pt-3">
-          <NavItem icon="❓" label="SUPPORT" active={false} onClick={()=>{}}/>
-          <NavItem icon="↪" label="LOGOUT"  active={false} onClick={()=>navigate("/login")}/>
+          <NavItem icon="❓" label="HỖ TRỢ" active={false} onClick={()=>{}}/>
+          <NavItem icon="↪" label="ĐĂNG XUẤT"  active={false} onClick={()=>navigate("/login")}/>
         </div>
       </aside>
 
@@ -267,7 +267,7 @@ export default function AdminUsers() {
           <h1 className="text-base font-black text-gray-900 shrink-0">PrecisionDrive Admin</h1>
           <div className="relative max-w-xs w-full">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
-            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Search system records..."
+            <input value={search} onChange={e=>setSearch(e.target.value)} placeholder="Tìm kiếm hồ sơ hệ thống..."
               className="w-full pl-9 pr-4 py-1.5 text-sm bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"/>
           </div>
           <div className="ml-auto flex items-center gap-4">
@@ -291,21 +291,21 @@ export default function AdminUsers() {
             <div className="flex-1 min-w-0">
 
               {/* Identity Engine header */}
-              <h2 className="text-3xl font-black italic tracking-tight text-gray-900 leading-tight mb-1">IDENTITY ENGINE</h2>
+              <h2 className="text-3xl font-black italic tracking-tight text-gray-900 leading-tight mb-1">ĐỘNG CƠ NHẬN DẠNG</h2>
               <div className="flex items-center justify-between mb-5">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"/>
                   <p className="text-[10px] font-black uppercase tracking-widest text-gray-500">
-                    Managing {users.length || 1248} Active Entities Across Global Fleet
+                    Đang quản lý {users.length || 1248} thực thể đang hoạt động trong đội xe toàn cầu
                   </p>
                 </div>
                 <div className="flex gap-3 shrink-0">
                   <button className="px-4 py-2 border border-gray-200 bg-white text-sm font-bold text-gray-700 rounded-lg hover:bg-gray-50 shadow-sm transition-colors">
-                    Export Logs
+                    Xuất nhật ký
                   </button>
                   <button onClick={()=>setModal({mode:"provision"})}
                     className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700 shadow-sm transition-colors">
-                    👤 Provision User
+                    👤 Cấp quyền người dùng
                   </button>
                 </div>
               </div>
@@ -313,9 +313,9 @@ export default function AdminUsers() {
               {/* Tabs */}
               <div className="flex gap-0 border-b border-gray-200 mb-0">
                 {[
-                  { key:"directory", label:"Active Directory" },
-                  { key:"audit",     label:"Audit Trail" },
-                  { key:"pending",   label:"Pending Access" },
+                  { key:"directory", label:"Danh bạ hoạt động" },
+                  { key:"audit",     label:"Nhật ký kiểm soát" },
+                  { key:"pending",   label:"Chờ truy cập" },
                 ].map(t=>(
                   <button key={t.key} onClick={()=>setTab(t.key)}
                     className={`px-5 py-3 text-xs font-black uppercase tracking-wider transition-colors border-b-2 ${
@@ -330,7 +330,7 @@ export default function AdminUsers() {
               <div className="bg-white border border-gray-100 rounded-b-xl shadow-sm mb-5">
                 {/* Table header */}
                 <div className="grid grid-cols-[2fr_1fr_1fr_1.4fr_auto] gap-4 px-6 py-3 border-b border-gray-50">
-                  {["Identity","System Role","Connectivity","Last Activity","Actions"].map(h=>(
+                  {["Nhận dạng","Vai trò","Kết nối","Hoạt động cuối","Thao tác"].map(h=>(
                     <p key={h} className="text-[10px] font-black uppercase tracking-widest text-gray-400">{h}</p>
                   ))}
                 </div>
@@ -384,7 +384,7 @@ export default function AdminUsers() {
                 {/* Table footer */}
                 <div className="flex items-center justify-between px-6 py-3">
                   <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">
-                    Showing {filtered.length} of 1,248 Records
+                    Hiển thị {filtered.length} trên 1,248 hồ sơ
                   </p>
                   <div className="flex items-center gap-1">
                     <button onClick={()=>setPage(p=>Math.max(1,p-1))} className="w-7 h-7 flex items-center justify-center rounded border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 text-sm">‹</button>
@@ -400,7 +400,7 @@ export default function AdminUsers() {
               </div>
 
               {/* Critical System Events */}
-              <p className="text-[10px] font-black uppercase tracking-widest text-gray-700 mb-3">Critical System Events</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-gray-700 mb-3">Sự kiện hệ thống quan trọng</p>
               <div className="space-y-2">
                 {EVENTS.map((ev,i)=>(
                   <div key={i} className="bg-white border border-gray-100 rounded-xl px-5 py-4 flex items-center gap-4 shadow-sm">
@@ -425,8 +425,8 @@ export default function AdminUsers() {
               <div className="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden">
                 <div className="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
                   <div>
-                    <p className="text-xs font-black uppercase tracking-widest text-gray-900">Authority Matrix</p>
-                    <p className="text-[10px] text-gray-400 mt-0.5">Configuring 'Moderator' Scope</p>
+                    <p className="text-xs font-black uppercase tracking-widest text-gray-900">Ma trận quyền hạn</p>
+                    <p className="text-[10px] text-gray-400 mt-0.5">Cấu hình phạm vi 'Moderator'</p>
                   </div>
                   <span className="text-blue-500 text-lg">⭐</span>
                 </div>
@@ -456,7 +456,7 @@ export default function AdminUsers() {
                     className={`w-full py-2.5 border border-gray-200 text-xs font-black uppercase tracking-widest rounded-lg transition-colors ${
                       propagated ? "bg-green-50 border-green-300 text-green-600" : "bg-white text-gray-700 hover:bg-gray-50"
                     }`}>
-                    {propagated ? "✅ Propagated!" : "Propagate Changes"}
+                    {propagated ? "✅ Đã lan truyền!" : "Lan truyền thay đổi"}
                   </button>
                 </div>
               </div>
@@ -467,11 +467,11 @@ export default function AdminUsers() {
                   alt="servers" className="absolute inset-0 w-full h-full object-cover"/>
                 <div className="absolute inset-0 bg-gray-900/80"/>
                 <div className="relative p-5">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-2">Status Report</p>
-                  <p className="text-lg font-black text-white leading-tight mb-4">SYSTEM INTEGRITY<br/>NOMINAL</p>
+                  <p className="text-[9px] font-black uppercase tracking-widest text-gray-400 mb-2">Báo cáo trạng thái</p>
+                  <p className="text-lg font-black text-white leading-tight mb-4">ĐỘ TOÀN VẸN HỆ THỐNG<br/>BÌNH THƯỜNG</p>
                   <div className="grid grid-cols-2 gap-3 border-t border-white/10 pt-4">
                     <div>
-                      <p className="text-[9px] font-black uppercase text-gray-500 mb-0.5">Errors</p>
+                      <p className="text-[9px] font-black uppercase text-gray-500 mb-0.5">Lỗi</p>
                       <p className="text-xl font-black text-white">0.00%</p>
                     </div>
                     <div>

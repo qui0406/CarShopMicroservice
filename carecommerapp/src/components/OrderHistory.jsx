@@ -96,17 +96,17 @@ export default function OrderHistory() {
           PRECISION MOTORS
         </button>
         <div style={s.navLinks}>
-          <Link style={s.navLink} to="/car-new">Inventory</Link>
-          <Link style={s.navLink} to="/quotation/1">Configurator</Link>
-          <span style={{ ...s.navLink, ...s.navLinkActive }}>Order History</span>
-          <Link style={s.navLink} to="/about">Support</Link>
+          <Link style={s.navLink} to="/car-new">Kho Xe</Link>
+          <Link style={s.navLink} to="/quotation/1">Cấu Hình</Link>
+          <span style={{ ...s.navLink, ...s.navLinkActive }}>Lịch Sử Đơn Hàng</span>
+          <Link style={s.navLink} to="/about">Hỗ Trợ</Link>
         </div>
       </header>
 
       <main style={s.main}>
         <section style={s.headingRow}>
           <div>
-            <p style={s.kicker}>CUSTOMER DASHBOARD</p>
+            <p style={s.kicker}>BẢNG ĐIỀU KHIỂN KHÁCH HÀNG</p>
             <h1 style={s.title}>Lịch sử đặt xe</h1>
           </div>
           <div style={s.tabWrap}>
@@ -158,11 +158,11 @@ export default function OrderHistory() {
                     <p style={s.meta}>ORD - {order.orderCode}</p>
                   </div>
                   <div style={s.dateCol}>
-                    <p style={s.label}>ORDER DATE</p>
+                    <p style={s.label}>NGÀY ĐẶT HÀNG</p>
                     <p style={s.value}>{formatDate(order.createdAt)}</p>
                   </div>
                   <div style={s.amountCol}>
-                    <p style={s.label}>DEPOSIT AMOUNT</p>
+                    <p style={s.label}>SỐ TIỀN ĐẶT CỌC</p>
                     <p style={s.amount}>{money(order.depositAmount)}</p>
                     <span style={{ ...s.badge, ...(paid ? s.badgePaid : s.badgePending) }}>
                       {paid ? "ĐÃ THANH TOÁN" : "CHỜ THANH TOÁN"}

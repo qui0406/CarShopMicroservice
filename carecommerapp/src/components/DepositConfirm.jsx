@@ -63,16 +63,16 @@ export default function DepositConfirm() {
       <nav style={s.nav}>
         <button onClick={() => navigate('/')} style={s.logo}>PRECISION</button>
         <div style={s.navLinks}>
-          {['MODELS','PURCHASE','SERVICE','EXPERIENCE','SHOP'].map(item => (
-            <span key={item} style={{ ...s.navLink, ...(item==='PURCHASE' ? s.navLinkActive : {}) }}>{item}</span>
+          {['DÒNG XE','MUA XE','DỊCH VỤ','TRẢI NGHIỆM','CỬA HÀNG'].map(item => (
+            <span key={item} style={{ ...s.navLink, ...(item==='MUA XE' ? s.navLinkActive : {}) }}>{item}</span>
           ))}
         </div>
-        <button style={s.reserveBtn}>Reserve Now</button>
+        <button style={s.reserveBtn}>Đặt xe ngay</button>
       </nav>
 
       {/* HERO LABEL */}
       <div style={s.heroSection}>
-        <p style={s.portalLabel}>RESERVATION PORTAL</p>
+        <p style={s.portalLabel}>CỔNG ĐẶT XE</p>
         <h1 style={s.heroTitle}>ĐẶT CỌC TRỰC TUYẾN</h1>
         <div style={s.titleLine}></div>
       </div>
@@ -171,7 +171,7 @@ export default function DepositConfirm() {
               {[
                 { label: 'MÀU NGOẠI THẤT', value: car.carModel?.exteriorColor || 'Chưa cập nhật' },
                 { label: 'NỘI THẤT', value: car.carModel?.interiorColor || 'Chưa cập nhật' },
-                { label: 'MÂM XE', value: car.carModel?.rimType || '20" Standard Design' },
+                { label: 'MÂM XE', value: car.carModel?.rimType || 'Thiết kế tiêu chuẩn 20"' },
               ].map(row => (
                 <div key={row.label} style={s.specRow}>
                   <span style={s.specLabel}>{row.label}</span>
@@ -242,11 +242,11 @@ export default function DepositConfirm() {
       <footer style={s.footer}>
         <div style={s.footerLeft}>
           <span style={s.footerLogo}>PRECISION</span>
-          {['Legal Notice','Privacy Policy','Cookie Policy','Consumption/Emissions'].map(l => (
+          {['Thông báo pháp lý','Chính sách bảo mật','Chính sách Cookie','Tiêu thụ/Phát thải'].map(l => (
             <a key={l} href="#" style={s.footerLink}>{l}</a>
           ))}
         </div>
-        <span style={{ fontSize:'0.7rem', color:'#9ca3af' }}>© 2026 Precision Digital Blueprint. All rights reserved.</span>
+        <span style={{ fontSize:'0.7rem', color:'#9ca3af' }}>© 2026 Bản kỹ thuật số Precision. Tất cả các quyền được bảo lưu.</span>
       </footer>
 
       <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>

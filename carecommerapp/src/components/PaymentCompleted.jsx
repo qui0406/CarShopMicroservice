@@ -106,11 +106,11 @@ export default function PaymentCompleted() {
       <nav style={s.nav}>
         <button onClick={() => navigate('/')} style={s.logo}>PRECISION MOTORS</button>
         <div style={s.navLinks}>
-          {['INVENTORY','CONFIGURE','FINANCE', 'OWNERS'].map(item => (
-            <span key={item} style={{ ...s.navLink, ...(item==='OWNERS' ? s.navLinkActive : {}) }}>{item}</span>
+          {['KHO XE','CẤU HÌNH','TÀI CHÍNH', 'CHỦ SỞ HỮU'].map(item => (
+            <span key={item} style={{ ...s.navLink, ...(item==='CHỦ SỞ HỮU' ? s.navLinkActive : {}) }}>{item}</span>
           ))}
         </div>
-        <button style={s.reserveBtn}>Reserve Now</button>
+        <button style={s.reserveBtn}>Đặt xe ngay</button>
       </nav>
 
       {/* CONTENT */}
@@ -136,7 +136,7 @@ export default function PaymentCompleted() {
                  <img src={carImg} alt="Car" style={s.carImg} />
               </div>
               <div style={s.carInfoWrap}>
-                 <p style={s.carLabel}>VEHICLE MODEL</p>
+                 <p style={s.carLabel}>MẪU XE</p>
                  <h3 style={s.carName}>{carModelName}</h3>
                  <div style={s.carMetaGrid}>
                     <div>
@@ -154,7 +154,7 @@ export default function PaymentCompleted() {
            {/* Right: Payment Details */}
            <div style={s.receiptRight}>
               <div style={{ marginBottom: 24 }}>
-                 <p style={s.totalLabel}>TOTAL DEPOSIT AMOUNT</p>
+                 <p style={s.totalLabel}>TỔNG SỐ TIỀN ĐẶT CỌC</p>
                  <p style={s.totalAmount}>{amountDisplay}</p>
               </div>
 
@@ -210,11 +210,11 @@ export default function PaymentCompleted() {
            <span style={s.footerLogo}>PRECISION MOTORS</span>
         </div>
         <div style={s.footerLinks}>
-          {['PRIVACY POLICY','TERMS OF SERVICE','LEGAL SPECS','CONTACT SUPPORT'].map(l => (
+          {['CHÍNH SÁCH BẢO MẬT','ĐIỀU KHOẢN DỊCH VỤ','THÔNG SỐ PHÁP LÝ','HỖ TRỢ'].map(l => (
             <a key={l} href="#" style={s.footerLink}>{l}</a>
           ))}
         </div>
-        <span style={s.footerCopy}>© 2026 PRECISION MOTORS. ENGINEERED EXCELLENCE.</span>
+        <span style={s.footerCopy}>© 2026 PRECISION MOTORS. CHI TIẾT ĐẾN TỪ SỰ HOÀN HẢO.</span>
       </footer>
 
     </div>

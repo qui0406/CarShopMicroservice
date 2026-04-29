@@ -3,13 +3,13 @@ import { useNavigate } from "react-router-dom";
 
 /* ─── Sidebar nav ────────────────────────────────────────── */
 const NAV = [
-  { icon: "⊞",  label: "DASHBOARD",   key: "dashboard",  to: "/admin" },
-  { icon: "🚗", label: "INVENTORY",    key: "inventory",  to: "/staff/inventory"},
-  { icon: "👥", label: "USERS",        key: "users",      to: null },
-  { icon: "🗃️", label: "MASTER DATA",  key: "master",     to: "/admin/master-data" },
-  { icon: "🛡️", label: "MODERATION",   key: "moderation", to: null },
-  { icon: "📊", label: "ANALYTICS",    key: "analytics",  to: null },
-  { icon: "⚙️", label: "SETTINGS",     key: "settings",   to: null },
+  { icon: "⊞",  label: "BẢNG ĐIỀU KHIỂN",   key: "dashboard",  to: "/admin" },
+  { icon: "🚗", label: "KHO XE",    key: "inventory",  to: "/staff/inventory"},
+  { icon: "👥", label: "NGƯỜI DÙNG",        key: "users",      to: null },
+  { icon: "🗃️", label: "DỮ LIỆU GỐC",  key: "master",     to: "/admin/master-data" },
+  { icon: "🛡️", label: "KIỂM DUYỆT",   key: "moderation", to: null },
+  { icon: "📊", label: "PHÂN TÍCH",    key: "analytics",  to: null },
+  { icon: "⚙️", label: "CÀI ĐẶT",     key: "settings",   to: null },
 ];
 
 /* ─── Mock brands ────────────────────────────────────────── */
@@ -57,13 +57,13 @@ function BrandCard({ brand, onEdit, onDelete }) {
       <p className="text-[10px] text-gray-400 font-black uppercase tracking-wider mt-0.5 mb-3">{brand.country}</p>
       {/* Badges */}
       <div className="flex items-center gap-2">
-        <span className="px-2 py-0.5 border border-gray-200 rounded text-[10px] font-bold text-gray-600">{brand.models} Models</span>
-        <span className="px-2 py-0.5 border border-green-200 bg-green-50 rounded text-[10px] font-bold text-green-600">Active</span>
+        <span className="px-2 py-0.5 border border-gray-200 rounded text-[10px] font-bold text-gray-600">{brand.models} Mẫu xe</span>
+        <span className="px-2 py-0.5 border border-green-200 bg-green-50 rounded text-[10px] font-bold text-green-600">Hoạt động</span>
       </div>
       {/* Hover actions */}
       <div className="absolute inset-0 bg-white/95 rounded-xl flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity">
-        <button onClick={() => onEdit(brand)} className="px-3 py-1.5 bg-blue-600 text-white text-xs font-black rounded-lg hover:bg-blue-700">Edit</button>
-        <button onClick={() => onDelete(brand.id)} className="px-3 py-1.5 border border-red-200 text-red-500 text-xs font-black rounded-lg hover:bg-red-50">Delete</button>
+        <button onClick={() => onEdit(brand)} className="px-3 py-1.5 bg-blue-600 text-white text-xs font-black rounded-lg hover:bg-blue-700">Sửa</button>
+        <button onClick={() => onDelete(brand.id)} className="px-3 py-1.5 border border-red-200 text-red-500 text-xs font-black rounded-lg hover:bg-red-50">Xóa</button>
       </div>
     </div>
   );
@@ -80,16 +80,16 @@ function BrandModal({ brand, onClose, onSave }) {
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden" onClick={e=>e.stopPropagation()}>
         <div className="bg-blue-600 px-6 py-4 flex items-center justify-between">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-widest text-blue-200">{brand ? "Edit Brand" : "Register Brand"}</p>
-            <h3 className="text-white font-black text-base">{brand ? `Edit ${brand.name}` : "New Manufacturer"}</h3>
+            <p className="text-[10px] font-black uppercase tracking-widest text-blue-200">{brand ? "Chỉnh sửa hãng" : "Đăng ký hãng xe"}</p>
+            <h3 className="text-white font-black text-base">{brand ? `Sửa ${brand.name}` : "Nhà sản xuất mới"}</h3>
           </div>
           <button onClick={onClose} className="w-8 h-8 bg-white/20 rounded-full text-white flex items-center justify-center hover:bg-white/30">✕</button>
         </div>
         <div className="p-6 space-y-4">
           {[
-            { label: "Brand Name", key: "name",    placeholder: "e.g. Porsche" },
-            { label: "Country",    key: "country", placeholder: "e.g. GERMANY" },
-            { label: "Flag Code",  key: "flag",    placeholder: "e.g. DEU" },
+            { label: "Tên hãng", key: "name",    placeholder: "VD: Porsche" },
+            { label: "Quốc gia",    key: "country", placeholder: "VD: GERMANY" },
+            { label: "Mã cờ",  key: "flag",    placeholder: "VD: DEU" },
           ].map(f=>(
             <div key={f.key}>
               <label className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1 block">{f.label}</label>
@@ -99,9 +99,9 @@ function BrandModal({ brand, onClose, onSave }) {
           ))}
           <div className="flex gap-3 pt-2">
             <button onClick={() => onSave(form)} className="flex-1 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700">
-              {brand ? "Save Changes" : "Register"}
+              {brand ? "Lưu thay đổi" : "Đăng ký"}
             </button>
-            <button onClick={onClose} className="flex-1 py-2.5 border border-gray-200 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-50">Cancel</button>
+            <button onClick={onClose} className="flex-1 py-2.5 border border-gray-200 text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-50">Hủy</button>
           </div>
         </div>
       </div>
@@ -136,10 +136,10 @@ export default function MasterData() {
       const nb = { id: Date.now(), name: form.name, country: form.country.toUpperCase(), flag: form.flag.toUpperCase(), models: 0,
         logo: `https://ui-avatars.com/api/?name=${encodeURIComponent(form.name)}&background=111827&color=fff&size=80` };
       setBrands(p => [...p, nb]);
-      showToast(`✅ ${form.name} registered`);
+      showToast(`✅ Hãng ${form.name} đã được đăng ký`);
     } else {
       setBrands(p => p.map(b => b.id === modal.data.id ? { ...b, ...form, country: form.country.toUpperCase(), flag: form.flag.toUpperCase() } : b));
-      showToast(`✏️ ${form.name} updated`);
+      showToast(`✏️ Hãng ${form.name} đã được cập nhật`);
     }
     setModal(null);
   };
@@ -147,14 +147,14 @@ export default function MasterData() {
   const deleteBrand = id => {
     const name = brands.find(b => b.id === id)?.name;
     setBrands(p => p.filter(b => b.id !== id));
-    showToast(`🗑️ ${name} removed`);
+    showToast(`🗑️ Hãng ${name} đã bị gỡ bỏ`);
   };
 
   const runValidation = async () => {
     setValidating(true);
     await new Promise(r => setTimeout(r, 2000));
     setValidating(false);
-    showToast("✅ Validation complete — 99.4% integrity");
+    showToast("✅ Kiểm tra hoàn tất — độ toàn vẹn 99.4%");
   };
 
   return (
@@ -180,8 +180,8 @@ export default function MasterData() {
           ))}
         </nav>
         <div className="pb-5 border-t border-gray-100 pt-3">
-          <NavItem icon="❓" label="SUPPORT" active={false} onClick={() => {}}/>
-          <NavItem icon="↪"  label="LOGOUT"  active={false} onClick={() => navigate("/login")}/>
+          <NavItem icon="❓" label="HỖ TRỢ" active={false} onClick={() => {}}/>
+          <NavItem icon="↪"  label="ĐĂNG XUẤT"  active={false} onClick={() => navigate("/login")}/>
         </div>
       </aside>
 
@@ -193,7 +193,7 @@ export default function MasterData() {
           <h1 className="text-base font-black text-gray-900 shrink-0">PrecisionDrive Admin</h1>
           <div className="relative max-w-xs w-full">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm">🔍</span>
-            <input placeholder="Global system search..." className="w-full pl-9 pr-4 py-1.5 text-sm bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"/>
+            <input placeholder="Tìm kiếm hệ thống toàn cầu..." className="w-full pl-9 pr-4 py-1.5 text-sm bg-gray-50 border border-gray-200 rounded-full focus:outline-none focus:ring-2 focus:ring-blue-500"/>
           </div>
           <div className="ml-auto flex items-center gap-4">
             <button className="text-gray-400 hover:text-gray-700 text-lg">🔔</button>
@@ -216,17 +216,17 @@ export default function MasterData() {
             <div className="flex-1 min-w-0">
 
               {/* Header */}
-              <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-1">System Configuration</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-blue-600 mb-1">Cấu hình hệ thống</p>
               <div className="flex items-end justify-between mb-5">
-                <h2 className="text-3xl font-black text-gray-900 leading-tight">Master Data Management</h2>
+                <h2 className="text-3xl font-black text-gray-900 leading-tight">Quản lý dữ liệu gốc</h2>
                 <div className="flex gap-3 shrink-0">
                   <button onClick={() => setModal({ mode: "add", data: null })}
                     className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700 shadow-sm transition-colors">
-                    + Add New Brand
+                    + Thêm hãng mới
                   </button>
                   <button onClick={() => navigate("/staff/create-car")}
                     className="flex items-center gap-1.5 px-4 py-2 border border-gray-200 bg-white text-gray-700 text-sm font-bold rounded-lg hover:bg-gray-50 shadow-sm transition-colors">
-                    + Add New Model
+                    + Thêm mẫu xe mới
                   </button>
                 </div>
               </div>
@@ -234,8 +234,8 @@ export default function MasterData() {
               {/* Tabs */}
               <div className="flex gap-1 mb-5 border-b border-gray-200">
                 {[
-                  { key: "brands",  icon: "🏷️", label: "Brands" },
-                  { key: "models",  icon: "🚘", label: "Car Models" },
+                  { key: "brands",  icon: "🏷️", label: "Hãng xe" },
+                  { key: "models",  icon: "🚘", label: "Mẫu xe" },
                 ].map(t => (
                   <button key={t.key} onClick={() => setTab(t.key)}
                     className={`flex items-center gap-2 px-4 py-3 text-sm font-bold border-b-2 transition-colors ${
@@ -272,8 +272,8 @@ export default function MasterData() {
                         <button onClick={() => setModal({ mode: "add", data: null })}
                           className="border-2 border-dashed border-gray-200 rounded-xl flex flex-col items-center justify-center gap-2 min-h-[180px] hover:border-blue-400 hover:bg-blue-50/30 transition-all group">
                           <div className="w-10 h-10 rounded-full bg-gray-100 group-hover:bg-blue-100 flex items-center justify-center text-gray-400 group-hover:text-blue-500 text-xl transition-colors">+</div>
-                          <p className="text-xs font-black uppercase tracking-wider text-gray-400 group-hover:text-blue-500 transition-colors">Register New Manufacturer</p>
-                          <p className="text-[9px] text-gray-300 uppercase tracking-widest">Manual Entry</p>
+                          <p className="text-xs font-black uppercase tracking-wider text-gray-400 group-hover:text-blue-500 transition-colors">Đăng ký hãng xe mới</p>
+                          <p className="text-[9px] text-gray-300 uppercase tracking-widest">Nhập thủ công</p>
                         </button>
                       </>
                   }
@@ -284,11 +284,11 @@ export default function MasterData() {
               {tab === "models" && (
                 <div className="py-16 text-center text-gray-400">
                   <p className="text-4xl mb-3">🚘</p>
-                  <p className="font-black uppercase tracking-wider text-sm">Car Models</p>
-                  <p className="text-xs mt-1">Use the Inventory section to manage models.</p>
+                  <p className="font-black uppercase tracking-wider text-sm">Mẫu xe</p>
+                  <p className="text-xs mt-1">Sử dụng phần Kho xe để quản lý các mẫu xe.</p>
                   <button onClick={() => navigate("/staff/home/model")}
                     className="mt-4 px-4 py-2 bg-blue-600 text-white text-sm font-bold rounded-lg hover:bg-blue-700">
-                    Go to Model Manager
+                    Đi tới Quản lý mẫu xe
                   </button>
                 </div>
               )}
@@ -301,7 +301,7 @@ export default function MasterData() {
               <div className="bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm">
                 <div className="px-5 py-4 border-b border-gray-50 flex items-center gap-2">
                   <span className="text-base">⚡</span>
-                  <span className="text-xs font-black uppercase tracking-widest text-gray-900">Technical Specs</span>
+                  <span className="text-xs font-black uppercase tracking-widest text-gray-900">Thông số kỹ thuật</span>
                 </div>
 
                 {/* Fuel Types */}
@@ -326,7 +326,7 @@ export default function MasterData() {
                   {editFuel && (
                     <div className="flex gap-1">
                       <input value={newFuel} onChange={e => setNewFuel(e.target.value)}
-                        placeholder="Add fuel type..." onKeyDown={e => { if(e.key==="Enter"&&newFuel.trim()){ setFuels(p=>[...p,newFuel.trim()]); setNewFuel(""); }}}
+                        placeholder="Thêm loại nhiên liệu..." onKeyDown={e => { if(e.key==="Enter"&&newFuel.trim()){ setFuels(p=>[...p,newFuel.trim()]); setNewFuel(""); }}}
                         className="flex-1 px-2 py-1 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"/>
                       <button onClick={() => { if(newFuel.trim()){ setFuels(p=>[...p,newFuel.trim()]); setNewFuel(""); }}}
                         className="px-2 py-1 bg-blue-600 text-white text-xs font-black rounded hover:bg-blue-700">+</button>
@@ -337,9 +337,9 @@ export default function MasterData() {
                 {/* Transmission */}
                 <div className="px-5 py-4">
                   <div className="flex items-center justify-between mb-3">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Transmission</p>
+                    <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Hộp số</p>
                     <button onClick={() => setEditTrans(e => !e)} className="text-[10px] font-black text-blue-600 hover:text-blue-800 flex items-center gap-1">
-                      ✏️ {editTrans ? "Done" : "Edit"}
+                      ✏️ {editTrans ? "Xong" : "Sửa"}
                     </button>
                   </div>
                   <div className="space-y-1.5">
@@ -356,7 +356,7 @@ export default function MasterData() {
                   {editTrans && (
                     <div className="flex gap-1 mt-2">
                       <input value={newTrans} onChange={e => setNewTrans(e.target.value)}
-                        placeholder="Add type..." onKeyDown={e => { if(e.key==="Enter"&&newTrans.trim()){ setTrans(p=>[...p,newTrans.trim()]); setNewTrans(""); }}}
+                        placeholder="Thêm loại..." onKeyDown={e => { if(e.key==="Enter"&&newTrans.trim()){ setTrans(p=>[...p,newTrans.trim()]); setNewTrans(""); }}}
                         className="flex-1 px-2 py-1 text-xs border border-gray-200 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"/>
                       <button onClick={() => { if(newTrans.trim()){ setTrans(p=>[...p,newTrans.trim()]); setNewTrans(""); }}}
                         className="px-2 py-1 bg-blue-600 text-white text-xs font-black rounded hover:bg-blue-700">+</button>
@@ -369,15 +369,15 @@ export default function MasterData() {
               <div className="bg-blue-600 rounded-xl p-5 relative overflow-hidden">
                 <div className="absolute -right-4 -bottom-4 w-24 h-24 rounded-full bg-white/10"/>
                 <div className="w-9 h-9 bg-white/20 rounded-lg flex items-center justify-center text-lg mb-3">📊</div>
-                <p className="text-white font-black text-base mb-2">Data Integrity: 99.4%</p>
+                <p className="text-white font-black text-base mb-2">Độ toàn vẹn dữ liệu: 99.4%</p>
                 <p className="text-blue-200 text-[11px] leading-relaxed mb-4">
-                  All vehicle data parameters are currently mapped to global automotive standards (ISO-15118).
+                  Tất cả các tham số dữ liệu xe hiện đang được ánh xạ theo tiêu chuẩn ô tô toàn cầu (ISO-15118).
                 </p>
                 <button onClick={runValidation} disabled={validating}
                   className="w-full py-2.5 bg-white/20 hover:bg-white/30 text-white text-[10px] font-black uppercase tracking-widest rounded-lg transition-colors disabled:opacity-60 flex items-center justify-center gap-2">
                   {validating
-                    ? <><span className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin"/>Validating...</>
-                    : "Run Validation Report"
+                    ? <><span className="w-3 h-3 border-2 border-white/40 border-t-white rounded-full animate-spin"/>Đang kiểm tra...</>
+                    : "Chạy báo cáo kiểm tra"
                   }
                 </button>
               </div>
@@ -387,10 +387,10 @@ export default function MasterData() {
           {/* ── BOTTOM STATS BAR ── */}
           <div className="border-t border-gray-100 bg-white px-8 py-4 grid grid-cols-4 gap-6">
             {[
-              { label: "Global Manufacturers",  value: brands.length || 142 },
-              { label: "Active Model Variants",  value: "2,841" },
-              { label: "Pending Validations",    value: "12" },
-              { label: "Last Synced",            value: "4m ago" },
+              { label: "Nhà sản xuất toàn cầu",  value: brands.length || 142 },
+              { label: "Biến thể mẫu xe hoạt động",  value: "2,841" },
+              { label: "Kiểm tra đang chờ xử lý",    value: "12" },
+              { label: "Đồng bộ lần cuối",            value: "4ph trước" },
             ].map(s => (
               <div key={s.label}>
                 <p className="text-[10px] font-black uppercase tracking-widest text-gray-400 mb-1">{s.label}</p>

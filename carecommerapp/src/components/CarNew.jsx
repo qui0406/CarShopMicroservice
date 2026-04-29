@@ -178,19 +178,19 @@ export default function CarSection() {
                   {cars.map((car) => (
                     <Col lg={6} key={car.id}>
                       <Card style={{ border: "1px solid #e7e8e9", borderRadius: "8px", overflow: "hidden", boxShadow: "none", height: "100%", backgroundColor: "#ffffff" }}>
-                        <div style={{ position: "relative", height: "260px", backgroundColor: "#f1f5f9" }}>
+                        <div style={{ position: "relative", height: "260px", backgroundColor: "#f1f5f9", cursor: "pointer" }} onClick={() => window.location.href = `/get-car-by-id/${car.id}`}>
                           {car.status && (
                             <span style={{ position: "absolute", top: "15px", left: "15px", backgroundColor: car.statusColor, color: "white", padding: "6px 12px", fontSize: "0.75rem", fontWeight: 700, borderRadius: "4px", zIndex: 2, letterSpacing: "1px" }}>
                               {car.status}
                             </span>
                           )}
-                          <Card.Img src={car.image} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                          <Card.Img src={car.image} style={{ width: "100%", height: "100%", objectFit: "cover", transition: "transform 0.3s ease" }} onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"} onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"} />
                         </div>
 
                         <Card.Body style={{ padding: "30px 24px" }}>
                           <div style={{ marginBottom: "24px" }}>
                             <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#8c949c", textTransform: "uppercase", letterSpacing: "1px", marginBottom: "6px" }}>{car.brand}</div>
-                            <Card.Title style={{ fontSize: "1.4rem", fontWeight: 800, color: "#191c1d", margin: 0, letterSpacing: "-0.5px", marginBottom: "6px" }}>{car.name}</Card.Title>
+                            <Card.Title as={Link} to={`/get-car-by-id/${car.id}`} style={{ fontSize: "1.4rem", fontWeight: 800, color: "#191c1d", margin: 0, letterSpacing: "-0.5px", marginBottom: "6px", textDecoration: "none", display: "block" }}>{car.name}</Card.Title>
                             <div style={{ fontSize: "1.5rem", fontWeight: 800, color: "red" }}>{car.price ? car.price.toLocaleString("vi-VN") + " VND" : "Liên hệ"}</div>
                           </div>
 
@@ -217,11 +217,8 @@ export default function CarSection() {
                           </div>
 
                           <Row className="g-3">
-                            <Col xs={6}>
-                              <Button as={Link} to={`/get-car-by-id/${car.id}`} style={{ width: "100%", background: "#e8f0fe", color: "#191c1d", border: "none", padding: "12px 0", fontWeight: 600, borderRadius: "4px", fontSize: "0.95rem" }}>Chi tiết</Button>
-                            </Col>
-                            <Col xs={6}>
-                              <Button as={Link} to={`/get-car-by-id/${car.id}`} style={{ width: "100%", background: "#191c1d", color: "#ffffff", border: "none", padding: "12px 0", fontWeight: 600, borderRadius: "4px", fontSize: "0.95rem" }}>Lái thử</Button>
+                            <Col xs={12}>
+                              <Button as={Link} to={`/get-car-by-id/${car.id}`} style={{ width: "100%", background: "#1a73e8", color: "#ffffff", border: "none", padding: "14px 0", fontWeight: 700, borderRadius: "4px", fontSize: "1rem" }}>Xem chi tiết</Button>
                             </Col>
                           </Row>
                         </Card.Body>
