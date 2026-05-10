@@ -1,7 +1,9 @@
 package com.tlaq.catalog_service.service;
 
 import com.tlaq.catalog_service.dto.PageResponse;
+import com.tlaq.catalog_service.dto.request.CarBatchItemRequest;
 import com.tlaq.catalog_service.dto.request.CarRequest;
+import com.tlaq.catalog_service.dto.response.CarBatchResponse;
 import com.tlaq.catalog_service.dto.response.CarResponse;
 import com.tlaq.catalog_service.dto.response.CarSummaryResponse;
 import com.tlaq.catalog_service.dto.response.Model3DResponse;
@@ -20,4 +22,5 @@ public interface CarService {
     BigDecimal getPrice(String carId);
     PageResponse<CarResponse> filterCar(Map<String, String> filter);
     Model3DResponse upload3DModel(String carId, MultipartFile file) throws IOException;
+    List<CarBatchResponse> validateBatch(List<CarBatchItemRequest> items);
 }

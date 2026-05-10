@@ -8,8 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface NotificationTemplateRepository extends MongoRepository<NotificationTemplate, String> {
-
     Optional<NotificationTemplate> findByTemplateCode(String templateCode);
-
-    Optional<NotificationTemplate> findByTemplateCodeAndLanguage(String templateCode, String language);
 }

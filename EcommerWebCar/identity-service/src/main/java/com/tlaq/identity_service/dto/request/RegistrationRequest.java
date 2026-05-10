@@ -17,9 +17,11 @@ import java.time.LocalDate;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class RegistrationRequest {
     @Size(min = 4, message = "USERNAME_INVALID")
+    @NotBlank(message= "USERNAME_IS_REQUIRED")
     String username;
 
     @Size(min = 6, message = "INVALID_PASSWORD")
+    @NotBlank(message= "PASSWORD_IS_REQUIRED")
     String password;
 
     @Email(message = "INVALID_EMAIL")

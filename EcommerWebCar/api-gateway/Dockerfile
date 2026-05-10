@@ -1,5 +1,5 @@
 # Stage 1: Build environment
-FROM maven:3.8.5-openjdk-17 AS build
+FROM maven:3.9.6-eclipse-temurin-21 AS build
 
 # Đặt thư mục làm việc cố định
 WORKDIR /app
@@ -11,10 +11,10 @@ RUN mvn dependency:go-offline
 # Copy mã nguồn và chạy build
 COPY src ./src
 # Build file .jar và bỏ qua các unit test để tiết kiệm thời gian CI/CD
-RUN mvn clean package -DskipTests
+RUN mvn clean package -Dmaven.test.skip=true
 
 # Stage 2: Run environment
-FROM openjdk:17-jdk-slim
+FROM eclipse-temurin:21-jre-jammy
 
 # Tạo thư mục làm việc chạy ứng dụng
 WORKDIR /app
@@ -23,7 +23,7 @@ WORKDIR /app
 COPY --from=build /app/target/*.jar app.jar
 
 # Mở cổng 8080 (hoặc cổng cấu hình riêng của service)
-EXPOSE 8080
+EXPOSE 8888
 
 # Chạy ứng dụng
 ENTRYPOINT ["java", "-jar", "app.jar"]

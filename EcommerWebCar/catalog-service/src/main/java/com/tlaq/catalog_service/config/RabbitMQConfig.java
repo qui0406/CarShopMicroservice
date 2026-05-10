@@ -14,6 +14,7 @@ public class RabbitMQConfig {
     public static final String INVENTORY_QUEUE         = "q.inventory-update";
     public static final String INVENTORY_ROUTING_KEY   = "routing.inventory";
     public static final String INVENTORY_ROLLBACK_RK   = "routing.inventory.rollback";
+    public static final String ORDER_FAIL_RK           = "routing.order.fail";
 
     @Bean
     public TopicExchange orderExchange() {

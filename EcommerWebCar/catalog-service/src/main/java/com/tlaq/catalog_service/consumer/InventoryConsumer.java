@@ -16,6 +16,7 @@ import java.util.Map;
 public class InventoryConsumer {
 
     private final InventoryService inventoryService;
+    private final org.springframework.amqp.rabbit.core.RabbitTemplate rabbitTemplate;
 
     @RabbitListener(queues = RabbitMQConfig.INVENTORY_QUEUE)
     public void handleInventory(Map<String, Object> message) {
@@ -36,6 +37,20 @@ public class InventoryConsumer {
             }
         } catch (Exception e) {
             log.error("Lỗi xử lý kho [rollback={}] OrderId: {} - {}", isRollback, orderId, e.getMessage());
+            
+            // SAGA Compensation: Gửi lệnh báo lỗi sang ordering-service để huỷ đơn
+            if (!Boolean.TRUE.equals(isRollback) && orderId != null) {
+                Map<String, Object> failMsg = new java.util.HashMap<>();
+                failMsg.put("orderId", orderId);
+                failMsg.put("reason", "Lỗi xử lý kho: " + e.getMessage());
+                
+                log.info("SAGA: Gửi yêu cầu huỷ đơn hàng do lỗi kho - OrderId: {}", orderId);
+                rabbitTemplate.convertAndSend(
+                        RabbitMQConfig.EXCHANGE,
+                        RabbitMQConfig.ORDER_FAIL_RK,
+                        failMsg
+                );
+            }
         }
     }
 }

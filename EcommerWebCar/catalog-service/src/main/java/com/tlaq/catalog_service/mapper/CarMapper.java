@@ -21,6 +21,7 @@ public interface CarMapper {
 
     // Khi trả về CarResponse, nó sẽ tự động dùng CarModelMapper để map field carModel
     @Mapping(target = "imageUrls", expression = "java(mapCarImages(car.getCarImages()))")
+    @Mapping(target = "fuelType", source = "carModel.technicalSpec.fuelType")
     CarResponse toCarResponse(Car car);
 
     @Mapping(target = "id", ignore = true)

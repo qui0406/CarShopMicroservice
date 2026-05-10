@@ -43,42 +43,86 @@ public class OrderManagementServiceImpl implements OrderManagementService {
 
     @Override
     @Transactional
-    public OrdersResponse updateStatus(String orderId, String note) {
+    public OrdersResponse updateStatus(String orderId, OrdersStatus newStatus, String note) {
         Orders order = ordersRepository.findById(orderId)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
+        // Kiểm tra hợp lệ State Machine
+        validateStateTransition(order.getStatus(), newStatus);
 
-        order.getOrderItems().forEach(item -> {
+        // 1. CHỈ GỬI LỆNH HOÀN KHO NẾU NHÂN VIÊN CHỌN HỦY ĐƠN (CANCELLED)
+        if (newStatus == OrdersStatus.CANCELLED) {
             Map<String, Object> rollbackMsg = new HashMap<>();
-            rollbackMsg.put("carId", item.getCarId());
-            rollbackMsg.put("quantity", item.getQuantity());
-            rollbackMsg.put("action", "INCREASE");
+            rollbackMsg.put("orderId", order.getId());
+            rollbackMsg.put("rollback", true);
+            List<Map<String, Object>> items = order.getOrderItems().stream().map(item -> {
+                Map<String, Object> i = new HashMap<>();
+                i.put("carId", item.getCarId());
+                i.put("quantity", item.getQuantity());
+                return i;
+            }).toList();
+            rollbackMsg.put("items", items);
 
             rabbitTemplate.convertAndSend(
                     RabbitMQConfig.EXCHANGE,
-                    RabbitMQConfig.INVENTORY_ROUTING_KEY,
+                    RabbitMQConfig.INVENTORY_ROLLBACK_RK,
                     rollbackMsg
             );
-            log.info("♻️ [RabbitMQ] Đã gửi yêu cầu hoàn kho cho xe: {}, SL: {}",
-                    item.getCarId(), item.getQuantity());
-        });
+            log.info("♻️ [RabbitMQ] Đã gửi yêu cầu hoàn kho (nhân viên hủy) cho đơn: {}", order.getId());
+        }
 
+        // 2. Cập nhật đúng trạng thái (newStatus) được truyền vào từ Controller
+        order.setStatus(newStatus);
 
-        order.setStatus(OrdersStatus.CANCELLED);
+        // 3. Ghi lại lịch sử thao tác
         String staffName = SecurityContextHolder.getContext().getAuthentication().getName();
-        orderHistoryService.saveHistory(order, OrdersStatus.CANCELLED, "Nhân viên xử lý: " + note, staffName);
+        String historyNote = (note != null && !note.trim().isEmpty()) ?
+                "Nhân viên xử lý: " + note :
+                "Hệ thống cập nhật trạng thái thành: " + newStatus;
 
+        orderHistoryService.saveHistory(order, newStatus, historyNote, staffName);
+
+        // 4. Lưu và trả về kết quả
         return ordersMapper.toOrdersResponse(ordersRepository.save(order));
+    }
+
+    private void validateStateTransition(OrdersStatus currentStatus, OrdersStatus newStatus) {
+        if (currentStatus == newStatus) return;
+        boolean isValid = false;
+        switch (currentStatus) {
+            case PENDING:
+            case WAITING_FOR_PAY:
+                isValid = (newStatus == OrdersStatus.DEPOSITED || newStatus == OrdersStatus.PAID || newStatus == OrdersStatus.CONFIRMED || newStatus == OrdersStatus.CANCELLED);
+                break;
+            case DEPOSITED:
+                isValid = (newStatus == OrdersStatus.PAID || newStatus == OrdersStatus.CONFIRMED || newStatus == OrdersStatus.CANCELLED);
+                break;
+            case PAID:
+                isValid = (newStatus == OrdersStatus.CONFIRMED || newStatus == OrdersStatus.CANCELLED);
+                break;
+            case CONFIRMED:
+                isValid = (newStatus == OrdersStatus.DELIVERED || newStatus == OrdersStatus.CANCELLED);
+                break;
+            case DELIVERED:
+            case COMPLETED:
+            case CANCELLED:
+                isValid = false; // Trạng thái cuối, không thể thay đổi
+                break;
+        }
+        if (!isValid) {
+            log.error("Invalid status transition from {} to {}", currentStatus, newStatus);
+            throw new AppException(ErrorCode.INVALID_STATUS);
+        }
     }
 
     @Override
     public PageResponse<OrdersResponse> getAllOrders(int page, int size, String status) {
         Pageable pageable = PageRequest.of(page - 1, size, Sort.by("createdAt").descending());
 
-        // Xử lý an toàn: Nếu status rỗng hoặc null thì lấy hết
         Page<Orders> pageData;
-        if (status != null && !status.isEmpty()) {
-            pageData = ordersRepository.findByStatus(OrdersStatus.valueOf(status), pageable);
+        if (status != null && !status.trim().isEmpty()) {
+            OrdersStatus ordersStatus = parseStatus(status);
+            pageData = ordersRepository.findByStatus(ordersStatus, pageable);
         } else {
             pageData = ordersRepository.findAll(pageable);
         }
@@ -93,13 +137,22 @@ public class OrderManagementServiceImpl implements OrderManagementService {
                 .build();
     }
 
+    private OrdersStatus parseStatus(String status) {
+        try {
+            return OrdersStatus.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            log.error("Invalid status provided: {}", status);
+            throw new AppException(ErrorCode.INVALID_STATUS);
+        }
+    }
+
     @Override
     public BigDecimal calculateRevenue(LocalDateTime start, LocalDateTime end) {
         // 1. Gọi Repository để tính tổng tiền [cite: 2026-03-12]
         BigDecimal total = ordersRepository.calculateTotalRevenue(
                 start,
                 end,
-                OrdersStatus.WAITING_FOR_PAY
+                OrdersStatus.DELIVERED
         );
 
         // 2. Tránh trả về null, trả về 0 nếu không có doanh thu [cite: 2026-03-12]
@@ -108,11 +161,15 @@ public class OrderManagementServiceImpl implements OrderManagementService {
 
     @Override
     public Map<OrdersStatus, Long> countOrdersByStatus() {
-        return Map.of();
+        Map<OrdersStatus, Long> stats = new HashMap<>();
+        for (OrdersStatus status : OrdersStatus.values()) {
+            stats.put(status, ordersRepository.countByStatus(status));
+        }
+        return stats;
     }
 
     @Override
     public List<MonthlyRevenueResponse> getYearlyRevenue(int year) {
-        return ordersRepository.getMonthlyRevenue(year, OrdersStatus.WAITING_FOR_PAY);
+        return ordersRepository.getMonthlyRevenue(year, OrdersStatus.DELIVERED);
     }
 }

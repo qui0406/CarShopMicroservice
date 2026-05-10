@@ -16,7 +16,7 @@ public enum ErrorCode {
     UNAUTHORIZED(1007, "You do not have permission", HttpStatus.FORBIDDEN),
     INVALID_DOB(1008, "Your age must be at least {min}", HttpStatus.BAD_REQUEST),
     INVALID_EMAIL(1009, "Invalid email address", HttpStatus.BAD_REQUEST),
-    EMAIL_IS_REQUIRED(1009, "Email is required", HttpStatus.BAD_REQUEST),
+    EMAIL_IS_REQUIRED(1035, "Email is required", HttpStatus.BAD_REQUEST),
     UPLOAD_AVATAR_ERROR(1010, "Error upload avatar", HttpStatus.BAD_REQUEST),
     EMAIL_EXISTED(1011, "Email existed", HttpStatus.BAD_REQUEST),
     ROLE_NOT_FOUND(1012, "Role not found", HttpStatus.NOT_FOUND),
@@ -41,6 +41,7 @@ public enum ErrorCode {
     MODEL_CAR_IS_EMPTY(1031, "Model car is empty", HttpStatus.BAD_REQUEST),
     CAR_CATEGORY_IS_EMPTY(1032, "Car category is empty", HttpStatus.BAD_REQUEST),
     RATING_NOT_EXIST(1033, "Rating not exist", HttpStatus.BAD_REQUEST),
+    ROLE_IS_NULL(1034, "Role is null", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

@@ -150,9 +150,6 @@ public class ChatMessageService {
             participantIds.add(conversation.getCustomerId());
             participantIds.addAll(conversation.getStaffIds());
 
-            socketIOServer.getRoomOperations(conversationRoom).sendEvent("message",
-                    toChatMessageResponseMap(chatMessage, conversation.getId()));
-
             Map<String, WebSocketSession> webSocketSessions = webSocketSessionRepository
                     .findAllByUserIdIn(new ArrayList<>(participantIds))
                     .stream()
@@ -183,40 +180,22 @@ public class ChatMessageService {
     }
 
 
-    private Map<String, Object> toChatMessageResponseMap(ChatMessage chatMessage, String conversationId) {
-        try {
-            Map<String, Object> response = new HashMap<>();
-            response.put("id", chatMessage.getId());
-            response.put("conversationId", conversationId);
-            response.put("message", chatMessage.getMessage());
-            response.put("createdDate", chatMessage.getCreatedDate().toString());
-
-            Map<String, Object> senderInfo = new HashMap<>();
-            senderInfo.put("id", chatMessage.getSender().getId());
-            senderInfo.put("name", chatMessage.getSender().getFirstName() + " " + chatMessage.getSender().getLastName());
-            senderInfo.put("username", chatMessage.getSender().getUsername());
-            senderInfo.put("avatar", chatMessage.getSender().getAvatar());
-            response.put("sender", senderInfo);
-
-            return response;
-        } catch (Exception e) {
-            log.error("Error converting message to response map: {}", e.getMessage());
-            return new HashMap<>();
-        }
-    }
+    // Removed unused toChatMessageResponseMap
 
     private ChatMessageResponse toChatMessageResponse(ChatMessage chatMessage, String currentUserId) {
         ChatMessageResponse response = chatMessageMapper.toChatMessageResponse(chatMessage);
 
         Authentication authentication= SecurityContextHolder.getContext().getAuthentication();
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
-        for (GrantedAuthority authority : authorities) {
-            if (authority.getAuthority().equals("ROLE_STAFF")) {
-                response.getSender().setRole("ROLE_STAFF");
-                break;
-            }
-            if (authority.getAuthority().equals("ROLE_USER")) {
-                response.getSender().setRole("ROLE_USER");
+        if (authentication != null) {
+            Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+            for (GrantedAuthority authority : authorities) {
+                if (authority.getAuthority().equals("ROLE_STAFF")) {
+                    response.getSender().setRole("ROLE_STAFF");
+                    break;
+                }
+                if (authority.getAuthority().equals("ROLE_USER")) {
+                    response.getSender().setRole("ROLE_USER");
+                }
             }
         }
 

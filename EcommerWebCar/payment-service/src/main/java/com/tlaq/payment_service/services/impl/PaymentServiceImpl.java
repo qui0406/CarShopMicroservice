@@ -21,6 +21,7 @@ import com.tlaq.payment_service.repository.httpClient.IdentityClient;
 import com.tlaq.payment_service.repository.httpClient.OrderingClient;
 import com.tlaq.payment_service.services.PaymentService;
 import jakarta.transaction.Transactional;
+import com.tlaq.event.dto.NotificationEvent;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -81,9 +82,10 @@ public class PaymentServiceImpl implements PaymentService {
             throw new AppException(ErrorCode.PAYMENT_STATUS_INVALID);
         }
 
-        if (request.getAmount().compareTo(payment.getRemainAmount()) > 0) {
-            throw new AppException(ErrorCode.INVALID_PAYMENT_AMOUNT);
-        }
+        BigDecimal expectedAmount = payment.getRemainAmount();
+        
+        // Remove amount spoofing check since client doesn't send amount anymore
+
 
         // ← BỎ toàn bộ block: orderingClient.getOrder + payment.setDetail(...)
         // PaymentDetails đã bị xóa, không cần fetch lại breakdown từ Orders
@@ -92,6 +94,7 @@ public class PaymentServiceImpl implements PaymentService {
         String staffId = identityClient.getProfileByUserKeycloakId(auth.getName()).getResult().getId();
 
         PaymentTransaction transaction = transactionMapper.toConfirmPayment(request);
+        transaction.setAmount(expectedAmount);
         transaction.setPayment(payment);
         transaction.setStaffId(staffId);
         transaction.setStatus(TransactionStatus.SUCCESS);
@@ -99,6 +102,20 @@ public class PaymentServiceImpl implements PaymentService {
                 ? TransactionType.FULL_PAYMENT : TransactionType.BALANCE);
 
         transactionRepository.save(transaction);
+        
+        Map<String, Object> confirmMsg = new HashMap<>();
+        confirmMsg.put("orderId", payment.getOrderId());
+        confirmMsg.put("status", "CONFIRMED");
+
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfig.EXCHANGE,
+                RabbitMQConfig.ORDER_CONFIRM_RK,
+                confirmMsg
+        );
+        log.info("Gửi lệnh xác nhận thanh toán nốt (offline) - OrderId: {}", payment.getOrderId());
+        
+        sendSuccessNotification(payment.getOrderId(), transaction.getAmount(), null);
+
         return updatePaymentProgress(payment, transaction.getAmount());
     }
 
@@ -114,10 +131,7 @@ public class PaymentServiceImpl implements PaymentService {
             throw new AppException(ErrorCode.ORDER_NOT_FOUND);
         }
 
-        if (request.getAmount().compareTo(orderInfo.getTotalAmount()) != 0) {
-            log.error("Sai lệch số tiền! Client: {}, Hệ thống: {}", request.getAmount(), orderInfo.getTotalAmount());
-            throw new AppException(ErrorCode.INVALID_PAYMENT_AMOUNT);
-        }
+        BigDecimal expectedAmount = orderInfo.getTotalAmount();
 
         Payment payment = paymentRepository.findByOrderId(request.getOrderId())
                 .orElseGet(() -> paymentRepository.save(
@@ -125,17 +139,20 @@ public class PaymentServiceImpl implements PaymentService {
                                 .orderId(request.getOrderId())
                                 .totalAmount(orderInfo.getTotalAmount()) // snapshot
                                 .paidAmount(BigDecimal.ZERO)
-                                // ← BỎ: remainAmount — là @Transient getter
-                                // ← BỎ: detail — PaymentDetails đã xóa
                                 .status(PaymentStatus.PENDING)
                                 .build()
                 ));
+
+        if (payment.getPaidAmount().compareTo(BigDecimal.ZERO) > 0) {
+            log.error("Đơn hàng {} đã được thanh toán một phần. Không thể dùng API fullPayment.", request.getOrderId());
+            throw new AppException(ErrorCode.PAYMENT_STATUS_INVALID);
+        }
 
         PaymentTransaction transaction = PaymentTransaction.builder()
                 .payment(payment)
                 .type(TransactionType.FULL_PAYMENT)
                 .method(request.getMethod())
-                .amount(request.getAmount())
+                .amount(expectedAmount)
                 .txnRef("OFFLINE-" + System.currentTimeMillis())
                 .status(TransactionStatus.SUCCESS)
                 .staffId(staffId)
@@ -143,8 +160,20 @@ public class PaymentServiceImpl implements PaymentService {
                 .build();
         transactionRepository.save(transaction);
 
-        sendInventoryUpdate(request.getOrderId());
-        return updatePaymentProgress(payment, request.getAmount());
+        Map<String, Object> confirmMsg = new HashMap<>();
+        confirmMsg.put("orderId", request.getOrderId());
+        confirmMsg.put("status", "CONFIRMED");
+
+        rabbitTemplate.convertAndSend(
+                RabbitMQConfig.EXCHANGE,
+                RabbitMQConfig.ORDER_CONFIRM_RK,
+                confirmMsg
+        );
+        log.info("Gửi lệnh xác nhận thanh toán toàn bộ (offline) - OrderId: {}", request.getOrderId());
+        
+        sendSuccessNotification(request.getOrderId(), expectedAmount, orderInfo.getUserId());
+
+        return updatePaymentProgress(payment, expectedAmount);
     }
 
     @Override
@@ -184,30 +213,46 @@ public class PaymentServiceImpl implements PaymentService {
     public boolean isDepositReached(String orderId) {
         Payment payment = paymentRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND));
-        BigDecimal minDeposit = new BigDecimal("20000000");
+        // Tính 10% tổng giá trị xe (Issue: Loại bỏ hardcode 20 triệu)
+        BigDecimal minDeposit = payment.getTotalAmount().multiply(new BigDecimal("0.1"));
         return payment.getPaidAmount().compareTo(minDeposit) >= 0;
     }
 
-    private void sendInventoryUpdate(String orderId) {
+    // Đã xóa hàm sendInventoryUpdate vì ordering-service tự lo trừ kho khi khởi tạo đơn.
+
+    private void sendSuccessNotification(String orderId, BigDecimal amount, String userId) {
         try {
-            // Lấy chi tiết đơn hàng để biết khách mua xe gì, số lượng bao nhiêu
-            OrdersResponse orderInfo = orderingClient.getOrder(orderId).getResult();
+            if (userId == null) {
+                OrdersResponse orderInfo = orderingClient.getOrder(orderId).getResult();
+                if (orderInfo != null) userId = orderInfo.getUserId();
+            }
+            if (userId != null) {
+                var userProfile = identityClient.getProfileById(userId).getResult();
+                if (userProfile != null) {
+                    Map<String, Object> params = new HashMap<>();
+                    params.put("orderId", orderId);
+                    params.put("amount", amount);
 
-            // Thường một đơn hàng xe chỉ có 1 item, nếu có nhiều thì dùng loop
-            orderInfo.getOrderItems().forEach(item -> {
-                Map<String, Object> message = new HashMap<>();
-                message.put("carId", item.getCarId());
-                message.put("quantity", item.getQuantity());
-                message.put("type", "DECREASE"); // Đánh dấu là trừ kho
+                    NotificationEvent notificationEvent = NotificationEvent.builder()
+                            .type("PAYMENT_SUCCESS")
+                            .channel("EMAIL")
+                            .recipientId(userProfile.getId())
+                            .recipientEmail(userProfile.getEmail())
+                            .subject("Thanh toán Offline thành công / Offline Payment Successful")
+                            .body("Thanh toán trực tiếp của bạn cho đơn hàng " + orderId + " với số tiền " + amount + " đã được xác nhận. Cảm ơn bạn đã mua sắm.")
+                            .param(params)
+                            .build();
 
-                rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE,
-                        RabbitMQConfig.INVENTORY_ROUTING_KEY,
-                        message);
-
-                log.info("Đã gửi yêu cầu trừ kho cho CarId: {}, Số lượng: {}", item.getCarId(), item.getQuantity());
-            });
+                    rabbitTemplate.convertAndSend(
+                            RabbitMQConfig.NOTIFICATION_EXCHANGE,
+                            RabbitMQConfig.NOTIFICATION_ROUTING_KEY,
+                            notificationEvent
+                    );
+                    log.info("Đã gửi sự kiện Notification cho thanh toán offline OrderId: {}", orderId);
+                }
+            }
         } catch (Exception e) {
-            throw new AppException(ErrorCode.SEND_FAIL_RABBITMQ);
+            log.error("Lỗi gửi thông báo thanh toán offline thành công: {}", e.getMessage());
         }
     }
 }

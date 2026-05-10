@@ -11,10 +11,13 @@ import java.util.Map;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class NotificationEvent {
-    String channel;
-    String recipient;
+    String type;
+    String channel; // Vd: EMAIL, PUSH, SMS
+    String recipientId;
+    String recipientEmail;
+    String senderId;
     String templateCode;
-    Map<String, Object> params;
+    Map<String, Object> param;
     String subject;
     String body;
 }

@@ -1,17 +1,14 @@
 package com.tlaq.identity_service.service;
 
-
-import com.tlaq.identity_service.dto.request.*;
-import com.tlaq.identity_service.dto.response.IntrospectResponse;
 import com.tlaq.identity_service.dto.response.ProfileResponse;
-import com.tlaq.identity_service.dto.response.TokenResponse;
-import org.springframework.web.multipart.MultipartFile;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 public interface ProfileService {
     ProfileResponse getMyProfile();
-    List<ProfileResponse> getAllProfiles();
+    Page<ProfileResponse> getAllProfiles(Pageable pageable);
     ProfileResponse getProfileByKeyCloakId(String userKeyCloakId);
     ProfileResponse getProfileById(String id);
 }

@@ -20,6 +20,10 @@ public class RabbitMQConfig {
     public static final String ORDER_CONFIRM_RK      = "routing.order.confirm";
     public static final String ORDER_CONFIRM_QUEUE   = "q.order-confirm";
 
+    // Notification
+    public static final String NOTIFICATION_EXCHANGE = "x.notification-exchange";
+    public static final String NOTIFICATION_ROUTING_KEY = "routing.notification";
+
     @Bean
     public TopicExchange orderExchange() {
         return new TopicExchange(EXCHANGE);

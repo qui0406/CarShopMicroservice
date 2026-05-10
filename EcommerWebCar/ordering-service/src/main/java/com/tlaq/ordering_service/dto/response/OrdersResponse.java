@@ -25,6 +25,7 @@ public class OrdersResponse {
     BigDecimal plateFeeAmount;  // Tổng phí cấp biển số (1tr hoặc 20tr)
     BigDecimal insuranceAmount; // Phí bảo trì đường bộ & BH dân sự (Cố định)
     BigDecimal totalAmount;     // Tổng giá lăn bánh cuối cùng (= sum các loại trên)
+    BigDecimal depositAmount;   // Số tiền cần đặt cọc (ví dụ: 1% của totalAmount)
 
     String note;
     List<OrdersDetailsResponse> orderItems;

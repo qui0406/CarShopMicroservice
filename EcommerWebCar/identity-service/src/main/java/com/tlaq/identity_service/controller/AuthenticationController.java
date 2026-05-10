@@ -28,7 +28,7 @@ public class AuthenticationController {
     AuthenticationService authenticationService;
 
     @PostMapping("/register")
-    public ApiResponse<ProfileResponse> register(@ModelAttribute RegistrationRequest request,
+    public ApiResponse<ProfileResponse> register(@ModelAttribute @Valid RegistrationRequest request,
                                                  MultipartFile avatar) {
         return ApiResponse.<ProfileResponse>builder()
                 .result(authenticationService.register(request, avatar))
@@ -58,7 +58,7 @@ public class AuthenticationController {
     }
 
     @PostMapping("/refresh")
-    ApiResponse<TokenResponse> refresh(@RequestBody RefreshTokenRequest request)
+    ApiResponse<TokenResponse> refresh(@RequestBody @Valid RefreshTokenRequest request)
             throws ParseException, JOSEException {
         var result = authenticationService.refreshToken(request);
         return ApiResponse.<TokenResponse>builder().result(result).build();

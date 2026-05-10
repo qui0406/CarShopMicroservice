@@ -53,13 +53,13 @@ public class OrderHistoryServiceImpl implements OrderHistoryService {
 
         // 2. Cập nhật trạng thái đơn hàng (Ví dụ: sau khi cọc/thanh toán xong thì xác nhận đơn)
         // Nếu Quí có trạng thái DEPOSITED (Đã đặt cọc) thì dùng, không thì CONFIRMED
-        order.setStatus(OrdersStatus.PENDING);
+        order.setStatus(OrdersStatus.DEPOSITED);
         ordersRepository.save(order);
 
         // 3. Ghi lại lịch sử (Timeline)
         // actorId ở đây có thể để là "SYSTEM" vì đây là hành động tự động từ hệ thống
-        String note = "Hệ thống xác nhận thanh toán thành công. Đơn hàng chuyển sang trạng thái Xác nhận.";
-        saveHistory(order, OrdersStatus.PAID, note, "SYSTEM");
+        String note = "Hệ thống xác nhận thanh toán thành công. Đơn hàng chuyển sang trạng thái Đã đặt cọc.";
+        saveHistory(order, OrdersStatus.DEPOSITED, note, "SYSTEM");
 
         log.info("✅ Đã cập nhật trạng thái và lịch sử cho đơn hàng: {}", orderId);
     }

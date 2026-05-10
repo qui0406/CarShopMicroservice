@@ -2,7 +2,9 @@ package com.tlaq.catalog_service.controller;
 
 import com.tlaq.catalog_service.dto.ApiResponse;
 import com.tlaq.catalog_service.dto.PageResponse;
+import com.tlaq.catalog_service.dto.request.CarBatchItemRequest;
 import com.tlaq.catalog_service.dto.request.CarRequest;
+import com.tlaq.catalog_service.dto.response.CarBatchResponse;
 import com.tlaq.catalog_service.dto.response.CarResponse;
 import com.tlaq.catalog_service.dto.response.CarSummaryResponse;
 import com.tlaq.catalog_service.dto.response.Model3DResponse;
@@ -90,6 +92,15 @@ public class CarController {
         carDetailsService.delete(carId);
         return ApiResponse.<Void>builder()
                 .message("Car deleted successfully")
+                .build();
+    }
+
+    @PostMapping("/car/batch-validate")
+    public ApiResponse<List<CarBatchResponse>> validateBatch(
+            @RequestBody List<CarBatchItemRequest> request
+    ) {
+        return ApiResponse.<List<CarBatchResponse>>builder()
+                .result(carDetailsService.validateBatch(request))
                 .build();
     }
 

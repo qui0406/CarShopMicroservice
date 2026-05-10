@@ -27,7 +27,7 @@ import java.util.List;
 public class AppraisalController {
     AppraisalService appraisalService;
 
-    @PostMapping(value = "create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<AppraisalResponse> createAppraisal(
             @RequestPart("dto") @Valid AppraisalRequestDto dto,
             @RequestPart("images") List<MultipartFile> images) {
@@ -40,6 +40,15 @@ public class AppraisalController {
     public ApiResponse<List<AppraisalResponse>> getMyAppraisals() {
         return ApiResponse.<List<AppraisalResponse>>builder()
                 .result(appraisalService.getMyAppraisals())
+                .build();
+    }
+
+    @PostMapping("/{id}/respond-to-offer")
+    public ApiResponse<AppraisalResponse> respondToOffer(
+            @PathVariable String id,
+            @RequestParam boolean accepted) {
+        return ApiResponse.<AppraisalResponse>builder()
+                .result(appraisalService.respondToOffer(id, accepted))
                 .build();
     }
 
@@ -67,11 +76,11 @@ public class AppraisalController {
                 .build();
     }
 
-    @PutMapping("/{id}/status")
+    @PatchMapping("/{id}/status")
     @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
     public ApiResponse<AppraisalResponse> updateStatus(
             @PathVariable String id,
-            @RequestParam AppraisalStatus status) {
+            @RequestParam boolean status) {
 
         return ApiResponse.<AppraisalResponse>builder()
                 .result(appraisalService.updateStatus(id, status))

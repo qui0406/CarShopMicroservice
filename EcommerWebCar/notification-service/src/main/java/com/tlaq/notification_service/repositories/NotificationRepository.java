@@ -11,13 +11,5 @@ import java.util.List;
 
 @Repository
 public interface NotificationRepository extends MongoRepository<Notifications, String> {
-
-    // Tìm thông báo theo người nhận, phân trang và sắp xếp
     Page<Notifications> findByRecipientId(String recipientId, Pageable pageable);
-
-    // Đếm số thông báo chưa đọc (UNREAD)
-    long countByRecipientIdAndStatus(String recipientId, NotificationStatus status);
-
-    // Tìm nhanh các thông báo chưa gửi thành công để retry
-    List<Notifications> findByStatus(NotificationStatus status);
 }

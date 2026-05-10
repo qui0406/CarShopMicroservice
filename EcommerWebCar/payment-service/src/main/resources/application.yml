@@ -7,7 +7,7 @@ spring:
   application:
     name: payment-service
   datasource:
-    url: "jdbc:mysql://localhost:3306/payment-ecommer-car"
+    url: "jdbc:mysql://car_mysql:3306/payment-ecommer-car"
     driverClassName: "com.mysql.cj.jdbc.Driver"
     username: root
     password: 12345678
@@ -51,10 +51,10 @@ eureka:
 
 payment:
   vnpay:
-    tmn-code: E4Q8NLOC
+    tmn-code: GSCN06EN
     init-payment-url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
-    return-url: http://localhost:8084/payment/payments/vnpay-callback
-    hash-secret: T4BD1GPII9JPUHVDNPJ85XODWYW8Q97L
+    return-url: http://localhost:8888/api/v1/payment/payments/vnpay-callback
+    hash-secret: ZR2XBKVYB88L0IGB8P0RR9ZDOBOH5HH5
     url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
 
 

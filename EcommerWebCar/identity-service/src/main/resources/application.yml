@@ -11,14 +11,20 @@ spring:
       max-file-size: 10MB
       max-request-size: 10MB
   datasource:
-    url: "jdbc:mysql://localhost:3306/identity-ecommer-car"
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/identity-ecommer-car?createDatabaseIfNotExist=true}
     driverClassName: "com.mysql.cj.jdbc.Driver"
-    username: root
-    password: 12345678
+    username: ${SPRING_DATASOURCE_USERNAME:root}
+    password: ${SPRING_DATASOURCE_PASSWORD:12345678}
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
 
   security:
     oauth2:

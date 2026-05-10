@@ -35,20 +35,16 @@ public class SocketHandler {
 
 
     @PostConstruct
-    public void init() {
+    public void startServer() {
         server.addEventListener("join-room", JoinRoomRequest.class, (client, data, ackSender) -> {
             String conversationId = data.getConversationId();
             client.joinRoom(conversationId);
             System.out.println("Client " + client.getSessionId() + " joined room: " + conversationId);
         });
 
-        server.addConnectListener(client ->
-                System.out.println("Client connected: " + client.getSessionId())
-        );
-
-        server.addDisconnectListener(client ->
-                System.out.println("Client disconnected: " + client.getSessionId())
-        );
+        server.addListeners(this);
+        server.start();
+        log.info("Socket server started");
     }
 
     @Data
@@ -60,9 +56,13 @@ public class SocketHandler {
     public void clientConnected(SocketIOClient client) {
         String token = client.getHandshakeData().getSingleUrlParam("token");
 
+        if (token == null || token.isEmpty()) {
+            client.disconnect();
+            return;
+        }
+
         // Verify token
         var introspectResponse = introspectService.introspect(token);
-
         log.info("IntrospectResponse: {}", introspectResponse);
 
         if (introspectResponse.isActive()) {
@@ -86,13 +86,6 @@ public class SocketHandler {
     public void clientDisconnected(SocketIOClient client) {
         log.info("Client disConnected: {}", client.getSessionId());
         webSocketSessionService.deleteSession(client.getSessionId().toString());
-    }
-
-    @PostConstruct
-    public void startServer() {
-        server.start();
-        server.addListeners(this);
-        log.info("Socket server started");
     }
 
     @PreDestroy

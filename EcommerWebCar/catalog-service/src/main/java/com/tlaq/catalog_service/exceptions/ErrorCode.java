@@ -39,6 +39,9 @@ public enum ErrorCode {
     INVENTORY_NOT_FOUND(1026, "Inventory not found", HttpStatus.NOT_FOUND),
     INVALID_QUANTITY(1027, "Invalid quantity", HttpStatus.BAD_REQUEST),
     QUANTITY_NOT_ENOUGH(1028, "Quantity car not enough", HttpStatus.BAD_REQUEST),
+    FILE_IS_EMPTY(1029, "File is empty", HttpStatus.BAD_REQUEST),
+    FILE_TOO_LARGE(1030, "File is too large", HttpStatus.BAD_REQUEST),
+    INVALID_FILE_FORMAT(1031, "Invalid file format", HttpStatus.BAD_REQUEST),
 
     ;
 

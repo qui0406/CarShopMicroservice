@@ -7,7 +7,7 @@ spring:
   application:
     name: ordering-service
   datasource:
-    url: "jdbc:mysql://localhost:3306/ordering-ecommer-car"
+    url: "jdbc:mysql://car_mysql:3307/ordering-ecommer-car"
     driverClassName: "com.mysql.cj.jdbc.Driver"
     username: root
     password: 12345678
@@ -21,6 +21,7 @@ spring:
     port: 5672
     username: root
     password: 123456
+
 
   security:
     oauth2:

@@ -22,6 +22,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.List;
 
 
 @Configuration
@@ -64,7 +67,6 @@ public class SecurityConfigs  {
         httpSecurity
                 .securityMatcher("/api/**")
                 .authorizeHttpRequests(request -> request
-                        // Dùng HttpMethod để xác định rõ ràng luồng POST cho Auth
                         .requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
                         .requestMatchers(STAFF_ENDPOINTS).hasAnyRole("STAFF", "ADMIN")
@@ -75,8 +77,8 @@ public class SecurityConfigs  {
                         .authenticationEntryPoint(new JwtAuthenticationEntryPoint())
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .csrf(AbstractHttpConfigurer::disable)
-                .cors(AbstractHttpConfigurer::disable);
+                .csrf(AbstractHttpConfigurer::disable);
+
         return httpSecurity.build();
     }
 
@@ -95,32 +97,5 @@ public class SecurityConfigs  {
         return new BCryptPasswordEncoder();
     }
 
-//    @Bean
-//    @Order(2)
-//    public SecurityFilterChain webSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
-//        httpSecurity
-//                .securityMatcher("/admin/**", "/login", "/dashboard", "/logout")
-//                .authorizeHttpRequests(request -> request
-//                        .requestMatchers("/login").permitAll()
-//                        .requestMatchers("/admin/**").hasRole("ADMIN")
-//                        .anyRequest().authenticated()
-//                )
-//                .formLogin(form -> form
-//                        .loginPage("/login")
-//                        .defaultSuccessUrl("/admin/dashboard", true)
-//                        .failureUrl("/login?error=true").permitAll()
-//                        .permitAll()
-//                )
-//                .logout(logout -> logout
-//                        .logoutSuccessUrl("/login?logout=true")
-//                        .permitAll()
-//                )
-//                .sessionManagement(session -> session
-//                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-//                )
-//                .csrf(AbstractHttpConfigurer::disable);
-//
-//        return httpSecurity.build();
-//    }
 
 }

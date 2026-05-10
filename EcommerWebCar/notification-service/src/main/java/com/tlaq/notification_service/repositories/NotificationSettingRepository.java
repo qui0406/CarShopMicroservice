@@ -8,7 +8,5 @@ import java.util.Optional;
 
 @Repository
 public interface NotificationSettingRepository extends MongoRepository<NotificationSetting, String> {
-
-    // Lấy cài đặt theo userId
     Optional<NotificationSetting> findByUserId(String userId);
 }

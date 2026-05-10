@@ -29,6 +29,7 @@ public class Car {
     CarModel carModel;
 
     String vinNumber;
+    String licensePlate;
     String color;
     BigDecimal price;
 
@@ -36,9 +37,25 @@ public class Car {
 
     boolean isUsed;
     int mileage;
+    String interiorColor;
+    int numberOfOwners;
+    LocalDate registrationDate;
+
+    @Column(columnDefinition = "TEXT")
+    String accidentHistory;
+
+    @Column(columnDefinition = "TEXT")
+    String serviceHistory;
+
     String inspectionReportUrl;
 
-    boolean isReady;
+    @Builder.Default
+    @Column(name = "is_ready")
+    private boolean isReady = true;
+
+    @Builder.Default
+    @Column(name = "is_deleted")
+    boolean deleted = false;
 
     String model3dUrl;
 

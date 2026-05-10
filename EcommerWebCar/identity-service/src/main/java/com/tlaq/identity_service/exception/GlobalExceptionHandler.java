@@ -1,15 +1,11 @@
 package com.tlaq.identity_service.exception;
 
-
-
 import com.tlaq.identity_service.dto.ApiResponse;
 import jakarta.validation.ConstraintViolation;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.validation.FieldError;
-import org.springframework.web.ErrorResponse;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -25,15 +21,33 @@ public class GlobalExceptionHandler {
 
     private static final String MIN_ATTRIBUTE = "min";
 
+    // Đổi tên hàm, sửa tham số truyền vào thành Exception, trả về status 500
     @ExceptionHandler(value = Exception.class)
-    ResponseEntity<ApiResponse> handlingRuntimeException(RuntimeException exception) {
+    public ResponseEntity<ApiResponse> handleGeneralException(Exception exception) {
         log.error("Exception: ", exception);
         ApiResponse apiResponse = new ApiResponse();
 
         apiResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
         apiResponse.setMessage(ErrorCode.UNCATEGORIZED_EXCEPTION.getMessage());
 
-        return ResponseEntity.badRequest().body(apiResponse);
+        // Sử dụng INTERNAL_SERVER_ERROR (500) cho lỗi hệ thống không xác định
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
+    }
+
+    // Đổi tên hàm, thêm tham số RuntimeException để bắt được lỗi
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ApiResponse> handleRuntimeException(RuntimeException exception) {
+        log.error("RuntimeException: ", exception);
+
+        // Lưu ý: Việc gán cứng UNAUTHENTICATED cho mọi RuntimeException có thể không chính xác
+        // Bạn nên cân nhắc xem có thực sự muốn mọi RuntimeException đều trả về lỗi Unauthenticated không.
+        ErrorCode errorCode = ErrorCode.UNAUTHENTICATED;
+        ApiResponse apiResponse = new ApiResponse();
+
+        apiResponse.setCode(errorCode.getCode());
+        apiResponse.setMessage(errorCode.getMessage());
+
+        return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
     }
 
     @ExceptionHandler(MultipartException.class)
@@ -41,10 +55,13 @@ public class GlobalExceptionHandler {
         log.error("Lỗi upload file: ", ex);
         ApiResponse apiResponse = new ApiResponse();
         apiResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
-        String message = ex.getCause() instanceof org.apache.tomcat.util.http.fileupload.impl.FileCountLimitExceededException
+
+        // Sửa lỗi ghi đè message bằng cách set đúng biến message vừa khởi tạo
+        String message = (ex.getCause() != null && ex.getCause() instanceof org.apache.tomcat.util.http.fileupload.impl.FileCountLimitExceededException)
                 ? "Upload quá số file cho phép. Tối đa là 10 file."
                 : "Lỗi upload file: " + ex.getMessage();
-        apiResponse.setMessage(ex.getCause().toString());
+
+        apiResponse.setMessage(message);
         return ResponseEntity.badRequest().body(apiResponse);
     }
 
@@ -53,7 +70,6 @@ public class GlobalExceptionHandler {
         ErrorCode errorCode = ErrorCode.INVALID_PARAMETER;
         ApiResponse apiResponse = new ApiResponse();
 
-        // Lấy thông báo lỗi đầu tiên
         String errorMessage = ex.getAllErrors().stream()
                 .findFirst()
                 .map(error -> error.getDefaultMessage())
@@ -65,21 +81,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ApiResponse> handlingRuntimeException() {
-        ErrorCode errorCode = ErrorCode.UNAUTHENTICATED; // Sử dụng ErrorCode phù hợp
-        ApiResponse apiResponse = new ApiResponse();
-
-        apiResponse.setCode(errorCode.getCode());
-        apiResponse.setMessage(errorCode.getMessage());
-
-        return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
-    }
-
-
-
     @ExceptionHandler(value = AppException.class)
-    ResponseEntity<ApiResponse> handlingAppException(AppException exception                                                                                                                                                                                                                                                                             ) {
+    public ResponseEntity<ApiResponse> handleAppException(AppException exception) {
         ErrorCode errorCode = exception.getErrorCode();
         ApiResponse apiResponse = new ApiResponse();
 
@@ -90,7 +93,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(value = AccessDeniedException.class)
-    ResponseEntity<ApiResponse> handlingAccessDeniedException(AccessDeniedException exception) {
+    public ResponseEntity<ApiResponse> handleAccessDeniedException(AccessDeniedException exception) {
         ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
 
         return ResponseEntity.status(errorCode.getStatusCode())
@@ -101,7 +104,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(value = MethodArgumentNotValidException.class)
-    ResponseEntity<ApiResponse> handlingValidation(MethodArgumentNotValidException exception) {
+    public ResponseEntity<ApiResponse> handleMethodArgumentNotValid(MethodArgumentNotValidException exception) {
         String enumKey = exception.getFieldError().getDefaultMessage();
         log.info(enumKey);
 
@@ -118,7 +121,7 @@ public class GlobalExceptionHandler {
             log.info(attributes.toString());
 
         } catch (IllegalArgumentException e) {
-
+            log.error("Không thể map ErrorCode từ enum key: {}", enumKey);
         }
 
         ApiResponse apiResponse = new ApiResponse();

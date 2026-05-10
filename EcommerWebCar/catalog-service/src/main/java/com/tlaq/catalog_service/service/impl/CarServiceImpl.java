@@ -2,10 +2,10 @@ package com.tlaq.catalog_service.service.impl;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tlaq.catalog_service.dto.PageResponse;
+import com.tlaq.catalog_service.dto.request.CarBatchItemRequest;
 import com.tlaq.catalog_service.dto.request.CarRequest;
+import com.tlaq.catalog_service.dto.response.CarBatchResponse;
 import com.tlaq.catalog_service.dto.response.CarResponse;
 import com.tlaq.catalog_service.dto.response.CarSummaryResponse;
 import com.tlaq.catalog_service.dto.response.Model3DResponse;
@@ -15,6 +15,7 @@ import com.tlaq.catalog_service.exceptions.ErrorCode;
 import com.tlaq.catalog_service.mapper.CarMapper;
 import com.tlaq.catalog_service.repo.CarModelRepository;
 import com.tlaq.catalog_service.repo.CarRepository;
+import com.tlaq.catalog_service.repo.InventoryRepository;
 import com.tlaq.catalog_service.service.CarService;
 import com.tlaq.catalog_service.specifications.CarSpecification;
 import jakarta.transaction.Transactional;
@@ -33,6 +34,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -45,7 +47,7 @@ public class CarServiceImpl implements CarService {
     CarRepository carRepository;
     CarModelRepository carModelRepository;
     Cloudinary cloudinary;
-    ObjectMapper objectMapper;
+    InventoryRepository inventoryRepository;
 
     @Override
     public PageResponse<CarSummaryResponse> getCar(int page, int size) {
@@ -125,16 +127,16 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public void delete(String carId) {
-        Car car=  carRepository.findById(carId).orElseThrow(() -> new AppException(ErrorCode.CAR_NOT_FOUND));
-        carRepository.delete(car);
+        Car car = carRepository.findById(carId)
+                .orElseThrow(() -> new AppException(ErrorCode.CAR_NOT_FOUND));
+        car.setDeleted(true);
+        carRepository.save(car);
     }
 
     @Override
     public PageResponse<CarResponse> filterCar(Map<String, String> filter) {
-        // Ép kiểu rõ ràng để tránh lỗi Ambiguous [cite: 2026-02-25]
         Specification<Car> spec = Specification.where((Specification<Car>) null);
 
-        // Thêm các điều kiện lọc [cite: 2026-02-25]
         if (filter.get("branch") != null)
             spec = spec.and(CarSpecification.hasBranch(filter.get("branch")));
 
@@ -160,17 +162,47 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
+    @Transactional
     public Model3DResponse upload3DModel(String carId, MultipartFile file) throws IOException {
-        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
-                "resource_type", "raw",
-                "public_id", "car_models/" + file.getOriginalFilename(),
-                "folder", "ecommerce_cars"
-        ));
-        String url = uploadResult.get("secure_url").toString();
+        // 1. Kiểm tra file rỗng
+        if (file == null || file.isEmpty()) {
+            throw new AppException(ErrorCode.FILE_IS_EMPTY); // Quí tự thêm ErrorCode tương ứng nhé
+        }
 
+        // 2. Kiểm tra kích thước file (Ví dụ: Giới hạn tối đa 50MB cho mô hình 3D)
+        long MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+
+        if (file.getSize() > MAX_FILE_SIZE) {
+            throw new AppException(ErrorCode.FILE_TOO_LARGE);
+        }
+
+        // 3. Kiểm tra định dạng file (Chỉ cho phép các file 3D thông dụng)
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null || !originalFilename.contains(".")) {
+            throw new AppException(ErrorCode.INVALID_FILE_FORMAT);
+        }
+
+        String extension = originalFilename.substring(originalFilename.lastIndexOf(".") + 1).toLowerCase();
+        List<String> allowedExtensions = Arrays.asList("glb", "gltf", "obj", "fbx"); // Thêm bớt đuôi file tùy nhu cầu
+
+        if (!allowedExtensions.contains(extension)) {
+            throw new AppException(ErrorCode.INVALID_FILE_FORMAT);
+        }
+
+        // 4. Lấy thông tin xe TRƯỚC KHI upload. (Tránh upload rác lên Cloudinary nếu carId sai)
         Car car = carRepository.findById(carId)
                 .orElseThrow(() -> new AppException(ErrorCode.CAR_NOT_FOUND));
 
+        // 5. Tiến hành upload lên Cloudinary
+        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
+                "resource_type", "raw",
+                "public_id", "car_models/" + System.currentTimeMillis() + "_" + originalFilename, // Thêm timestamp để tránh trùng tên file
+                "folder", "ecommerce_cars"
+        ));
+
+        String url = uploadResult.get("secure_url").toString();
+
+        // 6. Cập nhật vào Database
         car.setModel3dUrl(url);
         carRepository.save(car);
 
@@ -178,5 +210,29 @@ public class CarServiceImpl implements CarService {
                 .model3dUrl(url)
                 .carId(car.getId())
                 .build();
+    }
+
+    @Override
+    public List<CarBatchResponse> validateBatch(List<CarBatchItemRequest> items) {
+        if (items == null || items.isEmpty()) return new ArrayList<>();
+
+        List<String> carIds = items.stream().map(CarBatchItemRequest::getCarId).toList();
+
+        Map<String, Car> carMap = carRepository.findAllById(carIds).stream()
+                .collect(java.util.stream.Collectors.toMap(Car::getId, c -> c));
+
+        return items.stream().map(item -> {
+            Car car = carMap.get(item.getCarId());
+            if (car == null) throw new AppException(ErrorCode.CAR_NOT_FOUND);
+
+            boolean inStock = inventoryRepository.findInventoryByCarId(item.getCarId())
+                    .map(inv -> inv.getQuantity() >= item.getQuantity())
+                    .orElse(false);
+
+            return CarBatchResponse.builder()
+                    .carDetail(carMapper.toCarResponse(car))
+                    .inStock(inStock)
+                    .build();
+        }).toList();
     }
 }

@@ -17,19 +17,12 @@ public class CarResponse {
     String name;
     BigDecimal price;
     int manufacturingYear;
+    String fuelType;
     int mileage;
     String vinNumber;
     String color;
     String inspectionReportUrl;
     String model3dUrl;
-
-    // Các Object lồng nhau [cite: 2026-03-11]
-    TechnicalSpecResponse technicalSpec;
-    EquipmentResponse equipment;
-
-    List<String> images;
-
-    LocalDateTime createdAt;
-    LocalDateTime updatedAt;
-    boolean used;
+    List<String> imageUrls;
+    boolean isUsed;
 }

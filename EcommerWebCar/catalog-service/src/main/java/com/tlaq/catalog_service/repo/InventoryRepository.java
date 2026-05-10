@@ -1,8 +1,10 @@
 package com.tlaq.catalog_service.repo;
 
 import com.tlaq.catalog_service.entity.Inventory;
+import jakarta.persistence.LockModeType;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -12,15 +14,7 @@ import java.util.Optional;
 
 @Repository
 public interface InventoryRepository extends JpaRepository<Inventory, String> {
-    Optional<Inventory> findByCarId(String carId);
-
-    List<Inventory> findByShowRoomId(String showRoomId);
-
     Optional<Inventory> findInventoryByCarId(String id);
-
-    boolean existsByCarId(String carId);
-
-    boolean existsByCarIdAndQuantityGreaterThanEqual(String carId, int quantity);
 
     Optional<Inventory> findByCarIdAndShowRoomId(String carId, String showRoomId);
 
@@ -29,7 +23,6 @@ public interface InventoryRepository extends JpaRepository<Inventory, String> {
 
     @Modifying(clearAutomatically = true)
     @Transactional
-    // Sửa i.car.id thành i.carId
-    @Query("UPDATE Inventory i SET i.quantity = i.quantity - :qty WHERE i.carId = :carId")
-    void reduceStock(String carId, int qty);
+    @Query("UPDATE Inventory i SET i.quantity = i.quantity - :qty WHERE i.carId = :carId AND i.quantity >= :qty")
+    int deduceStock(String carId, int qty);
 }

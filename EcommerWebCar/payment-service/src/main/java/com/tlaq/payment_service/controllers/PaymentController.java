@@ -2,6 +2,7 @@ package com.tlaq.payment_service.controllers;
 
 import com.tlaq.payment_service.dto.ApiResponse;
 import com.tlaq.payment_service.dto.request.ConfirmPaymentRequest;
+import com.tlaq.payment_service.dto.request.CreateVNPayUrlRequest;
 import com.tlaq.payment_service.dto.request.DepositRequest;
 import com.tlaq.payment_service.dto.request.OfflinePaymentRequest;
 import com.tlaq.payment_service.dto.response.PaymentResponse;
@@ -30,14 +31,12 @@ public class PaymentController {
 
     @PostMapping("/create-vnpay-url")
     public ApiResponse<VNPayResponse> createUrl(
-            @RequestParam String orderId,
-            @RequestParam BigDecimal amount,
-            @RequestParam TransactionType type,
+            @RequestBody CreateVNPayUrlRequest createRequest,
             HttpServletRequest request) {
 
         String ipAddress = VNPayUtils.getIpAddress(request);
         return ApiResponse.<VNPayResponse>builder()
-                .result(vnPayService.createPaymentUrl(orderId, amount, ipAddress, type))
+                .result(vnPayService.createPaymentUrl(createRequest.getOrderId(), ipAddress, createRequest.getType()))
                 .build();
     }
 

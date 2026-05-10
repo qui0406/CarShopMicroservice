@@ -18,10 +18,6 @@ public class OfflinePaymentRequest {
     @NotBlank(message = "ORDER_ID_REQUIRED")
     String orderId;
 
-    @NotNull(message = "AMOUNT_REQUIRED")
-    @DecimalMin(value = "0.1", message = "INVALID_AMOUNT")
-    BigDecimal amount;
-
     @NotNull(message = "METHOD_REQUIRED")
     PaymentMethod method;
 

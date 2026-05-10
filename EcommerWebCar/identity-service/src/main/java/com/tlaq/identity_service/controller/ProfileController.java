@@ -8,10 +8,13 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 
-import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,9 +26,14 @@ public class ProfileController {
 
     @PreAuthorize("hasAnyRole('STAFF', 'ADMIN')")
     @GetMapping("/all-profiles")
-    public ApiResponse<List<ProfileResponse>> getAllProfiles() {
-        return ApiResponse.<List<ProfileResponse>>builder()
-                .result(profileService.getAllProfiles())
+    public ApiResponse<Page<ProfileResponse>> getAllProfiles(
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("id").descending()); // Sắp xếp mới nhất lên đầu
+
+        return ApiResponse.<Page<ProfileResponse>>builder()
+                .result(profileService.getAllProfiles(pageable))
                 .build();
     }
 

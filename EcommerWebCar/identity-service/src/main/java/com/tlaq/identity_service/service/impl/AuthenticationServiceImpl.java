@@ -2,10 +2,12 @@ package com.tlaq.identity_service.service.impl;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
+import com.tlaq.identity_service.config.RabbitMQConfig;
 import com.tlaq.identity_service.dto.request.*;
 import com.tlaq.identity_service.dto.response.*;
 import com.tlaq.identity_service.entity.Profile;
 import com.tlaq.identity_service.entity.Role;
+import com.tlaq.identity_service.event.NotificationEvent;
 import com.tlaq.identity_service.exception.AppException;
 import com.tlaq.identity_service.exception.ErrorCode;
 import com.tlaq.identity_service.exception.ErrorNormalizer;
@@ -21,6 +23,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -32,102 +35,73 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@Service
 @Slf4j
-@RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Service
 public class AuthenticationServiceImpl implements AuthenticationService {
-    ProfileRepository profileRepository;
-    ProfileMapper profileMapper;
-    KeyCloakClient identityClient;
-    ErrorNormalizer errorNormalizer;
-    Cloudinary cloudinary;
-    RoleRepository roleRepository;
+    private static final String ROLE_USER              = "USER";
+    private static final String ROLE_STAFF             = "STAFF";
+    private static final String CREDENTIAL_TYPE        = "password";
+    private static final String GRANT_TYPE_PASSWORD    = "password";
+    private static final String GRANT_TYPE_REFRESH     = "refresh_token";
+    private static final String GRANT_TYPE_CREDENTIALS = "client_credentials";
+    private static final String SCOPE_OPENID           = "openid";
 
-    @Value("${idp.client-id}")
-    @NonFinal
-    String clientId;
+    private final ProfileRepository profileRepository;
+    private final ProfileMapper     profileMapper;
+    private final KeyCloakClient    identityClient;
+    private final ErrorNormalizer   errorNormalizer;
+    private final Cloudinary        cloudinary;
+    private final RoleRepository    roleRepository;
+    private final RabbitTemplate    rabbitTemplate;
 
-    @Value("${idp.client-secret}")
-    @NonFinal
-    String clientSecret;
+    @Value("${idp.client-id}")     private String clientId;
+    @Value("${idp.client-secret}") private String clientSecret;
+
+    public AuthenticationServiceImpl(
+            ProfileRepository profileRepository,
+            ProfileMapper profileMapper,
+            KeyCloakClient identityClient,
+            ErrorNormalizer errorNormalizer,
+            Cloudinary cloudinary,
+            RoleRepository roleRepository,
+            RabbitTemplate rabbitTemplate) {
+        this.profileRepository = profileRepository;
+        this.profileMapper = profileMapper;
+        this.identityClient = identityClient;
+        this.errorNormalizer = errorNormalizer;
+        this.cloudinary = cloudinary;
+        this.roleRepository = roleRepository;
+        this.rabbitTemplate = rabbitTemplate;
+    }
+
 
     @Override
     @Transactional
     public ProfileResponse register(RegistrationRequest request, MultipartFile avatar) {
         try {
-            // 1. Lấy Admin Token để gọi API quản trị của Keycloak
-            var token = identityClient.exchangeToken(TokenExchangeParam.builder()
-                    .grant_type("client_credentials")
-                    .client_id(clientId)
-                    .client_secret(clientSecret)
-                    .scope("openid")
-                    .build());
-            String adminToken = "Bearer " + token.getAccessToken();
+            String adminToken = getAdminToken();
+            String userId = createKeycloakUser(adminToken, request.getUsername(),
+                    request.getFirstName(), request.getLastName(),
+                    request.getEmail(), request.getPassword(), true);
 
-            // 2. Tạo User trên Keycloak
-            var creationResponse = identityClient.createUser(adminToken,
-                    UserCreationParam.builder()
-                            .username(request.getUsername())
-                            .firstName(request.getFirstName())
-                            .lastName(request.getLastName())
-                            .email(request.getEmail())
-                            .enabled(true)
-                            .emailVerified(false)
-                            .credentials(List.of(Credential.builder()
-                                    .type("password")
-                                    .temporary(false)
-                                    .value(request.getPassword())
-                                    .build()))
-                            .build());
+            assignKeycloakRole(adminToken, userId, ROLE_USER);
 
-            String userId = extractUserId(creationResponse);
-            log.info("Keycloak User Created with ID: {}", userId);
-
-            // 3. ĐỒNG BỘ ROLE: Lấy ID Role "USER" từ Keycloak và gán cho User mới [cite: 2026-03-05]
-            RoleKeycloakResponse roleInfo = identityClient.getRoleByName(adminToken, "USER");
-            identityClient.assignRole(adminToken, userId, List.of(roleInfo));
-
-            // 4. Tạo Profile dưới Database local
             Profile profile = profileMapper.toProfile(request);
             profile.setUserKeyCloakId(userId);
             profile.setAddress(request.getAddress());
+            profile.setRoles(resolveRoles(ROLE_USER));
 
-            // Lưu Role cục bộ để khớp với Keycloak (nếu Quí vẫn muốn quản lý Role ở DB)
-            Role userRole = roleRepository.findByName("USER");
-            profile.setRoles(Set.of(userRole));
+            uploadAvatar(avatar, profile);
 
-            // 5. Xử lý Avatar với Cloudinary
-            if (avatar != null && !avatar.isEmpty()) {
-                try {
-                    Map res = cloudinary.uploader().upload(avatar.getBytes(),
-                            ObjectUtils.asMap("resource_type", "auto"));
-                    profile.setAvatar(res.get("secure_url").toString());
-                } catch (IOException ex) {
-                    log.error("Cloudinary upload failed: {}", ex.getMessage());
-                    // Quí có thể ném lỗi hoặc để avatar mặc định
-                }
-            }
+            ProfileResponse saved = profileMapper.toProfileResponse(profileRepository.save(profile));
 
+            // Publish sự kiện đăng ký tài khoản → notification-service sẽ gửi email chào mừng
+            publishUserRegisteredEvent(userId, request.getEmail(), request.getUsername(),
+                    request.getFirstName(), request.getLastName());
 
-            profile = profileRepository.save(profile);
-
-//            NotificationEvent notificationEvent = NotificationEvent.builder()
-//                    .body("Xin chào " + request.getUsername()
-//                            + ",\n\nTài khoản của bạn đã được tạo thành công. "
-//                            + "Chúc bạn có những trải nghiệm tuyệt vời cùng chúng tôi!\n\n"
-//                            + "Trân trọng,\nĐội ngũ hỗ trợ")
-//                    .channel("notification")
-//                    .subject("🎉 Chúc mừng! Tạo tài khoản thành công")
-//                    .recipient(request.getEmail())
-//                    .build();
-
-
-//            kafkaTemplate.send("notification-delivery", notificationEvent);
-
-            return profileMapper.toProfileResponse(profile);
-        } catch (FeignException exception) {
-            throw errorNormalizer.handleKeyCloakException(exception);
+            return saved;
+        } catch (FeignException e) {
+            throw errorNormalizer.handleKeyCloakException(e);
         }
     }
 
@@ -135,90 +109,45 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     @Transactional
     public ProfileResponse createStaff(StaffRegistrationRequest request) {
         try {
-            // 1. Lấy Admin Token (Client Credentials) để có quyền quản trị Keycloak
-            var token = identityClient.exchangeToken(TokenExchangeParam.builder()
-                    .grant_type("client_credentials")
-                    .client_id(clientId)
-                    .client_secret(clientSecret)
-                    .scope("openid")
-                    .build());
-            String adminToken = "Bearer " + token.getAccessToken();
+            String adminToken = getAdminToken();
+            String userId = createKeycloakUser(adminToken, request.getUsername(),
+                    request.getFirstName(), request.getLastName(),
+                    request.getEmail(), request.getPassword(), true);
 
-            // 2. Tạo User trên Keycloak
-            var creationResponse = identityClient.createUser(adminToken,
-                    UserCreationParam.builder()
-                            .username(request.getUsername())
-                            .firstName(request.getFirstName())
-                            .lastName(request.getLastName())
-                            .email(request.getEmail())
-                            .enabled(true)
-                            .emailVerified(true) // Nhân viên thường được xác thực email sẵn
-                            .credentials(List.of(Credential.builder()
-                                    .type("password")
-                                    .temporary(false)
-                                    .value(request.getPassword())
-                                    .build()))
-                            .build());
+            assignKeycloakRole(adminToken, userId, ROLE_STAFF);
 
-            String userId = extractUserId(creationResponse);
-            log.info("Keycloak Staff User Created with ID: {}", userId);
-
-            // 3. ĐỒNG BỘ ROLE STAFF: Lấy ID của Role "STAFF" từ Keycloak
-            // Lưu ý: Quí phải đảm bảo đã tạo Role tên "STAFF" trên Keycloak Admin Console trước.
-            RoleKeycloakResponse roleInfo = identityClient.getRoleByName(adminToken, "STAFF");
-
-            // 4. Gán Role STAFF cho User vừa tạo trên Keycloak
-            identityClient.assignRole(adminToken, userId, List.of(roleInfo));
-
-            // 5. Tạo và Lưu Profile xuống Database local (MySQL)
             Profile profile = profileMapper.toProfileStaff(request);
             profile.setUserKeyCloakId(userId);
+            profile.setRoles(resolveRoles(ROLE_STAFF));
 
-            // Lấy Role STAFF từ DB local để lưu vào bảng trung gian profile_roles
-            Role staffRole = roleRepository.findByName("STAFF");
-            if (staffRole == null) {
-                // Nếu chưa có trong DB local, hãy tạo mới hoặc ném lỗi
-                throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
-            }
-            profile.setRoles(Set.of(staffRole));
-
-            profile = profileRepository.save(profile);
-
-            log.info("Staff Profile saved to local DB for username: {}", request.getUsername());
-            return profileMapper.toProfileResponse(profile);
-
-        } catch (FeignException exception) {
-            log.error("Error during staff creation in Keycloak: {}", exception.contentUTF8());
-            throw errorNormalizer.handleKeyCloakException(exception);
+            return profileMapper.toProfileResponse(profileRepository.save(profile));
+        } catch (FeignException e) {
+            throw errorNormalizer.handleKeyCloakException(e);
         }
     }
 
     @Override
     public TokenResponse login(LoginRequest request) {
-        Authenticated auth = Authenticated.builder()
-                .client_id(clientId)
-                .client_secret(clientSecret)
-                .grant_type("password")
-                .username(request.getUsername())
-                .password(request.getPassword())
-                .build();
         try {
-            return identityClient.login(auth);
+            return identityClient.login(Authenticated.builder()
+                    .client_id(clientId)
+                    .client_secret(clientSecret)
+                    .grant_type(GRANT_TYPE_PASSWORD)
+                    .username(request.getUsername())
+                    .password(request.getPassword())
+                    .build());
         } catch (FeignException.Unauthorized e) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
-        } catch (Exception e) {
+        } catch (FeignException e) {
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
     }
 
     @Override
     public IntrospectResponse introspect(IntrospectRequest request) {
-        Map<String, String> formParams = new HashMap<>();
-        formParams.put("token", request.getToken());
-        formParams.put("client_id", clientId);
-        formParams.put("client_secret", clientSecret);
         try {
-            return identityClient.introspect(formParams);
+            return identityClient.introspect(buildClientParams(
+                    Map.of("token", request.getToken())));
         } catch (Exception e) {
             return IntrospectResponse.builder().isValid(false).build();
         }
@@ -226,41 +155,158 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Override
     public TokenResponse refreshToken(RefreshTokenRequest request) {
-        Map<String, String> map = new HashMap<>();
-        map.put("grant_type", "refresh_token");
-        map.put("refresh_token", request.getRefreshToken());
-        map.put("client_id", clientId);
-        map.put("client_secret", clientSecret);
-
         try {
-            return identityClient.refreshToken(map);
+            return identityClient.refreshToken(buildClientParams(
+                    Map.of("grant_type", GRANT_TYPE_REFRESH,
+                            "refresh_token", request.getRefreshToken())));
         } catch (FeignException.Unauthorized e) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
-        } catch (Exception e) {
+        } catch (FeignException e) {
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
     }
 
     @Override
     public void logout(LogoutRequest request) {
-        Map<String, String> map = new HashMap<>();
-        map.put("refresh_token", request.getRefreshToken());
-        map.put("client_id", clientId);
-        map.put("client_secret", clientSecret);
-
         try {
-            identityClient.logout(map);
-        } catch (Exception e) {
+            identityClient.logout(buildClientParams(
+                    Map.of("refresh_token", request.getRefreshToken())));
+        } catch (FeignException e) {
+            log.error("Logout failed: {}", e.contentUTF8());
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
     }
 
+
+    // ── private helpers ──────────────────────────────────────────────────────
+
+    /**
+     * Publish NotificationEvent lên RabbitMQ để notification-service gửi email chào mừng.
+     * Lỗi publish KHÔNG được phép làm rollback transaction đăng ký.
+     */
+    private void publishUserRegisteredEvent(String userId, String email,
+                                            String username, String firstName, String lastName) {
+        try {
+            NotificationEvent event = NotificationEvent.builder()
+                    .type("USER_REGISTERED")
+                    .recipientId(userId)
+                    .recipientEmail(email)
+                    .templateCode("WELCOME_USER")
+                    .subject("Chào mừng bạn đến với EcommerCar!")
+                    .body(String.format("Xin chào %s %s, tài khoản của bạn đã được tạo thành công!",
+                            firstName, lastName))
+                    .param(Map.of(
+                            "username",  username,
+                            "firstName", firstName,
+                            "lastName",  lastName,
+                            "email",     email
+                    ))
+                    .build();
+
+            rabbitTemplate.convertAndSend(
+                    RabbitMQConfig.USER_REGISTERED_EXCHANGE,
+                    RabbitMQConfig.USER_REGISTERED_ROUTING_KEY,
+                    event
+            );
+            log.info("📤 Đã publish UserRegisteredEvent cho user: {} ({})", userId, email);
+        } catch (Exception e) {
+            // Không throw — tránh rollback transaction đăng ký khi Rabbit tạm thời lỗi
+            log.error("⚠️ Không thể publish UserRegisteredEvent cho user {}: {}", userId, e.getMessage());
+        }
+    }
+
+    private String createKeycloakUser(String adminToken, String username,
+                                      String firstName, String lastName,
+                                      String email, String password,
+                                      boolean emailVerified) {
+        Credential credential = Credential.builder()
+                .type(CREDENTIAL_TYPE)
+                .temporary(false)
+                .value(password)
+                .build();
+
+        UserCreationParam param = UserCreationParam.builder()
+                .username(username)
+                .firstName(firstName)
+                .lastName(lastName)
+                .email(email)
+                .enabled(true)
+                .emailVerified(emailVerified)
+                .credentials(List.of(credential))
+                .build();
+
+        String userId = extractUserId(identityClient.createUser(adminToken, param));
+        log.info("Keycloak user created — id: {}", userId);
+        return userId;
+    }
+
+    /**
+     * Fetches the named Keycloak realm role and assigns it to the given user.
+     */
+    private void assignKeycloakRole(String adminToken, String userId, String roleName) {
+        RoleKeycloakResponse role = identityClient.getRoleByName(adminToken, roleName);
+        identityClient.assignRole(adminToken, userId, List.of(role));
+    }
+
+    /**
+     * Resolves a local DB role by name; throws if not found.
+     */
+    private Set<Role> resolveRoles(String roleName) {
+        Role role = roleRepository.findByName(roleName)
+                .orElseThrow(() -> new AppException(ErrorCode.ROLE_IS_NULL));
+        return Set.of(role);
+    }
+
+    /**
+     * Uploads an avatar to Cloudinary and sets the URL on the profile.
+     * Skips silently when {@code avatar} is null or empty.
+     */
+    private void uploadAvatar(MultipartFile avatar, Profile profile) {
+        if (avatar == null || avatar.isEmpty()) return;
+        try {
+            Map<String, Object> result = cloudinary.uploader()
+                    .upload(avatar.getBytes(), ObjectUtils.asMap("resource_type", "auto"));
+            profile.setAvatar(result.get("secure_url").toString());
+        } catch (IOException e) {
+            log.error("Cloudinary upload failed — avatar skipped: {}", e.getMessage());
+        }
+    }
+
+    /**
+     * Exchanges client credentials for an admin Bearer token.
+     */
+    private String getAdminToken() {
+        TokenExchangeResponse token = identityClient.exchangeToken(TokenExchangeParam.builder()
+                .grant_type(GRANT_TYPE_CREDENTIALS)
+                .client_id(clientId)
+                .client_secret(clientSecret)
+                .scope(SCOPE_OPENID)
+                .build());
+        return "Bearer " + token.getAccessToken();
+    }
+
+
+    /**
+     * Builds a param map pre-populated with client credentials.
+     * Extra entries are merged on top.
+     */
+    private Map<String, String> buildClientParams(Map<String, String> extras) {
+        Map<String, String> params = new HashMap<>();
+        params.put("client_id", clientId);
+        params.put("client_secret", clientSecret);
+        params.putAll(extras);
+        return params;
+    }
+
+    /**
+     * Extracts the Keycloak user ID from the {@code Location} header.
+     */
     private String extractUserId(ResponseEntity<?> response) {
-        List<String> locationHeader = response.getHeaders().get("Location");
-        if (locationHeader == null || locationHeader.isEmpty()) {
+        List<String> location = response.getHeaders().get("Location");
+        if (location == null || location.isEmpty()) {
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
-        String location = locationHeader.get(0);
-        return location.substring(location.lastIndexOf("/") + 1);
+        String url = location.get(0);
+        return url.substring(url.lastIndexOf('/') + 1);
     }
 }

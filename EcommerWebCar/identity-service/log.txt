@@ -1,0 +1,1343 @@
+Apache Maven 3.9.11 (3e54c93a704957b63ee3494413a2b544fd3d825b)
+Maven home: /opt/homebrew/Cellar/maven/3.9.11/libexec
+Java version: 25, vendor: Homebrew, runtime: /opt/homebrew/Cellar/openjdk/25/libexec/openjdk.jdk/Contents/Home
+Default locale: en_VN, platform encoding: UTF-8
+OS name: "mac os x", version: "26.2", arch: "aarch64", family: "mac"
+[DEBUG] Created new class realm maven.api
+[DEBUG] Importing foreign packages into class realm maven.api
+[DEBUG]   Imported: javax.annotation.* < plexus.core
+[DEBUG]   Imported: javax.annotation.security.* < plexus.core
+[DEBUG]   Imported: javax.inject.* < plexus.core
+[DEBUG]   Imported: org.apache.maven.* < plexus.core
+[DEBUG]   Imported: org.apache.maven.artifact < plexus.core
+[DEBUG]   Imported: org.apache.maven.classrealm < plexus.core
+[DEBUG]   Imported: org.apache.maven.cli < plexus.core
+[DEBUG]   Imported: org.apache.maven.configuration < plexus.core
+[DEBUG]   Imported: org.apache.maven.exception < plexus.core
+[DEBUG]   Imported: org.apache.maven.execution < plexus.core
+[DEBUG]   Imported: org.apache.maven.execution.scope < plexus.core
+[DEBUG]   Imported: org.apache.maven.graph < plexus.core
+[DEBUG]   Imported: org.apache.maven.lifecycle < plexus.core
+[DEBUG]   Imported: org.apache.maven.model < plexus.core
+[DEBUG]   Imported: org.apache.maven.monitor < plexus.core
+[DEBUG]   Imported: org.apache.maven.plugin < plexus.core
+[DEBUG]   Imported: org.apache.maven.profiles < plexus.core
+[DEBUG]   Imported: org.apache.maven.project < plexus.core
+[DEBUG]   Imported: org.apache.maven.reporting < plexus.core
+[DEBUG]   Imported: org.apache.maven.repository < plexus.core
+[DEBUG]   Imported: org.apache.maven.rtinfo < plexus.core
+[DEBUG]   Imported: org.apache.maven.settings < plexus.core
+[DEBUG]   Imported: org.apache.maven.toolchain < plexus.core
+[DEBUG]   Imported: org.apache.maven.usability < plexus.core
+[DEBUG]   Imported: org.apache.maven.wagon.* < plexus.core
+[DEBUG]   Imported: org.apache.maven.wagon.authentication < plexus.core
+[DEBUG]   Imported: org.apache.maven.wagon.authorization < plexus.core
+[DEBUG]   Imported: org.apache.maven.wagon.events < plexus.core
+[DEBUG]   Imported: org.apache.maven.wagon.observers < plexus.core
+[DEBUG]   Imported: org.apache.maven.wagon.proxy < plexus.core
+[DEBUG]   Imported: org.apache.maven.wagon.repository < plexus.core
+[DEBUG]   Imported: org.apache.maven.wagon.resource < plexus.core
+[DEBUG]   Imported: org.codehaus.classworlds < plexus.core
+[DEBUG]   Imported: org.codehaus.plexus.* < plexus.core
+[DEBUG]   Imported: org.codehaus.plexus.classworlds < plexus.core
+[DEBUG]   Imported: org.codehaus.plexus.component < plexus.core
+[DEBUG]   Imported: org.codehaus.plexus.configuration < plexus.core
+[DEBUG]   Imported: org.codehaus.plexus.container < plexus.core
+[DEBUG]   Imported: org.codehaus.plexus.context < plexus.core
+[DEBUG]   Imported: org.codehaus.plexus.lifecycle < plexus.core
+[DEBUG]   Imported: org.codehaus.plexus.logging < plexus.core
+[DEBUG]   Imported: org.codehaus.plexus.personality < plexus.core
+[DEBUG]   Imported: org.codehaus.plexus.util.xml.Xpp3Dom < plexus.core
+[DEBUG]   Imported: org.codehaus.plexus.util.xml.pull.XmlPullParser < plexus.core
+[DEBUG]   Imported: org.codehaus.plexus.util.xml.pull.XmlPullParserException < plexus.core
+[DEBUG]   Imported: org.codehaus.plexus.util.xml.pull.XmlSerializer < plexus.core
+[DEBUG]   Imported: org.eclipse.aether.* < plexus.core
+[DEBUG]   Imported: org.eclipse.aether.artifact < plexus.core
+[DEBUG]   Imported: org.eclipse.aether.collection < plexus.core
+[DEBUG]   Imported: org.eclipse.aether.deployment < plexus.core
+[DEBUG]   Imported: org.eclipse.aether.graph < plexus.core
+[DEBUG]   Imported: org.eclipse.aether.impl < plexus.core
+[DEBUG]   Imported: org.eclipse.aether.installation < plexus.core
+[DEBUG]   Imported: org.eclipse.aether.internal.impl < plexus.core
+[DEBUG]   Imported: org.eclipse.aether.metadata < plexus.core
+[DEBUG]   Imported: org.eclipse.aether.repository < plexus.core
+[DEBUG]   Imported: org.eclipse.aether.resolution < plexus.core
+[DEBUG]   Imported: org.eclipse.aether.spi < plexus.core
+[DEBUG]   Imported: org.eclipse.aether.transfer < plexus.core
+[DEBUG]   Imported: org.eclipse.aether.util < plexus.core
+[DEBUG]   Imported: org.eclipse.aether.version < plexus.core
+[DEBUG]   Imported: org.fusesource.jansi.* < plexus.core
+[DEBUG]   Imported: org.slf4j.* < plexus.core
+[DEBUG]   Imported: org.slf4j.event.* < plexus.core
+[DEBUG]   Imported: org.slf4j.helpers.* < plexus.core
+[DEBUG]   Imported: org.slf4j.spi.* < plexus.core
+[DEBUG] Populating class realm maven.api
+[DEBUG] Created adapter factory; available factories [file-lock, rwlock-local, semaphore-local, noop]; available name mappers [discriminating, file-gav, file-hgav, file-static, gav, static]
+[INFO] Error stacktraces are turned on.
+[DEBUG] Message scheme: color
+[DEBUG] Message styles: debug info warning error success failure strong mojo project
+[DEBUG] Reading global settings from /opt/homebrew/Cellar/maven/3.9.11/libexec/conf/settings.xml
+[DEBUG] Reading user settings from /Users/anhqui/.m2/settings.xml
+[DEBUG] Reading global toolchains from /opt/homebrew/Cellar/maven/3.9.11/libexec/conf/toolchains.xml
+[DEBUG] Reading user toolchains from /Users/anhqui/.m2/toolchains.xml
+[DEBUG] Using local repository at /Users/anhqui/.m2/repository
+[DEBUG] Using manager EnhancedLocalRepositoryManager with priority 10.0 for /Users/anhqui/.m2/repository
+[INFO] Scanning for projects...
+[DEBUG] Creating adapter using nameMapper 'gav' and factory 'rwlock-local'
+[DEBUG] Extension realms for project com.tlaq:identity-service:jar:0.0.1-SNAPSHOT: (none)
+[DEBUG] Looking up lifecycle mappings for packaging jar from ClassRealm[plexus.core, parent: null]
+[DEBUG] Extension realms for project org.springframework.boot:spring-boot-starter-parent:pom:3.4.2: (none)
+[DEBUG] Looking up lifecycle mappings for packaging pom from ClassRealm[plexus.core, parent: null]
+[DEBUG] Extension realms for project org.springframework.boot:spring-boot-dependencies:pom:3.4.2: (none)
+[DEBUG] Looking up lifecycle mappings for packaging pom from ClassRealm[plexus.core, parent: null]
+[DEBUG] === REACTOR BUILD PLAN ================================================
+[DEBUG] Project: com.tlaq:identity-service:jar:0.0.1-SNAPSHOT
+[DEBUG] Tasks:   [clean, compile]
+[DEBUG] Style:   Regular
+[DEBUG] =======================================================================
+[INFO] 
+[INFO] ---------------------< com.tlaq:identity-service >----------------------
+[INFO] Building identity-service 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[DEBUG] Lifecycle clean -> [pre-clean, clean, post-clean]
+[DEBUG] Lifecycle default -> [validate, initialize, generate-sources, process-sources, generate-resources, process-resources, compile, process-classes, generate-test-sources, process-test-sources, generate-test-resources, process-test-resources, test-compile, process-test-classes, test, prepare-package, package, pre-integration-test, integration-test, post-integration-test, verify, install, deploy]
+[DEBUG] Lifecycle site -> [pre-site, site, post-site, site-deploy]
+[DEBUG] Lifecycle clean -> [pre-clean, clean, post-clean]
+[DEBUG] Lifecycle default -> [validate, initialize, generate-sources, process-sources, generate-resources, process-resources, compile, process-classes, generate-test-sources, process-test-sources, generate-test-resources, process-test-resources, test-compile, process-test-classes, test, prepare-package, package, pre-integration-test, integration-test, post-integration-test, verify, install, deploy]
+[DEBUG] Lifecycle site -> [pre-site, site, post-site, site-deploy]
+[DEBUG] Lifecycle clean -> [pre-clean, clean, post-clean]
+[DEBUG] Lifecycle default -> [validate, initialize, generate-sources, process-sources, generate-resources, process-resources, compile, process-classes, generate-test-sources, process-test-sources, generate-test-resources, process-test-resources, test-compile, process-test-classes, test, prepare-package, package, pre-integration-test, integration-test, post-integration-test, verify, install, deploy]
+[DEBUG] Lifecycle site -> [pre-site, site, post-site, site-deploy]
+[DEBUG] Lifecycle clean -> [pre-clean, clean, post-clean]
+[DEBUG] Lifecycle default -> [validate, initialize, generate-sources, process-sources, generate-resources, process-resources, compile, process-classes, generate-test-sources, process-test-sources, generate-test-resources, process-test-resources, test-compile, process-test-classes, test, prepare-package, package, pre-integration-test, integration-test, post-integration-test, verify, install, deploy]
+[DEBUG] Lifecycle site -> [pre-site, site, post-site, site-deploy]
+[DEBUG] Lifecycle clean -> [pre-clean, clean, post-clean]
+[DEBUG] Lifecycle default -> [validate, initialize, generate-sources, process-sources, generate-resources, process-resources, compile, process-classes, generate-test-sources, process-test-sources, generate-test-resources, process-test-resources, test-compile, process-test-classes, test, prepare-package, package, pre-integration-test, integration-test, post-integration-test, verify, install, deploy]
+[DEBUG] Lifecycle site -> [pre-site, site, post-site, site-deploy]
+[DEBUG] === PROJECT BUILD PLAN ================================================
+[DEBUG] Project:       com.tlaq:identity-service:0.0.1-SNAPSHOT
+[DEBUG] Dependencies (collect): []
+[DEBUG] Dependencies (resolve): [compile]
+[DEBUG] Repositories (dependencies): [central (https://repo.maven.apache.org/maven2, default, releases)]
+[DEBUG] Repositories (plugins)     : [central (https://repo.maven.apache.org/maven2, default, releases)]
+[DEBUG] -----------------------------------------------------------------------
+[DEBUG] Goal:          org.apache.maven.plugins:maven-clean-plugin:3.4.0:clean (default-clean)
+[DEBUG] Style:         Regular
+[DEBUG] Configuration: <?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <directory default-value="${project.build.directory}"/>
+  <excludeDefaultDirectories default-value="false">${maven.clean.excludeDefaultDirectories}</excludeDefaultDirectories>
+  <failOnError default-value="true">${maven.clean.failOnError}</failOnError>
+  <fast default-value="false">${maven.clean.fast}</fast>
+  <fastDir>${maven.clean.fastDir}</fastDir>
+  <fastMode default-value="background">${maven.clean.fastMode}</fastMode>
+  <followSymLinks default-value="false">${maven.clean.followSymLinks}</followSymLinks>
+  <outputDirectory default-value="${project.build.outputDirectory}"/>
+  <reportDirectory default-value="${project.build.outputDirectory}"/>
+  <retryOnError default-value="true">${maven.clean.retryOnError}</retryOnError>
+  <session default-value="${session}"/>
+  <skip default-value="false">${maven.clean.skip}</skip>
+  <testOutputDirectory default-value="${project.build.testOutputDirectory}"/>
+  <verbose>${maven.clean.verbose}</verbose>
+</configuration>
+[DEBUG] -----------------------------------------------------------------------
+[DEBUG] Goal:          org.apache.maven.plugins:maven-resources-plugin:3.3.1:resources (default-resources)
+[DEBUG] Style:         Regular
+[DEBUG] Configuration: <?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <addDefaultExcludes default-value="true"/>
+  <buildFilters default-value="${project.build.filters}"/>
+  <delimiters>
+    <delimiter>@</delimiter>
+  </delimiters>
+  <encoding default-value="${project.build.sourceEncoding}"/>
+  <escapeWindowsPaths default-value="true"/>
+  <fileNameFiltering default-value="false"/>
+  <includeEmptyDirs default-value="false"/>
+  <outputDirectory default-value="${project.build.outputDirectory}"/>
+  <overwrite default-value="false"/>
+  <project default-value="${project}"/>
+  <propertiesEncoding>UTF-8</propertiesEncoding>
+  <resources default-value="${project.resources}"/>
+  <session default-value="${session}"/>
+  <skip default-value="false">${maven.resources.skip}</skip>
+  <supportMultiLineFiltering default-value="false"/>
+  <useBuildFilters default-value="true"/>
+  <useDefaultDelimiters default-value="true">false</useDefaultDelimiters>
+</configuration>
+[DEBUG] -----------------------------------------------------------------------
+[DEBUG] Goal:          org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile (default-compile)
+[DEBUG] Style:         Regular
+[DEBUG] Configuration: <?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <annotationProcessorPaths>
+    <path>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok</artifactId>
+    </path>
+    <path>
+      <groupId>org.mapstruct</groupId>
+      <artifactId>mapstruct-processor</artifactId>
+      <version>1.6.0.Beta1</version>
+    </path>
+    <path>
+      <groupId>org.projectlombok</groupId>
+      <artifactId>lombok-mapstruct-binding</artifactId>
+      <version>0.2.0</version>
+    </path>
+  </annotationProcessorPaths>
+  <annotationProcessorPathsUseDepMgmt default-value="false"/>
+  <basedir default-value="${basedir}"/>
+  <buildDirectory default-value="${project.build.directory}"/>
+  <compilePath default-value="${project.compileClasspathElements}"/>
+  <compileSourceRoots default-value="${project.compileSourceRoots}"/>
+  <compilerId default-value="javac">${maven.compiler.compilerId}</compilerId>
+  <compilerReuseStrategy default-value="${reuseCreated}">${maven.compiler.compilerReuseStrategy}</compilerReuseStrategy>
+  <compilerVersion>${maven.compiler.compilerVersion}</compilerVersion>
+  <createMissingPackageInfoClass default-value="true">${maven.compiler.createMissingPackageInfoClass}</createMissingPackageInfoClass>
+  <debug default-value="true">${maven.compiler.debug}</debug>
+  <debugFileName default-value="javac"/>
+  <debuglevel>${maven.compiler.debuglevel}</debuglevel>
+  <enablePreview default-value="false">${maven.compiler.enablePreview}</enablePreview>
+  <encoding default-value="${project.build.sourceEncoding}">${encoding}</encoding>
+  <executable>${maven.compiler.executable}</executable>
+  <failOnError default-value="true">${maven.compiler.failOnError}</failOnError>
+  <failOnWarning default-value="false">${maven.compiler.failOnWarning}</failOnWarning>
+  <fileExtensions default-value="class,jar"/>
+  <forceJavacCompilerUse default-value="false">${maven.compiler.forceJavacCompilerUse}</forceJavacCompilerUse>
+  <forceLegacyJavacApi default-value="false">${maven.compiler.forceLegacyJavacApi}</forceLegacyJavacApi>
+  <fork default-value="false">${maven.compiler.fork}</fork>
+  <generatedSourcesDirectory default-value="${project.build.directory}/generated-sources/annotations"/>
+  <implicit>${maven.compiler.implicit}</implicit>
+  <maxmem>${maven.compiler.maxmem}</maxmem>
+  <meminitial>${maven.compiler.meminitial}</meminitial>
+  <mojoExecution default-value="${mojoExecution}"/>
+  <optimize default-value="false">${maven.compiler.optimize}</optimize>
+  <outputDirectory default-value="${project.build.outputDirectory}">${maven.compiler.outputDirectory}</outputDirectory>
+  <outputTimestamp default-value="${project.build.outputTimestamp}"/>
+  <parameters default-value="false">true</parameters>
+  <proc>${maven.compiler.proc}</proc>
+  <project default-value="${project}"/>
+  <projectArtifact default-value="${project.artifact}"/>
+  <release>${maven.compiler.release}</release>
+  <session default-value="${session}"/>
+  <showCompilationChanges default-value="false">${maven.compiler.showCompilationChanges}</showCompilationChanges>
+  <showDeprecation default-value="false">${maven.compiler.showDeprecation}</showDeprecation>
+  <showWarnings default-value="true">${maven.compiler.showWarnings}</showWarnings>
+  <skipMain>${maven.main.skip}</skipMain>
+  <skipMultiThreadWarning default-value="false">${maven.compiler.skipMultiThreadWarning}</skipMultiThreadWarning>
+  <source default-value="1.8">${maven.compiler.source}</source>
+  <staleMillis default-value="0">${lastModGranularityMs}</staleMillis>
+  <target default-value="1.8">${maven.compiler.target}</target>
+  <useIncrementalCompilation default-value="true">${maven.compiler.useIncrementalCompilation}</useIncrementalCompilation>
+  <verbose default-value="false">${maven.compiler.verbose}</verbose>
+</configuration>
+[DEBUG] =======================================================================
+[DEBUG] Using mirror maven-default-http-blocker (http://0.0.0.0/) for apache.snapshots (http://repository.apache.org/snapshots).
+[DEBUG] Using mirror maven-default-http-blocker (http://0.0.0.0/) for apache.snapshots (http://people.apache.org/repo/m2-snapshot-repository).
+[DEBUG] Dependency collection stats {ConflictMarker.analyzeTime=476000, ConflictMarker.markTime=219958, ConflictMarker.nodeCount=340, ConflictIdSorter.graphTime=293166, ConflictIdSorter.topsortTime=115750, ConflictIdSorter.conflictIdCount=149, ConflictIdSorter.conflictIdCycleCount=0, ConflictResolver.totalTime=6792792, ConflictResolver.conflictItemCount=291, DfDependencyCollector.collectTime=207976125, DfDependencyCollector.transformTime=8544541}
+[DEBUG] com.tlaq:identity-service:jar:0.0.1-SNAPSHOT
+[DEBUG]    org.springframework.boot:spring-boot-starter-data-jpa:jar:3.4.2:compile
+[DEBUG]       org.springframework.boot:spring-boot-starter:jar:3.4.2:compile (version managed from 3.4.2)
+[DEBUG]          org.springframework.boot:spring-boot:jar:3.4.2:compile (version managed from 3.4.2)
+[DEBUG]          org.springframework.boot:spring-boot-autoconfigure:jar:3.4.2:compile (version managed from 3.4.2)
+[DEBUG]          org.springframework.boot:spring-boot-starter-logging:jar:3.4.2:compile (version managed from 3.4.2)
+[DEBUG]             ch.qos.logback:logback-classic:jar:1.5.16:compile (version managed from 1.5.16)
+[DEBUG]                ch.qos.logback:logback-core:jar:1.5.16:compile (version managed from 1.5.16)
+[DEBUG]             org.apache.logging.log4j:log4j-to-slf4j:jar:2.24.3:compile (version managed from 2.24.3)
+[DEBUG]                org.apache.logging.log4j:log4j-api:jar:2.24.3:compile (version managed from 2.24.3)
+[DEBUG]             org.slf4j:jul-to-slf4j:jar:2.0.16:compile (version managed from 2.0.16)
+[DEBUG]          jakarta.annotation:jakarta.annotation-api:jar:2.1.1:compile (version managed from 2.1.1)
+[DEBUG]          org.springframework:spring-core:jar:6.2.2:compile (version managed from 6.2.2)
+[DEBUG]             org.springframework:spring-jcl:jar:6.2.2:compile (version managed from 6.2.2)
+[DEBUG]          org.yaml:snakeyaml:jar:2.3:compile (version managed from 2.3)
+[DEBUG]       org.springframework.boot:spring-boot-starter-jdbc:jar:3.4.2:compile (version managed from 3.4.2)
+[DEBUG]          com.zaxxer:HikariCP:jar:5.1.0:compile (version managed from 5.1.0)
+[DEBUG]          org.springframework:spring-jdbc:jar:6.2.2:compile (version managed from 6.2.2)
+[DEBUG]       org.hibernate.orm:hibernate-core:jar:6.6.5.Final:compile (version managed from 6.6.5.Final)
+[DEBUG]          jakarta.persistence:jakarta.persistence-api:jar:3.1.0:compile (version managed from 3.1.0)
+[DEBUG]          jakarta.transaction:jakarta.transaction-api:jar:2.0.1:compile (version managed from 2.0.1)
+[DEBUG]          org.jboss.logging:jboss-logging:jar:3.6.1.Final:compile (version managed from 3.5.0.Final)
+[DEBUG]          org.hibernate.common:hibernate-commons-annotations:jar:7.0.3.Final:runtime
+[DEBUG]          io.smallrye:jandex:jar:3.2.0:runtime
+[DEBUG]          com.fasterxml:classmate:jar:1.7.0:compile (version managed from 1.5.1)
+[DEBUG]          net.bytebuddy:byte-buddy:jar:1.15.11:runtime (version managed from 1.15.11)
+[DEBUG]          jakarta.xml.bind:jakarta.xml.bind-api:jar:4.0.2:runtime (version managed from 4.0.0)
+[DEBUG]             jakarta.activation:jakarta.activation-api:jar:2.1.3:runtime (version managed from 2.1.3)
+[DEBUG]          org.glassfish.jaxb:jaxb-runtime:jar:4.0.5:runtime (version managed from 4.0.2)
+[DEBUG]             org.glassfish.jaxb:jaxb-core:jar:4.0.5:runtime (version managed from 4.0.5)
+[DEBUG]                org.eclipse.angus:angus-activation:jar:2.0.2:runtime (version managed from 2.0.2)
+[DEBUG]                org.glassfish.jaxb:txw2:jar:4.0.5:runtime (version managed from 4.0.5)
+[DEBUG]                com.sun.istack:istack-commons-runtime:jar:4.1.2:runtime (version managed from 4.1.2)
+[DEBUG]          jakarta.inject:jakarta.inject-api:jar:2.0.1:compile (version managed from 2.0.1)
+[DEBUG]          org.antlr:antlr4-runtime:jar:4.13.0:compile
+[DEBUG]       org.springframework.data:spring-data-jpa:jar:3.4.2:compile (version managed from 3.4.2)
+[DEBUG]          org.springframework.data:spring-data-commons:jar:3.4.2:compile (version managed from 3.4.2)
+[DEBUG]          org.springframework:spring-orm:jar:6.2.2:compile (version managed from 6.2.2)
+[DEBUG]          org.springframework:spring-beans:jar:6.2.2:compile (version managed from 6.2.2)
+[DEBUG]          org.slf4j:slf4j-api:jar:2.0.16:compile (version managed from 2.0.2)
+[DEBUG]       org.springframework:spring-aspects:jar:6.2.2:compile (version managed from 6.2.2)
+[DEBUG]          org.aspectj:aspectjweaver:jar:1.9.22.1:compile (version managed from 1.9.22.1)
+[DEBUG]    org.springframework.boot:spring-boot-starter-security:jar:3.4.2:compile
+[DEBUG]       org.springframework:spring-aop:jar:6.2.2:compile (version managed from 6.2.2)
+[DEBUG]       org.springframework.security:spring-security-config:jar:6.4.2:compile (version managed from 6.4.2)
+[DEBUG]       org.springframework.security:spring-security-web:jar:6.4.2:compile (version managed from 6.4.2)
+[DEBUG]          org.springframework:spring-expression:jar:6.2.2:compile (version managed from 6.2.1)
+[DEBUG]    org.springframework.boot:spring-boot-starter-web:jar:3.4.2:compile
+[DEBUG]       org.springframework.boot:spring-boot-starter-json:jar:3.4.2:compile (version managed from 3.4.2)
+[DEBUG]          com.fasterxml.jackson.datatype:jackson-datatype-jdk8:jar:2.18.2:compile (version managed from 2.18.2)
+[DEBUG]          com.fasterxml.jackson.datatype:jackson-datatype-jsr310:jar:2.18.2:compile (version managed from 2.18.2)
+[DEBUG]          com.fasterxml.jackson.module:jackson-module-parameter-names:jar:2.18.2:compile (version managed from 2.18.2)
+[DEBUG]       org.springframework.boot:spring-boot-starter-tomcat:jar:3.4.2:compile (version managed from 3.4.2)
+[DEBUG]          org.apache.tomcat.embed:tomcat-embed-core:jar:10.1.34:compile (version managed from 10.1.34)
+[DEBUG]          org.apache.tomcat.embed:tomcat-embed-websocket:jar:10.1.34:compile (version managed from 10.1.34)
+[DEBUG]       org.springframework:spring-web:jar:6.2.2:compile (version managed from 6.2.2)
+[DEBUG]       org.springframework:spring-webmvc:jar:6.2.2:compile (version managed from 6.2.2)
+[DEBUG]    org.springframework.boot:spring-boot-starter-oauth2-resource-server:jar:3.4.2:compile
+[DEBUG]       org.springframework.security:spring-security-core:jar:6.4.2:compile (version managed from 6.4.2)
+[DEBUG]          org.springframework.security:spring-security-crypto:jar:6.4.2:compile (version managed from 6.4.2)
+[DEBUG]       org.springframework.security:spring-security-oauth2-resource-server:jar:6.4.2:compile (version managed from 6.4.2)
+[DEBUG]          org.springframework.security:spring-security-oauth2-core:jar:6.4.2:compile (version managed from 6.4.2)
+[DEBUG]       org.springframework.security:spring-security-oauth2-jose:jar:6.4.2:compile (version managed from 6.4.2)
+[DEBUG]          com.nimbusds:nimbus-jose-jwt:jar:9.37.3:compile
+[DEBUG]             com.github.stephenc.jcip:jcip-annotations:jar:1.0-1:compile
+[DEBUG]    com.fasterxml.jackson.core:jackson-databind:jar:2.18.2:compile
+[DEBUG]       com.fasterxml.jackson.core:jackson-annotations:jar:2.18.2:compile (version managed from 2.18.2)
+[DEBUG]       com.fasterxml.jackson.core:jackson-core:jar:2.18.2:compile (version managed from 2.18.2)
+[DEBUG]    org.springframework.boot:spring-boot-starter-validation:jar:3.4.2:compile
+[DEBUG]       org.apache.tomcat.embed:tomcat-embed-el:jar:10.1.34:compile (version managed from 10.1.34)
+[DEBUG]       org.hibernate.validator:hibernate-validator:jar:8.0.2.Final:compile (version managed from 8.0.2.Final)
+[DEBUG]          jakarta.validation:jakarta.validation-api:jar:3.0.2:compile (version managed from 3.0.2)
+[DEBUG]    org.springframework.cloud:spring-cloud-starter-openfeign:jar:4.2.0:compile
+[DEBUG]       org.springframework.cloud:spring-cloud-starter:jar:4.2.0:compile (version managed from 4.2.0)
+[DEBUG]          org.springframework.cloud:spring-cloud-context:jar:4.2.0:compile (version managed from 4.2.0)
+[DEBUG]          org.bouncycastle:bcprov-jdk18on:jar:1.78.1:compile
+[DEBUG]       org.springframework.cloud:spring-cloud-openfeign-core:jar:4.2.0:compile (version managed from 4.2.0)
+[DEBUG]          io.github.openfeign:feign-form-spring:jar:13.5:compile (version managed from 13.5)
+[DEBUG]             io.github.openfeign:feign-form:jar:13.5:compile (version managed from 13.5)
+[DEBUG]             commons-fileupload:commons-fileupload:jar:1.5:compile
+[DEBUG]                commons-io:commons-io:jar:2.11.0:compile
+[DEBUG]       org.springframework.cloud:spring-cloud-commons:jar:4.2.0:compile (version managed from 4.2.0)
+[DEBUG]       io.github.openfeign:feign-core:jar:13.5:compile (version managed from 13.5)
+[DEBUG]       io.github.openfeign:feign-slf4j:jar:13.5:compile (version managed from 13.5)
+[DEBUG]    org.mapstruct:mapstruct:jar:1.6.0.Beta1:compile
+[DEBUG]    org.projectlombok:lombok-mapstruct-binding:jar:0.2.0:provided
+[DEBUG]    com.cloudinary:cloudinary-http44:jar:1.36.0:compile
+[DEBUG]       com.cloudinary:cloudinary-core:jar:1.36.0:compile
+[DEBUG]       org.apache.commons:commons-lang3:jar:3.17.0:compile (version managed from 3.1)
+[DEBUG]       org.apache.httpcomponents:httpclient:jar:4.4:compile
+[DEBUG]          org.apache.httpcomponents:httpcore:jar:4.4.16:compile (version managed from 4.4)
+[DEBUG]          commons-logging:commons-logging:jar:1.2:compile
+[DEBUG]          commons-codec:commons-codec:jar:1.17.2:compile (version managed from 1.9)
+[DEBUG]       org.apache.httpcomponents:httpmime:jar:4.4:compile
+[DEBUG]    org.springframework.kafka:spring-kafka:jar:3.3.2:compile
+[DEBUG]       org.springframework:spring-context:jar:6.2.2:compile (version managed from 6.2.2)
+[DEBUG]       org.springframework:spring-messaging:jar:6.2.2:compile (version managed from 6.2.2)
+[DEBUG]       org.springframework:spring-tx:jar:6.2.2:compile (version managed from 6.2.2)
+[DEBUG]       org.springframework.retry:spring-retry:jar:2.0.11:compile (version managed from 2.0.11)
+[DEBUG]       org.apache.kafka:kafka-clients:jar:3.8.1:compile (version managed from 3.8.1)
+[DEBUG]          com.github.luben:zstd-jni:jar:1.5.6-4:runtime
+[DEBUG]          org.lz4:lz4-java:jar:1.8.0:runtime
+[DEBUG]          org.xerial.snappy:snappy-java:jar:1.1.10.5:runtime
+[DEBUG]       io.micrometer:micrometer-observation:jar:1.14.3:compile (version managed from 1.14.3)
+[DEBUG]          io.micrometer:micrometer-commons:jar:1.14.3:compile (version managed from 1.14.3)
+[DEBUG]    com.mysql:mysql-connector-j:jar:9.1.0:runtime (exclusions managed from [com.google.protobuf:protobuf-java:*:*])
+[DEBUG]    org.springframework.cloud:spring-cloud-starter-netflix-eureka-client:jar:4.2.0:compile
+[DEBUG]       org.springframework.cloud:spring-cloud-netflix-eureka-client:jar:4.2.0:compile (version managed from 4.2.0)
+[DEBUG]          org.apache.httpcomponents.client5:httpclient5:jar:5.4.1:compile (version managed from 5.4.1)
+[DEBUG]             org.apache.httpcomponents.core5:httpcore5:jar:5.3.2:compile (version managed from 5.3.1)
+[DEBUG]             org.apache.httpcomponents.core5:httpcore5-h2:jar:5.3.2:compile (version managed from 5.3.1)
+[DEBUG]       com.netflix.eureka:eureka-client:jar:2.0.4:compile (version managed from 2.0.4) (exclusions managed from [com.sun.jersey:jersey-client:*:*, com.sun.jersey:jersey-core:*:*, com.sun.jersey.contribs:jersey-apache-client4:*:*, aopalliance:aopalliance:*:*])
+[DEBUG]          com.thoughtworks.xstream:xstream:jar:1.4.20:compile
+[DEBUG]             io.github.x-stream:mxparser:jar:1.2.2:compile
+[DEBUG]                xmlpull:xmlpull:jar:1.1.3.1:compile
+[DEBUG]          jakarta.ws.rs:jakarta.ws.rs-api:jar:3.1.0:compile (version managed from 3.0.0)
+[DEBUG]          com.netflix.spectator:spectator-api:jar:1.7.3:compile
+[DEBUG]          commons-configuration:commons-configuration:jar:1.10:compile
+[DEBUG]             commons-lang:commons-lang:jar:2.6:compile
+[DEBUG]          com.netflix.netflix-commons:netflix-eventbus:jar:0.3.0:runtime
+[DEBUG]             com.netflix.netflix-commons:netflix-infix:jar:0.3.0:runtime
+[DEBUG]                commons-jxpath:commons-jxpath:jar:1.3:runtime
+[DEBUG]                joda-time:joda-time:jar:2.3:runtime
+[DEBUG]                org.antlr:antlr-runtime:jar:3.4:runtime
+[DEBUG]                   org.antlr:stringtemplate:jar:3.2.1:runtime
+[DEBUG]                   antlr:antlr:jar:2.7.7:runtime
+[DEBUG]                com.google.guava:guava:jar:33.3.1-jre:runtime (version managed from 14.0.1)
+[DEBUG]                   com.google.guava:failureaccess:jar:1.0.2:runtime
+[DEBUG]                   com.google.guava:listenablefuture:jar:9999.0-empty-to-avoid-conflict-with-guava:runtime
+[DEBUG]                   org.checkerframework:checker-qual:jar:3.43.0:runtime
+[DEBUG]                   com.google.errorprone:error_prone_annotations:jar:2.28.0:runtime
+[DEBUG]                   com.google.j2objc:j2objc-annotations:jar:3.0.0:runtime
+[DEBUG]                com.google.code.gson:gson:jar:2.11.0:runtime (version managed from 2.1)
+[DEBUG]             com.netflix.servo:servo-core:jar:0.5.3:runtime
+[DEBUG]             org.apache.commons:commons-math:jar:2.2:runtime
+[DEBUG]          javax.annotation:javax.annotation-api:jar:1.2:runtime
+[DEBUG]          org.codehaus.jettison:jettison:jar:1.5.4:runtime
+[DEBUG]       org.springframework.cloud:spring-cloud-starter-loadbalancer:jar:4.2.0:compile (version managed from 4.2.0)
+[DEBUG]          org.springframework.cloud:spring-cloud-loadbalancer:jar:4.2.0:compile (version managed from 4.2.0)
+[DEBUG]             io.projectreactor:reactor-core:jar:3.7.2:compile (version managed from 3.7.0)
+[DEBUG]                org.reactivestreams:reactive-streams:jar:1.0.4:compile (version managed from 1.0.4)
+[DEBUG]             io.projectreactor.addons:reactor-extra:jar:3.5.2:compile (version managed from 3.5.2)
+[DEBUG]          org.springframework.boot:spring-boot-starter-cache:jar:3.4.2:compile (version managed from 3.4.0)
+[DEBUG]             org.springframework:spring-context-support:jar:6.2.2:compile (version managed from 6.2.2)
+[DEBUG]          com.stoyanr:evictor:jar:1.0.0:compile
+[DEBUG]    org.springframework.boot:spring-boot-starter-amqp:jar:3.4.2:compile
+[DEBUG]       org.springframework.amqp:spring-rabbit:jar:3.2.2:compile (version managed from 3.2.2)
+[DEBUG]          org.springframework.amqp:spring-amqp:jar:3.2.2:compile (version managed from 3.2.2)
+[DEBUG]          com.rabbitmq:amqp-client:jar:5.22.0:compile (version managed from 5.22.0)
+[DEBUG]    org.projectlombok:lombok:jar:1.18.36:compile (optional)
+[INFO] 
+[INFO] --- clean:3.4.0:clean (default-clean) @ identity-service ---
+[DEBUG] Dependency collection stats {ConflictMarker.analyzeTime=45500, ConflictMarker.markTime=19167, ConflictMarker.nodeCount=2, ConflictIdSorter.graphTime=21166, ConflictIdSorter.topsortTime=4542, ConflictIdSorter.conflictIdCount=2, ConflictIdSorter.conflictIdCycleCount=0, ConflictResolver.totalTime=27000, ConflictResolver.conflictItemCount=2, DfDependencyCollector.collectTime=2531917, DfDependencyCollector.transformTime=125166}
+[DEBUG] org.apache.maven.plugins:maven-clean-plugin:jar:3.4.0
+[DEBUG]    org.codehaus.plexus:plexus-utils:jar:4.0.1:compile
+[DEBUG] Created new class realm plugin>org.apache.maven.plugins:maven-clean-plugin:3.4.0
+[DEBUG] Importing foreign packages into class realm plugin>org.apache.maven.plugins:maven-clean-plugin:3.4.0
+[DEBUG]   Imported:  < maven.api
+[DEBUG] Populating class realm plugin>org.apache.maven.plugins:maven-clean-plugin:3.4.0
+[DEBUG]   Included: org.apache.maven.plugins:maven-clean-plugin:jar:3.4.0
+[DEBUG]   Included: org.codehaus.plexus:plexus-utils:jar:4.0.1
+[DEBUG] Loading mojo org.apache.maven.plugins:maven-clean-plugin:3.4.0:clean from plugin realm ClassRealm[plugin>org.apache.maven.plugins:maven-clean-plugin:3.4.0, parent: jdk.internal.loader.ClassLoaders$AppClassLoader@5bc2b487]
+[DEBUG] Configuring mojo execution 'org.apache.maven.plugins:maven-clean-plugin:3.4.0:clean:default-clean' with basic configurator -->
+[DEBUG]   (f) directory = /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target
+[DEBUG]   (f) excludeDefaultDirectories = false
+[DEBUG]   (f) failOnError = true
+[DEBUG]   (f) fast = false
+[DEBUG]   (f) fastMode = background
+[DEBUG]   (f) followSymLinks = false
+[DEBUG]   (f) outputDirectory = /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target/classes
+[DEBUG]   (f) reportDirectory = /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target/classes
+[DEBUG]   (f) retryOnError = true
+[DEBUG]   (f) session = org.apache.maven.execution.MavenSession@3d4e405e
+[DEBUG]   (f) skip = false
+[DEBUG]   (f) testOutputDirectory = /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target/test-classes
+[DEBUG] -- end configuration --
+[INFO] Deleting /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target
+[INFO] Deleting file /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target/maven-status/maven-compiler-plugin/compile/default-compile/inputFiles.lst
+[INFO] Deleting directory /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target/maven-status/maven-compiler-plugin/compile/default-compile
+[INFO] Deleting directory /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target/maven-status/maven-compiler-plugin/compile
+[INFO] Deleting directory /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target/maven-status/maven-compiler-plugin
+[INFO] Deleting directory /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target/maven-status
+[INFO] Deleting file /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target/classes/application.yml
+[INFO] Deleting directory /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target/classes
+[INFO] Deleting directory /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target/generated-sources/annotations
+[INFO] Deleting directory /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target/generated-sources
+[INFO] Deleting directory /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target
+[DEBUG] Skipping non-existing directory /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target/classes
+[DEBUG] Skipping non-existing directory /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target/test-classes
+[DEBUG] Skipping non-existing directory /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ identity-service ---
+[DEBUG] Dependency collection stats {ConflictMarker.analyzeTime=33833, ConflictMarker.markTime=9875, ConflictMarker.nodeCount=13, ConflictIdSorter.graphTime=18792, ConflictIdSorter.topsortTime=6416, ConflictIdSorter.conflictIdCount=9, ConflictIdSorter.conflictIdCycleCount=0, ConflictResolver.totalTime=72375, ConflictResolver.conflictItemCount=13, DfDependencyCollector.collectTime=10923709, DfDependencyCollector.transformTime=150666}
+[DEBUG] org.apache.maven.plugins:maven-resources-plugin:jar:3.3.1
+[DEBUG]    org.codehaus.plexus:plexus-interpolation:jar:1.26:runtime
+[DEBUG]    org.codehaus.plexus:plexus-utils:jar:3.5.1:compile
+[DEBUG]    org.apache.maven.shared:maven-filtering:jar:3.3.1:compile
+[DEBUG]       javax.inject:javax.inject:jar:1:compile
+[DEBUG]       org.slf4j:slf4j-api:jar:1.7.36:compile
+[DEBUG]       org.sonatype.plexus:plexus-build-api:jar:0.0.7:compile
+[DEBUG]    commons-io:commons-io:jar:2.11.0:compile
+[DEBUG]    org.apache.commons:commons-lang3:jar:3.12.0:compile
+[DEBUG] Created new class realm plugin>org.apache.maven.plugins:maven-resources-plugin:3.3.1
+[DEBUG] Importing foreign packages into class realm plugin>org.apache.maven.plugins:maven-resources-plugin:3.3.1
+[DEBUG]   Imported:  < maven.api
+[DEBUG] Populating class realm plugin>org.apache.maven.plugins:maven-resources-plugin:3.3.1
+[DEBUG]   Included: org.apache.maven.plugins:maven-resources-plugin:jar:3.3.1
+[DEBUG]   Included: org.codehaus.plexus:plexus-interpolation:jar:1.26
+[DEBUG]   Included: org.codehaus.plexus:plexus-utils:jar:3.5.1
+[DEBUG]   Included: org.apache.maven.shared:maven-filtering:jar:3.3.1
+[DEBUG]   Included: org.sonatype.plexus:plexus-build-api:jar:0.0.7
+[DEBUG]   Included: commons-io:commons-io:jar:2.11.0
+[DEBUG]   Included: org.apache.commons:commons-lang3:jar:3.12.0
+[DEBUG] Loading mojo org.apache.maven.plugins:maven-resources-plugin:3.3.1:resources from plugin realm ClassRealm[plugin>org.apache.maven.plugins:maven-resources-plugin:3.3.1, parent: jdk.internal.loader.ClassLoaders$AppClassLoader@5bc2b487]
+[DEBUG] Configuring mojo execution 'org.apache.maven.plugins:maven-resources-plugin:3.3.1:resources:default-resources' with basic configurator -->
+[DEBUG]   (f) addDefaultExcludes = true
+[DEBUG]   (f) buildFilters = []
+[DEBUG]   (s) delimiters = [@]
+[DEBUG]   (f) encoding = UTF-8
+[DEBUG]   (f) escapeWindowsPaths = true
+[DEBUG]   (f) fileNameFiltering = false
+[DEBUG]   (s) includeEmptyDirs = false
+[DEBUG]   (s) outputDirectory = /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target/classes
+[DEBUG]   (s) overwrite = false
+[DEBUG]   (f) project = MavenProject: com.tlaq:identity-service:0.0.1-SNAPSHOT @ /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/pom.xml
+[DEBUG]   (f) propertiesEncoding = UTF-8
+[DEBUG]   (s) resources = [Resource {targetPath: null, filtering: true, FileSet {directory: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/resources, PatternSet [includes: {**/application*.yml, **/application*.yaml, **/application*.properties}, excludes: {}]}}, Resource {targetPath: null, filtering: false, FileSet {directory: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/resources, PatternSet [includes: {}, excludes: {**/application*.yml, **/application*.yaml, **/application*.properties}]}}]
+[DEBUG]   (f) session = org.apache.maven.execution.MavenSession@3d4e405e
+[DEBUG]   (f) skip = false
+[DEBUG]   (f) supportMultiLineFiltering = false
+[DEBUG]   (f) useBuildFilters = true
+[DEBUG]   (s) useDefaultDelimiters = false
+[DEBUG] -- end configuration --
+[DEBUG] properties used:
+[DEBUG] activemq.version: 6.1.5
+[DEBUG] angus-mail.version: 2.0.3
+[DEBUG] apple.awt.application.name: Launcher
+[DEBUG] artemis.version: 2.37.0
+[DEBUG] aspectj.version: 1.9.22.1
+[DEBUG] assertj.version: 3.26.3
+[DEBUG] awaitility.version: 4.2.2
+[DEBUG] brave.version: 6.0.3
+[DEBUG] build-helper-maven-plugin.version: 3.6.0
+[DEBUG] byte-buddy.version: 1.15.11
+[DEBUG] cache2k.version: 2.6.1.Final
+[DEBUG] caffeine.version: 3.1.8
+[DEBUG] cassandra-driver.version: 4.18.1
+[DEBUG] classmate.version: 1.7.0
+[DEBUG] classworlds.conf: /opt/homebrew/Cellar/maven/3.9.11/libexec/bin/m2.conf
+[DEBUG] commons-codec.version: 1.17.2
+[DEBUG] commons-dbcp2.version: 2.12.0
+[DEBUG] commons-lang3.version: 3.17.0
+[DEBUG] commons-pool.version: 1.6
+[DEBUG] commons-pool2.version: 2.12.0
+[DEBUG] couchbase-client.version: 3.7.7
+[DEBUG] crac.version: 1.5.0
+[DEBUG] cyclonedx-maven-plugin.version: 2.9.1
+[DEBUG] db2-jdbc.version: 11.5.9.0
+[DEBUG] dependency-management-plugin.version: 1.1.7
+[DEBUG] derby.version: 10.16.1.1
+[DEBUG] ehcache3.version: 3.10.8
+[DEBUG] elasticsearch-client.version: 8.15.5
+[DEBUG] env.ANTIGRAVITY_AGENT: 1
+[DEBUG] env.ANTIGRAVITY_EDITOR_APP_ROOT: /Applications/Antigravity.app/Contents/Resources/app
+[DEBUG] env.ANTIGRAVITY_TRAJECTORY_ID: 1ab72b80-83b0-456d-80b3-fc0eaedcd597
+[DEBUG] env.COMMAND_MODE: unix2003
+[DEBUG] env.FPATH: /opt/homebrew/share/zsh/site-functions:/usr/local/share/zsh/site-functions:/usr/share/zsh/site-functions:/usr/share/zsh/5.9/functions
+[DEBUG] env.HOME: /Users/anhqui
+[DEBUG] env.HOMEBREW_CELLAR: /opt/homebrew/Cellar
+[DEBUG] env.HOMEBREW_PREFIX: /opt/homebrew
+[DEBUG] env.HOMEBREW_REPOSITORY: /opt/homebrew
+[DEBUG] env.INFOPATH: /opt/homebrew/share/info:
+[DEBUG] env.JAVA_HOME: /opt/homebrew/opt/openjdk/libexec/openjdk.jdk/Contents/Home
+[DEBUG] env.LANG: C.UTF-8
+[DEBUG] env.LOGNAME: anhqui
+[DEBUG] env.MAVEN_CMD_LINE_ARGS:  clean compile -X
+[DEBUG] env.MAVEN_PROJECTBASEDIR: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service
+[DEBUG] env.MallocNanoZone: 0
+[DEBUG] env.OLDPWD: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service
+[DEBUG] env.OSLogRateLimit: 64
+[DEBUG] env.PAGER: cat
+[DEBUG] env.PATH: /opt/homebrew/bin:/opt/homebrew/sbin:/Library/Frameworks/Python.framework/Versions/3.13/bin:/usr/local/bin:/System/Cryptexes/App/usr/bin:/usr/bin:/bin:/usr/sbin:/sbin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/local/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/bin:/var/run/com.apple.security.cryptexd/codex.system/bootstrap/usr/appleinternal/bin:/opt/pmk/env/global/bin:/Library/TeX/texbin:/Applications/VMware Fusion.app/Contents/Public
+[DEBUG] env.PWD: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service
+[DEBUG] env.SHELL: /bin/zsh
+[DEBUG] env.SHLVL: 0
+[DEBUG] env.SSH_AUTH_SOCK: /private/tmp/com.apple.launchd.1lFKCenEPF/Listeners
+[DEBUG] env.TERM: dumb
+[DEBUG] env.TMPDIR: /var/folders/g2/bdf0j0w94fs_r7bkw935fdx40000gn/T/
+[DEBUG] env.USER: anhqui
+[DEBUG] env.VSCODE_CODE_CACHE_PATH: /Users/anhqui/Library/Application Support/Antigravity/CachedData/15487b3041e65228cae24980a3f796c905ef582c
+[DEBUG] env.VSCODE_CWD: /
+[DEBUG] env.VSCODE_IPC_HOOK: /Users/anhqui/Library/Application Support/Antigravity/1.10-main.sock
+[DEBUG] env.VSCODE_NLS_CONFIG: {"userLocale":"en-us","osLocale":"en-vn","resolvedLanguage":"en","defaultMessagesFile":"/Applications/Antigravity.app/Contents/Resources/app/out/nls.messages.json","locale":"en-us","availableLanguages":{}}
+[DEBUG] env.VSCODE_PID: 10263
+[DEBUG] env.XPC_FLAGS: 0x0
+[DEBUG] env.XPC_SERVICE_NAME: application.com.google.antigravity.39655486.39655492
+[DEBUG] env.__CFBundleIdentifier: com.google.antigravity
+[DEBUG] env.__CF_USER_TEXT_ENCODING: 0x1F5:0x0:0x0
+[DEBUG] file.encoding: UTF-8
+[DEBUG] file.separator: /
+[DEBUG] flyway.version: 10.20.1
+[DEBUG] freemarker.version: 2.3.34
+[DEBUG] ftp.nonProxyHosts: local|*.local|169.254/16|*.169.254/16
+[DEBUG] git-commit-id-maven-plugin.version: 9.0.1
+[DEBUG] glassfish-jaxb.version: 4.0.5
+[DEBUG] glassfish-jstl.version: 3.0.1
+[DEBUG] graphql-java.version: 22.3
+[DEBUG] groovy.version: 4.0.24
+[DEBUG] gson.version: 2.11.0
+[DEBUG] h2.version: 2.3.232
+[DEBUG] hamcrest.version: 2.2
+[DEBUG] hazelcast.version: 5.5.0
+[DEBUG] hibernate-validator.version: 8.0.2.Final
+[DEBUG] hibernate.version: 6.6.5.Final
+[DEBUG] hikaricp.version: 5.1.0
+[DEBUG] hsqldb.version: 2.7.3
+[DEBUG] htmlunit.version: 4.5.0
+[DEBUG] http.nonProxyHosts: local|*.local|169.254/16|*.169.254/16
+[DEBUG] httpasyncclient.version: 4.1.5
+[DEBUG] httpclient5.version: 5.4.1
+[DEBUG] httpcore.version: 4.4.16
+[DEBUG] httpcore5.version: 5.3.2
+[DEBUG] infinispan.version: 15.0.12.Final
+[DEBUG] influxdb-java.version: 2.24
+[DEBUG] jackson-bom.version: 2.18.2
+[DEBUG] jakarta-activation.version: 2.1.3
+[DEBUG] jakarta-annotation.version: 2.1.1
+[DEBUG] jakarta-inject.version: 2.0.1
+[DEBUG] jakarta-jms.version: 3.1.0
+[DEBUG] jakarta-json-bind.version: 3.0.1
+[DEBUG] jakarta-json.version: 2.1.3
+[DEBUG] jakarta-mail.version: 2.1.3
+[DEBUG] jakarta-management.version: 1.1.4
+[DEBUG] jakarta-persistence.version: 3.1.0
+[DEBUG] jakarta-servlet-jsp-jstl.version: 3.0.2
+[DEBUG] jakarta-servlet.version: 6.0.0
+[DEBUG] jakarta-transaction.version: 2.0.1
+[DEBUG] jakarta-validation.version: 3.0.2
+[DEBUG] jakarta-websocket.version: 2.1.1
+[DEBUG] jakarta-ws-rs.version: 3.1.0
+[DEBUG] jakarta-xml-bind.version: 4.0.2
+[DEBUG] jakarta-xml-soap.version: 3.0.2
+[DEBUG] jakarta-xml-ws.version: 4.0.2
+[DEBUG] janino.version: 3.1.12
+[DEBUG] java.class.path: /opt/homebrew/Cellar/maven/3.9.11/libexec/boot/plexus-classworlds-2.9.0.jar
+[DEBUG] java.class.version: 69.0
+[DEBUG] java.home: /opt/homebrew/Cellar/openjdk/25/libexec/openjdk.jdk/Contents/Home
+[DEBUG] java.io.tmpdir: /var/folders/g2/bdf0j0w94fs_r7bkw935fdx40000gn/T/
+[DEBUG] java.library.path: /Users/anhqui/Library/Java/Extensions:/Library/Java/Extensions:/Network/Library/Java/Extensions:/System/Library/Java/Extensions:/usr/lib/java:.
+[DEBUG] java.runtime.name: OpenJDK Runtime Environment
+[DEBUG] java.runtime.version: 25
+[DEBUG] java.specification.name: Java Platform API Specification
+[DEBUG] java.specification.vendor: Oracle Corporation
+[DEBUG] java.specification.version: 25
+[DEBUG] java.vendor: Homebrew
+[DEBUG] java.vendor.url: https://github.com/Homebrew/homebrew-core/issues
+[DEBUG] java.vendor.url.bug: https://github.com/Homebrew/homebrew-core/issues
+[DEBUG] java.vendor.version: Homebrew
+[DEBUG] java.version: 25
+[DEBUG] java.version.date: 2025-09-16
+[DEBUG] java.vm.compressedOopsMode: Zero based
+[DEBUG] java.vm.info: mixed mode, sharing
+[DEBUG] java.vm.name: OpenJDK 64-Bit Server VM
+[DEBUG] java.vm.specification.name: Java Virtual Machine Specification
+[DEBUG] java.vm.specification.vendor: Oracle Corporation
+[DEBUG] java.vm.specification.version: 25
+[DEBUG] java.vm.vendor: Homebrew
+[DEBUG] java.vm.version: 25
+[DEBUG] javax-cache.version: 1.1.1
+[DEBUG] javax-money.version: 1.1
+[DEBUG] jaxen.version: 2.0.0
+[DEBUG] jaybird.version: 5.0.6.java11
+[DEBUG] jboss-logging.version: 3.6.1.Final
+[DEBUG] jdk.debug: release
+[DEBUG] jdom2.version: 2.0.6.1
+[DEBUG] jedis.version: 5.2.0
+[DEBUG] jersey.version: 3.1.10
+[DEBUG] jetty-reactive-httpclient.version: 4.0.8
+[DEBUG] jetty.version: 12.0.16
+[DEBUG] jmustache.version: 1.16
+[DEBUG] jooq.version: 3.19.18
+[DEBUG] json-path.version: 2.9.0
+[DEBUG] json-smart.version: 2.5.1
+[DEBUG] jsonassert.version: 1.5.3
+[DEBUG] jtds.version: 1.3.1
+[DEBUG] junit-jupiter.version: 5.11.4
+[DEBUG] junit.version: 4.13.2
+[DEBUG] kafka.version: 3.8.1
+[DEBUG] kotlin-coroutines.version: 1.8.1
+[DEBUG] kotlin-serialization.version: 1.6.3
+[DEBUG] kotlin.version: 1.9.25
+[DEBUG] lettuce.version: 6.4.2.RELEASE
+[DEBUG] library.jansi.path: /opt/homebrew/Cellar/maven/3.9.11/libexec/lib/jansi-native
+[DEBUG] line.separator: 
+
+[DEBUG] liquibase.version: 4.29.2
+[DEBUG] log4j2.version: 2.24.3
+[DEBUG] logback.version: 1.5.16
+[DEBUG] lombok.version: 1.18.36
+[DEBUG] mariadb.version: 3.4.1
+[DEBUG] maven-antrun-plugin.version: 3.1.0
+[DEBUG] maven-assembly-plugin.version: 3.7.1
+[DEBUG] maven-clean-plugin.version: 3.4.0
+[DEBUG] maven-compiler-plugin.version: 3.13.0
+[DEBUG] maven-dependency-plugin.version: 3.8.1
+[DEBUG] maven-deploy-plugin.version: 3.1.3
+[DEBUG] maven-enforcer-plugin.version: 3.5.0
+[DEBUG] maven-failsafe-plugin.version: 3.5.2
+[DEBUG] maven-help-plugin.version: 3.5.1
+[DEBUG] maven-install-plugin.version: 3.1.3
+[DEBUG] maven-invoker-plugin.version: 3.8.1
+[DEBUG] maven-jar-plugin.version: 3.4.2
+[DEBUG] maven-javadoc-plugin.version: 3.10.1
+[DEBUG] maven-resources-plugin.version: 3.3.1
+[DEBUG] maven-shade-plugin.version: 3.6.0
+[DEBUG] maven-source-plugin.version: 3.3.1
+[DEBUG] maven-surefire-plugin.version: 3.5.2
+[DEBUG] maven-war-plugin.version: 3.4.0
+[DEBUG] maven.build.timestamp: 2026-05-06T13:07:13Z
+[DEBUG] maven.build.version: Apache Maven 3.9.11 (3e54c93a704957b63ee3494413a2b544fd3d825b)
+[DEBUG] maven.compiler.release: 21
+[DEBUG] maven.conf: /opt/homebrew/Cellar/maven/3.9.11/libexec/conf
+[DEBUG] maven.home: /opt/homebrew/Cellar/maven/3.9.11/libexec
+[DEBUG] maven.multiModuleProjectDirectory: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service
+[DEBUG] maven.version: 3.9.11
+[DEBUG] micrometer-tracing.version: 1.4.2
+[DEBUG] micrometer.version: 1.14.3
+[DEBUG] mockito.version: 5.14.2
+[DEBUG] mongodb.version: 5.2.1
+[DEBUG] mssql-jdbc.version: 12.8.1.jre11
+[DEBUG] mysql.version: 9.1.0
+[DEBUG] native-build-tools-plugin.version: 0.10.4
+[DEBUG] native.encoding: UTF-8
+[DEBUG] nekohtml.version: 1.9.22
+[DEBUG] neo4j-java-driver.version: 5.25.0
+[DEBUG] netty.version: 4.1.117.Final
+[DEBUG] opentelemetry.version: 1.43.0
+[DEBUG] oracle-database.version: 23.5.0.24.07
+[DEBUG] oracle-r2dbc.version: 1.2.0
+[DEBUG] os.arch: aarch64
+[DEBUG] os.name: Mac OS X
+[DEBUG] os.version: 26.2
+[DEBUG] path.separator: :
+[DEBUG] pooled-jms.version: 3.1.7
+[DEBUG] postgresql.version: 42.7.5
+[DEBUG] project.baseUri: file:/Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/
+[DEBUG] project.build.sourceEncoding: UTF-8
+[DEBUG] project.reporting.outputEncoding: UTF-8
+[DEBUG] prometheus-client.version: 1.3.5
+[DEBUG] prometheus-simpleclient.version: 0.16.0
+[DEBUG] pulsar-reactive.version: 0.5.10
+[DEBUG] pulsar.version: 3.3.4
+[DEBUG] quartz.version: 2.3.2
+[DEBUG] querydsl.version: 5.1.0
+[DEBUG] r2dbc-h2.version: 1.0.0.RELEASE
+[DEBUG] r2dbc-mariadb.version: 1.2.2
+[DEBUG] r2dbc-mssql.version: 1.0.2.RELEASE
+[DEBUG] r2dbc-mysql.version: 1.3.1
+[DEBUG] r2dbc-pool.version: 1.0.2.RELEASE
+[DEBUG] r2dbc-postgresql.version: 1.0.7.RELEASE
+[DEBUG] r2dbc-proxy.version: 1.1.5.RELEASE
+[DEBUG] r2dbc-spi.version: 1.0.0.RELEASE
+[DEBUG] rabbit-amqp-client.version: 5.22.0
+[DEBUG] rabbit-stream-client.version: 0.18.0
+[DEBUG] reactive-streams.version: 1.0.4
+[DEBUG] reactor-bom.version: 2024.0.2
+[DEBUG] resource.delimiter: @
+[DEBUG] rest-assured.version: 5.5.0
+[DEBUG] rsocket.version: 1.1.3
+[DEBUG] rxjava3.version: 3.1.10
+[DEBUG] saaj-impl.version: 3.0.4
+[DEBUG] selenium-htmlunit.version: 4.25.0
+[DEBUG] selenium.version: 4.25.0
+[DEBUG] sendgrid.version: 4.10.3
+[DEBUG] slf4j.version: 2.0.16
+[DEBUG] snakeyaml.version: 2.3
+[DEBUG] socksNonProxyHosts: local|*.local|169.254/16|*.169.254/16
+[DEBUG] spring-amqp.version: 3.2.2
+[DEBUG] spring-authorization-server.version: 1.4.1
+[DEBUG] spring-batch.version: 5.2.1
+[DEBUG] spring-boot.run.main-class: ${start-class}
+[DEBUG] spring-cloud.version: 2024.0.0
+[DEBUG] spring-data-bom.version: 2024.1.2
+[DEBUG] spring-framework.version: 6.2.2
+[DEBUG] spring-graphql.version: 1.3.3
+[DEBUG] spring-hateoas.version: 2.4.1
+[DEBUG] spring-integration.version: 6.4.1
+[DEBUG] spring-kafka.version: 3.3.2
+[DEBUG] spring-ldap.version: 3.2.10
+[DEBUG] spring-pulsar.version: 1.2.2
+[DEBUG] spring-restdocs.version: 3.0.3
+[DEBUG] spring-retry.version: 2.0.11
+[DEBUG] spring-security.version: 6.4.2
+[DEBUG] spring-session.version: 3.4.1
+[DEBUG] spring-ws.version: 4.0.11
+[DEBUG] sqlite-jdbc.version: 3.47.2.0
+[DEBUG] stderr.encoding: UTF-8
+[DEBUG] stdin.encoding: UTF-8
+[DEBUG] stdout.encoding: UTF-8
+[DEBUG] sun.arch.data.model: 64
+[DEBUG] sun.boot.library.path: /opt/homebrew/Cellar/openjdk/25/libexec/openjdk.jdk/Contents/Home/lib
+[DEBUG] sun.cpu.endian: little
+[DEBUG] sun.io.unicode.encoding: UnicodeBig
+[DEBUG] sun.java.command: org.codehaus.plexus.classworlds.launcher.Launcher clean compile -X
+[DEBUG] sun.java.launcher: SUN_STANDARD
+[DEBUG] sun.jnu.encoding: UTF-8
+[DEBUG] sun.management.compiler: HotSpot 64-Bit Tiered Compilers
+[DEBUG] testcontainers-redis-module.version: 2.2.2
+[DEBUG] testcontainers.version: 1.20.4
+[DEBUG] thymeleaf-extras-data-attribute.version: 2.0.1
+[DEBUG] thymeleaf-extras-springsecurity.version: 3.1.3.RELEASE
+[DEBUG] thymeleaf-layout-dialect.version: 3.3.0
+[DEBUG] thymeleaf.version: 3.1.3.RELEASE
+[DEBUG] tomcat.version: 10.1.34
+[DEBUG] unboundid-ldapsdk.version: 6.0.11
+[DEBUG] undertow.version: 2.3.18.Final
+[DEBUG] user.country: VN
+[DEBUG] user.dir: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service
+[DEBUG] user.home: /Users/anhqui
+[DEBUG] user.language: en
+[DEBUG] user.name: anhqui
+[DEBUG] versions-maven-plugin.version: 2.17.1
+[DEBUG] webjars-locator-core.version: 0.59
+[DEBUG] webjars-locator-lite.version: 1.0.1
+[DEBUG] wsdl4j.version: 1.6.3
+[DEBUG] xml-maven-plugin.version: 1.1.0
+[DEBUG] xmlunit2.version: 2.10.0
+[DEBUG] yasson.version: 3.0.4
+[DEBUG] zipkin-reporter.version: 3.4.3
+[DEBUG] Using 'UTF-8' encoding to copy filtered resources.
+[DEBUG] Using 'UTF-8' encoding to copy filtered properties files.
+[DEBUG] resource with targetPath null
+directory /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/resources
+excludes []
+includes [**/application*.yml, **/application*.yaml, **/application*.properties]
+[DEBUG] ignoreDelta true
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[DEBUG] Copying file application.yml
+[DEBUG] file application.yml has a filtered file extension
+[DEBUG] Using 'UTF-8' encoding to copy filtered resource 'application.yml'.
+[DEBUG] filtering /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/resources/application.yml to /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target/classes/application.yml
+[DEBUG] resource with targetPath null
+directory /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/resources
+excludes [**/application*.yml, **/application*.yaml, **/application*.properties]
+includes []
+[DEBUG] ignoreDelta true
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[DEBUG] no user filter components
+[INFO] 
+[INFO] --- compiler:3.13.0:compile (default-compile) @ identity-service ---
+[DEBUG] Dependency collection stats {ConflictMarker.analyzeTime=38083, ConflictMarker.markTime=8750, ConflictMarker.nodeCount=22, ConflictIdSorter.graphTime=15083, ConflictIdSorter.topsortTime=8750, ConflictIdSorter.conflictIdCount=14, ConflictIdSorter.conflictIdCycleCount=0, ConflictResolver.totalTime=122875, ConflictResolver.conflictItemCount=22, DfDependencyCollector.collectTime=21786375, DfDependencyCollector.transformTime=205750}
+[DEBUG] org.apache.maven.plugins:maven-compiler-plugin:jar:3.13.0
+[DEBUG]    org.apache.maven.shared:maven-shared-utils:jar:3.4.2:compile
+[DEBUG]       org.slf4j:slf4j-api:jar:1.7.36:compile
+[DEBUG]       commons-io:commons-io:jar:2.11.0:compile
+[DEBUG]    org.apache.maven.shared:maven-shared-incremental:jar:1.1:compile
+[DEBUG]    org.codehaus.plexus:plexus-java:jar:1.2.0:compile
+[DEBUG]       org.ow2.asm:asm:jar:9.6:compile
+[DEBUG]       com.thoughtworks.qdox:qdox:jar:2.0.3:compile
+[DEBUG]    org.codehaus.plexus:plexus-compiler-api:jar:2.15.0:compile
+[DEBUG]    org.codehaus.plexus:plexus-compiler-manager:jar:2.15.0:compile
+[DEBUG]       javax.inject:javax.inject:jar:1:compile
+[DEBUG]       org.codehaus.plexus:plexus-xml:jar:3.0.0:compile (version managed from default)
+[DEBUG]    org.codehaus.plexus:plexus-compiler-javac:jar:2.15.0:runtime
+[DEBUG]    org.codehaus.plexus:plexus-utils:jar:4.0.0:compile
+[DEBUG] Created new class realm plugin>org.apache.maven.plugins:maven-compiler-plugin:3.13.0
+[DEBUG] Importing foreign packages into class realm plugin>org.apache.maven.plugins:maven-compiler-plugin:3.13.0
+[DEBUG]   Imported:  < maven.api
+[DEBUG] Populating class realm plugin>org.apache.maven.plugins:maven-compiler-plugin:3.13.0
+[DEBUG]   Included: org.apache.maven.plugins:maven-compiler-plugin:jar:3.13.0
+[DEBUG]   Included: org.apache.maven.shared:maven-shared-utils:jar:3.4.2
+[DEBUG]   Included: commons-io:commons-io:jar:2.11.0
+[DEBUG]   Included: org.apache.maven.shared:maven-shared-incremental:jar:1.1
+[DEBUG]   Included: org.codehaus.plexus:plexus-java:jar:1.2.0
+[DEBUG]   Included: org.ow2.asm:asm:jar:9.6
+[DEBUG]   Included: com.thoughtworks.qdox:qdox:jar:2.0.3
+[DEBUG]   Included: org.codehaus.plexus:plexus-compiler-api:jar:2.15.0
+[DEBUG]   Included: org.codehaus.plexus:plexus-compiler-manager:jar:2.15.0
+[DEBUG]   Included: org.codehaus.plexus:plexus-xml:jar:3.0.0
+[DEBUG]   Included: org.codehaus.plexus:plexus-compiler-javac:jar:2.15.0
+[DEBUG]   Included: org.codehaus.plexus:plexus-utils:jar:4.0.0
+[DEBUG] Loading mojo org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile from plugin realm ClassRealm[plugin>org.apache.maven.plugins:maven-compiler-plugin:3.13.0, parent: jdk.internal.loader.ClassLoaders$AppClassLoader@5bc2b487]
+[DEBUG] Configuring mojo execution 'org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile:default-compile' with basic configurator -->
+[DEBUG]   (s) groupId = org.projectlombok
+[DEBUG]   (s) artifactId = lombok
+[DEBUG]   (s) groupId = org.mapstruct
+[DEBUG]   (s) artifactId = mapstruct-processor
+[DEBUG]   (s) version = 1.6.0.Beta1
+[DEBUG]   (s) groupId = org.projectlombok
+[DEBUG]   (s) artifactId = lombok-mapstruct-binding
+[DEBUG]   (s) version = 0.2.0
+[DEBUG]   (f) annotationProcessorPaths = [org.projectlombok:lombok.jar, org.mapstruct:mapstruct-processor:1.6.0.Beta1.jar, org.projectlombok:lombok-mapstruct-binding:0.2.0.jar]
+[DEBUG]   (f) annotationProcessorPathsUseDepMgmt = false
+[DEBUG]   (f) basedir = /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service
+[DEBUG]   (f) buildDirectory = /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target
+[DEBUG]   (f) compilePath = [/Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target/classes, /Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-data-jpa/3.4.2/spring-boot-starter-data-jpa-3.4.2.jar, /Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter/3.4.2/spring-boot-starter-3.4.2.jar, /Users/anhqui/.m2/repository/org/springframework/boot/spring-boot/3.4.2/spring-boot-3.4.2.jar, /Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-autoconfigure/3.4.2/spring-boot-autoconfigure-3.4.2.jar, /Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-logging/3.4.2/spring-boot-starter-logging-3.4.2.jar, /Users/anhqui/.m2/repository/ch/qos/logback/logback-classic/1.5.16/logback-classic-1.5.16.jar, /Users/anhqui/.m2/repository/ch/qos/logback/logback-core/1.5.16/logback-core-1.5.16.jar, /Users/anhqui/.m2/repository/org/apache/logging/log4j/log4j-to-slf4j/2.24.3/log4j-to-slf4j-2.24.3.jar, /Users/anhqui/.m2/repository/org/apache/logging/log4j/log4j-api/2.24.3/log4j-api-2.24.3.jar, /Users/anhqui/.m2/repository/org/slf4j/jul-to-slf4j/2.0.16/jul-to-slf4j-2.0.16.jar, /Users/anhqui/.m2/repository/jakarta/annotation/jakarta.annotation-api/2.1.1/jakarta.annotation-api-2.1.1.jar, /Users/anhqui/.m2/repository/org/springframework/spring-core/6.2.2/spring-core-6.2.2.jar, /Users/anhqui/.m2/repository/org/springframework/spring-jcl/6.2.2/spring-jcl-6.2.2.jar, /Users/anhqui/.m2/repository/org/yaml/snakeyaml/2.3/snakeyaml-2.3.jar, /Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-jdbc/3.4.2/spring-boot-starter-jdbc-3.4.2.jar, /Users/anhqui/.m2/repository/com/zaxxer/HikariCP/5.1.0/HikariCP-5.1.0.jar, /Users/anhqui/.m2/repository/org/springframework/spring-jdbc/6.2.2/spring-jdbc-6.2.2.jar, /Users/anhqui/.m2/repository/org/hibernate/orm/hibernate-core/6.6.5.Final/hibernate-core-6.6.5.Final.jar, /Users/anhqui/.m2/repository/jakarta/persistence/jakarta.persistence-api/3.1.0/jakarta.persistence-api-3.1.0.jar, /Users/anhqui/.m2/repository/jakarta/transaction/jakarta.transaction-api/2.0.1/jakarta.transaction-api-2.0.1.jar, /Users/anhqui/.m2/repository/org/jboss/logging/jboss-logging/3.6.1.Final/jboss-logging-3.6.1.Final.jar, /Users/anhqui/.m2/repository/com/fasterxml/classmate/1.7.0/classmate-1.7.0.jar, /Users/anhqui/.m2/repository/jakarta/inject/jakarta.inject-api/2.0.1/jakarta.inject-api-2.0.1.jar, /Users/anhqui/.m2/repository/org/antlr/antlr4-runtime/4.13.0/antlr4-runtime-4.13.0.jar, /Users/anhqui/.m2/repository/org/springframework/data/spring-data-jpa/3.4.2/spring-data-jpa-3.4.2.jar, /Users/anhqui/.m2/repository/org/springframework/data/spring-data-commons/3.4.2/spring-data-commons-3.4.2.jar, /Users/anhqui/.m2/repository/org/springframework/spring-orm/6.2.2/spring-orm-6.2.2.jar, /Users/anhqui/.m2/repository/org/springframework/spring-beans/6.2.2/spring-beans-6.2.2.jar, /Users/anhqui/.m2/repository/org/slf4j/slf4j-api/2.0.16/slf4j-api-2.0.16.jar, /Users/anhqui/.m2/repository/org/springframework/spring-aspects/6.2.2/spring-aspects-6.2.2.jar, /Users/anhqui/.m2/repository/org/aspectj/aspectjweaver/1.9.22.1/aspectjweaver-1.9.22.1.jar, /Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-security/3.4.2/spring-boot-starter-security-3.4.2.jar, /Users/anhqui/.m2/repository/org/springframework/spring-aop/6.2.2/spring-aop-6.2.2.jar, /Users/anhqui/.m2/repository/org/springframework/security/spring-security-config/6.4.2/spring-security-config-6.4.2.jar, /Users/anhqui/.m2/repository/org/springframework/security/spring-security-web/6.4.2/spring-security-web-6.4.2.jar, /Users/anhqui/.m2/repository/org/springframework/spring-expression/6.2.2/spring-expression-6.2.2.jar, /Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-web/3.4.2/spring-boot-starter-web-3.4.2.jar, /Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-json/3.4.2/spring-boot-starter-json-3.4.2.jar, /Users/anhqui/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jdk8/2.18.2/jackson-datatype-jdk8-2.18.2.jar, /Users/anhqui/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.18.2/jackson-datatype-jsr310-2.18.2.jar, /Users/anhqui/.m2/repository/com/fasterxml/jackson/module/jackson-module-parameter-names/2.18.2/jackson-module-parameter-names-2.18.2.jar, /Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-tomcat/3.4.2/spring-boot-starter-tomcat-3.4.2.jar, /Users/anhqui/.m2/repository/org/apache/tomcat/embed/tomcat-embed-core/10.1.34/tomcat-embed-core-10.1.34.jar, /Users/anhqui/.m2/repository/org/apache/tomcat/embed/tomcat-embed-websocket/10.1.34/tomcat-embed-websocket-10.1.34.jar, /Users/anhqui/.m2/repository/org/springframework/spring-web/6.2.2/spring-web-6.2.2.jar, /Users/anhqui/.m2/repository/org/springframework/spring-webmvc/6.2.2/spring-webmvc-6.2.2.jar, /Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-oauth2-resource-server/3.4.2/spring-boot-starter-oauth2-resource-server-3.4.2.jar, /Users/anhqui/.m2/repository/org/springframework/security/spring-security-core/6.4.2/spring-security-core-6.4.2.jar, /Users/anhqui/.m2/repository/org/springframework/security/spring-security-crypto/6.4.2/spring-security-crypto-6.4.2.jar, /Users/anhqui/.m2/repository/org/springframework/security/spring-security-oauth2-resource-server/6.4.2/spring-security-oauth2-resource-server-6.4.2.jar, /Users/anhqui/.m2/repository/org/springframework/security/spring-security-oauth2-core/6.4.2/spring-security-oauth2-core-6.4.2.jar, /Users/anhqui/.m2/repository/org/springframework/security/spring-security-oauth2-jose/6.4.2/spring-security-oauth2-jose-6.4.2.jar, /Users/anhqui/.m2/repository/com/nimbusds/nimbus-jose-jwt/9.37.3/nimbus-jose-jwt-9.37.3.jar, /Users/anhqui/.m2/repository/com/github/stephenc/jcip/jcip-annotations/1.0-1/jcip-annotations-1.0-1.jar, /Users/anhqui/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.18.2/jackson-databind-2.18.2.jar, /Users/anhqui/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.18.2/jackson-annotations-2.18.2.jar, /Users/anhqui/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.18.2/jackson-core-2.18.2.jar, /Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-validation/3.4.2/spring-boot-starter-validation-3.4.2.jar, /Users/anhqui/.m2/repository/org/apache/tomcat/embed/tomcat-embed-el/10.1.34/tomcat-embed-el-10.1.34.jar, /Users/anhqui/.m2/repository/org/hibernate/validator/hibernate-validator/8.0.2.Final/hibernate-validator-8.0.2.Final.jar, /Users/anhqui/.m2/repository/jakarta/validation/jakarta.validation-api/3.0.2/jakarta.validation-api-3.0.2.jar, /Users/anhqui/.m2/repository/org/springframework/cloud/spring-cloud-starter-openfeign/4.2.0/spring-cloud-starter-openfeign-4.2.0.jar, /Users/anhqui/.m2/repository/org/springframework/cloud/spring-cloud-starter/4.2.0/spring-cloud-starter-4.2.0.jar, /Users/anhqui/.m2/repository/org/springframework/cloud/spring-cloud-context/4.2.0/spring-cloud-context-4.2.0.jar, /Users/anhqui/.m2/repository/org/bouncycastle/bcprov-jdk18on/1.78.1/bcprov-jdk18on-1.78.1.jar, /Users/anhqui/.m2/repository/org/springframework/cloud/spring-cloud-openfeign-core/4.2.0/spring-cloud-openfeign-core-4.2.0.jar, /Users/anhqui/.m2/repository/io/github/openfeign/feign-form-spring/13.5/feign-form-spring-13.5.jar, /Users/anhqui/.m2/repository/io/github/openfeign/feign-form/13.5/feign-form-13.5.jar, /Users/anhqui/.m2/repository/commons-fileupload/commons-fileupload/1.5/commons-fileupload-1.5.jar, /Users/anhqui/.m2/repository/commons-io/commons-io/2.11.0/commons-io-2.11.0.jar, /Users/anhqui/.m2/repository/org/springframework/cloud/spring-cloud-commons/4.2.0/spring-cloud-commons-4.2.0.jar, /Users/anhqui/.m2/repository/io/github/openfeign/feign-core/13.5/feign-core-13.5.jar, /Users/anhqui/.m2/repository/io/github/openfeign/feign-slf4j/13.5/feign-slf4j-13.5.jar, /Users/anhqui/.m2/repository/org/mapstruct/mapstruct/1.6.0.Beta1/mapstruct-1.6.0.Beta1.jar, /Users/anhqui/.m2/repository/org/projectlombok/lombok-mapstruct-binding/0.2.0/lombok-mapstruct-binding-0.2.0.jar, /Users/anhqui/.m2/repository/com/cloudinary/cloudinary-http44/1.36.0/cloudinary-http44-1.36.0.jar, /Users/anhqui/.m2/repository/com/cloudinary/cloudinary-core/1.36.0/cloudinary-core-1.36.0.jar, /Users/anhqui/.m2/repository/org/apache/commons/commons-lang3/3.17.0/commons-lang3-3.17.0.jar, /Users/anhqui/.m2/repository/org/apache/httpcomponents/httpclient/4.4/httpclient-4.4.jar, /Users/anhqui/.m2/repository/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.jar, /Users/anhqui/.m2/repository/commons-logging/commons-logging/1.2/commons-logging-1.2.jar, /Users/anhqui/.m2/repository/commons-codec/commons-codec/1.17.2/commons-codec-1.17.2.jar, /Users/anhqui/.m2/repository/org/apache/httpcomponents/httpmime/4.4/httpmime-4.4.jar, /Users/anhqui/.m2/repository/org/springframework/kafka/spring-kafka/3.3.2/spring-kafka-3.3.2.jar, /Users/anhqui/.m2/repository/org/springframework/spring-context/6.2.2/spring-context-6.2.2.jar, /Users/anhqui/.m2/repository/org/springframework/spring-messaging/6.2.2/spring-messaging-6.2.2.jar, /Users/anhqui/.m2/repository/org/springframework/spring-tx/6.2.2/spring-tx-6.2.2.jar, /Users/anhqui/.m2/repository/org/springframework/retry/spring-retry/2.0.11/spring-retry-2.0.11.jar, /Users/anhqui/.m2/repository/org/apache/kafka/kafka-clients/3.8.1/kafka-clients-3.8.1.jar, /Users/anhqui/.m2/repository/io/micrometer/micrometer-observation/1.14.3/micrometer-observation-1.14.3.jar, /Users/anhqui/.m2/repository/io/micrometer/micrometer-commons/1.14.3/micrometer-commons-1.14.3.jar, /Users/anhqui/.m2/repository/org/springframework/cloud/spring-cloud-starter-netflix-eureka-client/4.2.0/spring-cloud-starter-netflix-eureka-client-4.2.0.jar, /Users/anhqui/.m2/repository/org/springframework/cloud/spring-cloud-netflix-eureka-client/4.2.0/spring-cloud-netflix-eureka-client-4.2.0.jar, /Users/anhqui/.m2/repository/org/apache/httpcomponents/client5/httpclient5/5.4.1/httpclient5-5.4.1.jar, /Users/anhqui/.m2/repository/org/apache/httpcomponents/core5/httpcore5/5.3.2/httpcore5-5.3.2.jar, /Users/anhqui/.m2/repository/org/apache/httpcomponents/core5/httpcore5-h2/5.3.2/httpcore5-h2-5.3.2.jar, /Users/anhqui/.m2/repository/com/netflix/eureka/eureka-client/2.0.4/eureka-client-2.0.4.jar, /Users/anhqui/.m2/repository/com/thoughtworks/xstream/xstream/1.4.20/xstream-1.4.20.jar, /Users/anhqui/.m2/repository/io/github/x-stream/mxparser/1.2.2/mxparser-1.2.2.jar, /Users/anhqui/.m2/repository/xmlpull/xmlpull/1.1.3.1/xmlpull-1.1.3.1.jar, /Users/anhqui/.m2/repository/jakarta/ws/rs/jakarta.ws.rs-api/3.1.0/jakarta.ws.rs-api-3.1.0.jar, /Users/anhqui/.m2/repository/com/netflix/spectator/spectator-api/1.7.3/spectator-api-1.7.3.jar, /Users/anhqui/.m2/repository/commons-configuration/commons-configuration/1.10/commons-configuration-1.10.jar, /Users/anhqui/.m2/repository/commons-lang/commons-lang/2.6/commons-lang-2.6.jar, /Users/anhqui/.m2/repository/org/springframework/cloud/spring-cloud-starter-loadbalancer/4.2.0/spring-cloud-starter-loadbalancer-4.2.0.jar, /Users/anhqui/.m2/repository/org/springframework/cloud/spring-cloud-loadbalancer/4.2.0/spring-cloud-loadbalancer-4.2.0.jar, /Users/anhqui/.m2/repository/io/projectreactor/reactor-core/3.7.2/reactor-core-3.7.2.jar, /Users/anhqui/.m2/repository/org/reactivestreams/reactive-streams/1.0.4/reactive-streams-1.0.4.jar, /Users/anhqui/.m2/repository/io/projectreactor/addons/reactor-extra/3.5.2/reactor-extra-3.5.2.jar, /Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-cache/3.4.2/spring-boot-starter-cache-3.4.2.jar, /Users/anhqui/.m2/repository/org/springframework/spring-context-support/6.2.2/spring-context-support-6.2.2.jar, /Users/anhqui/.m2/repository/com/stoyanr/evictor/1.0.0/evictor-1.0.0.jar, /Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-amqp/3.4.2/spring-boot-starter-amqp-3.4.2.jar, /Users/anhqui/.m2/repository/org/springframework/amqp/spring-rabbit/3.2.2/spring-rabbit-3.2.2.jar, /Users/anhqui/.m2/repository/org/springframework/amqp/spring-amqp/3.2.2/spring-amqp-3.2.2.jar, /Users/anhqui/.m2/repository/com/rabbitmq/amqp-client/5.22.0/amqp-client-5.22.0.jar, /Users/anhqui/.m2/repository/org/projectlombok/lombok/1.18.36/lombok-1.18.36.jar]
+[DEBUG]   (f) compileSourceRoots = [/Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java]
+[DEBUG]   (f) compilerId = javac
+[DEBUG]   (f) createMissingPackageInfoClass = true
+[DEBUG]   (f) debug = true
+[DEBUG]   (f) debugFileName = javac
+[DEBUG]   (f) enablePreview = false
+[DEBUG]   (f) encoding = UTF-8
+[DEBUG]   (f) failOnError = true
+[DEBUG]   (f) failOnWarning = false
+[DEBUG]   (f) fileExtensions = [jar, class]
+[DEBUG]   (f) forceJavacCompilerUse = false
+[DEBUG]   (f) forceLegacyJavacApi = false
+[DEBUG]   (f) fork = false
+[DEBUG]   (f) generatedSourcesDirectory = /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target/generated-sources/annotations
+[DEBUG]   (f) mojoExecution = org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile {execution: default-compile}
+[DEBUG]   (f) optimize = false
+[DEBUG]   (f) outputDirectory = /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target/classes
+[DEBUG]   (f) parameters = true
+[DEBUG]   (f) project = MavenProject: com.tlaq:identity-service:0.0.1-SNAPSHOT @ /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/pom.xml
+[DEBUG]   (f) projectArtifact = com.tlaq:identity-service:jar:0.0.1-SNAPSHOT
+[DEBUG]   (s) release = 21
+[DEBUG]   (f) session = org.apache.maven.execution.MavenSession@3d4e405e
+[DEBUG]   (f) showCompilationChanges = false
+[DEBUG]   (f) showDeprecation = false
+[DEBUG]   (f) showWarnings = true
+[DEBUG]   (f) skipMultiThreadWarning = false
+[DEBUG]   (f) source = 1.8
+[DEBUG]   (f) staleMillis = 0
+[DEBUG]   (s) target = 1.8
+[DEBUG]   (f) useIncrementalCompilation = true
+[DEBUG]   (f) verbose = false
+[DEBUG] -- end configuration --
+[DEBUG] Using compiler 'javac'.
+[DEBUG] Adding /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target/generated-sources/annotations to compile source roots:
+  /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java
+[DEBUG] New compile source roots:
+  /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java
+  /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target/generated-sources/annotations
+[DEBUG] Dependency collection stats {ConflictMarker.analyzeTime=8708, ConflictMarker.markTime=6334, ConflictMarker.nodeCount=4, ConflictIdSorter.graphTime=1250, ConflictIdSorter.topsortTime=3417, ConflictIdSorter.conflictIdCount=3, ConflictIdSorter.conflictIdCycleCount=0, ConflictResolver.totalTime=30666, ConflictResolver.conflictItemCount=3, DfDependencyCollector.collectTime=1281500, DfDependencyCollector.transformTime=58209}
+[DEBUG] CompilerReuseStrategy: reuseCreated
+[DEBUG] useIncrementalCompilation enabled
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/validator/DateTimeValidator.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/request/StaffRegistrationRequest.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/validator/DobValidator.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/service/ProfileService.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/entity/Role.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/request/UserCreationParam.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/controller/ProfileController.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/service/RoleService.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/validator/DateTimeConstraint.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/config/CloudinaryConfigs.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/exception/ErrorCode.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/validator/ImageValidator.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/service/KeyCloakTokenService.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/response/TokenExchangeResponse.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/IdentityServiceApplication.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/response/IntrospectResponse.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/exception/GlobalExceptionHandler.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/repo/RoleRepository.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/config/RabbitMQConfig.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/config/CustomFeignErrorDecoder.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/service/impl/AuthenticationServiceImpl.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/response/TokenResponse.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/ApiResponse.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/entity/Profile.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/exception/AppException.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/repo/httpClient/KeyCloakClient.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/request/Authenticated.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/service/impl/ProfileServiceImpl.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/config/AppConfig.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/exception/ErrorNormalizer.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/response/ProfileResponse.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/request/RegistrationRequest.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/entity/UserRole.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/service/impl/RoleServiceImpl.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/request/LoginRequest.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/mapper/ProfileMapper.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/request/LogoutRequest.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/response/TokenExchangeParam.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/validator/ImageConstraint.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/repo/ProfileRepository.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/response/RoleKeycloakResponse.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/response/AuthenticationResponse.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/config/CustomAuthenticationSuccessHandler.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/request/RoleKeycloakRequest.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/event/NotificationEvent.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/controller/AuthenticationController.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/request/Credential.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/validator/DobConstraint.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/config/JwtAuthenticationEntryPoint.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/request/KeyCloak.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/config/CustomAuthoritiesConverter.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/config/SecurityConfigs.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/request/KeyCloakError.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/request/RefreshTokenRequest.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/service/AuthenticationService.java
+[INFO] 	Stale source detected: /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/request/IntrospectRequest.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/IdentityServiceApplication.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/config/AppConfig.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/config/CloudinaryConfigs.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/config/CustomAuthenticationSuccessHandler.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/config/CustomAuthoritiesConverter.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/config/CustomFeignErrorDecoder.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/config/JwtAuthenticationEntryPoint.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/config/RabbitMQConfig.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/config/SecurityConfigs.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/controller/AuthenticationController.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/controller/ProfileController.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/ApiResponse.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/request/Authenticated.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/request/Credential.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/request/IntrospectRequest.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/request/KeyCloak.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/request/KeyCloakError.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/request/LoginRequest.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/request/LogoutRequest.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/request/RefreshTokenRequest.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/request/RegistrationRequest.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/request/RoleKeycloakRequest.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/request/StaffRegistrationRequest.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/request/UserCreationParam.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/response/AuthenticationResponse.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/response/IntrospectResponse.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/response/ProfileResponse.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/response/RoleKeycloakResponse.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/response/TokenExchangeParam.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/response/TokenExchangeResponse.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/dto/response/TokenResponse.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/entity/Profile.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/entity/Role.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/entity/UserRole.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/event/NotificationEvent.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/exception/AppException.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/exception/ErrorCode.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/exception/ErrorNormalizer.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/exception/GlobalExceptionHandler.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/mapper/ProfileMapper.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/repo/ProfileRepository.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/repo/RoleRepository.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/repo/httpClient/KeyCloakClient.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/service/AuthenticationService.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/service/KeyCloakTokenService.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/service/ProfileService.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/service/RoleService.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/service/impl/AuthenticationServiceImpl.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/service/impl/ProfileServiceImpl.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/service/impl/RoleServiceImpl.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/validator/DateTimeConstraint.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/validator/DateTimeValidator.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/validator/DobConstraint.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/validator/DobValidator.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/validator/ImageConstraint.java
+[INFO] 	Input tree files (+): /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java/com/tlaq/identity_service/validator/ImageValidator.java
+[INFO] Recompiling the module because of changed source code.
+[DEBUG] Classpath:
+[DEBUG]  /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target/classes
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-data-jpa/3.4.2/spring-boot-starter-data-jpa-3.4.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter/3.4.2/spring-boot-starter-3.4.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/boot/spring-boot/3.4.2/spring-boot-3.4.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-autoconfigure/3.4.2/spring-boot-autoconfigure-3.4.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-logging/3.4.2/spring-boot-starter-logging-3.4.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/ch/qos/logback/logback-classic/1.5.16/logback-classic-1.5.16.jar
+[DEBUG]  /Users/anhqui/.m2/repository/ch/qos/logback/logback-core/1.5.16/logback-core-1.5.16.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/apache/logging/log4j/log4j-to-slf4j/2.24.3/log4j-to-slf4j-2.24.3.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/apache/logging/log4j/log4j-api/2.24.3/log4j-api-2.24.3.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/slf4j/jul-to-slf4j/2.0.16/jul-to-slf4j-2.0.16.jar
+[DEBUG]  /Users/anhqui/.m2/repository/jakarta/annotation/jakarta.annotation-api/2.1.1/jakarta.annotation-api-2.1.1.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/spring-core/6.2.2/spring-core-6.2.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/spring-jcl/6.2.2/spring-jcl-6.2.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/yaml/snakeyaml/2.3/snakeyaml-2.3.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-jdbc/3.4.2/spring-boot-starter-jdbc-3.4.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/com/zaxxer/HikariCP/5.1.0/HikariCP-5.1.0.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/spring-jdbc/6.2.2/spring-jdbc-6.2.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/hibernate/orm/hibernate-core/6.6.5.Final/hibernate-core-6.6.5.Final.jar
+[DEBUG]  /Users/anhqui/.m2/repository/jakarta/persistence/jakarta.persistence-api/3.1.0/jakarta.persistence-api-3.1.0.jar
+[DEBUG]  /Users/anhqui/.m2/repository/jakarta/transaction/jakarta.transaction-api/2.0.1/jakarta.transaction-api-2.0.1.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/jboss/logging/jboss-logging/3.6.1.Final/jboss-logging-3.6.1.Final.jar
+[DEBUG]  /Users/anhqui/.m2/repository/com/fasterxml/classmate/1.7.0/classmate-1.7.0.jar
+[DEBUG]  /Users/anhqui/.m2/repository/jakarta/inject/jakarta.inject-api/2.0.1/jakarta.inject-api-2.0.1.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/antlr/antlr4-runtime/4.13.0/antlr4-runtime-4.13.0.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/data/spring-data-jpa/3.4.2/spring-data-jpa-3.4.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/data/spring-data-commons/3.4.2/spring-data-commons-3.4.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/spring-orm/6.2.2/spring-orm-6.2.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/spring-beans/6.2.2/spring-beans-6.2.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/slf4j/slf4j-api/2.0.16/slf4j-api-2.0.16.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/spring-aspects/6.2.2/spring-aspects-6.2.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/aspectj/aspectjweaver/1.9.22.1/aspectjweaver-1.9.22.1.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-security/3.4.2/spring-boot-starter-security-3.4.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/spring-aop/6.2.2/spring-aop-6.2.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/security/spring-security-config/6.4.2/spring-security-config-6.4.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/security/spring-security-web/6.4.2/spring-security-web-6.4.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/spring-expression/6.2.2/spring-expression-6.2.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-web/3.4.2/spring-boot-starter-web-3.4.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-json/3.4.2/spring-boot-starter-json-3.4.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jdk8/2.18.2/jackson-datatype-jdk8-2.18.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.18.2/jackson-datatype-jsr310-2.18.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/com/fasterxml/jackson/module/jackson-module-parameter-names/2.18.2/jackson-module-parameter-names-2.18.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-tomcat/3.4.2/spring-boot-starter-tomcat-3.4.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/apache/tomcat/embed/tomcat-embed-core/10.1.34/tomcat-embed-core-10.1.34.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/apache/tomcat/embed/tomcat-embed-websocket/10.1.34/tomcat-embed-websocket-10.1.34.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/spring-web/6.2.2/spring-web-6.2.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/spring-webmvc/6.2.2/spring-webmvc-6.2.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-oauth2-resource-server/3.4.2/spring-boot-starter-oauth2-resource-server-3.4.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/security/spring-security-core/6.4.2/spring-security-core-6.4.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/security/spring-security-crypto/6.4.2/spring-security-crypto-6.4.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/security/spring-security-oauth2-resource-server/6.4.2/spring-security-oauth2-resource-server-6.4.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/security/spring-security-oauth2-core/6.4.2/spring-security-oauth2-core-6.4.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/security/spring-security-oauth2-jose/6.4.2/spring-security-oauth2-jose-6.4.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/com/nimbusds/nimbus-jose-jwt/9.37.3/nimbus-jose-jwt-9.37.3.jar
+[DEBUG]  /Users/anhqui/.m2/repository/com/github/stephenc/jcip/jcip-annotations/1.0-1/jcip-annotations-1.0-1.jar
+[DEBUG]  /Users/anhqui/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.18.2/jackson-databind-2.18.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.18.2/jackson-annotations-2.18.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.18.2/jackson-core-2.18.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-validation/3.4.2/spring-boot-starter-validation-3.4.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/apache/tomcat/embed/tomcat-embed-el/10.1.34/tomcat-embed-el-10.1.34.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/hibernate/validator/hibernate-validator/8.0.2.Final/hibernate-validator-8.0.2.Final.jar
+[DEBUG]  /Users/anhqui/.m2/repository/jakarta/validation/jakarta.validation-api/3.0.2/jakarta.validation-api-3.0.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/cloud/spring-cloud-starter-openfeign/4.2.0/spring-cloud-starter-openfeign-4.2.0.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/cloud/spring-cloud-starter/4.2.0/spring-cloud-starter-4.2.0.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/cloud/spring-cloud-context/4.2.0/spring-cloud-context-4.2.0.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/bouncycastle/bcprov-jdk18on/1.78.1/bcprov-jdk18on-1.78.1.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/cloud/spring-cloud-openfeign-core/4.2.0/spring-cloud-openfeign-core-4.2.0.jar
+[DEBUG]  /Users/anhqui/.m2/repository/io/github/openfeign/feign-form-spring/13.5/feign-form-spring-13.5.jar
+[DEBUG]  /Users/anhqui/.m2/repository/io/github/openfeign/feign-form/13.5/feign-form-13.5.jar
+[DEBUG]  /Users/anhqui/.m2/repository/commons-fileupload/commons-fileupload/1.5/commons-fileupload-1.5.jar
+[DEBUG]  /Users/anhqui/.m2/repository/commons-io/commons-io/2.11.0/commons-io-2.11.0.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/cloud/spring-cloud-commons/4.2.0/spring-cloud-commons-4.2.0.jar
+[DEBUG]  /Users/anhqui/.m2/repository/io/github/openfeign/feign-core/13.5/feign-core-13.5.jar
+[DEBUG]  /Users/anhqui/.m2/repository/io/github/openfeign/feign-slf4j/13.5/feign-slf4j-13.5.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/mapstruct/mapstruct/1.6.0.Beta1/mapstruct-1.6.0.Beta1.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/projectlombok/lombok-mapstruct-binding/0.2.0/lombok-mapstruct-binding-0.2.0.jar
+[DEBUG]  /Users/anhqui/.m2/repository/com/cloudinary/cloudinary-http44/1.36.0/cloudinary-http44-1.36.0.jar
+[DEBUG]  /Users/anhqui/.m2/repository/com/cloudinary/cloudinary-core/1.36.0/cloudinary-core-1.36.0.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/apache/commons/commons-lang3/3.17.0/commons-lang3-3.17.0.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/apache/httpcomponents/httpclient/4.4/httpclient-4.4.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.jar
+[DEBUG]  /Users/anhqui/.m2/repository/commons-logging/commons-logging/1.2/commons-logging-1.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/commons-codec/commons-codec/1.17.2/commons-codec-1.17.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/apache/httpcomponents/httpmime/4.4/httpmime-4.4.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/kafka/spring-kafka/3.3.2/spring-kafka-3.3.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/spring-context/6.2.2/spring-context-6.2.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/spring-messaging/6.2.2/spring-messaging-6.2.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/spring-tx/6.2.2/spring-tx-6.2.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/retry/spring-retry/2.0.11/spring-retry-2.0.11.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/apache/kafka/kafka-clients/3.8.1/kafka-clients-3.8.1.jar
+[DEBUG]  /Users/anhqui/.m2/repository/io/micrometer/micrometer-observation/1.14.3/micrometer-observation-1.14.3.jar
+[DEBUG]  /Users/anhqui/.m2/repository/io/micrometer/micrometer-commons/1.14.3/micrometer-commons-1.14.3.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/cloud/spring-cloud-starter-netflix-eureka-client/4.2.0/spring-cloud-starter-netflix-eureka-client-4.2.0.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/cloud/spring-cloud-netflix-eureka-client/4.2.0/spring-cloud-netflix-eureka-client-4.2.0.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/apache/httpcomponents/client5/httpclient5/5.4.1/httpclient5-5.4.1.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/apache/httpcomponents/core5/httpcore5/5.3.2/httpcore5-5.3.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/apache/httpcomponents/core5/httpcore5-h2/5.3.2/httpcore5-h2-5.3.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/com/netflix/eureka/eureka-client/2.0.4/eureka-client-2.0.4.jar
+[DEBUG]  /Users/anhqui/.m2/repository/com/thoughtworks/xstream/xstream/1.4.20/xstream-1.4.20.jar
+[DEBUG]  /Users/anhqui/.m2/repository/io/github/x-stream/mxparser/1.2.2/mxparser-1.2.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/xmlpull/xmlpull/1.1.3.1/xmlpull-1.1.3.1.jar
+[DEBUG]  /Users/anhqui/.m2/repository/jakarta/ws/rs/jakarta.ws.rs-api/3.1.0/jakarta.ws.rs-api-3.1.0.jar
+[DEBUG]  /Users/anhqui/.m2/repository/com/netflix/spectator/spectator-api/1.7.3/spectator-api-1.7.3.jar
+[DEBUG]  /Users/anhqui/.m2/repository/commons-configuration/commons-configuration/1.10/commons-configuration-1.10.jar
+[DEBUG]  /Users/anhqui/.m2/repository/commons-lang/commons-lang/2.6/commons-lang-2.6.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/cloud/spring-cloud-starter-loadbalancer/4.2.0/spring-cloud-starter-loadbalancer-4.2.0.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/cloud/spring-cloud-loadbalancer/4.2.0/spring-cloud-loadbalancer-4.2.0.jar
+[DEBUG]  /Users/anhqui/.m2/repository/io/projectreactor/reactor-core/3.7.2/reactor-core-3.7.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/reactivestreams/reactive-streams/1.0.4/reactive-streams-1.0.4.jar
+[DEBUG]  /Users/anhqui/.m2/repository/io/projectreactor/addons/reactor-extra/3.5.2/reactor-extra-3.5.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-cache/3.4.2/spring-boot-starter-cache-3.4.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/spring-context-support/6.2.2/spring-context-support-6.2.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/com/stoyanr/evictor/1.0.0/evictor-1.0.0.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-amqp/3.4.2/spring-boot-starter-amqp-3.4.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/amqp/spring-rabbit/3.2.2/spring-rabbit-3.2.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/springframework/amqp/spring-amqp/3.2.2/spring-amqp-3.2.2.jar
+[DEBUG]  /Users/anhqui/.m2/repository/com/rabbitmq/amqp-client/5.22.0/amqp-client-5.22.0.jar
+[DEBUG]  /Users/anhqui/.m2/repository/org/projectlombok/lombok/1.18.36/lombok-1.18.36.jar
+[DEBUG] Source roots:
+[DEBUG]  /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java
+[DEBUG]  /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target/generated-sources/annotations
+[DEBUG] Command line options:
+[DEBUG] -d /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target/classes -classpath /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target/classes:/Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-data-jpa/3.4.2/spring-boot-starter-data-jpa-3.4.2.jar:/Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter/3.4.2/spring-boot-starter-3.4.2.jar:/Users/anhqui/.m2/repository/org/springframework/boot/spring-boot/3.4.2/spring-boot-3.4.2.jar:/Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-autoconfigure/3.4.2/spring-boot-autoconfigure-3.4.2.jar:/Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-logging/3.4.2/spring-boot-starter-logging-3.4.2.jar:/Users/anhqui/.m2/repository/ch/qos/logback/logback-classic/1.5.16/logback-classic-1.5.16.jar:/Users/anhqui/.m2/repository/ch/qos/logback/logback-core/1.5.16/logback-core-1.5.16.jar:/Users/anhqui/.m2/repository/org/apache/logging/log4j/log4j-to-slf4j/2.24.3/log4j-to-slf4j-2.24.3.jar:/Users/anhqui/.m2/repository/org/apache/logging/log4j/log4j-api/2.24.3/log4j-api-2.24.3.jar:/Users/anhqui/.m2/repository/org/slf4j/jul-to-slf4j/2.0.16/jul-to-slf4j-2.0.16.jar:/Users/anhqui/.m2/repository/jakarta/annotation/jakarta.annotation-api/2.1.1/jakarta.annotation-api-2.1.1.jar:/Users/anhqui/.m2/repository/org/springframework/spring-core/6.2.2/spring-core-6.2.2.jar:/Users/anhqui/.m2/repository/org/springframework/spring-jcl/6.2.2/spring-jcl-6.2.2.jar:/Users/anhqui/.m2/repository/org/yaml/snakeyaml/2.3/snakeyaml-2.3.jar:/Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-jdbc/3.4.2/spring-boot-starter-jdbc-3.4.2.jar:/Users/anhqui/.m2/repository/com/zaxxer/HikariCP/5.1.0/HikariCP-5.1.0.jar:/Users/anhqui/.m2/repository/org/springframework/spring-jdbc/6.2.2/spring-jdbc-6.2.2.jar:/Users/anhqui/.m2/repository/org/hibernate/orm/hibernate-core/6.6.5.Final/hibernate-core-6.6.5.Final.jar:/Users/anhqui/.m2/repository/jakarta/persistence/jakarta.persistence-api/3.1.0/jakarta.persistence-api-3.1.0.jar:/Users/anhqui/.m2/repository/jakarta/transaction/jakarta.transaction-api/2.0.1/jakarta.transaction-api-2.0.1.jar:/Users/anhqui/.m2/repository/org/jboss/logging/jboss-logging/3.6.1.Final/jboss-logging-3.6.1.Final.jar:/Users/anhqui/.m2/repository/com/fasterxml/classmate/1.7.0/classmate-1.7.0.jar:/Users/anhqui/.m2/repository/jakarta/inject/jakarta.inject-api/2.0.1/jakarta.inject-api-2.0.1.jar:/Users/anhqui/.m2/repository/org/antlr/antlr4-runtime/4.13.0/antlr4-runtime-4.13.0.jar:/Users/anhqui/.m2/repository/org/springframework/data/spring-data-jpa/3.4.2/spring-data-jpa-3.4.2.jar:/Users/anhqui/.m2/repository/org/springframework/data/spring-data-commons/3.4.2/spring-data-commons-3.4.2.jar:/Users/anhqui/.m2/repository/org/springframework/spring-orm/6.2.2/spring-orm-6.2.2.jar:/Users/anhqui/.m2/repository/org/springframework/spring-beans/6.2.2/spring-beans-6.2.2.jar:/Users/anhqui/.m2/repository/org/slf4j/slf4j-api/2.0.16/slf4j-api-2.0.16.jar:/Users/anhqui/.m2/repository/org/springframework/spring-aspects/6.2.2/spring-aspects-6.2.2.jar:/Users/anhqui/.m2/repository/org/aspectj/aspectjweaver/1.9.22.1/aspectjweaver-1.9.22.1.jar:/Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-security/3.4.2/spring-boot-starter-security-3.4.2.jar:/Users/anhqui/.m2/repository/org/springframework/spring-aop/6.2.2/spring-aop-6.2.2.jar:/Users/anhqui/.m2/repository/org/springframework/security/spring-security-config/6.4.2/spring-security-config-6.4.2.jar:/Users/anhqui/.m2/repository/org/springframework/security/spring-security-web/6.4.2/spring-security-web-6.4.2.jar:/Users/anhqui/.m2/repository/org/springframework/spring-expression/6.2.2/spring-expression-6.2.2.jar:/Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-web/3.4.2/spring-boot-starter-web-3.4.2.jar:/Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-json/3.4.2/spring-boot-starter-json-3.4.2.jar:/Users/anhqui/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jdk8/2.18.2/jackson-datatype-jdk8-2.18.2.jar:/Users/anhqui/.m2/repository/com/fasterxml/jackson/datatype/jackson-datatype-jsr310/2.18.2/jackson-datatype-jsr310-2.18.2.jar:/Users/anhqui/.m2/repository/com/fasterxml/jackson/module/jackson-module-parameter-names/2.18.2/jackson-module-parameter-names-2.18.2.jar:/Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-tomcat/3.4.2/spring-boot-starter-tomcat-3.4.2.jar:/Users/anhqui/.m2/repository/org/apache/tomcat/embed/tomcat-embed-core/10.1.34/tomcat-embed-core-10.1.34.jar:/Users/anhqui/.m2/repository/org/apache/tomcat/embed/tomcat-embed-websocket/10.1.34/tomcat-embed-websocket-10.1.34.jar:/Users/anhqui/.m2/repository/org/springframework/spring-web/6.2.2/spring-web-6.2.2.jar:/Users/anhqui/.m2/repository/org/springframework/spring-webmvc/6.2.2/spring-webmvc-6.2.2.jar:/Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-oauth2-resource-server/3.4.2/spring-boot-starter-oauth2-resource-server-3.4.2.jar:/Users/anhqui/.m2/repository/org/springframework/security/spring-security-core/6.4.2/spring-security-core-6.4.2.jar:/Users/anhqui/.m2/repository/org/springframework/security/spring-security-crypto/6.4.2/spring-security-crypto-6.4.2.jar:/Users/anhqui/.m2/repository/org/springframework/security/spring-security-oauth2-resource-server/6.4.2/spring-security-oauth2-resource-server-6.4.2.jar:/Users/anhqui/.m2/repository/org/springframework/security/spring-security-oauth2-core/6.4.2/spring-security-oauth2-core-6.4.2.jar:/Users/anhqui/.m2/repository/org/springframework/security/spring-security-oauth2-jose/6.4.2/spring-security-oauth2-jose-6.4.2.jar:/Users/anhqui/.m2/repository/com/nimbusds/nimbus-jose-jwt/9.37.3/nimbus-jose-jwt-9.37.3.jar:/Users/anhqui/.m2/repository/com/github/stephenc/jcip/jcip-annotations/1.0-1/jcip-annotations-1.0-1.jar:/Users/anhqui/.m2/repository/com/fasterxml/jackson/core/jackson-databind/2.18.2/jackson-databind-2.18.2.jar:/Users/anhqui/.m2/repository/com/fasterxml/jackson/core/jackson-annotations/2.18.2/jackson-annotations-2.18.2.jar:/Users/anhqui/.m2/repository/com/fasterxml/jackson/core/jackson-core/2.18.2/jackson-core-2.18.2.jar:/Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-validation/3.4.2/spring-boot-starter-validation-3.4.2.jar:/Users/anhqui/.m2/repository/org/apache/tomcat/embed/tomcat-embed-el/10.1.34/tomcat-embed-el-10.1.34.jar:/Users/anhqui/.m2/repository/org/hibernate/validator/hibernate-validator/8.0.2.Final/hibernate-validator-8.0.2.Final.jar:/Users/anhqui/.m2/repository/jakarta/validation/jakarta.validation-api/3.0.2/jakarta.validation-api-3.0.2.jar:/Users/anhqui/.m2/repository/org/springframework/cloud/spring-cloud-starter-openfeign/4.2.0/spring-cloud-starter-openfeign-4.2.0.jar:/Users/anhqui/.m2/repository/org/springframework/cloud/spring-cloud-starter/4.2.0/spring-cloud-starter-4.2.0.jar:/Users/anhqui/.m2/repository/org/springframework/cloud/spring-cloud-context/4.2.0/spring-cloud-context-4.2.0.jar:/Users/anhqui/.m2/repository/org/bouncycastle/bcprov-jdk18on/1.78.1/bcprov-jdk18on-1.78.1.jar:/Users/anhqui/.m2/repository/org/springframework/cloud/spring-cloud-openfeign-core/4.2.0/spring-cloud-openfeign-core-4.2.0.jar:/Users/anhqui/.m2/repository/io/github/openfeign/feign-form-spring/13.5/feign-form-spring-13.5.jar:/Users/anhqui/.m2/repository/io/github/openfeign/feign-form/13.5/feign-form-13.5.jar:/Users/anhqui/.m2/repository/commons-fileupload/commons-fileupload/1.5/commons-fileupload-1.5.jar:/Users/anhqui/.m2/repository/commons-io/commons-io/2.11.0/commons-io-2.11.0.jar:/Users/anhqui/.m2/repository/org/springframework/cloud/spring-cloud-commons/4.2.0/spring-cloud-commons-4.2.0.jar:/Users/anhqui/.m2/repository/io/github/openfeign/feign-core/13.5/feign-core-13.5.jar:/Users/anhqui/.m2/repository/io/github/openfeign/feign-slf4j/13.5/feign-slf4j-13.5.jar:/Users/anhqui/.m2/repository/org/mapstruct/mapstruct/1.6.0.Beta1/mapstruct-1.6.0.Beta1.jar:/Users/anhqui/.m2/repository/org/projectlombok/lombok-mapstruct-binding/0.2.0/lombok-mapstruct-binding-0.2.0.jar:/Users/anhqui/.m2/repository/com/cloudinary/cloudinary-http44/1.36.0/cloudinary-http44-1.36.0.jar:/Users/anhqui/.m2/repository/com/cloudinary/cloudinary-core/1.36.0/cloudinary-core-1.36.0.jar:/Users/anhqui/.m2/repository/org/apache/commons/commons-lang3/3.17.0/commons-lang3-3.17.0.jar:/Users/anhqui/.m2/repository/org/apache/httpcomponents/httpclient/4.4/httpclient-4.4.jar:/Users/anhqui/.m2/repository/org/apache/httpcomponents/httpcore/4.4.16/httpcore-4.4.16.jar:/Users/anhqui/.m2/repository/commons-logging/commons-logging/1.2/commons-logging-1.2.jar:/Users/anhqui/.m2/repository/commons-codec/commons-codec/1.17.2/commons-codec-1.17.2.jar:/Users/anhqui/.m2/repository/org/apache/httpcomponents/httpmime/4.4/httpmime-4.4.jar:/Users/anhqui/.m2/repository/org/springframework/kafka/spring-kafka/3.3.2/spring-kafka-3.3.2.jar:/Users/anhqui/.m2/repository/org/springframework/spring-context/6.2.2/spring-context-6.2.2.jar:/Users/anhqui/.m2/repository/org/springframework/spring-messaging/6.2.2/spring-messaging-6.2.2.jar:/Users/anhqui/.m2/repository/org/springframework/spring-tx/6.2.2/spring-tx-6.2.2.jar:/Users/anhqui/.m2/repository/org/springframework/retry/spring-retry/2.0.11/spring-retry-2.0.11.jar:/Users/anhqui/.m2/repository/org/apache/kafka/kafka-clients/3.8.1/kafka-clients-3.8.1.jar:/Users/anhqui/.m2/repository/io/micrometer/micrometer-observation/1.14.3/micrometer-observation-1.14.3.jar:/Users/anhqui/.m2/repository/io/micrometer/micrometer-commons/1.14.3/micrometer-commons-1.14.3.jar:/Users/anhqui/.m2/repository/org/springframework/cloud/spring-cloud-starter-netflix-eureka-client/4.2.0/spring-cloud-starter-netflix-eureka-client-4.2.0.jar:/Users/anhqui/.m2/repository/org/springframework/cloud/spring-cloud-netflix-eureka-client/4.2.0/spring-cloud-netflix-eureka-client-4.2.0.jar:/Users/anhqui/.m2/repository/org/apache/httpcomponents/client5/httpclient5/5.4.1/httpclient5-5.4.1.jar:/Users/anhqui/.m2/repository/org/apache/httpcomponents/core5/httpcore5/5.3.2/httpcore5-5.3.2.jar:/Users/anhqui/.m2/repository/org/apache/httpcomponents/core5/httpcore5-h2/5.3.2/httpcore5-h2-5.3.2.jar:/Users/anhqui/.m2/repository/com/netflix/eureka/eureka-client/2.0.4/eureka-client-2.0.4.jar:/Users/anhqui/.m2/repository/com/thoughtworks/xstream/xstream/1.4.20/xstream-1.4.20.jar:/Users/anhqui/.m2/repository/io/github/x-stream/mxparser/1.2.2/mxparser-1.2.2.jar:/Users/anhqui/.m2/repository/xmlpull/xmlpull/1.1.3.1/xmlpull-1.1.3.1.jar:/Users/anhqui/.m2/repository/jakarta/ws/rs/jakarta.ws.rs-api/3.1.0/jakarta.ws.rs-api-3.1.0.jar:/Users/anhqui/.m2/repository/com/netflix/spectator/spectator-api/1.7.3/spectator-api-1.7.3.jar:/Users/anhqui/.m2/repository/commons-configuration/commons-configuration/1.10/commons-configuration-1.10.jar:/Users/anhqui/.m2/repository/commons-lang/commons-lang/2.6/commons-lang-2.6.jar:/Users/anhqui/.m2/repository/org/springframework/cloud/spring-cloud-starter-loadbalancer/4.2.0/spring-cloud-starter-loadbalancer-4.2.0.jar:/Users/anhqui/.m2/repository/org/springframework/cloud/spring-cloud-loadbalancer/4.2.0/spring-cloud-loadbalancer-4.2.0.jar:/Users/anhqui/.m2/repository/io/projectreactor/reactor-core/3.7.2/reactor-core-3.7.2.jar:/Users/anhqui/.m2/repository/org/reactivestreams/reactive-streams/1.0.4/reactive-streams-1.0.4.jar:/Users/anhqui/.m2/repository/io/projectreactor/addons/reactor-extra/3.5.2/reactor-extra-3.5.2.jar:/Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-cache/3.4.2/spring-boot-starter-cache-3.4.2.jar:/Users/anhqui/.m2/repository/org/springframework/spring-context-support/6.2.2/spring-context-support-6.2.2.jar:/Users/anhqui/.m2/repository/com/stoyanr/evictor/1.0.0/evictor-1.0.0.jar:/Users/anhqui/.m2/repository/org/springframework/boot/spring-boot-starter-amqp/3.4.2/spring-boot-starter-amqp-3.4.2.jar:/Users/anhqui/.m2/repository/org/springframework/amqp/spring-rabbit/3.2.2/spring-rabbit-3.2.2.jar:/Users/anhqui/.m2/repository/org/springframework/amqp/spring-amqp/3.2.2/spring-amqp-3.2.2.jar:/Users/anhqui/.m2/repository/com/rabbitmq/amqp-client/5.22.0/amqp-client-5.22.0.jar:/Users/anhqui/.m2/repository/org/projectlombok/lombok/1.18.36/lombok-1.18.36.jar: -sourcepath /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/src/main/java:/Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target/generated-sources/annotations: -s /Users/anhqui/Documents/CarShopMicroservice/EcommerWebCar/identity-service/target/generated-sources/annotations -processorpath /Users/anhqui/.m2/repository/org/projectlombok/lombok/1.18.36/lombok-1.18.36.jar:/Users/anhqui/.m2/repository/org/mapstruct/mapstruct-processor/1.6.0.Beta1/mapstruct-processor-1.6.0.Beta1.jar:/Users/anhqui/.m2/repository/org/projectlombok/lombok-mapstruct-binding/0.2.0/lombok-mapstruct-binding-0.2.0.jar: -g -parameters --release 21 -encoding UTF-8 -XDuseUnsharedTable=true
+[DEBUG] incrementalBuildHelper#beforeRebuildExecution
+[INFO] Compiling 56 source files with javac [debug parameters release 21] to target/classes
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.918 s
+[INFO] Finished at: 2026-05-06T20:07:13+07:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile (default-compile) on project identity-service: Fatal error compiling: java.lang.ExceptionInInitializerError: com.sun.tools.javac.code.TypeTag :: UNKNOWN -> [Help 1]
+org.apache.maven.lifecycle.LifecycleExecutionException: Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.13.0:compile (default-compile) on project identity-service: Fatal error compiling
+    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute2 (MojoExecutor.java:333)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute (MojoExecutor.java:316)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:212)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:174)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.access$000 (MojoExecutor.java:75)
+    at org.apache.maven.lifecycle.internal.MojoExecutor$1.run (MojoExecutor.java:162)
+    at org.apache.maven.plugin.DefaultMojosExecutionStrategy.execute (DefaultMojosExecutionStrategy.java:39)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:159)
+    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:105)
+    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:73)
+    at org.apache.maven.lifecycle.internal.builder.singlethreaded.SingleThreadedBuilder.build (SingleThreadedBuilder.java:53)
+    at org.apache.maven.lifecycle.internal.LifecycleStarter.execute (LifecycleStarter.java:118)
+    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:261)
+    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:173)
+    at org.apache.maven.DefaultMaven.execute (DefaultMaven.java:101)
+    at org.apache.maven.cli.MavenCli.execute (MavenCli.java:906)
+    at org.apache.maven.cli.MavenCli.doMain (MavenCli.java:283)
+    at org.apache.maven.cli.MavenCli.main (MavenCli.java:206)
+    at jdk.internal.reflect.DirectMethodHandleAccessor.invoke (DirectMethodHandleAccessor.java:104)
+    at java.lang.reflect.Method.invoke (Method.java:565)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.launchEnhanced (Launcher.java:255)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.launch (Launcher.java:201)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.mainWithExitCode (Launcher.java:361)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.main (Launcher.java:314)
+Caused by: org.apache.maven.plugin.MojoExecutionException: Fatal error compiling
+    at org.apache.maven.plugin.compiler.AbstractCompilerMojo.execute (AbstractCompilerMojo.java:1231)
+    at org.apache.maven.plugin.compiler.CompilerMojo.execute (CompilerMojo.java:215)
+    at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo (DefaultBuildPluginManager.java:126)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute2 (MojoExecutor.java:328)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute (MojoExecutor.java:316)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:212)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:174)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.access$000 (MojoExecutor.java:75)
+    at org.apache.maven.lifecycle.internal.MojoExecutor$1.run (MojoExecutor.java:162)
+    at org.apache.maven.plugin.DefaultMojosExecutionStrategy.execute (DefaultMojosExecutionStrategy.java:39)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:159)
+    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:105)
+    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:73)
+    at org.apache.maven.lifecycle.internal.builder.singlethreaded.SingleThreadedBuilder.build (SingleThreadedBuilder.java:53)
+    at org.apache.maven.lifecycle.internal.LifecycleStarter.execute (LifecycleStarter.java:118)
+    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:261)
+    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:173)
+    at org.apache.maven.DefaultMaven.execute (DefaultMaven.java:101)
+    at org.apache.maven.cli.MavenCli.execute (MavenCli.java:906)
+    at org.apache.maven.cli.MavenCli.doMain (MavenCli.java:283)
+    at org.apache.maven.cli.MavenCli.main (MavenCli.java:206)
+    at jdk.internal.reflect.DirectMethodHandleAccessor.invoke (DirectMethodHandleAccessor.java:104)
+    at java.lang.reflect.Method.invoke (Method.java:565)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.launchEnhanced (Launcher.java:255)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.launch (Launcher.java:201)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.mainWithExitCode (Launcher.java:361)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.main (Launcher.java:314)
+Caused by: org.codehaus.plexus.compiler.CompilerException: java.lang.ExceptionInInitializerError
+    at org.codehaus.plexus.compiler.javac.JavaxToolsCompiler.compileInProcess (JavaxToolsCompiler.java:179)
+    at org.codehaus.plexus.compiler.javac.JavacCompiler.performCompile (JavacCompiler.java:214)
+    at org.apache.maven.plugin.compiler.AbstractCompilerMojo.execute (AbstractCompilerMojo.java:1228)
+    at org.apache.maven.plugin.compiler.CompilerMojo.execute (CompilerMojo.java:215)
+    at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo (DefaultBuildPluginManager.java:126)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute2 (MojoExecutor.java:328)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute (MojoExecutor.java:316)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:212)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:174)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.access$000 (MojoExecutor.java:75)
+    at org.apache.maven.lifecycle.internal.MojoExecutor$1.run (MojoExecutor.java:162)
+    at org.apache.maven.plugin.DefaultMojosExecutionStrategy.execute (DefaultMojosExecutionStrategy.java:39)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:159)
+    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:105)
+    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:73)
+    at org.apache.maven.lifecycle.internal.builder.singlethreaded.SingleThreadedBuilder.build (SingleThreadedBuilder.java:53)
+    at org.apache.maven.lifecycle.internal.LifecycleStarter.execute (LifecycleStarter.java:118)
+    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:261)
+    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:173)
+    at org.apache.maven.DefaultMaven.execute (DefaultMaven.java:101)
+    at org.apache.maven.cli.MavenCli.execute (MavenCli.java:906)
+    at org.apache.maven.cli.MavenCli.doMain (MavenCli.java:283)
+    at org.apache.maven.cli.MavenCli.main (MavenCli.java:206)
+    at jdk.internal.reflect.DirectMethodHandleAccessor.invoke (DirectMethodHandleAccessor.java:104)
+    at java.lang.reflect.Method.invoke (Method.java:565)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.launchEnhanced (Launcher.java:255)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.launch (Launcher.java:201)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.mainWithExitCode (Launcher.java:361)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.main (Launcher.java:314)
+Caused by: java.lang.RuntimeException: java.lang.ExceptionInInitializerError
+    at com.sun.tools.javac.api.JavacTaskImpl.invocationHelper (JavacTaskImpl.java:168)
+    at com.sun.tools.javac.api.JavacTaskImpl.doCall (JavacTaskImpl.java:100)
+    at com.sun.tools.javac.api.JavacTaskImpl.call (JavacTaskImpl.java:94)
+    at org.codehaus.plexus.compiler.javac.JavaxToolsCompiler.compileInProcess (JavaxToolsCompiler.java:126)
+    at org.codehaus.plexus.compiler.javac.JavacCompiler.performCompile (JavacCompiler.java:214)
+    at org.apache.maven.plugin.compiler.AbstractCompilerMojo.execute (AbstractCompilerMojo.java:1228)
+    at org.apache.maven.plugin.compiler.CompilerMojo.execute (CompilerMojo.java:215)
+    at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo (DefaultBuildPluginManager.java:126)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute2 (MojoExecutor.java:328)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute (MojoExecutor.java:316)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:212)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:174)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.access$000 (MojoExecutor.java:75)
+    at org.apache.maven.lifecycle.internal.MojoExecutor$1.run (MojoExecutor.java:162)
+    at org.apache.maven.plugin.DefaultMojosExecutionStrategy.execute (DefaultMojosExecutionStrategy.java:39)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:159)
+    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:105)
+    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:73)
+    at org.apache.maven.lifecycle.internal.builder.singlethreaded.SingleThreadedBuilder.build (SingleThreadedBuilder.java:53)
+    at org.apache.maven.lifecycle.internal.LifecycleStarter.execute (LifecycleStarter.java:118)
+    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:261)
+    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:173)
+    at org.apache.maven.DefaultMaven.execute (DefaultMaven.java:101)
+    at org.apache.maven.cli.MavenCli.execute (MavenCli.java:906)
+    at org.apache.maven.cli.MavenCli.doMain (MavenCli.java:283)
+    at org.apache.maven.cli.MavenCli.main (MavenCli.java:206)
+    at jdk.internal.reflect.DirectMethodHandleAccessor.invoke (DirectMethodHandleAccessor.java:104)
+    at java.lang.reflect.Method.invoke (Method.java:565)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.launchEnhanced (Launcher.java:255)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.launch (Launcher.java:201)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.mainWithExitCode (Launcher.java:361)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.main (Launcher.java:314)
+Caused by: java.lang.ExceptionInInitializerError
+    at lombok.javac.apt.LombokProcessor.placePostCompileAndDontMakeForceRoundDummiesHook (LombokProcessor.java:174)
+    at lombok.javac.apt.LombokProcessor.init (LombokProcessor.java:96)
+    at lombok.core.AnnotationProcessor$JavacDescriptor.want (AnnotationProcessor.java:160)
+    at lombok.core.AnnotationProcessor.init (AnnotationProcessor.java:213)
+    at lombok.launch.AnnotationProcessorHider$AnnotationProcessor.init (AnnotationProcessor.java:64)
+    at com.sun.tools.javac.processing.JavacProcessingEnvironment$ProcessorState.<init> (JavacProcessingEnvironment.java:635)
+    at com.sun.tools.javac.processing.JavacProcessingEnvironment$DiscoveredProcessors$ProcessorStateIterator.next (JavacProcessingEnvironment.java:761)
+    at com.sun.tools.javac.processing.JavacProcessingEnvironment.discoverAndRunProcs (JavacProcessingEnvironment.java:857)
+    at com.sun.tools.javac.processing.JavacProcessingEnvironment$Round.run (JavacProcessingEnvironment.java:1188)
+    at com.sun.tools.javac.processing.JavacProcessingEnvironment.doProcessing (JavacProcessingEnvironment.java:1301)
+    at com.sun.tools.javac.main.JavaCompiler.processAnnotations (JavaCompiler.java:1262)
+    at com.sun.tools.javac.main.JavaCompiler.compile (JavaCompiler.java:938)
+    at com.sun.tools.javac.api.JavacTaskImpl.lambda$doCall$0 (JavacTaskImpl.java:104)
+    at com.sun.tools.javac.api.JavacTaskImpl.invocationHelper (JavacTaskImpl.java:152)
+    at com.sun.tools.javac.api.JavacTaskImpl.doCall (JavacTaskImpl.java:100)
+    at com.sun.tools.javac.api.JavacTaskImpl.call (JavacTaskImpl.java:94)
+    at org.codehaus.plexus.compiler.javac.JavaxToolsCompiler.compileInProcess (JavaxToolsCompiler.java:126)
+    at org.codehaus.plexus.compiler.javac.JavacCompiler.performCompile (JavacCompiler.java:214)
+    at org.apache.maven.plugin.compiler.AbstractCompilerMojo.execute (AbstractCompilerMojo.java:1228)
+    at org.apache.maven.plugin.compiler.CompilerMojo.execute (CompilerMojo.java:215)
+    at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo (DefaultBuildPluginManager.java:126)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute2 (MojoExecutor.java:328)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute (MojoExecutor.java:316)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:212)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:174)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.access$000 (MojoExecutor.java:75)
+    at org.apache.maven.lifecycle.internal.MojoExecutor$1.run (MojoExecutor.java:162)
+    at org.apache.maven.plugin.DefaultMojosExecutionStrategy.execute (DefaultMojosExecutionStrategy.java:39)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:159)
+    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:105)
+    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:73)
+    at org.apache.maven.lifecycle.internal.builder.singlethreaded.SingleThreadedBuilder.build (SingleThreadedBuilder.java:53)
+    at org.apache.maven.lifecycle.internal.LifecycleStarter.execute (LifecycleStarter.java:118)
+    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:261)
+    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:173)
+    at org.apache.maven.DefaultMaven.execute (DefaultMaven.java:101)
+    at org.apache.maven.cli.MavenCli.execute (MavenCli.java:906)
+    at org.apache.maven.cli.MavenCli.doMain (MavenCli.java:283)
+    at org.apache.maven.cli.MavenCli.main (MavenCli.java:206)
+    at jdk.internal.reflect.DirectMethodHandleAccessor.invoke (DirectMethodHandleAccessor.java:104)
+    at java.lang.reflect.Method.invoke (Method.java:565)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.launchEnhanced (Launcher.java:255)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.launch (Launcher.java:201)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.mainWithExitCode (Launcher.java:361)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.main (Launcher.java:314)
+Caused by: java.lang.NoSuchFieldException: com.sun.tools.javac.code.TypeTag :: UNKNOWN
+    at lombok.permit.Permit.getField (Permit.java:144)
+    at lombok.javac.JavacTreeMaker$SchroedingerType.getFieldCached (JavacTreeMaker.java:171)
+    at lombok.javac.JavacTreeMaker$TypeTag.typeTag (JavacTreeMaker.java:259)
+    at lombok.javac.Javac.<clinit> (Javac.java:187)
+    at lombok.javac.apt.LombokProcessor.placePostCompileAndDontMakeForceRoundDummiesHook (LombokProcessor.java:174)
+    at lombok.javac.apt.LombokProcessor.init (LombokProcessor.java:96)
+    at lombok.core.AnnotationProcessor$JavacDescriptor.want (AnnotationProcessor.java:160)
+    at lombok.core.AnnotationProcessor.init (AnnotationProcessor.java:213)
+    at lombok.launch.AnnotationProcessorHider$AnnotationProcessor.init (AnnotationProcessor.java:64)
+    at com.sun.tools.javac.processing.JavacProcessingEnvironment$ProcessorState.<init> (JavacProcessingEnvironment.java:635)
+    at com.sun.tools.javac.processing.JavacProcessingEnvironment$DiscoveredProcessors$ProcessorStateIterator.next (JavacProcessingEnvironment.java:761)
+    at com.sun.tools.javac.processing.JavacProcessingEnvironment.discoverAndRunProcs (JavacProcessingEnvironment.java:857)
+    at com.sun.tools.javac.processing.JavacProcessingEnvironment$Round.run (JavacProcessingEnvironment.java:1188)
+    at com.sun.tools.javac.processing.JavacProcessingEnvironment.doProcessing (JavacProcessingEnvironment.java:1301)
+    at com.sun.tools.javac.main.JavaCompiler.processAnnotations (JavaCompiler.java:1262)
+    at com.sun.tools.javac.main.JavaCompiler.compile (JavaCompiler.java:938)
+    at com.sun.tools.javac.api.JavacTaskImpl.lambda$doCall$0 (JavacTaskImpl.java:104)
+    at com.sun.tools.javac.api.JavacTaskImpl.invocationHelper (JavacTaskImpl.java:152)
+    at com.sun.tools.javac.api.JavacTaskImpl.doCall (JavacTaskImpl.java:100)
+    at com.sun.tools.javac.api.JavacTaskImpl.call (JavacTaskImpl.java:94)
+    at org.codehaus.plexus.compiler.javac.JavaxToolsCompiler.compileInProcess (JavaxToolsCompiler.java:126)
+    at org.codehaus.plexus.compiler.javac.JavacCompiler.performCompile (JavacCompiler.java:214)
+    at org.apache.maven.plugin.compiler.AbstractCompilerMojo.execute (AbstractCompilerMojo.java:1228)
+    at org.apache.maven.plugin.compiler.CompilerMojo.execute (CompilerMojo.java:215)
+    at org.apache.maven.plugin.DefaultBuildPluginManager.executeMojo (DefaultBuildPluginManager.java:126)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute2 (MojoExecutor.java:328)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.doExecute (MojoExecutor.java:316)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:212)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:174)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.access$000 (MojoExecutor.java:75)
+    at org.apache.maven.lifecycle.internal.MojoExecutor$1.run (MojoExecutor.java:162)
+    at org.apache.maven.plugin.DefaultMojosExecutionStrategy.execute (DefaultMojosExecutionStrategy.java:39)
+    at org.apache.maven.lifecycle.internal.MojoExecutor.execute (MojoExecutor.java:159)
+    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:105)
+    at org.apache.maven.lifecycle.internal.LifecycleModuleBuilder.buildProject (LifecycleModuleBuilder.java:73)
+    at org.apache.maven.lifecycle.internal.builder.singlethreaded.SingleThreadedBuilder.build (SingleThreadedBuilder.java:53)
+    at org.apache.maven.lifecycle.internal.LifecycleStarter.execute (LifecycleStarter.java:118)
+    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:261)
+    at org.apache.maven.DefaultMaven.doExecute (DefaultMaven.java:173)
+    at org.apache.maven.DefaultMaven.execute (DefaultMaven.java:101)
+    at org.apache.maven.cli.MavenCli.execute (MavenCli.java:906)
+    at org.apache.maven.cli.MavenCli.doMain (MavenCli.java:283)
+    at org.apache.maven.cli.MavenCli.main (MavenCli.java:206)
+    at jdk.internal.reflect.DirectMethodHandleAccessor.invoke (DirectMethodHandleAccessor.java:104)
+    at java.lang.reflect.Method.invoke (Method.java:565)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.launchEnhanced (Launcher.java:255)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.launch (Launcher.java:201)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.mainWithExitCode (Launcher.java:361)
+    at org.codehaus.plexus.classworlds.launcher.Launcher.main (Launcher.java:314)
+[ERROR] 
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoExecutionException
+[DEBUG] Shutting down adapter factory; available factories [file-lock, rwlock-local, semaphore-local, noop]; available name mappers [discriminating, file-gav, file-hgav, file-static, gav, static]
+[DEBUG] Shutting down 'file-lock' factory
+[DEBUG] Shutting down 'rwlock-local' factory
+[DEBUG] Shutting down 'semaphore-local' factory
+[DEBUG] Shutting down 'noop' factory

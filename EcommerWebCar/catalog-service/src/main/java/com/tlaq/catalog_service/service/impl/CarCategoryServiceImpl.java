@@ -12,6 +12,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import com.tlaq.catalog_service.dto.PageResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -31,8 +35,17 @@ public class CarCategoryServiceImpl implements CarCategoryService {
     }
 
     @Override
-    public List<CarCategoryResponse> getCarCategories() {
-        return carCategoryMapper.toResponseList(carCategoryRepository.findAll());
+    public PageResponse<CarCategoryResponse> getCarCategories(int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Page<CarCategory> carCategoryPage = carCategoryRepository.findAll(pageable);
+
+        return PageResponse.<CarCategoryResponse>builder()
+                .currentPage(page)
+                .pageSize(carCategoryPage.getSize())
+                .totalPages(carCategoryPage.getTotalPages())
+                .totalElements(carCategoryPage.getTotalElements())
+                .data(carCategoryMapper.toResponseList(carCategoryPage.getContent()))
+                .build();
     }
 
     @Override

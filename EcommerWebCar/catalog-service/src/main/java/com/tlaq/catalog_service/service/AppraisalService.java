@@ -13,11 +13,12 @@ public interface AppraisalService {
     // Cho Khách hàng
     AppraisalResponse createAppraisal(AppraisalRequestDto dto, List<MultipartFile> images);
     List<AppraisalResponse> getMyAppraisals();
+    AppraisalResponse respondToOffer(String id, boolean accepted);
 
     // Cho Nhân viên Showroom (Admin)
     PageResponse<AppraisalResponse> getAllAppraisals(int page, int size, String status);
     AppraisalResponse updateOfferedPrice(String id, BigDecimal price, String note);
-    AppraisalResponse updateStatus(String id, AppraisalStatus status);
+    AppraisalResponse updateStatus(String id, boolean status);
 
     // Hàm "đinh": Chuyển đổi từ yêu cầu thu mua thành xe trong kho để bán
     Boolean convertToInventory(String appraisalId);

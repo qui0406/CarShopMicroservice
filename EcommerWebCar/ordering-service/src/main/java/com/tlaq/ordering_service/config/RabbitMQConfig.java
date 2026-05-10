@@ -26,6 +26,9 @@ public class RabbitMQConfig {
     public static final String ORDER_CONFIRM_RK    = "routing.order.confirm";
     public static final String ORDER_CONFIRM_QUEUE = "q.order-confirm";
 
+    public static final String NOTIFICATION_EXCHANGE = "x.notification-exchange";
+    public static final String NOTIFICATION_ROUTING_KEY = "routing.notification";
+
     // Exchange nhận lệnh trừ/hoàn kho
     @Bean
     public TopicExchange orderExchange() {
@@ -56,7 +59,8 @@ public class RabbitMQConfig {
     @Bean
     public Queue orderTimeoutQueue() {
         return QueueBuilder.durable(ORDER_TIMEOUT_QUEUE)
-                .withArgument("x-message-ttl", 180000)
+                .withArgument("x-message-ttl", 180000) // 3 phút (dành cho test)
+               // .withArgument("x-message-ttl", 86400000) // 24 giờ (Thực tế)
                 .withArgument("x-dead-letter-exchange", ORDER_RESTORE_EXCHANGE)
                 .withArgument("x-dead-letter-routing-key", ORDER_RESTORE_RK)
                 .build();
@@ -91,6 +95,19 @@ public class RabbitMQConfig {
     @Bean
     public Binding orderConfirmBinding() {
         return BindingBuilder.bind(orderConfirmQueue()).to(orderExchange()).with(ORDER_CONFIRM_RK);
+    }
+
+    public static final String ORDER_FAIL_RK    = "routing.order.fail";
+    public static final String ORDER_FAIL_QUEUE = "q.order-fail";
+
+    @Bean
+    public Queue orderFailQueue() {
+        return new Queue(ORDER_FAIL_QUEUE, true);
+    }
+
+    @Bean
+    public Binding orderFailBinding() {
+        return BindingBuilder.bind(orderFailQueue()).to(orderExchange()).with(ORDER_FAIL_RK);
     }
 
     @Bean

@@ -5,5 +5,6 @@ public enum BodyType {
     Sedan,
     Coupe,
     Sportback,
-    Pickup
+    Pickup,
+    MPV
 }

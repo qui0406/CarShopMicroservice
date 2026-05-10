@@ -25,6 +25,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -130,18 +131,14 @@ public class InventoryServiceImpl implements InventoryService {
     public void deduceStock(List<Map<String, Object>> items) {
         for (Map<String, Object> item : items) {
             String carId = (String) item.get("carId");
-            Integer quantity = (Integer) item.get("quantity");
+            int quantity = (Integer) item.get("quantity");
 
-            log.info("Đang trừ kho cho CarId: {} với số lượng: {}", carId, quantity);
-
-            int currentStock = inventoryRepository.findQuantityByCarId(carId)
-                    .orElseThrow(() -> new AppException(ErrorCode.INVENTORY_IS_EMPTY));
-
-            if (currentStock < quantity) {
+            int rowsUpdated = inventoryRepository.deduceStock(carId, quantity);
+            if (rowsUpdated == 0) {
+                log.error("Không đủ số lượng trong kho hoặc không tìm thấy xe. CarId: {}", carId);
                 throw new AppException(ErrorCode.QUANTITY_NOT_ENOUGH);
             }
-
-            inventoryRepository.reduceStock(carId, quantity);
+            log.info("Đã trừ {} xe {} từ kho", quantity, carId);
         }
     }
 
@@ -164,28 +161,48 @@ public class InventoryServiceImpl implements InventoryService {
 
     @Override
     public PageResponse<InventoryResponse> getList(int page, int size) {
-        // Sắp xếp theo ngày cập nhật mới nhất
-        Pageable pageable = PageRequest.of(page - 1, size, Sort.by("updatedAt").descending());
-
+        // 1. Phân trang và sắp xếp
+        Pageable pageable = PageRequest.of(page - 1, size,
+                Sort.by("updatedAt").descending());
         Page<Inventory> inventoryPage = inventoryRepository.findAll(pageable);
 
-        // Gom tất cả carId trong Page hiện tại
+        // 2. Early Exit: Nếu trang không có dữ liệu, trả về Page rỗng ngay
+        if (inventoryPage.isEmpty()) {
+            return PageResponse.<InventoryResponse>builder()
+                    .currentPage(page)
+                    .pageSize(size)
+                    .totalPages(inventoryPage.getTotalPages())
+                    .totalElements(inventoryPage.getTotalElements())
+                    .data(Collections.emptyList())
+                    .build();
+        }
+
+        // 3. Gom carId để query 1 lần
         List<String> carIds = inventoryPage.getContent().stream()
                 .map(Inventory::getCarId)
+                // Có thể thêm .distinct() nếu 1 trang có nhiều dòng tồn kho của cùng 1 xe
+                .distinct()
                 .collect(Collectors.toList());
 
-        // Lấy Map Car để truy xuất nhanh, tránh N+1 Query
+        // 4. Lấy Map Car
         Map<String, Car> carMap = carRepository.findAllById(carIds).stream()
                 .collect(Collectors.toMap(Car::getId, c -> c));
 
+        // 5. Mapping sang DTO
         List<InventoryResponse> responses = inventoryPage.getContent().stream()
                 .map(inventory -> {
                     Car car = carMap.get(inventory.getCarId());
-                    // Lưu ý: Nếu Car bị xóa khỏi DB, car có thể null
+
+                    // Xử lý an toàn nếu Car bị xóa mềm hoặc mất đồng bộ dữ liệu
+                    if (car == null) {
+                        throw new AppException(ErrorCode.CAR_NOT_FOUND);
+                    }
+
                     return inventoryMapper.toInventoryResponse(inventory, car);
                 })
                 .collect(Collectors.toList());
 
+        // 6. Build response
         return PageResponse.<InventoryResponse>builder()
                 .currentPage(page)
                 .pageSize(size)

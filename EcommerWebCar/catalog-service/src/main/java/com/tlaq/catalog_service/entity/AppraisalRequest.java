@@ -7,6 +7,7 @@ import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -35,11 +36,36 @@ public class AppraisalRequest {
     @JoinColumn(name = "model_id")
     CarModel model;
 
+    String modelName; // Tên dòng xe khách hàng tự nhập
+    String trimLevel;
+    String engineSize;
+    String fuelType;
+    String transmission;
+
     Integer manufacturingYear;
     Integer mileage;
 
+    String vinNumber;
+    String licensePlate;
+    String color;
+    String interiorColor;
+
+    Integer numberOfOwners;
+    LocalDate registrationDate;
+
     @Column(columnDefinition = "TEXT")
     String conditionNote;
+
+    String contactName;
+    String contactPhone;
+    String contactEmail;
+    String location;
+
+    @Column(columnDefinition = "TEXT")
+    String accidentHistory;
+
+    @Column(columnDefinition = "TEXT")
+    String serviceHistory;
 
     BigDecimal expectedPrice;
     BigDecimal offeredPrice;

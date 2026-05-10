@@ -42,12 +42,16 @@ public interface OrdersRepository extends JpaRepository<Orders, String>, JpaSpec
             "MONTH(o.createdAt), SUM(o.totalAmount)) " +
             "FROM Orders o " +
             "WHERE YEAR(o.createdAt) = :year " +
-            "AND o.status = 'COMPLETED' " +
+            "AND o.status = :status " +
             "GROUP BY MONTH(o.createdAt) " +
             "ORDER BY MONTH(o.createdAt) ASC")
     List<MonthlyRevenueResponse> getMonthlyRevenue(@Param("year") int year, @Param("status") OrdersStatus status);
 
     long countByUserIdAndStatus(String userId, OrdersStatus status);
+    
+    long countByStatus(OrdersStatus status);
+
+    List<Orders> findByStatusAndTypeAndUpdatedAtBefore(OrdersStatus status, com.tlaq.ordering_service.entity.enums.OrdersType type, LocalDateTime time);
 
     boolean existsById(String id);
 }

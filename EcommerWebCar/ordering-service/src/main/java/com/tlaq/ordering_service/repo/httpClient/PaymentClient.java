@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
-@FeignClient(name = "payment-service", url = "${app.services.pay.url}",
+@FeignClient(name = "payment-service",
         configuration = { AuthenticationRequestInterceptor.class })
 public interface PaymentClient {
     @GetMapping("/api/payments/order/{orderId}")

@@ -39,9 +39,10 @@ public class OrderManagementController {
     @PatchMapping("/cancel-order/{orderId}")
     public ApiResponse<OrdersResponse> updateStatus(
             @PathVariable String orderId,
+            @RequestParam OrdersStatus status,
             @RequestParam(required = false) String note) {
         return ApiResponse.<OrdersResponse>builder()
-                .result(orderManagementService.updateStatus(orderId, note))
+                .result(orderManagementService.updateStatus(orderId, status, note))
                 .build();
     }
 

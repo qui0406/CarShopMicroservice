@@ -25,6 +25,7 @@ public class OrdersResponse {
     BigDecimal plateFeeAmount;  // Phí biển số
     BigDecimal insuranceAmount; // Bảo hiểm
     BigDecimal totalAmount;     // Tổng cộng
+    BigDecimal depositAmount;
 
     String note;
     List<OrdersDetailsResponse> orderItems;

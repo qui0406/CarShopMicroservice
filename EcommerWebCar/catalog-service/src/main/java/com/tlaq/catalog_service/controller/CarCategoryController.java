@@ -1,5 +1,6 @@
 package com.tlaq.catalog_service.controller;
 
+import com.tlaq.catalog_service.dto.PageResponse;
 import com.tlaq.catalog_service.dto.ApiResponse;
 import com.tlaq.catalog_service.dto.request.CarCategoryRequest;
 import com.tlaq.catalog_service.dto.response.CarCategoryResponse;
@@ -22,9 +23,12 @@ public class CarCategoryController {
     CarCategoryService carCategoryService;
 
     @GetMapping("/car-category/get-all-car-category")
-    public ApiResponse<List<CarCategoryResponse>> getCarCategories() {
-        return ApiResponse.<List<CarCategoryResponse>>builder()
-                .result(carCategoryService.getCarCategories())
+    public ApiResponse<PageResponse<CarCategoryResponse>> getCarCategories(
+            @RequestParam(value = "page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size
+    ) {
+        return ApiResponse.<PageResponse<CarCategoryResponse>>builder()
+                .result(carCategoryService.getCarCategories(page, size))
                 .build();
     }
 

@@ -44,30 +44,33 @@ public class VNPayConfig {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMddHHmmss");
         vnp_Params.put("vnp_CreateDate", formatter.format(cld.getTime()));
 
-        // Build hashData - KHÔNG encode
+        List<String> fieldNames = new ArrayList<>(vnp_Params.keySet());
+        Collections.sort(fieldNames);
         StringBuilder hashData = new StringBuilder();
         StringBuilder query = new StringBuilder();
-
-        for (Map.Entry<String, String> entry : vnp_Params.entrySet()) {
-            String key = entry.getKey();
-            String value = entry.getValue();
-            if (value != null && !value.isEmpty()) {
-                // hashData dùng UTF_8 encode
-                hashData.append(URLEncoder.encode(key, StandardCharsets.UTF_8))
-                        .append('=')
-                        .append(URLEncoder.encode(value, StandardCharsets.UTF_8))
-                        .append('&');
-                // query cũng dùng UTF_8
-                query.append(URLEncoder.encode(key, StandardCharsets.UTF_8))
-                        .append('=')
-                        .append(URLEncoder.encode(value, StandardCharsets.UTF_8))
-                        .append('&');
+        Iterator<String> itr = fieldNames.iterator();
+        while (itr.hasNext()) {
+            String fieldName = itr.next();
+            String fieldValue = vnp_Params.get(fieldName);
+            if ((fieldValue != null) && (fieldValue.length() > 0)) {
+                try {
+                    //Build hash data
+                    hashData.append(fieldName);
+                    hashData.append('=');
+                    hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                    //Build query
+                    query.append(URLEncoder.encode(fieldName, StandardCharsets.US_ASCII.toString()));
+                    query.append('=');
+                    query.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                if (itr.hasNext()) {
+                    query.append('&');
+                    hashData.append('&');
+                }
             }
         }
-
-        // Xóa dấu '&' cuối
-        hashData.deleteCharAt(hashData.length() - 1);
-        query.deleteCharAt(query.length() - 1);
 
         String vnp_SecureHash = VNPayUtils.hmacSHA512(hashSecret, hashData.toString());
 

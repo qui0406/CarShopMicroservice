@@ -14,9 +14,7 @@ import com.tlaq.catalog_service.entity.enums.AppraisalStatus;
 import com.tlaq.catalog_service.exceptions.AppException;
 import com.tlaq.catalog_service.exceptions.ErrorCode;
 import com.tlaq.catalog_service.mapper.AppraisalMapper;
-import com.tlaq.catalog_service.repo.AppraisalImageRepository;
-import com.tlaq.catalog_service.repo.AppraisalRequestRepository;
-import com.tlaq.catalog_service.repo.CarRepository;
+import com.tlaq.catalog_service.repo.*;
 import com.tlaq.catalog_service.repo.httpClient.IdentityClient;
 import com.tlaq.catalog_service.service.AppraisalService;
 import lombok.AccessLevel;
@@ -48,6 +46,8 @@ public class AppraisalServiceImpl implements AppraisalService {
     AppraisalRequestRepository appraisalRepository;
     AppraisalImageRepository imageRepository;
     CarRepository carRepository;
+    CarBranchRepository branchRepository;
+    CarModelRepository modelRepository;
     AppraisalMapper appraisalMapper;
     Cloudinary cloudinary;
     IdentityClient identityClient;
@@ -73,14 +73,16 @@ public class AppraisalServiceImpl implements AppraisalService {
     }
 
     @Override
-    public AppraisalResponse updateStatus(String id, AppraisalStatus status) {
+    public AppraisalResponse updateStatus(String id, boolean status) {
         AppraisalRequest request = appraisalRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.APPRAISAL_NOT_FOUND));
 
-        request.setStatus(status);
-
-        if (status == AppraisalStatus.BOUGHT) {
+        if (status) {
+            request.setStatus(AppraisalStatus.BOUGHT);
             request.setConditionNote(request.getConditionNote() + "\n[Hệ thống]: Showroom đã hoàn tất thu mua chiếc xe này.");
+        } else {
+            request.setStatus(AppraisalStatus.CANCELLED);
+            request.setConditionNote(request.getConditionNote() + "\n[Hệ thống]: Showroom đã từ chối/hủy giao dịch thu mua này.");
         }
 
         AppraisalRequest updatedRequest = appraisalRepository.save(request);
@@ -100,6 +102,13 @@ public class AppraisalServiceImpl implements AppraisalService {
         request.setUserId(profileId);
         request.setStatus(AppraisalStatus.PENDING);
 
+        // Gán thông tin Hãng và Model từ database dựa trên ID
+        request.setBranch(branchRepository.findById(dto.getBranchId()).orElse(null));
+        if (dto.getModelId() != null) {
+            request.setModel(modelRepository.findById(dto.getModelId()).orElse(null));
+        }
+
+
         uploadAppraisalImages(images, request);
 
         AppraisalRequest savedRequest = appraisalRepository.save(request);
@@ -113,7 +122,37 @@ public class AppraisalServiceImpl implements AppraisalService {
 
         request.setOfferedPrice(price);
         request.setConditionNote(request.getConditionNote() + "\n[Phản hồi Showroom]: " + note);
-        request.setStatus(AppraisalStatus.INSPECTING);
+        request.setStatus(AppraisalStatus.OFFERED);
+
+        return appraisalMapper.toResponse(appraisalRepository.save(request));
+    }
+
+    @Override
+    public AppraisalResponse respondToOffer(String id, boolean accepted) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userKeyCloakId = authentication.getName();
+        var profileRes = identityClient.getProfileByUserKeycloakId(userKeyCloakId);
+        if (profileRes.getResult() == null) throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        String profileId = profileRes.getResult().getId();
+
+        AppraisalRequest request = appraisalRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.APPRAISAL_NOT_FOUND));
+
+        if (!request.getUserId().equals(profileId)) {
+            throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        if (request.getStatus() != AppraisalStatus.INSPECTING) {
+            throw new AppException(ErrorCode.INVALID_STATUS_FOR_INVENTORY);
+        }
+
+        if (accepted) {
+            request.setStatus(AppraisalStatus.APPROVED);
+            request.setConditionNote(request.getConditionNote() + "\n[Khách hàng]: Đã đồng ý với mức giá đề nghị.");
+        } else {
+            request.setStatus(AppraisalStatus.CANCELLED);
+            request.setConditionNote(request.getConditionNote() + "\n[Khách hàng]: Đã từ chối mức giá đề nghị và hủy yêu cầu.");
+        }
 
         return appraisalMapper.toResponse(appraisalRepository.save(request));
     }
@@ -146,11 +185,25 @@ public class AppraisalServiceImpl implements AppraisalService {
             throw new AppException(ErrorCode.INVALID_STATUS_FOR_INVENTORY);
         }
 
+        if (request.getModel() == null) {
+            throw new AppException(ErrorCode.CAR_NOT_FOUND); // Nhân viên phải gán Model trước khi nhập kho
+        }
+
         Car car = Car.builder()
                 .carModel(request.getModel())
+                .vinNumber(request.getVinNumber())
+                .licensePlate(request.getLicensePlate())
+                .color(request.getColor())
+                .interiorColor(request.getInteriorColor())
+                .price(request.getOfferedPrice())
                 .isUsed(true)
                 .isReady(false)
+                .mileage(request.getMileage())
                 .manufacturingYear(request.getManufacturingYear())
+                .registrationDate(request.getRegistrationDate())
+                .numberOfOwners(request.getNumberOfOwners())
+                .accidentHistory(request.getAccidentHistory())
+                .serviceHistory(request.getServiceHistory())
                 .build();
 
         carRepository.save(car);

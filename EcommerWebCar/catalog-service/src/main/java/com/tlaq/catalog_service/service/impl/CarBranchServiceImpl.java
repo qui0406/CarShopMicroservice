@@ -14,6 +14,10 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import com.tlaq.catalog_service.dto.PageResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,9 +35,17 @@ public class CarBranchServiceImpl implements CarBranchService {
     Cloudinary cloudinary;
 
     @Override
-    public List<CarBranchResponse> getAll() {
-        List<CarBranch> carBranches = carBranchRepository.findAll();
-        return carBranchMapper.toDto(carBranches);
+    public PageResponse<CarBranchResponse> getAll(int page, int size) {
+        Pageable pageable = PageRequest.of(page - 1, size);
+        Page<CarBranch> carBranchPage = carBranchRepository.findAll(pageable);
+
+        return PageResponse.<CarBranchResponse>builder()
+                .currentPage(page)
+                .pageSize(carBranchPage.getSize())
+                .totalPages(carBranchPage.getTotalPages())
+                .totalElements(carBranchPage.getTotalElements())
+                .data(carBranchMapper.toDto(carBranchPage.getContent()))
+                .build();
     }
 
     @Override
