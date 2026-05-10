@@ -78,7 +78,7 @@ export const endpoints = {
     "get-monthly-revenue": (year = 2026) => `/ordering/staff/orders/revenue/monthly?year=${year}`,
 
     // Payment Service
-    "create-vnpay-url": (orderId, amount, type) => `/payment/payments/create-vnpay-url?orderId=${orderId}&amount=${amount}&type=${type}`,
+    "create-vnpay-url": "/payment/payments/create-vnpay-url",
     "confirm-offline": "/payment/payments/staff/confirm-offline",
     "create-offline-payment": "/payment/payments/staff/create-payment",
     "get-payment-status": orderId => `/payment/payments/status/${orderId}`,

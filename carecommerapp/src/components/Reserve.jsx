@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import axios, { endpoints, authApis } from '../configs/APIs';
 import { MyUserContext } from '../configs/MyContexts';
 
-const DEPOSIT_AMOUNT = 50_000_000;
+// Removed hardcoded DEPOSIT_AMOUNT to use value from backend
 const fmt = (n) => (n == null ? '0 đ' : Number(n).toLocaleString('vi-VN') + ' đ');
 
 export default function Reserve() {
@@ -23,7 +23,9 @@ export default function Reserve() {
     phone: '',
     idNumber: '',
     dob: '',
+    quantity: 1,
     address: '',
+    note: '',
   });
 
   useEffect(() => {
@@ -44,6 +46,7 @@ export default function Reserve() {
       try {
         const res = await axios.get(endpoints['get-product-by-id'](id));
         setCar(res.data?.result || res.data);
+
       } catch (err) { console.error(err); }
       finally { setLoading(false); }
     };
@@ -61,12 +64,18 @@ export default function Reserve() {
     setSubmitting(true);
     try {
       const orderRes = await authApis().post(endpoints['create-order'], {
-        carId: id,
-        quantity: 1,
-        receiverName: form.fullName,
-        receiverPhone: form.phone,
-        deliveryAddress: form.address,
-        note: form.idNumber ? `CCCD: ${form.idNumber}` : '',
+        note: form.note || '',
+        orderItems: [
+          {
+            carId: id,
+            fullName: form.fullName,
+            phoneNumber: form.phone,
+            address: form.address,
+            cccd: form.idNumber,
+            dob: form.dob,
+            quantity: Number(form.quantity) || 1
+          }
+        ]
       });
       const order = orderRes.data?.result || orderRes.data;
 
@@ -77,7 +86,7 @@ export default function Reserve() {
           form,
           car,
           paymentMethod,
-          depositAmount: DEPOSIT_AMOUNT,
+          depositAmount: order.depositAmount, // Dùng số tiền cọc từ backend
         }
       });
     } catch (err) {
@@ -105,7 +114,7 @@ export default function Reserve() {
 
   if (!car) return (
     <div style={s.centerPage}>
-      <p style={{ color:'#6c757d', fontWeight:600 }}>Không tìm thấy thông tin xe.</p>
+      <p style={{ color: '#6c757d', fontWeight: 600 }}>Không tìm thấy thông tin xe.</p>
       <button onClick={() => navigate(-1)} style={s.blueBtn}>← Quay lại</button>
     </div>
   );
@@ -116,8 +125,8 @@ export default function Reserve() {
       <nav style={s.nav}>
         <button onClick={() => navigate('/')} style={s.logo}>PRECISION</button>
         <div style={s.navLinks}>
-          {['DÒNG XE','MUA XE','DỊCH VỤ','TRẢI NGHIỆM','CỬA HÀNG'].map(item => (
-            <span key={item} style={{ ...s.navLink, ...(item==='MUA XE' ? s.navLinkActive : {}) }}>{item}</span>
+          {['DÒNG XE', 'MUA XE', 'DỊCH VỤ', 'TRẢI NGHIỆM', 'CỬA HÀNG'].map(item => (
+            <span key={item} style={{ ...s.navLink, ...(item === 'MUA XE' ? s.navLinkActive : {}) }}>{item}</span>
           ))}
         </div>
         <button style={s.reserveBtn}>Đặt xe ngay</button>
@@ -162,7 +171,7 @@ export default function Reserve() {
                 <div style={s.inputWrap}>
                   <span style={s.inputIcon}>👤</span>
                   <input style={s.input} placeholder="Nhập họ và tên" value={form.fullName}
-                    onChange={e => setForm(p => ({...p, fullName: e.target.value}))} required />
+                    onChange={e => setForm(p => ({ ...p, fullName: e.target.value }))} required />
                 </div>
               </div>
               <div style={s.fieldWrap}>
@@ -170,7 +179,7 @@ export default function Reserve() {
                 <div style={s.inputWrap}>
                   <span style={s.inputIcon}>📞</span>
                   <input style={s.input} placeholder="+84 XXX XXX XXX" type="tel" value={form.phone}
-                    onChange={e => setForm(p => ({...p, phone: e.target.value}))} required />
+                    onChange={e => setForm(p => ({ ...p, phone: e.target.value }))} required />
                 </div>
               </div>
               <div style={s.fieldWrap}>
@@ -178,7 +187,7 @@ export default function Reserve() {
                 <div style={s.inputWrap}>
                   <span style={s.inputIcon}>🪪</span>
                   <input style={s.input} placeholder="Nhập số định danh" value={form.idNumber}
-                    onChange={e => setForm(p => ({...p, idNumber: e.target.value}))} />
+                    onChange={e => setForm(p => ({ ...p, idNumber: e.target.value }))} />
                 </div>
               </div>
               <div style={s.fieldWrap}>
@@ -186,7 +195,15 @@ export default function Reserve() {
                 <div style={s.inputWrap}>
                   <span style={s.inputIcon}>📅</span>
                   <input style={{ ...s.input, color: form.dob ? '#111' : '#9ca3af' }} type="date" value={form.dob}
-                    onChange={e => setForm(p => ({...p, dob: e.target.value}))} />
+                    onChange={e => setForm(p => ({ ...p, dob: e.target.value }))} />
+                </div>
+              </div>
+              <div style={s.fieldWrap}>
+                <label style={s.label}>SỐ LƯỢNG XE</label>
+                <div style={s.inputWrap}>
+                  <span style={s.inputIcon}>🚗</span>
+                  <input style={s.input} type="number" min={1} max={10} value={form.quantity}
+                    onChange={e => setForm(p => ({ ...p, quantity: e.target.value }))} />
                 </div>
               </div>
             </div>
@@ -195,9 +212,20 @@ export default function Reserve() {
               <label style={s.label}>ĐỊA CHỈ THƯỜNG TRÚ</label>
               <div style={{ ...s.inputWrap, alignItems: 'flex-start', paddingTop: 12 }}>
                 <span style={{ ...s.inputIcon, marginTop: 2 }}>📍</span>
-                <textarea style={{ ...s.input, height: 100, resize: 'vertical' }} rows={3}
+                <textarea style={{ ...s.input, height: 80, resize: 'vertical' }} rows={3}
                   placeholder="Tên đường, Quận/Huyện, Tỉnh/Thành phố" value={form.address}
-                  onChange={e => setForm(p => ({...p, address: e.target.value}))} required />
+                  onChange={e => setForm(p => ({ ...p, address: e.target.value }))} required />
+              </div>
+            </div>
+
+            <div style={{ ...s.fieldWrap, marginTop: 20 }}>
+              <label style={s.label}>GHI CHÚ (tuỳ chọn)</label>
+              <div style={{ ...s.inputWrap, alignItems: 'flex-start', paddingTop: 12 }}>
+                <span style={{ ...s.inputIcon, marginTop: 2 }}>📝</span>
+                <textarea style={{ ...s.input, height: 72, resize: 'vertical' }} rows={2}
+                  placeholder="VD: Khách hàng muốn nhận xe vào cuối tuần, màu sắc ưa thích..."
+                  value={form.note}
+                  onChange={e => setForm(p => ({ ...p, note: e.target.value }))} />
               </div>
             </div>
 
@@ -236,7 +264,7 @@ export default function Reserve() {
 
             <p style={s.summaryMeta}>SỐ TIỀN ĐẶT CỌC</p>
             <p style={{ fontSize: '1.8rem', fontWeight: 900, color: '#111', margin: '4px 0 2px', fontStyle: 'italic' }}>
-              {fmt(DEPOSIT_AMOUNT)}
+              {(car.price / 100).toLocaleString('vi-VN')} VNĐ
             </p>
             <p style={{ fontSize: '0.72rem', color: '#9ca3af', margin: '0 0 16px' }}>
               *Số tiền cuối cùng sẽ được tính toán dựa trên cấu hình của bạn trong bước tiếp theo.
@@ -282,7 +310,7 @@ export default function Reserve() {
       <footer style={s.footer}>
         <div style={s.footerLeft}>
           <span style={s.footerLogo}>PRECISION</span>
-          {['THÔNG BÁO PHÁP LÝ','CHÍNH SÁCH BẢO MẬT','COOKIE','KHẢ NĂNG TRUY CẬP','HỆ THỐNG TỐ GIÁC'].map(l => (
+          {['THÔNG BÁO PHÁP LÝ', 'CHÍNH SÁCH BẢO MẬT', 'COOKIE', 'KHẢ NĂNG TRUY CẬP', 'HỆ THỐNG TỐ GIÁC'].map(l => (
             <a key={l} href="#" style={s.footerLink}>{l}</a>
           ))}
         </div>
@@ -300,78 +328,78 @@ export default function Reserve() {
 }
 
 const s = {
-  page:{ minHeight:'100vh', background:'#f8f9fa', fontFamily:"'Inter','Segoe UI',sans-serif", display:'flex', flexDirection:'column' },
-  centerPage:{ minHeight:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:16, background:'#fff' },
-  spinner:{ width:36, height:36, border:'3px solid #e5e7eb', borderTopColor:'#0a58ca', borderRadius:'50%', animation:'spin .8s linear infinite' },
-  spinnerSmall:{ width:14, height:14, border:'2px solid rgba(255,255,255,0.3)', borderTopColor:'#fff', borderRadius:'50%', display:'inline-block', animation:'spin .8s linear infinite' },
-  blueBtn:{ background:'#0a58ca', color:'#fff', border:'none', borderRadius:8, padding:'10px 22px', fontWeight:800, cursor:'pointer', fontSize:'0.85rem' },
+  page: { minHeight: '100vh', background: '#f8f9fa', fontFamily: "'Inter','Segoe UI',sans-serif", display: 'flex', flexDirection: 'column' },
+  centerPage: { minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, background: '#fff' },
+  spinner: { width: 36, height: 36, border: '3px solid #e5e7eb', borderTopColor: '#0a58ca', borderRadius: '50%', animation: 'spin .8s linear infinite' },
+  spinnerSmall: { width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', display: 'inline-block', animation: 'spin .8s linear infinite' },
+  blueBtn: { background: '#0a58ca', color: '#fff', border: 'none', borderRadius: 8, padding: '10px 22px', fontWeight: 800, cursor: 'pointer', fontSize: '0.85rem' },
 
   // Nav
-  nav:{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'0 56px', height:68, borderBottom:'1px solid #e5e7eb', background:'#fff', position:'sticky', top:0, zIndex:100 },
-  logo:{ fontWeight:900, fontSize:'1rem', letterSpacing:'3px', background:'none', border:'none', cursor:'pointer', color:'#111' },
-  navLinks:{ display:'flex', gap:36 },
-  navLink:{ fontSize:'0.78rem', fontWeight:600, color:'#6c757d', cursor:'pointer', letterSpacing:'0.3px', paddingBottom:2, borderBottom:'2px solid transparent' },
-  navLinkActive:{ color:'#0a58ca', borderBottom:'2px solid #0a58ca' },
-  reserveBtn:{ background:'#0a58ca', color:'#fff', border:'none', borderRadius:6, padding:'9px 22px', fontWeight:800, fontSize:'0.78rem', cursor:'pointer' },
+  nav: { display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 56px', height: 68, borderBottom: '1px solid #e5e7eb', background: '#fff', position: 'sticky', top: 0, zIndex: 100 },
+  logo: { fontWeight: 900, fontSize: '1rem', letterSpacing: '3px', background: 'none', border: 'none', cursor: 'pointer', color: '#111' },
+  navLinks: { display: 'flex', gap: 36 },
+  navLink: { fontSize: '0.78rem', fontWeight: 600, color: '#6c757d', cursor: 'pointer', letterSpacing: '0.3px', paddingBottom: 2, borderBottom: '2px solid transparent' },
+  navLinkActive: { color: '#0a58ca', borderBottom: '2px solid #0a58ca' },
+  reserveBtn: { background: '#0a58ca', color: '#fff', border: 'none', borderRadius: 6, padding: '9px 22px', fontWeight: 800, fontSize: '0.78rem', cursor: 'pointer' },
 
   // Stepper
-  stepperWrap:{ background:'#fff', borderBottom:'1px solid #e5e7eb', padding:'28px 56px' },
-  stepperInner:{ display:'flex', alignItems:'center', maxWidth:480 },
-  step:{ display:'flex', flexDirection:'column', alignItems:'center', gap:8 },
-  stepCircle:{ width:44, height:44, borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', fontWeight:900, fontSize:'0.9rem' },
-  stepDone:{ background:'#fff', border:'2px solid #0a58ca', color:'#0a58ca' },
-  stepActive:{ background:'#0a58ca', color:'#fff', border:'2px solid #0a58ca' },
-  stepInactive:{ background:'#fff', border:'2px solid #e5e7eb', color:'#9ca3af' },
-  stepLabel:{ fontSize:'0.65rem', fontWeight:700, color:'#6c757d', letterSpacing:'1.5px', textTransform:'uppercase' },
-  stepLine:{ flex:1, height:2, margin:'0 12px', marginBottom:24 },
+  stepperWrap: { background: '#fff', borderBottom: '1px solid #e5e7eb', padding: '28px 56px' },
+  stepperInner: { display: 'flex', alignItems: 'center', maxWidth: 480 },
+  step: { display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 },
+  stepCircle: { width: 44, height: 44, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '0.9rem' },
+  stepDone: { background: '#fff', border: '2px solid #0a58ca', color: '#0a58ca' },
+  stepActive: { background: '#0a58ca', color: '#fff', border: '2px solid #0a58ca' },
+  stepInactive: { background: '#fff', border: '2px solid #e5e7eb', color: '#9ca3af' },
+  stepLabel: { fontSize: '0.65rem', fontWeight: 700, color: '#6c757d', letterSpacing: '1.5px', textTransform: 'uppercase' },
+  stepLine: { flex: 1, height: 2, margin: '0 12px', marginBottom: 24 },
 
   // Content
-  content:{ display:'grid', gridTemplateColumns:'1fr 420px', gap:32, padding:'48px 56px', flex:1, alignItems:'start' },
-  leftCol:{ display:'flex', flexDirection:'column' },
-  rightCol:{ display:'flex', flexDirection:'column', gap:20 },
+  content: { display: 'grid', gridTemplateColumns: '1fr 420px', gap: 32, padding: '48px 56px', flex: 1, alignItems: 'start' },
+  leftCol: { display: 'flex', flexDirection: 'column' },
+  rightCol: { display: 'flex', flexDirection: 'column', gap: 20 },
 
-  formTitle:{ fontSize:'1.7rem', fontWeight:900, color:'#111', margin:'0 0 6px', letterSpacing:'-0.5px' },
-  formSub:{ fontSize:'0.85rem', color:'#6c757d', margin:0, fontWeight:500 },
+  formTitle: { fontSize: '1.7rem', fontWeight: 900, color: '#111', margin: '0 0 6px', letterSpacing: '-0.5px' },
+  formSub: { fontSize: '0.85rem', color: '#6c757d', margin: 0, fontWeight: 500 },
 
   // Form fields
-  fieldGrid:{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'20px 24px', marginBottom:8 },
-  fieldWrap:{ display:'flex', flexDirection:'column', gap:8 },
-  label:{ fontSize:'0.65rem', fontWeight:900, color:'#6c757d', textTransform:'uppercase', letterSpacing:'1.5px', margin:0 },
-  inputWrap:{ display:'flex', alignItems:'center', gap:8, border:'1px solid #e5e7eb', borderRadius:8, padding:'0 12px', background:'#fff', transition:'border .2s' },
-  inputIcon:{ fontSize:'0.9rem', flexShrink:0, lineHeight:1, opacity:0.5 },
-  input:{ border:'none', outline:'none', width:'100%', padding:'12px 0', fontSize:'0.88rem', fontWeight:600, color:'#111', background:'transparent' },
-  textarea:{ border:'none', outline:'none', width:'100%', padding:'12px 0', fontSize:'0.88rem', fontWeight:600, color:'#111', background:'transparent', resize:'vertical' },
+  fieldGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px 24px', marginBottom: 8 },
+  fieldWrap: { display: 'flex', flexDirection: 'column', gap: 8 },
+  label: { fontSize: '0.65rem', fontWeight: 900, color: '#6c757d', textTransform: 'uppercase', letterSpacing: '1.5px', margin: 0 },
+  inputWrap: { display: 'flex', alignItems: 'center', gap: 8, border: '1px solid #e5e7eb', borderRadius: 8, padding: '0 12px', background: '#fff', transition: 'border .2s' },
+  inputIcon: { fontSize: '0.9rem', flexShrink: 0, lineHeight: 1, opacity: 0.5 },
+  input: { border: 'none', outline: 'none', width: '100%', padding: '12px 0', fontSize: '0.88rem', fontWeight: 600, color: '#111', background: 'transparent' },
+  textarea: { border: 'none', outline: 'none', width: '100%', padding: '12px 0', fontSize: '0.88rem', fontWeight: 600, color: '#111', background: 'transparent', resize: 'vertical' },
 
   // Terms
-  termsRow:{ display:'flex', gap:12, alignItems:'flex-start', cursor:'pointer', marginTop:28 },
-  checkbox:{ marginTop:2, flexShrink:0 },
-  termsText:{ fontSize:'0.82rem', color:'#374151', lineHeight:1.6, fontWeight:500 },
-  termsLink:{ color:'#0a58ca', fontWeight:700, textDecoration:'none' },
+  termsRow: { display: 'flex', gap: 12, alignItems: 'flex-start', cursor: 'pointer', marginTop: 28 },
+  checkbox: { marginTop: 2, flexShrink: 0 },
+  termsText: { fontSize: '0.82rem', color: '#374151', lineHeight: 1.6, fontWeight: 500 },
+  termsLink: { color: '#0a58ca', fontWeight: 700, textDecoration: 'none' },
 
-  errorBox:{ background:'#fef2f2', border:'1px solid #fecaca', borderRadius:10, padding:'12px 16px', color:'#dc2626', fontWeight:700, fontSize:'0.82rem', marginTop:16 },
+  errorBox: { background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 10, padding: '12px 16px', color: '#dc2626', fontWeight: 700, fontSize: '0.82rem', marginTop: 16 },
 
   // Right summary
-  summaryCard:{ background:'#fff', border:'1px solid #e5e7eb', borderRadius:14, padding:'28px 24px' },
-  sectionLabel:{ fontSize:'0.6rem', fontWeight:900, color:'#9ca3af', letterSpacing:'2.5px', margin:'0 0 20px', textTransform:'uppercase' },
-  summaryGrid:{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 },
-  summaryMeta:{ fontSize:'0.65rem', fontWeight:800, color:'#9ca3af', textTransform:'uppercase', letterSpacing:'1px', margin:'0 0 4px' },
-  summaryVal:{ fontWeight:900, color:'#111', margin:0, fontSize:'0.95rem' },
-  divider:{ height:1, background:'#f1f5f9', margin:'20px 0' },
-  suggestionBox:{ background:'#f0f7ff', border:'1px solid #bfdbfe', borderRadius:8, padding:'12px 14px', fontSize:'0.78rem', color:'#374151', lineHeight:1.6 },
+  summaryCard: { background: '#fff', border: '1px solid #e5e7eb', borderRadius: 14, padding: '28px 24px' },
+  sectionLabel: { fontSize: '0.6rem', fontWeight: 900, color: '#9ca3af', letterSpacing: '2.5px', margin: '0 0 20px', textTransform: 'uppercase' },
+  summaryGrid: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 },
+  summaryMeta: { fontSize: '0.65rem', fontWeight: 800, color: '#9ca3af', textTransform: 'uppercase', letterSpacing: '1px', margin: '0 0 4px' },
+  summaryVal: { fontWeight: 900, color: '#111', margin: 0, fontSize: '0.95rem' },
+  divider: { height: 1, background: '#f1f5f9', margin: '20px 0' },
+  suggestionBox: { background: '#f0f7ff', border: '1px solid #bfdbfe', borderRadius: 8, padding: '12px 14px', fontSize: '0.78rem', color: '#374151', lineHeight: 1.6 },
 
   // Payment method
-  methodList:{ display:'flex', flexDirection:'column', gap:4, marginBottom:20 },
-  methodRow:{ display:'flex', alignItems:'center', gap:14, padding:'14px 16px', borderRadius:10, cursor:'pointer', transition:'background .15s', border:'1.5px solid transparent', userSelect:'none' },
-  methodRowActive:{ border:'1.5px solid #0a58ca', background:'#eff6ff' },
+  methodList: { display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 20 },
+  methodRow: { display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', borderRadius: 10, cursor: 'pointer', transition: 'background .15s', border: '1.5px solid transparent', userSelect: 'none' },
+  methodRowActive: { border: '1.5px solid #0a58ca', background: '#eff6ff' },
 
-  payBtn:{ width:'100%', background:'#0a58ca', color:'#fff', border:'none', borderRadius:10, padding:'16px', fontWeight:900, fontSize:'0.85rem', letterSpacing:'0.5px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:10, marginBottom:18, transition:'background .2s' },
-  pciRow:{ display:'flex', alignItems:'center', justifyContent:'center', gap:8 },
-  pciIcon:{ fontSize:'0.9rem', opacity:0.5 },
-  pciText:{ fontSize:'0.65rem', fontWeight:800, color:'#9ca3af', letterSpacing:'1.5px' },
+  payBtn: { width: '100%', background: '#0a58ca', color: '#fff', border: 'none', borderRadius: 10, padding: '16px', fontWeight: 900, fontSize: '0.85rem', letterSpacing: '0.5px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 18, transition: 'background .2s' },
+  pciRow: { display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  pciIcon: { fontSize: '0.9rem', opacity: 0.5 },
+  pciText: { fontSize: '0.65rem', fontWeight: 800, color: '#9ca3af', letterSpacing: '1.5px' },
 
   // Footer
-  footer:{ borderTop:'1px solid #e5e7eb', background:'#fff', padding:'24px 56px', display:'flex', alignItems:'center', justifyContent:'space-between', flexWrap:'wrap', gap:12, marginTop:'auto' },
-  footerLeft:{ display:'flex', alignItems:'center', gap:28, flexWrap:'wrap' },
-  footerLogo:{ fontWeight:900, fontSize:'0.85rem', letterSpacing:'3px', color:'#111' },
-  footerLink:{ fontSize:'0.72rem', color:'#6c757d', fontWeight:600, textDecoration:'none', letterSpacing:'0.5px' },
+  footer: { borderTop: '1px solid #e5e7eb', background: '#fff', padding: '24px 56px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginTop: 'auto' },
+  footerLeft: { display: 'flex', alignItems: 'center', gap: 28, flexWrap: 'wrap' },
+  footerLogo: { fontWeight: 900, fontSize: '0.85rem', letterSpacing: '3px', color: '#111' },
+  footerLink: { fontSize: '0.72rem', color: '#6c757d', fontWeight: 600, textDecoration: 'none', letterSpacing: '0.5px' },
 };
