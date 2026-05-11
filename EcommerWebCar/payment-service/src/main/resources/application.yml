@@ -7,7 +7,7 @@ spring:
   application:
     name: payment-service
   datasource:
-    url: "jdbc:mysql://car_mysql:3306/payment-ecommer-car"
+    url: "jdbc:mysql://localhost:3306/payment-ecommer-car"
     driverClassName: "com.mysql.cj.jdbc.Driver"
     username: root
     password: 12345678
@@ -61,4 +61,4 @@ payment:
 idp:
   url: http://localhost:8180/realms/anhqui/protocol/openid-connect/token
   client-id: ecommer-app
-  client-secret: 2anScggPiIAmbA5mW5SI5JnGZAcCVveo
+  client-secret: lVaXmGMg3bmpkAcDSvBcqhiu1QSEiUGG

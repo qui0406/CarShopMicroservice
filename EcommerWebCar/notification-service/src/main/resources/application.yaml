@@ -34,7 +34,7 @@ eureka:
 idp:
   url: http://localhost:8180
   client-id: ecommer-app
-  client-secret: 2anScggPiIAmbA5mW5SI5JnGZAcCVveo
+  client-secret: lVaXmGMg3bmpkAcDSvBcqhiu1QSEiUGG
 
 
 logging:

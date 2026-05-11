@@ -287,6 +287,15 @@ services:
     networks:
       - car_network
 
+  frontend:
+    image: ${DOCKER_USERNAME:-anhqui}/ecommercar-frontend:latest
+    container_name: frontend
+    ports:
+      - "3000:80"
+    restart: always
+    networks:
+      - car_network
+
 volumes:
   redis_data:
   mysql_data:

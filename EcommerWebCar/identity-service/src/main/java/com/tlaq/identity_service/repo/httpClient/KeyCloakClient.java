@@ -19,18 +19,18 @@ public interface KeyCloakClient {
     @PostMapping(
             value = "/realms/anhqui/protocol/openid-connect/token",
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    TokenExchangeResponse exchangeToken(@QueryMap TokenExchangeParam param);
+    TokenExchangeResponse exchangeToken(@RequestBody TokenExchangeParam param);
 
     @PostMapping(value = "/admin/realms/anhqui/users", consumes = MediaType.APPLICATION_JSON_VALUE)
     ResponseEntity<?> createUser(@RequestHeader("authorization") String token, @RequestBody UserCreationParam param);
 
     @PostMapping(value = "/realms/anhqui/protocol/openid-connect/token",
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    TokenResponse login(@QueryMap Authenticated request);
+    TokenResponse login(@RequestBody Authenticated request);
 
     @PostMapping(value = "/realms/anhqui/protocol/openid-connect/token/introspect",
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)
-    IntrospectResponse introspect(@QueryMap Map<String, ?> formParams);
+    IntrospectResponse introspect(@RequestBody Map<String, ?> formParams);
 
     @PostMapping(value = "/realms/anhqui/protocol/openid-connect/token",
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE)

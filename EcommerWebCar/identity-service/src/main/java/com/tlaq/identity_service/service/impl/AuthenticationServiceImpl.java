@@ -137,8 +137,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     .password(request.getPassword())
                     .build());
         } catch (FeignException.Unauthorized e) {
+            log.error("Keycloak Unauthorized error: {}", e.contentUTF8());
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         } catch (FeignException e) {
+            log.error("Feign error: Status {}, Message: {}", e.status(), e.getMessage());
+            log.error("Full body: {}", e.contentUTF8());
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
         }
     }

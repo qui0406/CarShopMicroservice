@@ -22,10 +22,10 @@ import com.tlaq.payment_service.entity.PaymentTransaction;
 @RestController
 @RequestMapping("/payments")
 @RequiredArgsConstructor
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@FieldDefaults(level = AccessLevel.PRIVATE)
 public class VNPayCallbackController {
-    VNPayService vnPayService;
-    PaymentTransactionRepository transactionRepository;
+    final VNPayService vnPayService;
+    final PaymentTransactionRepository transactionRepository;
 
     @Value("${frontend.url:http://localhost:3000}")
     String frontendUrl;
