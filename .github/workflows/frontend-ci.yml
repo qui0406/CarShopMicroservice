@@ -49,7 +49,7 @@ jobs:
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ubuntu
-        key: |-----BEGIN RSA PRIVATE KEY-----
+        key: -----BEGIN RSA PRIVATE KEY-----
 MIIEpAIBAAKCAQEAr6VlQReB/CkLxA2ulz51jOBil4GGG2czAYkHDgEzPde2DwSp
 Fwh+m6g7K9EDBXVjzqVqPx5NCKD8x4tAMHTskGbmqFnQD/uKwof4uDkc6HvWHOES
 QGY8jVYFA5OkJJBngXrQAeRPQXZRcGMXSZ0ltGecMG6Weug94QxocaKwvyU7b34x
