@@ -34,8 +34,9 @@ jobs:
         context: ./carecommerapp
         push: true
         tags: anhqui0406/ecommer-frontend:latest
+        platforms: linux/amd64
         build-args: |
-          REACT_APP_API_URL=http://13.212.7.203:8888/api/v1
+          REACT_APP_API_URL=http://3.1.245.236:8888/api/v1
 
   deploy:
     runs-on: ubuntu-latest
