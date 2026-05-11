@@ -49,7 +49,33 @@ jobs:
       with:
         host: ${{ secrets.EC2_HOST }}
         username: ubuntu
-        key: ${{ secrets.EC2_SSH_KEY }}
+        key: |-----BEGIN RSA PRIVATE KEY-----
+MIIEpAIBAAKCAQEAr6VlQReB/CkLxA2ulz51jOBil4GGG2czAYkHDgEzPde2DwSp
+Fwh+m6g7K9EDBXVjzqVqPx5NCKD8x4tAMHTskGbmqFnQD/uKwof4uDkc6HvWHOES
+QGY8jVYFA5OkJJBngXrQAeRPQXZRcGMXSZ0ltGecMG6Weug94QxocaKwvyU7b34x
+hKwjXMKqjrI4nYr34NVTu/B/dy2U6urhmZKZeTjiWfxQnaefKr8yvkyUHJ1G6NWZ
+zLYKZPg95+hhPL6oRG7HAsjCfmEmXvSdjV4m9KpypTZtNGykbAq6T2gZam4DPDYX
+LE4FT+8spi3VfHeqkkoudNy9jJTLj9oKoQAwTwIDAQABAoIBAQCoFeM70z81DCKS
+T3WQjtj3I5O14OFxP+TzxynVIRjkSZWT8aXOwPZIB0n4uF/nzVrh2jI+jMSzSTwd
+yQh4Vqw70/1PhgMyCEnVt0ExKpabdEaGBGzu6+duaa8KqTMfOoGSyvBbnxypTIzK
+vEkAzT3T0oMJZgrjO3Rb9P/OHx59C5Fn/Cv2H7g9as4baFU+ow3Mkc0VPpsgibDY
+keTQ4JB69mbJ1As9CmOTGR5sqdzth2eF7YU84mHfv/tnPM2SfI9Zwi1pB28iZ1kZ
+xK6vM9fGUAANTvrmGivUnot+kO71g37H9A6/yt7glQcJVlqrJNzoIrlUf7NEJlpS
+X4WbS2khAoGBAONwxefWjrPFEqldupNWRL2NKfSJGAUlMtCVMTM+vlessAV59OqY
+DCh88s5EpbyOeAgeuSQdU8zv2HiOyuozyEQYMwkx7mTBC8LxFfv2nTZqdiflXlHe
+h90P0ujNuFByeyxKsedB4pwrWZ7gfQ4UzkjK/90dObuG9D6ctgVENNkrAoGBAMWz
+p9RwVS9WwbSnqKqfKhf5pAzlLTdlonY265rp5un1ZAl2+2jkIQ2jNx6eWt0C2oao
+dK5U+sLP+r5QaWKHzXu1Kp4DUW0YqOwaTECvahCVA5fw2N+Sex16Dh4HhaMpBO3r
+J0GEdq6ioikFfjZgl/4tHEz4PzLLBVjQGB5EUKttAoGATEB+2V9hsHud6hJ2fvcp
+TLOLIWTlHLR/+NZMDHY4soQ+71cX+Z7IVLqvXOA/AJxzOaWzRJxggBDZbnHRLfv2
+ZH4IfkizOCxQmSbiy/q+coP24SFRIfmNa1vmxg5SgQYgrZTNWE8Kfnk6Lr3sr0/i
+aR1F8wfdVzXDpUo87D8VyMkCgYEApv4KbDH6ckMI2Yyotn488wVl4ZKPL/TEVrAr
+MK4T41joh+odkErp9HgB7fX6cCah6Q5PiJW1PmqotKp9acGl+rFbbx8EX29t+Ah6
+kkTZBWqpH2VL+wTiw1I+rHTUF65lQIXZoci+6uHqsVW3dzz+Ba+a8RTbZQ8B1DPp
+u18e+L0CgYA9xTGoB+fFvtaN48MPb6nq5TcnXgyXYxazrCnC3fq4+k9pmOTl8zTb
+RH6D2p08gd383pz1lb74f2T9JkUjE5R6ZJQBLs6GFfEfo3Iz7yoJPJ+bU4yyfpFo
+LrTBBt4lVmI8UJvacdeS97WBjYgVwJML5r06n0CoK8h2xdEYpzh7Qg==
+-----END RSA PRIVATE KEY-----
         script: |
           cd ~/CarShopMicroservice/EcommerWebCar
           docker compose pull frontend
