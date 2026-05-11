@@ -1,7 +1,7 @@
 import axios from "axios";
 import cookie from "react-cookies";
 
-const BASE_URL = "http://localhost:8888/api/v1";
+const BASE_URL = "http://13.212.7.203:8888/api/v1";
 
 export const endpoints = {
     //Identity service

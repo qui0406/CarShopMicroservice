@@ -1,30 +1,16 @@
-# Stage 1: Build
-FROM node:18-alpine AS build
-
-# Đặt thư mục làm việc trong container
+# Build stage
+FROM node:18-alpine as build-stage
 WORKDIR /app
-
-# Copy file cấu hình package để cài đặt dependencies trước
-# (Tận dụng cơ chế cache layer của Docker)
 COPY package*.json ./
-
-# Cài đặt các thư viện cần thiết
 RUN npm install
-
-# Copy toàn bộ code vào
 COPY . .
 
-# Build ứng dụng cho môi trường production
 RUN npm run build
 
-# Stage 2: Serve
-FROM nginx:alpine
-
-# Copy toàn bộ file build từ stage 1 sang thư mục html của Nginx
-COPY --from=build /app/build /usr/share/nginx/html
-
-# Expose port 80 cho web server
+# Production stage
+FROM nginx:stable-alpine
+COPY --from=build-stage /app/build /usr/share/nginx/html
+# Nếu bạn dùng thư mục build thay vì dist thì sửa lại /app/build
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
-
-# Chạy Nginx
 CMD ["nginx", "-g", "daemon off;"]
