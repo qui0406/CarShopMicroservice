@@ -22,18 +22,34 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v4
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
       with:
-        node-version: '18'
-        cache: 'npm'
-        cache-dependency-path: carecommerapp/package-lock.json
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Install dependencies
-      run: npm install
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./carecommerapp
+        push: true
+        tags: anhqui0406/ecommer-frontend:latest
+        build-args: |
+          REACT_APP_API_URL=http://13.212.7.203:8888/api/v1
 
-    - name: Build project
-      run: npm run build --if-present
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
 
-    - name: Build Docker Image
-      run: docker build -t carecommerapp:latest .
+    steps:
+    - name: Deploy to EC2
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          cd ~/CarShopMicroservice/EcommerWebCar
+          docker compose pull frontend
+          docker compose up -d frontend
