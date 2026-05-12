@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
 
-@FeignClient(name = "key-cloak-client", url = "http://localhost:8180")
+@FeignClient(name = "key-cloak-client", url = "${idp.url}")
 public interface KeyCloakClient {
 
     @PostMapping(

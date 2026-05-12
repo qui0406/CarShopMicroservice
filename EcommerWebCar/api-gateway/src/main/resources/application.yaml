@@ -76,6 +76,9 @@ idp:
   client-id: ecommer-app
   client-secret: lVaXmGMg3bmpkAcDSvBcqhiu1QSEiUGG
 
+app:
+  base-url: http://localhost:8080/ecommer-car-web
+
 
 
 logging:

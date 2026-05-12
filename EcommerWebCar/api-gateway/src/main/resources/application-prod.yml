@@ -7,3 +7,6 @@ eureka:
 
 idp:
   url: http://keycloak:8080
+
+app:
+  base-url: http://api-gateway:8888

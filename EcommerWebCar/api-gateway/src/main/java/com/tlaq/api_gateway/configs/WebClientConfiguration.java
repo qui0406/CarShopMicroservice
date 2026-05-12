@@ -17,7 +17,7 @@ public class WebClientConfiguration {
     @Bean
     public WebClient webClient() {
         return WebClient.builder()
-                .baseUrl("http://localhost:8080/ecommer-car-web")
+                .baseUrl("${app.base-url:http://localhost:8080/ecommer-car-web}")
                 .build();
     }
 

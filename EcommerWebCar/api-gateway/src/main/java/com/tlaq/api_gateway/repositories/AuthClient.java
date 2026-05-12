@@ -12,7 +12,7 @@ import org.springframework.web.service.annotation.HttpExchange;
 import org.springframework.web.service.annotation.PostExchange;
 import reactor.core.publisher.Mono;
 
-@HttpExchange("http://localhost:8180")
+@HttpExchange("${idp.url}")
 public interface AuthClient {
     @PostExchange(url = "/realms/anhqui/protocol/openid-connect/token/introspect",
             contentType = MediaType.APPLICATION_FORM_URLENCODED_VALUE)

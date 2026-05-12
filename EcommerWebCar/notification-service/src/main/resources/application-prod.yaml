@@ -14,8 +14,3 @@ spring:
           issuer-uri: http://keycloak:8080/realms/anhqui
   rabbitmq:
     host: rabbitmq
-
-app:
-  services:
-    identity:
-      url: http://identity-service:8081

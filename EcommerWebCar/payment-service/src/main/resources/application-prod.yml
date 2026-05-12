@@ -18,3 +18,12 @@ app:
       url: http://catalog-service:8082
     ordering:
       url: http://ordering-service:8083
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://keycloak:8080/realms/anhqui
+  rabbitmq:
+    host: rabbitmq
