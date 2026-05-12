@@ -1,0 +1,23 @@
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://eureka-server:8761/eureka/
+  instance:
+    hostname: chat-service
+
+idp:
+  url: http://keycloak:8080/realms/anhqui/protocol/openid-connect/token
+
+spring:
+  data:
+    mongodb:
+      uri: mongodb://root:root@mongodb:27017/chat?authSource=admin
+
+app:
+  services:
+    identity:
+      url: http://identity-service:8081
+    catalog:
+      url: http://catalog-service:8082
+    ordering:
+      url: http://ordering-service:8083

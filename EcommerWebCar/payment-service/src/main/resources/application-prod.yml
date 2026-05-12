@@ -1,0 +1,20 @@
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-server:8761/eureka/
+
+idp:
+  url: http://keycloak:8080/realms/anhqui/protocol/openid-connect/token
+
+payment:
+  vnpay:
+    return-url: http://3.1.245.236:8888/api/v1/payment/payments/vnpay-callback
+
+app:
+  services:
+    identity:
+      url: http://identity-service:8081
+    catalog:
+      url: http://catalog-service:8082
+    ordering:
+      url: http://ordering-service:8083

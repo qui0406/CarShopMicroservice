@@ -96,6 +96,7 @@ services:
     environment:
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - IDP_URL=http://keycloak:8080
+      - SPRING_PROFILES_ACTIVE=prod
     depends_on:
       - eureka-server
     networks:
@@ -123,6 +124,7 @@ services:
       - SPRING_RABBITMQ_HOST=rabbitmq
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - IDP_URL=http://keycloak:8080
+      - SPRING_PROFILES_ACTIVE=prod
     depends_on:
       car_mysql:
         condition: service_healthy
@@ -149,6 +151,7 @@ services:
       - SPRING_RABBITMQ_HOST=rabbitmq
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
       - IDP_URL=http://keycloak:8080
+      - SPRING_PROFILES_ACTIVE=prod
     depends_on:
       car_mysql:
         condition: service_healthy
@@ -177,6 +180,7 @@ services:
       - JAKARTA_PERSISTENCE_JDBC_PASSWORD=12345678
       - SPRING_RABBITMQ_HOST=rabbitmq
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_PROFILES_ACTIVE=prod
     depends_on:
       car_mysql:
         condition: service_healthy
@@ -204,6 +208,7 @@ services:
       - JAKARTA_PERSISTENCE_JDBC_USER=root
       - JAKARTA_PERSISTENCE_JDBC_PASSWORD=12345678
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_PROFILES_ACTIVE=prod
     depends_on:
       car_mysql:
         condition: service_healthy
@@ -221,6 +226,7 @@ services:
     environment:
       - SPRING_RABBITMQ_HOST=rabbitmq
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_PROFILES_ACTIVE=prod
     depends_on:
       rabbitmq:
         condition: service_started
@@ -259,6 +265,7 @@ services:
     environment:
       - SPRING_DATA_MONGODB_URI=mongodb://root:root@mongodb:27017/chat?authSource=admin
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_PROFILES_ACTIVE=prod
     depends_on:
       - mongodb
       - eureka-server
@@ -279,6 +286,7 @@ services:
       - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MySQL8Dialect
       - SPRING_JPA_HIBERNATE_DIALECT=org.hibernate.dialect.MySQL8Dialect
       - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - SPRING_PROFILES_ACTIVE=prod
     depends_on:
       car_mysql:
         condition: service_healthy
