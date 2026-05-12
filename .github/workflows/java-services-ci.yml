@@ -66,12 +66,28 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ~/CarShopMicroservice/EcommerWebCar
+            
+            # TỰ ĐỘNG TẠO FILE .ENV VỚI IP THẬT
+            echo "PUBLIC_IP=3.1.245.236" > .env
+            echo "KEYCLOAK_PORT=8180" >> .env
+            echo "EUREKA_PORT=8761" >> .env
+            echo "API_GATEWAY_PORT=8888" >> .env
+            echo "FRONTEND_PORT=3000" >> .env
+            echo "KEYCLOAK_URL=http://3.1.245.236:8180" >> .env
+            echo "EUREKA_URL=http://3.1.245.236:8761/eureka/" >> .env
+            echo "API_GATEWAY_URL=http://3.1.245.236:8888" >> .env
+            echo "FRONTEND_URL=http://3.1.245.236:3000" >> .env
+            echo "IDENTITY_SERVICE_URL=http://3.1.245.236:8081" >> .env
+            echo "CATALOG_SERVICE_URL=http://3.1.245.236:8082" >> .env
+            echo "ORDERING_SERVICE_URL=http://3.1.245.236:8083" >> .env
+            echo "PAYMENT_SERVICE_URL=http://3.1.245.236:8084" >> .env
+
             docker system prune -af
             rm -rf cms-service
             if command -v docker-compose >/dev/null 2>&1; then
               docker-compose pull
-              docker-compose up -d
+              docker-compose up -d --force-recreate
             else
               docker compose pull
-              docker compose up -d
+              docker compose up -d --force-recreate
             fi

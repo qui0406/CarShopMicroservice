@@ -21,31 +21,31 @@ spring:
     show-sql: true
 
   rabbitmq:
-    host: localhost
-    port: 5672
-    username: guest
-    password: guest
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
 
   security:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8180/realms/anhqui
+          issuer-uri: ${KEYCLOAK_URL:http://localhost:8180}/realms/anhqui
 
 cloudinary:
-  cloud-name: do43r8nr0
-  api-key: 947875495844325
-  api-secret: evQEPk5TbxIMpCWbbXl8sLMbo6A
+  cloud-name: ${CLOUDINARY_NAME:do43r8nr0}
+  api-key: ${CLOUDINARY_API_KEY:947875495844325}
+  api-secret: ${CLOUDINARY_API_SECRET:evQEPk5TbxIMpCWbbXl8sLMbo6A}
 
 idp:
-  url: http://localhost:8180
-  client-id: ecommer-app
-  client-secret: lVaXmGMg3bmpkAcDSvBcqhiu1QSEiUGG
+  url: ${KEYCLOAK_URL:http://localhost:8180}
+  client-id: ${KEYCLOAK_CLIENT_ID:ecommer-app}
+  client-secret: ${KEYCLOAK_CLIENT_SECRET:lVaXmGMg3bmpkAcDSvBcqhiu1QSEiUGG}
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
     register-with-eureka: true
     fetch-registry: true
   instance:

@@ -83,6 +83,8 @@ services:
     container_name: eureka-server
     ports:
       - "8761:8761"
+    environment:
+      - EUREKA_HOSTNAME=eureka-server
     networks:
       - car_network
 
@@ -92,9 +94,10 @@ services:
     ports:
       - "8888:8888"
     environment:
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      - IDP_URL=http://keycloak:8080
+      - EUREKA_URL=${EUREKA_URL}
+      - KEYCLOAK_URL=${KEYCLOAK_URL}
       - SPRING_PROFILES_ACTIVE=prod
+      - FRONTEND_URL=${FRONTEND_URL}
     depends_on:
       - eureka-server
     networks:
@@ -119,8 +122,8 @@ services:
       - JAKARTA_PERSISTENCE_JDBC_USER=root
       - JAKARTA_PERSISTENCE_JDBC_PASSWORD=12345678
       - SPRING_RABBITMQ_HOST=rabbitmq
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      - IDP_URL=http://keycloak:8080
+      - EUREKA_URL=${EUREKA_URL}
+      - KEYCLOAK_URL=${KEYCLOAK_URL}
       - SPRING_PROFILES_ACTIVE=prod
     depends_on:
       car_mysql:
@@ -145,8 +148,9 @@ services:
       - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MySQL8Dialect
       - SPRING_JPA_HIBERNATE_DIALECT=org.hibernate.dialect.MySQL8Dialect
       - SPRING_RABBITMQ_HOST=rabbitmq
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      - IDP_URL=http://keycloak:8080
+      - EUREKA_URL=${EUREKA_URL}
+      - KEYCLOAK_URL=${KEYCLOAK_URL}
+      - IDENTITY_SERVICE_URL=${IDENTITY_SERVICE_URL}
       - SPRING_PROFILES_ACTIVE=prod
     depends_on:
       car_mysql:
@@ -174,7 +178,11 @@ services:
       - JAKARTA_PERSISTENCE_JDBC_USER=root
       - JAKARTA_PERSISTENCE_JDBC_PASSWORD=12345678
       - SPRING_RABBITMQ_HOST=rabbitmq
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - EUREKA_URL=${EUREKA_URL}
+      - KEYCLOAK_URL=${KEYCLOAK_URL}
+      - IDENTITY_SERVICE_URL=${IDENTITY_SERVICE_URL}
+      - CATALOG_SERVICE_URL=${CATALOG_SERVICE_URL}
+      - PAYMENT_SERVICE_URL=${PAYMENT_SERVICE_URL}
       - SPRING_PROFILES_ACTIVE=prod
     depends_on:
       car_mysql:
@@ -201,7 +209,13 @@ services:
       - JAKARTA_PERSISTENCE_JDBC_URL=jdbc:mysql://car_mysql:3306/payment-ecommer-car?createDatabaseIfNotExist=true
       - JAKARTA_PERSISTENCE_JDBC_USER=root
       - JAKARTA_PERSISTENCE_JDBC_PASSWORD=12345678
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - EUREKA_URL=${EUREKA_URL}
+      - KEYCLOAK_URL=${KEYCLOAK_URL}
+      - IDENTITY_SERVICE_URL=${IDENTITY_SERVICE_URL}
+      - CATALOG_SERVICE_URL=${CATALOG_SERVICE_URL}
+      - ORDERING_SERVICE_URL=${ORDERING_SERVICE_URL}
+      - API_GATEWAY_URL=${API_GATEWAY_URL}
+      - FRONTEND_URL=${FRONTEND_URL}
       - SPRING_PROFILES_ACTIVE=prod
     depends_on:
       car_mysql:
@@ -218,7 +232,8 @@ services:
       - "8088:8088"
     environment:
       - SPRING_RABBITMQ_HOST=rabbitmq
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - EUREKA_URL=${EUREKA_URL}
+      - KEYCLOAK_URL=${KEYCLOAK_URL}
       - SPRING_PROFILES_ACTIVE=prod
     depends_on:
       rabbitmq:
@@ -235,7 +250,11 @@ services:
       - "8085:8085"
     environment:
       - SPRING_DATA_MONGODB_URI=mongodb://root:root@mongodb:27017/chat?authSource=admin
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
+      - EUREKA_URL=${EUREKA_URL}
+      - KEYCLOAK_URL=${KEYCLOAK_URL}
+      - IDENTITY_SERVICE_URL=${IDENTITY_SERVICE_URL}
+      - CATALOG_SERVICE_URL=${CATALOG_SERVICE_URL}
+      - ORDERING_SERVICE_URL=${ORDERING_SERVICE_URL}
       - SPRING_PROFILES_ACTIVE=prod
     depends_on:
       - mongodb
