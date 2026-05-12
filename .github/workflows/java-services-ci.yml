@@ -1,68 +1,57 @@
-name: Java Microservices CI
+name: CI/CD for CarShop Microservices
 
 on:
   push:
     branches: [ "main" ]
-    paths:
-      - 'EcommerWebCar/api-gateway/**'
-      - 'EcommerWebCar/catalog-service/**'
-      - 'EcommerWebCar/chat-service/**'
-      - 'EcommerWebCar/config-server/**'
-      - 'EcommerWebCar/eureka-server/**'
-      - 'EcommerWebCar/fraud-detection-service/**'
-      - 'EcommerWebCar/identity-service/**'
-      - 'EcommerWebCar/notification-service/**'
-      - 'EcommerWebCar/ordering-service/**'
-      - 'EcommerWebCar/payment-service/**'
-      - '.github/workflows/java-services-ci.yml'
-  pull_request:
-    branches: [ "main" ]
 
 jobs:
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        service: 
-          - api-gateway
-          - catalog-service
-          - chat-service
-          - config-server
-          - eureka-server
-          - fraud-detection-service
-          - identity-service
-          - notification-service
-          - ordering-service
-          - payment-service
-      fail-fast: false
-
-    defaults:
-      run:
-        working-directory: EcommerWebCar/${{ matrix.service }}
-
+        service: [
+          api-gateway,
+          catalog-service,
+          chat-service,
+          eureka-server,
+          identity-service,
+          notification-service,
+          ordering-service,
+          payment-service,
+          ai-service
+        ]
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up JDK 21
-      uses: actions/setup-java@v4
-      with:
-        java-version: '21'
-        distribution: 'temurin'
-        cache: maven
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-    - name: Build with Maven
-      run: |
-        if [ -f pom.xml ]; then
-          mvn -B package --file pom.xml -DskipTests
-        else
-          echo "Skipping Maven build... No pom.xml found"
-        fi
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-    - name: Build Docker Image
-      run: |
-        if [ -f Dockerfile ]; then
-          docker build -t ${{ matrix.service }}:latest .
-        else
-          echo "Skipping Docker build... No Dockerfile found"
-        fi
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./EcommerWebCar/${{ matrix.service }}
+          push: true
+          tags: anhqui0406/ecommer-${{ matrix.service }}:latest
+          platforms: linux/amd64
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    steps:
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: 3.1.245.236
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/CarShopMicroservice/EcommerWebCar
+            docker compose pull
+            docker compose up -d
