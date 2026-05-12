@@ -79,8 +79,7 @@ services:
 
   # --- Core Services ---
   eureka-server:
-    build:
-      context: ./eureka-server
+    image: anhqui0406/ecommer-eureka-server:latest
     container_name: eureka-server
     ports:
       - "8761:8761"
@@ -88,8 +87,7 @@ services:
       - car_network
 
   api-gateway:
-    build:
-      context: ./api-gateway
+    image: anhqui0406/ecommer-api-gateway:latest
     container_name: api-gateway
     ports:
       - "8888:8888"
@@ -104,8 +102,7 @@ services:
 
   # --- Microservices ---
   identity-service:
-    build:
-      context: ./identity-service
+    image: anhqui0406/ecommer-identity-service:latest
     container_name: identity-service
     ports:
       - "8081:8081"
@@ -136,8 +133,7 @@ services:
       - car_network
 
   catalog-service:
-    build:
-      context: ./catalog-service
+    image: anhqui0406/ecommer-catalog-service:latest
     container_name: catalog-service
     ports:
       - "8082:8082"
@@ -163,8 +159,7 @@ services:
       - car_network
 
   ordering-service:
-    build:
-      context: ./ordering-service
+    image: anhqui0406/ecommer-ordering-service:latest
     container_name: ordering-service
     ports:
       - "8083:8083"
@@ -192,8 +187,7 @@ services:
       - car_network
 
   payment-service:
-    build:
-      context: ./payment-service
+    image: anhqui0406/ecommer-payment-service:latest
     container_name: payment-service
     ports:
       - "8084:8084"
@@ -218,8 +212,7 @@ services:
       - car_network
 
   notification-service:
-    build:
-      context: ./notification-service
+    image: anhqui0406/ecommer-notification-service:latest
     container_name: notification-service
     ports:
       - "8088:8088"
@@ -236,8 +229,7 @@ services:
       - car_network
 
   ai-service:
-    build:
-      context: ./ai-service
+    image: anhqui0406/ecommer-ai-service:latest
     container_name: ai-service
     ports:
       - "8000:8000"
@@ -257,8 +249,7 @@ services:
       - car_network
 
   chat-service:
-    build:
-      context: ./chat-service
+    image: anhqui0406/ecommer-chat-service:latest
     container_name: chat-service
     ports:
       - "8085:8085"
