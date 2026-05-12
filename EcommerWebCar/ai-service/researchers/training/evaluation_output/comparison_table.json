@@ -1,0 +1,16 @@
+[
+  {
+    "Mô hình": "GradientBoosting (Tabular-only)",
+    "MAE (triệu)": 24.68,
+    "RMSE (triệu)": 35.42,
+    "MAPE (%)": 6.09,
+    "R²": 0.9622
+  },
+  {
+    "Mô hình": "Naive Baseline (luôn đoán median)",
+    "MAE (triệu)": 144.53,
+    "RMSE (triệu)": 183.26,
+    "MAPE (%)": 45.57,
+    "R²": -0.0117
+  }
+]
