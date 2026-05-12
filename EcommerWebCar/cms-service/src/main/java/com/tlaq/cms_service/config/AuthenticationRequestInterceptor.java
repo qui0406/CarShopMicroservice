@@ -1,6 +1,6 @@
 package com.tlaq.cms_service.config;
 
-import com.tlaq.ordering_service.service.KeyCloakTokenService;
+import com.tlaq.cms_service.service.KeyCloakTokenService;
 import feign.RequestInterceptor;
 import feign.RequestTemplate;
 import lombok.extern.slf4j.Slf4j;

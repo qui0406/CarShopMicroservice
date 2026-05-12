@@ -7,7 +7,7 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "identity-service", url = "${app.services.main.url}",
+@FeignClient(name = "identity-service",
         configuration = { AuthenticationRequestInterceptor.class })
 public interface IdentityClient {
     @GetMapping("/identity/api/profile/get-profile-by-keycloak-id/{userKeyCloakId}")

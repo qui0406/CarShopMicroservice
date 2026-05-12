@@ -1,8 +1,8 @@
 package com.tlaq.cms_service.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.tlaq.ordering_service.dto.ApiResponse;
-import com.tlaq.ordering_service.exceptions.ErrorCode;
+import com.tlaq.cms_service.dto.ApiResponse;
+import com.tlaq.cms_service.exceptions.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.MediaType;

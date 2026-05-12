@@ -1,17 +1,19 @@
 package com.tlaq.cms_service.service.impl;
 
+import com.tlaq.cms_service.dto.PageResponse;
+import com.tlaq.cms_service.dto.request.RatingRequest;
+import com.tlaq.cms_service.dto.request.UpdateRatingRequest;
+import com.tlaq.cms_service.dto.response.RatingResponse;
+import com.tlaq.cms_service.entity.Rating;
+import com.tlaq.cms_service.exceptions.AppException;
+import com.tlaq.cms_service.exceptions.ErrorCode;
+import com.tlaq.cms_service.mapper.RatingMapper;
 import com.tlaq.cms_service.repo.RatingRepository;
-import com.tlaq.main_service.dto.PageResponse;
-import com.tlaq.main_service.dto.requests.ratingRequest.RatingRequest;
-import com.tlaq.main_service.dto.requests.ratingRequest.UpdateRatingRequest;
-import com.tlaq.main_service.dto.responses.ratingResponse.RatingResponse;
-import com.tlaq.main_service.entity.Rating;
-import com.tlaq.main_service.exceptions.AppException;
-import com.tlaq.main_service.exceptions.ErrorCode;
-import com.tlaq.main_service.mapper.RatingMapper;
-import com.tlaq.main_service.repositories.ProfileRepository;
-import com.tlaq.main_service.repositories.RatingRepository;
-import com.tlaq.main_service.services.RatingService;
+import com.tlaq.cms_service.repo.httpClient.IdentityClient;
+import com.tlaq.cms_service.service.RatingService;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -22,9 +24,11 @@ import org.springframework.stereotype.Service;
 
 
 @Service
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class RatingServiceImpl implements RatingService {
     RatingRepository ratingRepository;
-    ProfileRepository profileRepository;
+    IdentityClient identityClient;
     RatingMapper ratingMapper;
 
     @Override
@@ -33,8 +37,7 @@ public class RatingServiceImpl implements RatingService {
         String userKeycloakId = authentication.getName();
 
         request.setCarId(carId);
-        String profileId = profileRepository.findByUserKeyCloakId(userKeycloakId)
-                .orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTED)).getId();
+        String profileId = identityClient.getProfile(userKeycloakId).getResult().getId();
         request.setProfileId(profileId);
 
 //        Rating rating = ratingMapper.toRating(request);
@@ -48,8 +51,7 @@ public class RatingServiceImpl implements RatingService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userKeycloakId = authentication.getName();
 
-        String profileId = profileRepository.findByUserKeyCloakId(userKeycloakId)
-                .orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTED)).getId();
+        String profileId = identityClient.getProfile(userKeycloakId).getResult().getId();
 
         Rating rating = ratingRepository.findById(id)
                 .orElseThrow(()-> new AppException(ErrorCode.RATING_NOT_EXIST));
@@ -87,8 +89,7 @@ public class RatingServiceImpl implements RatingService {
                 .orElseThrow(()-> new AppException(ErrorCode.RATING_NOT_EXIST));
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userKeycloakId = authentication.getName();
-        String profileId = profileRepository.findByUserKeyCloakId(userKeycloakId)
-                .orElseThrow(()-> new AppException(ErrorCode.USER_NOT_EXISTED)).getId();
+        String profileId = identityClient.getProfile(userKeycloakId).getResult().getId();
         if(!rating.getProfile().getId().equals(profileId)){
             throw new AppException(ErrorCode.UNAUTHORIZED);
         }

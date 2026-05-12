@@ -33,6 +33,7 @@ public interface OrdersMapper {
     // Entity → Response
     // ────────────────────────────────────────────
     @Mapping(target = "orderItems", source = "orderItems")
+    @Mapping(target = "depositAmount", ignore = true)
     OrdersResponse toOrdersResponse(Orders orders);
 
     List<OrdersResponse> toOrdersResponseList(List<Orders> orders);

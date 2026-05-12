@@ -1,7 +1,7 @@
 package com.tlaq.cms_service.exceptions;
 
 
-import com.tlaq.catalog_service.exceptions.ErrorCode;
+import com.tlaq.cms_service.exceptions.ErrorCode;
 
 public class AppException extends RuntimeException {
 

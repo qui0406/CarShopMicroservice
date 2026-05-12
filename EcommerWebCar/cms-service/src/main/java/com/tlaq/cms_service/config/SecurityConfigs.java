@@ -1,8 +1,8 @@
 package com.tlaq.cms_service.config;
 
-import com.tlaq.ordering_service.config.CustomAuthenticationSuccessHandler;
-import com.tlaq.ordering_service.config.CustomAuthoritiesConverter;
-import com.tlaq.ordering_service.config.JwtAuthenticationEntryPoint;
+import com.tlaq.cms_service.config.CustomAuthenticationSuccessHandler;
+import com.tlaq.cms_service.config.CustomAuthoritiesConverter;
+import com.tlaq.cms_service.config.JwtAuthenticationEntryPoint;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

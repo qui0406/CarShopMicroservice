@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.math.BigDecimal;
 
-@FeignClient(name = "catalog-service", url = "${app.services.main.url}",
+@FeignClient(name = "catalog-service",
         configuration = { AuthenticationRequestInterceptor.class })
 public interface CatalogClient {
     @GetMapping("/api/cars/check-inventory/{carId}/{quantity}")

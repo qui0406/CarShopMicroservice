@@ -1,6 +1,6 @@
 package com.tlaq.cms_service.repo;
 
-import com.tlaq.main_service.entity.Voucher;
+import com.tlaq.cms_service.entity.Voucher;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

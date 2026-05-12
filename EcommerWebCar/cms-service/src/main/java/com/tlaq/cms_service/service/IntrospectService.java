@@ -1,7 +1,7 @@
 package com.tlaq.cms_service.service;
 
-import com.tlaq.catalog_service.dto.response.IntrospectResponse;
-import com.tlaq.catalog_service.repo.httpClient.KeyCloakClient;
+import com.tlaq.cms_service.dto.response.IntrospectResponse;
+import com.tlaq.cms_service.repo.httpClient.KeyCloakClient;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;

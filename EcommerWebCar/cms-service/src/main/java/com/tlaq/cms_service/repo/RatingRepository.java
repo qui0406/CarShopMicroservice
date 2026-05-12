@@ -1,6 +1,6 @@
 package com.tlaq.cms_service.repo;
 
-import com.tlaq.main_service.entity.Rating;
+import com.tlaq.cms_service.entity.Rating;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.repository.CrudRepository;
