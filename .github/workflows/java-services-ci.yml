@@ -8,6 +8,7 @@ jobs:
   build-and-push:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         service: [
           api-gateway,
@@ -17,8 +18,7 @@ jobs:
           identity-service,
           notification-service,
           ordering-service,
-          payment-service,
-          ai-service
+          payment-service
         ]
     steps:
       - name: Checkout code

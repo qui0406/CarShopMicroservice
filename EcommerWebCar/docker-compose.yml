@@ -228,26 +228,6 @@ services:
     networks:
       - car_network
 
-  ai-service:
-    image: anhqui0406/ecommer-ai-service:latest
-    container_name: ai-service
-    ports:
-      - "8000:8000"
-    environment:
-      - MYSQL_HOST=car_mysql
-      - MYSQL_PORT=3306
-      - MYSQL_USER=root
-      - MYSQL_PASSWORD=12345678
-      - MYSQL_DB=catalog-ecommer-car
-      - REDIS_URL=redis://car_redis:6379?protocol=2
-    depends_on:
-      car_mysql:
-        condition: service_healthy
-      car_redis:
-        condition: service_started
-    networks:
-      - car_network
-
   chat-service:
     image: anhqui0406/ecommer-chat-service:latest
     container_name: chat-service
