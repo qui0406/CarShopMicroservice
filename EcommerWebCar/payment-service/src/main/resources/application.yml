@@ -7,7 +7,7 @@ spring:
   application:
     name: payment-service
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/payment-ecommer-car}
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://${MYSQL_HOST:localhost}:3306/payment-ecommer-car}
     driverClassName: "com.mysql.cj.jdbc.Driver"
     username: ${SPRING_DATASOURCE_USERNAME:root}
     password: ${SPRING_DATASOURCE_PASSWORD:12345678}
@@ -20,7 +20,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: ${KEYCLOAK_URL:http://localhost:8180}/realms/anhqui
+          issuer-uri: ${KEYCLOAK_URL:http://${PUBLIC_IP:localhost}:8180}/realms/anhqui
 
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
@@ -29,21 +29,21 @@ spring:
     password: ${RABBITMQ_PASSWORD:guest}
 
 app:
-  base-url: ${API_GATEWAY_URL:http://localhost:8888}
-  frontend-url: ${FRONTEND_URL:http://localhost:3000}
+  base-url: ${API_GATEWAY_URL:http://${PUBLIC_IP:localhost}:8888}
+  frontend-url: ${FRONTEND_URL:http://${PUBLIC_IP:localhost}:3000}
   services:
     identity:
-      url: ${IDENTITY_SERVICE_URL:http://localhost:8081}
+      url: ${IDENTITY_SERVICE_URL:http://${PUBLIC_IP:localhost}:8081}
     catalog:
-      url: ${CATALOG_SERVICE_URL:http://localhost:8082}
+      url: ${CATALOG_SERVICE_URL:http://${PUBLIC_IP:localhost}:8082}
     ordering:
-      url: ${ORDERING_SERVICE_URL:http://localhost:8083}
+      url: ${ORDERING_SERVICE_URL:http://${PUBLIC_IP:localhost}:8083}
 
 
 eureka:
   client:
     service-url:
-      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+      defaultZone: ${EUREKA_URL:http://${PUBLIC_IP:localhost}:8761/eureka/}
     register-with-eureka: true
     fetch-registry: true
   instance:
@@ -61,6 +61,6 @@ payment:
 
 
 idp:
-  url: ${KEYCLOAK_URL:http://localhost:8180}/realms/anhqui/protocol/openid-connect/token
+  url: ${KEYCLOAK_URL:http://${PUBLIC_IP:localhost}:8180}/realms/anhqui/protocol/openid-connect/token
   client-id: ${KEYCLOAK_CLIENT_ID:ecommer-app}
   client-secret: ${KEYCLOAK_CLIENT_SECRET:lVaXmGMg3bmpkAcDSvBcqhiu1QSEiUGG}

@@ -21,18 +21,18 @@ spring:
         oauth2:
             resourceserver:
                 jwt:
-                    issuer-uri: ${KEYCLOAK_URL:http://localhost:8180}/realms/anhqui
+                    issuer-uri: ${KEYCLOAK_URL:http://${PUBLIC_IP:localhost}:8180}/realms/anhqui
 
 eureka:
   client:
     serviceUrl:
-      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka/}
+      defaultZone: ${EUREKA_URL:http://${PUBLIC_IP:localhost}:8761/eureka/}
   instance:
     prefer-ip-address: true
     hostname: ${EUREKA_HOSTNAME:localhost}
 
 idp:
-  url: ${KEYCLOAK_URL:http://localhost:8180}
+  url: ${KEYCLOAK_URL:http://${PUBLIC_IP:localhost}:8180}
   client-id: ${KEYCLOAK_CLIENT_ID:ecommer-app}
   client-secret: ${KEYCLOAK_CLIENT_SECRET:lVaXmGMg3bmpkAcDSvBcqhiu1QSEiUGG}
 
