@@ -1,6 +1,7 @@
 package com.tlaq.api_gateway.configs;
 
 import com.tlaq.api_gateway.repositories.AuthClient;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.cors.CorsConfiguration;
@@ -14,10 +15,13 @@ import java.util.List;
 
 @Configuration
 public class WebClientConfiguration {
+    @Value("${app.base-url:http://localhost:8888}")
+    private String baseUrl;
+
     @Bean
     public WebClient webClient() {
         return WebClient.builder()
-                .baseUrl("${app.base-url:http://localhost:8080/ecommer-car-web}")
+                .baseUrl(baseUrl)
                 .build();
     }
 

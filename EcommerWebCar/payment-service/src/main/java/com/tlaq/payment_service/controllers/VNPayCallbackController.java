@@ -27,7 +27,7 @@ public class VNPayCallbackController {
     final VNPayService vnPayService;
     final PaymentTransactionRepository transactionRepository;
 
-    @Value("${frontend.url:http://localhost:3000}")
+    @Value("${app.frontend-url:http://localhost:3000}")
     String frontendUrl;
 
     @GetMapping("/vnpay-callback")

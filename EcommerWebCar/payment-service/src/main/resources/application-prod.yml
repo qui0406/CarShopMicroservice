@@ -8,9 +8,11 @@ idp:
 
 payment:
   vnpay:
-    return-url: http://3.1.245.236:8888/api/v1/payment/payments/vnpay-callback
+    return-url: ${app.base-url}/api/v1/payment/payments/vnpay-callback
 
 app:
+  base-url: http://3.1.245.236:8888
+  frontend-url: http://3.1.245.236
   services:
     identity:
       url: http://identity-service:8081

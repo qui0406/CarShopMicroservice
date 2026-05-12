@@ -5,3 +5,12 @@ eureka:
 
 idp:
   url: http://keycloak:8080
+
+spring:
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://keycloak:8080/realms/anhqui
+  rabbitmq:
+    host: rabbitmq

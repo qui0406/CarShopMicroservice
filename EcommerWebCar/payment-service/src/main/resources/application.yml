@@ -29,6 +29,8 @@ spring:
     password: 123456
 
 app:
+  base-url: http://localhost:8888
+  frontend-url: http://localhost:3000
   services:
     identity:
       url: http://localhost:8081
@@ -53,7 +55,7 @@ payment:
   vnpay:
     tmn-code: GSCN06EN
     init-payment-url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
-    return-url: http://localhost:8888/api/v1/payment/payments/vnpay-callback
+    return-url: ${app.base-url}/api/v1/payment/payments/vnpay-callback
     hash-secret: ZR2XBKVYB88L0IGB8P0RR9ZDOBOH5HH5
     url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
 
