@@ -66,6 +66,7 @@ jobs:
           key: ${{ secrets.EC2_SSH_KEY }}
           script: |
             cd ~/CarShopMicroservice/EcommerWebCar
+            docker system prune -af
             rm -rf cms-service
             if command -v docker-compose >/dev/null 2>&1; then
               docker-compose pull
