@@ -272,29 +272,6 @@ services:
     networks:
       - car_network
 
-  cms-service:
-    build:
-      context: ./cms-service
-    container_name: cms-service
-    ports:
-      - "8086:8086"
-    environment:
-      - SPRING_DATASOURCE_URL=jdbc:mysql://car_mysql:3306/cms-ecommer-car?createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true&useSSL=false
-      - SPRING_DATASOURCE_USERNAME=root
-      - SPRING_DATASOURCE_PASSWORD=12345678
-      - SPRING_DATASOURCE_DRIVER_CLASS_NAME=com.mysql.cj.jdbc.Driver
-      - SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.MySQL8Dialect
-      - SPRING_JPA_HIBERNATE_DIALECT=org.hibernate.dialect.MySQL8Dialect
-      - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://eureka-server:8761/eureka/
-      - SPRING_PROFILES_ACTIVE=prod
-    depends_on:
-      car_mysql:
-        condition: service_healthy
-      eureka-server:
-        condition: service_started
-    networks:
-      - car_network
-
   frontend:
     image: anhqui0406/ecommer-frontend:latest
     container_name: frontend

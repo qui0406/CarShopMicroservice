@@ -7,7 +7,6 @@ on:
       - 'EcommerWebCar/api-gateway/**'
       - 'EcommerWebCar/catalog-service/**'
       - 'EcommerWebCar/chat-service/**'
-      - 'EcommerWebCar/cms-service/**'
       - 'EcommerWebCar/config-server/**'
       - 'EcommerWebCar/eureka-server/**'
       - 'EcommerWebCar/fraud-detection-service/**'
@@ -28,7 +27,6 @@ jobs:
           - api-gateway
           - catalog-service
           - chat-service
-          - cms-service
           - config-server
           - eureka-server
           - fraud-detection-service

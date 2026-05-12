@@ -57,13 +57,6 @@ spring:
           filters:
             - StripPrefix=2
 
-        - id: cms-service
-          uri: lb://cms-service
-          predicates:
-            - Path=${app.api-prefix}/cms/**
-          filters:
-            - StripPrefix=2
-
         - id: ai-service
           uri: lb://ai-service
           predicates:
