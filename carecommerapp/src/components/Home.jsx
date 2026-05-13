@@ -73,12 +73,16 @@ export default function Home() {
   const fetchBranches = async () => {
     try {
       setLoading(true);
+      console.log("Attempting to fetch branches...");
       const res = await axios.get(endpoints["get-all-branch"]);
+      console.log("Branch Response received:", res.data);
       const resData = res.data?.result;
-      setBranches(Array.isArray(resData) ? resData : []);
+      const data = Array.isArray(resData?.data) ? resData.data : (Array.isArray(resData) ? resData : []);
+      console.log("Processed branches:", data);
+      setBranches(data);
       setLoading(false);
     } catch (err) {
-      console.error(err);
+      console.error("Fetch branches error:", err);
       setLoading(false);
     }
   };
@@ -87,12 +91,16 @@ export default function Home() {
   const fetchCategories = async () => {
     try {
       setLoading(true);
+      console.log("Attempting to fetch categories...");
       const res = await axios.get(endpoints["get-all-category"]);
+      console.log("Category Response received:", res.data);
       const resData = res.data?.result;
-      setCategories(Array.isArray(resData) ? resData : []);
+      const data = Array.isArray(resData?.data) ? resData.data : (Array.isArray(resData) ? resData : []);
+      console.log("Processed categories:", data);
+      setCategories(data);
       setLoading(false);
     } catch (err) {
-      console.error(err);
+      console.error("Fetch categories error:", err);
       setLoading(false);
     }
   };
@@ -112,27 +120,52 @@ export default function Home() {
   };
 
   // Fetch cars
-  const fetchCars = async (pageNum) => {
+  const fetchCars = async (pageNum = 1) => {
     try {
       setLoading(true);
-      const res = await axios.get(endpoints["get-products"](pageNum, 12));
-      const resData = res.data?.result || {};
-      setCars(Array.isArray(resData.data) ? resData.data : []);
+
+      const params = {
+        page: pageNum,
+        size: 12
+      };
+
+      if (selectedBranch) params.carBranch = selectedBranch;
+      if (selectedCategory) params.carCategory = selectedCategory;
+      if (selectedPriceRange) params.price = selectedPriceRange;
+      if (selectedModel) params.carName = selectedModel;
+
+      // Use filter-car if any filters are active, else use get-products
+      const endpoint = (selectedBranch || selectedCategory || selectedPriceRange || selectedModel)
+        ? endpoints["filter-car"](params)
+        : endpoints["get-products"](pageNum, 12);
+
+      const res = await axios.get(endpoint);
+      const resData = res.data?.result || res.data || {};
+      const data = Array.isArray(resData.data) ? resData.data : (Array.isArray(resData) ? resData : []);
+
+      console.log("Cars data received:", data);
+      if (data.length > 0) console.log("Example car fields:", Object.keys(data[0]));
+
+      setCars(data);
       setCarTotalPages(resData.totalPages || 1);
       setLoading(false);
     } catch (err) {
-      console.error(err);
+      console.error("Fetch cars error:", err);
       setLoading(false);
     }
   };
 
   // Load data on mount and page changes
   useEffect(() => {
-    fetchBranches(pageBranch);
-    fetchCategories(pageCategory);
-    fetchModels(pageModel);
+    console.log("Home component mounted, fetching initial data...");
+    fetchBranches();
+    fetchCategories();
+    fetchModels();
+  }, []);
+
+  useEffect(() => {
     fetchCars(carPage);
-  }, [pageBranch, pageCategory, pageModel, carPage]);
+  }, [carPage]); // Only refetch when page changes, or when handleSearch is called manually
 
   // Handle pagination
   const handleBranchPageChange = (pageNumber) => {
@@ -171,41 +204,25 @@ export default function Home() {
     try {
       setImageSearchLoading(true);
       const formData = new FormData();
-      formData.append('image', selectedImage);
+      formData.append('file', selectedImage); // Endpoint expects 'file'
 
-      // // Replace with your actual image search endpoint
-      const resPredict = await axios.post("http://127.0.0.1:5000/predict", formData, {
+      // Call the AI Service via Gateway
+      const resPredict = await axios.post(endpoints["identify-car"], formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
       });
 
-      // const result = {
-      //   "predicted_class": "Toyota Innova",
-      //   "confidence": 0.9876,
-      //   "class_index": 6,
-      //   "image_path": "static/uploads/example.jpg"
-      // }
+      const responseData = resPredict.data;
+      if (responseData.success) {
+        setNameCarPredict(responseData.ai_detected);
+        setCars(Array.isArray(responseData.data) ? responseData.data : []);
+        setCarTotalPages(1);
+        setShowModal(true);
+      } else {
+        setError(responseData.message || "Failed to identify car.");
+      }
 
-      setShowModal(true);
-      setPredictedCar(resPredict.data.predicted_class);
-      setNameCarPredict(resPredict.data);
-
-      const [carBranch = "", category = ""] = resPredict.data.predicted_class.split(" ");
-
-      const res = await axios.get(endpoints["filter-cars"], {
-        params: { carBranch, category },
-      });
-
-      const resultData = res.data?.result || {};
-
-      setCars(Array.isArray(resultData.data) ? resultData.data : []);
-      setCarTotalPages(resultData.totalPages || 1);
-
-
-
-      // setCars(Array.isArray(result) ? result : []);
-      setNameCarPredict(resPredict.data)
       setShowImageSearch(false);
 
     } catch (error) {
@@ -226,279 +243,196 @@ export default function Home() {
   };
 
   return (
-    <div style={{ backgroundColor: "#f8f9fa", minHeight: "100vh", paddingBottom: "50px" }}>
+    <div style={{ backgroundColor: "#f4f6f8", minHeight: "100vh", paddingBottom: "50px" }}>
       {/* 1. Hero Section */}
-      <div style={{
-        position: "relative",
-        background: "url('https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?q=80&w=2070&auto=format&fit=crop') center/cover no-repeat",
-        height: "550px",
-        display: "flex",
-        alignItems: "center",
-        padding: "0 10%"
-      }}>
-        <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, background: "linear-gradient(to right, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.3) 100%)" }}></div>
-        <div style={{ position: "relative", zIndex: 2, maxWidth: "600px" }}>
-          <h1 style={{ color: "#ffffff", fontSize: "3.5rem", fontWeight: 800, lineHeight: 1.1, marginBottom: "20px", letterSpacing: "-1px" }}>Ưu đãi chào tháng<br />mới – Lãi suất 0%</h1>
-          <p style={{ color: "#e0e0e0", fontSize: "1.2rem", fontWeight: 400, marginBottom: "30px" }}>CarShop - Nơi bạn tìm thấy chiếc xe mơ ước.</p>
-          <Button style={{ background: "#1a73e8", color: "#ffffff", border: "none", borderRadius: "4px", padding: "12px 32px", fontSize: "1rem", fontWeight: 600, boxShadow: "none" }}>Xem ngay</Button>
+      <div style={{ padding: "80px 10%", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", backgroundColor: "#f4f6f8" }}>
+        <div style={{ flex: 1, minWidth: "400px", paddingRight: "40px", marginBottom: "40px" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", padding: "6px 12px", backgroundColor: "#e8f0fe", borderRadius: "50px", marginBottom: "20px" }}>
+            <span style={{ color: "#1a73e8", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "6px" }}>
+              ⚡ AI POWERED
+            </span>
+          </div>
+          <h1 style={{ fontSize: "3.5rem", fontWeight: 800, color: "#191c1d", lineHeight: 1.2, marginBottom: "20px", letterSpacing: "-1px" }}>
+            Định giá xe AI <br />
+            <span style={{ color: "#1a73e8" }}>chính xác nhất</span>
+          </h1>
+          <p style={{ color: "#5d6571", fontSize: "1.1rem", marginBottom: "30px", lineHeight: 1.6, maxWidth: "450px" }}>
+            Sử dụng công nghệ Computer Vision để phân tích tình trạng xe và so sánh với 100,000+ dữ liệu thị trường thực tế.
+          </p>
+          <div style={{ display: "flex", gap: "15px" }}>
+            <Button as={Link} to="/valuation" style={{ backgroundColor: "#0056b3", color: "#ffffff", border: "none", borderRadius: "6px", padding: "12px 28px", fontWeight: 600, fontSize: "1rem" }}>
+              Thẩm định ngay &rarr;
+            </Button>
+            <Button style={{ backgroundColor: "#ffffff", color: "#191c1d", border: "1px solid #e7e8e9", borderRadius: "6px", padding: "12px 28px", fontWeight: 600, fontSize: "1rem" }}>
+              Tìm hiểu thêm
+            </Button>
+          </div>
+        </div>
+        <div style={{ flex: 1, minWidth: "400px", position: "relative", display: "flex", justifyContent: "flex-end" }}>
+          <div style={{ width: "90%", borderRadius: "20px", overflow: "hidden", position: "relative", boxShadow: "0 20px 40px rgba(0,0,0,0.2)" }}>
+            <img src="https://mazdalongan.vn/media/1vxbkcbp/new-mazda6_1.jpg" alt="AI Valuation Car" style={{ width: "100%", display: "block", filter: "brightness(0.9)" }} />
+            <div style={{ position: "absolute", top: "20px", right: "20px", backgroundColor: "rgba(255,255,255,0.85)", padding: "8px 16px", borderRadius: "8px", backdropFilter: "blur(10px)" }}>
+              <span style={{ fontWeight: 700, fontSize: "0.85rem", color: "#191c1d" }}>🎯 Phân tích: 98%</span>
+            </div>
+          </div>
         </div>
       </div>
 
       {/* 2. Floating Search Box */}
-      <div className="container" style={{ maxWidth: "1200px", margin: "-60px auto 0", position: "relative", zIndex: 10 }}>
-        <div style={{ background: "#ffffff", padding: "24px 32px", display: "flex", alignItems: "flex-end", gap: "20px", boxShadow: "0 10px 30px rgba(0,0,0,0.05)", borderRadius: "4px", border: "1px solid #e7e8e9" }}>
+      <div className="container" style={{ maxWidth: "1200px", marginTop: "20px", position: "relative", zIndex: 10 }}>
+        <div style={{ background: "#ffffff", padding: "24px 30px", display: "flex", alignItems: "flex-end", gap: "15px", boxShadow: "0 10px 40px rgba(0,0,0,0.05)", borderRadius: "16px" }}>
 
-          <div style={{ flex: "1.5" }}>
-            <label style={{ fontSize: "0.7rem", fontWeight: 700, color: "#191c1d", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "10px", display: "block" }}>TÌM KIẾM TÊN XE</label>
-            <Form.Control type="text" placeholder="Toyota Corolla Cross..." style={{ background: "#f8f9fa", border: "1px solid #e7e8e9", borderRadius: "4px", boxShadow: "none", padding: "12px 16px", fontSize: "0.95rem" }} />
+          <div style={{ flex: 1.5 }}>
+            <label style={{ fontSize: "0.7rem", fontWeight: 700, color: "#5d6571", textTransform: "uppercase", marginBottom: "8px", display: "block" }}>TÊN XE</label>
+            <div style={{ position: "relative" }}>
+              <FaSearch style={{ position: "absolute", left: "12px", top: "50%", transform: "translateY(-50%)", color: "#9aa0a6" }} />
+              <Form.Control
+                type="text"
+                placeholder="Nhập tên xe..."
+                value={selectedModel}
+                onChange={(e) => setSelectedModel(e.target.value)}
+                style={{ background: "#f4f6f8", border: "none", borderRadius: "8px", padding: "14px 14px 14px 40px", fontSize: "0.95rem", fontWeight: 500 }}
+              />
+            </div>
           </div>
 
-          <div style={{ flex: "1.2" }}>
-            <label style={{ fontSize: "0.7rem", fontWeight: 700, color: "#191c1d", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "10px", display: "block" }}>THƯƠNG HIỆU</label>
+          <div style={{ flex: 1.2 }}>
+            <label style={{ fontSize: "0.7rem", fontWeight: 700, color: "#5d6571", textTransform: "uppercase", marginBottom: "8px", display: "block" }}>THƯƠNG HIỆU</label>
             <Form.Select
               value={selectedBranch}
               onChange={(e) => setSelectedBranch(e.target.value)}
-              style={{ background: "#f8f9fa", border: "1px solid #e7e8e9", borderRadius: "4px", boxShadow: "none", padding: "12px 16px", fontSize: "0.95rem", color: "#5d6571", appearance: "none" }}
+              style={{ background: "#f4f6f8", border: "none", borderRadius: "8px", padding: "14px", fontSize: "0.95rem", color: "#191c1d", fontWeight: 500 }}
             >
               <option value="">Tất cả</option>
               {branches.map(branch => <option key={branch.id} value={branch.name}>{branch.name}</option>)}
             </Form.Select>
           </div>
 
-          <div style={{ flex: "1.2" }}>
-            <label style={{ fontSize: "0.7rem", fontWeight: 700, color: "#191c1d", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "10px", display: "block" }}>
-              DANH MỤC
-            </label>
+          <div style={{ flex: 1.2 }}>
+            <label style={{ fontSize: "0.7rem", fontWeight: 700, color: "#5d6571", textTransform: "uppercase", marginBottom: "8px", display: "block" }}>PHÂN KHÚC</label>
             <Form.Select
-              value={selectedCategory} // Đổi tên biến state nếu cần để đồng bộ
+              value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              style={{ background: "#f8f9fa", border: "1px solid #e7e8e9", borderRadius: "4px", boxShadow: "none", padding: "12px 16px", fontSize: "0.95rem", color: "#5d6571", appearance: "none" }}
+              style={{ background: "#f4f6f8", border: "none", borderRadius: "8px", padding: "14px", fontSize: "0.95rem", color: "#191c1d", fontWeight: 500 }}
             >
               <option value="">Tất cả</option>
-              {categories.map((category) => (
-                <option key={category.id} value={category.name}>
-                  {category.name}
-                </option>
-              ))}
+              {categories.map((cat) => <option key={cat.id} value={cat.name}>{cat.name}</option>)}
             </Form.Select>
           </div>
 
-          <div style={{ flex: "2" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "5px" }}>
-              <label style={{ fontSize: "0.7rem", fontWeight: 700, color: "#191c1d", textTransform: "uppercase", letterSpacing: "0.5px", margin: 0 }}>KHOẢNG GIÁ</label>
+          <div style={{ flex: 1.5 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "8px" }}>
+              <label style={{ fontSize: "0.7rem", fontWeight: 700, color: "#5d6571", textTransform: "uppercase", margin: 0 }}>KHOẢNG GIÁ</label>
               <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "#1a73e8" }}>
                 {selectedPriceRange ? (selectedPriceRange >= 1000 ? `Dưới ${(selectedPriceRange / 1000).toFixed(1)} Tỷ` : `Dưới ${selectedPriceRange} Triệu`) : "Mọi mức giá"}
               </span>
             </div>
-            <Form.Range
-              min={0}
-              max={5000}
-              step={100}
-              value={selectedPriceRange || 0}
-              onChange={(e) => {
-                const val = Number(e.target.value);
-                setSelectedPriceRange(val === 0 ? "" : val);
-              }}
-              style={{ width: "100%", accentColor: "#1a73e8" }}
-            />
+            <div style={{ background: "#f4f6f8", borderRadius: "8px", padding: "14px 20px" }}>
+              <Form.Range
+                min={0}
+                max={5000}
+                step={100}
+                value={selectedPriceRange || 0}
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  setSelectedPriceRange(val === 0 ? "" : val);
+                }}
+                style={{ width: "100%", accentColor: "#1a73e8", margin: 0 }}
+              />
+            </div>
           </div>
 
-          <div style={{ flex: "1" }}>
+          <div style={{ flex: 1, display: "flex", gap: "10px" }}>
+            <Button
+              onClick={() => handleSearch(1)}
+              style={{ background: "#1a73e8", color: "#ffffff", border: "none", borderRadius: "8px", flex: 1, height: "52px", display: "flex", alignItems: "center", justifyContent: "center", gap: "8px", fontWeight: 700, fontSize: "0.9rem" }}
+            >
+              <FaSearch size={16} />
+            </Button>
             <Button
               onClick={() => setShowImageSearch(true)}
-              style={{ background: "#eff6ff", color: "#1a73e8", border: "none", borderRadius: "4px", width: "100%", height: "48px", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "none", gap: "8px" }}
+              style={{ background: "#f8f9fa", color: "#1a73e8", border: "1px solid #e8f0fe", borderRadius: "8px", width: "52px", height: "52px", display: "flex", alignItems: "center", justifyContent: "center", padding: 0 }}
+              title="Tìm bằng ảnh"
             >
-              <FaCamera size={16} />
-              <span style={{ fontSize: "0.85rem", fontWeight: 700 }}>Tìm bằng hình ảnh</span>
+              <FaCamera size={18} />
             </Button>
           </div>
 
         </div>
       </div>
 
-
-
-      {/* 5. Featured Cars Section */}
-      <div className="container" style={{ maxWidth: "1200px", margin: "60px auto 60px auto" }}>
+      {/* 3. Featured Cars Section */}
+      <div className="container" style={{ maxWidth: "1200px", margin: "80px auto" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "30px" }}>
           <div>
-            <h2 style={{ fontSize: "1.8rem", fontWeight: 700, color: "#191c1d", marginBottom: "5px" }}>Mẫu xe Nổi bật</h2>
-            <p style={{ color: "#5d6571", fontSize: "0.9rem", margin: 0 }}>Những lựa chọn hàng đầu được tinh tuyển trong tuần này.</p>
+            <h2 style={{ fontSize: "1.8rem", fontWeight: 800, color: "#191c1d", marginBottom: "8px" }}>Mẫu xe Nổi bật</h2>
+            <p style={{ color: "#5d6571", fontSize: "0.95rem", margin: 0, fontWeight: 500 }}>Khám phá những dòng xe Mazda được ưa chuộng nhất hiện nay.</p>
           </div>
-          <Link to="#" style={{ color: "#1a73e8", fontWeight: 600, fontSize: "0.95rem", textDecoration: "none" }}>Xem tất cả kho xe &rarr;</Link>
+          <Link to="#" style={{ color: "#0056b3", fontWeight: 700, fontSize: "0.95rem", textDecoration: "none" }}>Xem tất cả &rarr;</Link>
         </div>
 
         {loading ? (
-          <div className="text-center py-5"><Spinner animation="border" style={{ color: "#1a73e8" }} /></div>
+          <div className="text-center py-5"><Spinner animation="border" style={{ color: "#0056b3" }} /></div>
         ) : error ? (
-          <Alert variant="danger" style={{ borderRadius: "4px", border: "none" }}>{error}</Alert>
+          <Alert variant="danger" style={{ borderRadius: "8px", border: "none" }}>{error}</Alert>
         ) : cars.length === 0 ? (
           <div className="text-center py-5 text-muted" style={{ fontSize: "1.1rem" }}>Không tìm thấy xe phù hợp!</div>
         ) : (
           <>
             <Row className="g-4">
-              {cars.slice(0, 3).map((car) => (
-                <Col md={4} key={car.id}>
-                  <Card style={{ border: "none", borderRadius: "0", boxShadow: "none", backgroundColor: "transparent" }}>
-                    <div style={{ height: "240px", backgroundColor: "#f1f5f9", overflow: "hidden", cursor: "pointer" }} onClick={() => window.location.href = `/get-car-by-id/${car.id}`}>
-                      <Card.Img variant="top" src={car.thumbnail || "https://via.placeholder.com/400x240?text=No+Image"} style={{ height: "100%", objectFit: "cover", transition: "transform 0.3s ease" }} onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"} onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"} />
-                    </div>
-                    <Card.Body style={{ padding: "24px 0" }}>
-                      <Card.Title
-                        as={Link} to={`/get-car-by-id/${car.id}`}
-                        style={{ color: "#1a73e8", fontWeight: 700, fontSize: "1.1rem", marginBottom: "15px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis", display: "block", textDecoration: "none" }}
-                      >
-                        {car.name || "Unknown Car"}
-                      </Card.Title>
-
-                      <div style={{ backgroundColor: "#f8f9fa", padding: "12px", display: "flex", justifyContent: "space-between", marginBottom: "20px" }}>
-                        <div style={{ textAlign: "center", color: "#191c1d" }}>
-                          <GiCarSeat size={18} style={{ marginBottom: "5px" }} />
-                          <div style={{ fontSize: "0.6rem", fontWeight: 700, textTransform: "uppercase" }}>{car.seatCapacity ? `${car.seatCapacity} CHỖ` : "N/A"}</div>
-                        </div>
-                        <div style={{ textAlign: "center", color: "#191c1d" }}>
-                          <GiGearStick size={18} style={{ marginBottom: "5px" }} />
-                          <div style={{ fontSize: "0.6rem", fontWeight: 700, textTransform: "uppercase" }}>{car.fuelType || "N/A"}</div>
-                        </div>
-                        <div style={{ textAlign: "center", color: "#191c1d" }}>
-                          <FaCarSide size={18} style={{ marginBottom: "5px" }} />
-                          <div style={{ fontSize: "0.6rem", fontWeight: 700, textTransform: "uppercase" }}>{car.engineSize || "N/A"}</div>
-                        </div>
+              {cars.slice(0, 3).map((car, idx) => {
+                const badges = ["NEW 2024", "PREMIUM", "TOUGH"];
+                return (
+                  <Col md={4} key={car.id}>
+                    <Card style={{ border: "1px solid #e7e8e9", borderRadius: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.02)", overflow: "hidden", backgroundColor: "#ffffff" }}>
+                      <div style={{ position: "relative", height: "220px", cursor: "pointer", overflow: "hidden" }} onClick={() => window.location.href = `/get-car-by-id/${car.id}`}>
+                        <Card.Img
+                          src={car.thumbnail || car.image || car.imageCar || car.url || car.imageBranch || "https://via.placeholder.com/400x240?text=No+Image"}
+                          style={{ height: "100%", width: "100%", objectFit: "cover", transition: "transform 0.4s ease" }}
+                          onMouseEnter={(e) => e.currentTarget.style.transform = "scale(1.05)"}
+                          onMouseLeave={(e) => e.currentTarget.style.transform = "scale(1)"}
+                        />
                       </div>
+                      <Card.Body style={{ padding: "20px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "4px" }}>
+                          <Card.Title style={{ color: "#191c1d", fontWeight: 800, fontSize: "1.2rem", margin: 0, textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", maxWidth: "70%" }}>
+                            {car.name || car.carName || car.modelName || "Unknown Car"}
+                          </Card.Title>
+                          <span style={{ fontSize: "0.6rem", fontWeight: 800, backgroundColor: "#f4f6f8", padding: "4px 8px", borderRadius: "4px", color: "#191c1d", border: "1px solid #e7e8e9" }}>{badges[idx % 3]}</span>
+                        </div>
 
-                      <div style={{ fontSize: "1.4rem", fontWeight: 700, color: "#191c1d", marginBottom: "20px" }}>
-                        {car.price ? car.price.toLocaleString("vi-VN") + "đ" : "Liên hệ"}
-                      </div>
+                        <div style={{ fontSize: "1.05rem", fontWeight: 700, color: "#1a73e8", marginBottom: "24px" }}>
+                          {car.price ? "Từ " + car.price.toLocaleString("vi-VN") + "đ" : "Liên hệ"}
+                        </div>
 
-                      <div style={{ display: "flex", gap: "10px" }}>
-                        <Button as={Link} to={`/get-car-by-id/${car.id}`} variant="primary" style={{ flex: 1, backgroundColor: "#1a73e8", borderColor: "#1a73e8", fontWeight: 600, borderRadius: "4px", padding: "12px" }}>Xem chi tiết</Button>
-                      </div>
-                    </Card.Body>
-                  </Card>
-                </Col>
-              ))}
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "24px", padding: "0 10px" }}>
+                          <div style={{ textAlign: "center", color: "#1a73e8" }}>
+                            <GiCarSeat size={20} style={{ marginBottom: "8px" }} />
+                            <div style={{ fontSize: "0.65rem", fontWeight: 600, color: "#5d6571" }}>{car.seatCapacity ? `${car.seatCapacity} Chỗ` : "5 Chỗ"}</div>
+                          </div>
+                          <div style={{ textAlign: "center", color: "#1a73e8" }}>
+                            <GiGearStick size={20} style={{ marginBottom: "8px" }} />
+                            <div style={{ fontSize: "0.65rem", fontWeight: 600, color: "#5d6571" }}>{car.fuelType === "Xăng" || car.fuelType === "GASOLINE" ? "Xăng 2.0L" : (car.fuelType || "Xăng 2.0L")}</div>
+                          </div>
+                          <div style={{ textAlign: "center", color: "#1a73e8" }}>
+                            <FaCarSide size={20} style={{ marginBottom: "8px" }} />
+                            <div style={{ fontSize: "0.65rem", fontWeight: 600, color: "#5d6571" }}>Số tự động</div>
+                          </div>
+                        </div>
+
+                        <Button as={Link} to={`/get-car-by-id/${car.id}`} style={{ width: "100%", backgroundColor: "#0056b3", border: "none", fontWeight: 600, borderRadius: "6px", padding: "12px", fontSize: "0.95rem" }}>
+                          Xem chi tiết
+                        </Button>
+                      </Card.Body>
+                    </Card>
+                  </Col>
+                );
+              })}
             </Row>
-
-            {carTotalPages > 1 && (
-              <div style={{ display: "flex", justifyContent: "center", gap: "8px", marginTop: "50px" }}>
-                <Button onClick={() => handleCarPageChange(carPage - 1)} disabled={carPage === 1} style={{ background: "#ffffff", color: "#191c1d", border: "1px solid #e7e8e9", borderRadius: "4px", width: "40px", height: "40px", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "none" }}><FaChevronLeft /></Button>
-                {Array.from({ length: Math.min(5, carTotalPages) }, (_, i) => {
-                  let pageNum = i + 1;
-                  return (
-                    <Button key={pageNum} onClick={() => handleCarPageChange(pageNum)} style={{ background: carPage === pageNum ? "#1a73e8" : "#ffffff", color: carPage === pageNum ? "#ffffff" : "#191c1d", border: carPage === pageNum ? "none" : "1px solid #e7e8e9", borderRadius: "4px", width: "40px", height: "40px", fontWeight: 600, boxShadow: "none" }}>{pageNum}</Button>
-                  );
-                })}
-                <Button onClick={() => handleCarPageChange(carPage + 1)} disabled={carPage === carTotalPages} style={{ background: "#ffffff", color: "#191c1d", border: "1px solid #e7e8e9", borderRadius: "4px", width: "40px", height: "40px", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "none" }}><FaChevronRight /></Button>
-              </div>
-            )}
           </>
         )}
       </div>
 
-      {/* PREMIUM AI VALUATION PROMO */}
-      <div className="container" style={{ maxWidth: "1200px", margin: "100px auto" }}>
-        <div style={{
-          backgroundColor: "#0f172a",
-          borderRadius: "32px",
-          padding: "80px 60px",
-          backgroundImage: "linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          color: "#fff",
-          position: "relative",
-          overflow: "hidden",
-          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)"
-        }}>
-          {/* Decorative Elements */}
-          <div style={{
-            position: "absolute", top: "-100px", right: "-100px",
-            width: "400px", height: "400px", borderRadius: "50%",
-            background: "radial-gradient(circle, rgba(37,99,235,0.2) 0%, transparent 70%)"
-          }}></div>
-
-          <div style={{ position: "relative", zIndex: 1, flex: 1, maxWidth: "600px" }}>
-            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", backgroundColor: "rgba(37, 99, 235, 0.3)", padding: "8px 16px", borderRadius: "100px", marginBottom: "24px", backdropFilter: "blur(4px)", border: "1px solid rgba(255,255,255,0.1)" }}>
-              <span style={{ width: "8px", height: "8px", borderRadius: "50%", backgroundColor: "#3b82f6", display: "inline-block", boxShadow: "0 0 10px #3b82f6" }}></span>
-              <span style={{ fontSize: "0.75rem", fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase" }}>AI Technology 2026</span>
-            </div>
-
-            <h2 style={{ fontSize: "3rem", fontWeight: 800, marginBottom: "24px", lineHeight: 1.2, letterSpacing: "-1.5px" }}>
-              Bán xe nhanh chóng với <br />
-              <span style={{ color: "#3b82f6" }}>Định giá AI Chính xác</span>
-            </h2>
-
-            <p style={{ fontSize: "1.2rem", opacity: 0.8, marginBottom: "40px", lineHeight: 1.6 }}>
-              Không còn lo lắng về giá bán. Công nghệ Computer Vision của chúng tôi tự động phân tích tình trạng xe qua ảnh và so sánh với 100,000+ dữ liệu thị trường thực tế.
-            </p>
-
-            <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
-              <Link to="/valuation" style={{ textDecoration: "none" }}>
-                <Button style={{
-                  backgroundColor: "#fff", color: "#1e3a8a", border: "none",
-                  padding: "18px 48px", borderRadius: "16px", fontWeight: 800,
-                  fontSize: "1.1rem", boxShadow: "0 10px 25px rgba(0,0,0,0.2)",
-                  transition: "all 0.3s ease"
-                }}>
-                  Thẩm định ngay
-                </Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 3. Categories */}
-      <div className="container" style={{ maxWidth: "1200px", margin: "60px auto 60px auto" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: "20px" }}>
-          {categories.slice(0, 5).map((cat) => (
-            <div
-              key={cat.id}
-              onClick={() => { setSelectedCategory(cat.name); handleSearch(1); }}
-              style={{
-                flex: 1,
-                background: selectedCategory === cat.name ? "#e8f0fe" : "#f1f5f9",
-                color: "#1a73e8",
-                padding: "30px 10px",
-                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                borderRadius: "4px", cursor: "pointer",
-                border: selectedCategory === cat.name ? "1px solid #1a73e8" : "1px solid transparent",
-                transition: "all 0.2s"
-              }}
-            >
-              <div style={{ fontSize: "2rem", marginBottom: "12px" }}>
-                {cat.name === "SUV" && <FaCarSide />}
-                {cat.name === "Sedan" && <GiCarSeat />}
-                {cat.name === "Hatchback" && <GiGearStick />}
-                {cat.name === "Coupe" && <FaTruckPickup />}
-                {(!["SUV", "Sedan", "Hatchback", "Coupe"].includes(cat.name)) && <FaCarSide />}
-              </div>
-              <span style={{ fontWeight: 600, fontSize: "0.85rem", color: "#191c1d" }}>{cat.name}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 4. Brands Layout (Thương hiệu đối tác) */}
-      <div className="container" style={{ maxWidth: "1200px", margin: "0 auto 80px auto" }}>
-        <h2 style={{ fontSize: "1.8rem", fontWeight: 700, color: "#191c1d", marginBottom: "30px", textAlign: "left" }}>Thương hiệu đối tác</h2>
-        <div style={{ display: "flex", gap: "16px", flexWrap: "wrap" }}>
-          {branches.map((branch) => (
-            <div
-              key={branch.id}
-              style={{
-                width: "120px", height: "120px",
-                background: "#ffffff",
-                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
-                cursor: "pointer", padding: "16px"
-              }}
-              onClick={() => { setSelectedBranch(branch.name); handleSearch(1); }}
-            >
-              <img src={branch.imageBranch || "https://via.placeholder.com/80"} alt={branch.name} style={{ width: "70px", height: "70px", objectFit: "contain", filter: "grayscale(100%)", opacity: 0.5, transition: "0.2s" }} onMouseEnter={(e) => { e.currentTarget.style.opacity = 1; e.currentTarget.style.filter = "none"; }} onMouseLeave={(e) => { e.currentTarget.style.opacity = 0.5; e.currentTarget.style.filter = "grayscale(100%)"; }} />
-            </div>
-          ))}
-        </div>
-      </div>
 
       {/* Image Search Modal */}
       <Modal show={showImageSearch} onHide={resetImageSearch} centered>
@@ -537,19 +471,51 @@ export default function Home() {
       </Modal>
 
       {/* Prediction Result Modal */}
-      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
-        <Modal.Header closeButton style={{ borderBottom: "1px solid #e7e8e9" }}>
-          <Modal.Title style={{ fontWeight: 700, color: "#1a73e8", fontSize: "1.2rem" }}>Kết quả dự đoán AI</Modal.Title>
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered size="lg">
+        <Modal.Header closeButton style={{ borderBottom: "1px solid #e7e8e9", background: "#f8f9fa" }}>
+          <Modal.Title style={{ fontWeight: 700, color: "#1a73e8", fontSize: "1.2rem" }}>Tư vấn Xe theo Hình Ảnh (AI)</Modal.Title>
         </Modal.Header>
-        <Modal.Body style={{ padding: "30px", textAlign: "center" }}>
-          <FaCarSide size={60} style={{ color: "#1a73e8", marginBottom: "16px" }} />
-          <h5 style={{ color: "#5d6571", fontWeight: 500, fontSize: "1rem" }}>Hệ thống nhận diện mẫu xe:</h5>
-          <div style={{ fontSize: "1.5rem", fontWeight: 700, color: "#191c1d", marginTop: "10px", marginBottom: "16px" }}>{nameCarPredict.predicted_class}</div>
-          <p style={{ color: "#5d6571", fontWeight: 500 }}>Độ nhạy (Confidence): <strong style={{ color: "#34a853" }}>{(nameCarPredict.confidence * 100).toFixed(2)}%</strong></p>
+        <Modal.Body style={{ padding: "30px", background: "#ffffff" }}>
+          <div style={{ textAlign: "center", marginBottom: "20px" }}>
+            <FaCarSide size={48} style={{ color: "#1a73e8", marginBottom: "16px" }} />
+            <h5 style={{ color: "#5d6571", fontWeight: 600, fontSize: "1.1rem" }}>Hệ thống nhận diện chiếc xe trong ảnh là:</h5>
+            <div style={{ fontSize: "1.8rem", fontWeight: 800, color: "#191c1d", marginTop: "10px", marginBottom: "8px" }}>
+              {nameCarPredict?.brand && nameCarPredict?.brand !== "Unknown" ? nameCarPredict.brand : ""} {nameCarPredict?.model && nameCarPredict?.model !== "Unknown" ? nameCarPredict.model : "Không rõ mẫu xe"}
+            </div>
+            <div style={{ display: "flex", gap: "10px", justifyContent: "center" }}>
+              {nameCarPredict?.year && nameCarPredict.year !== "Unknown" && (
+                <Badge bg="primary" style={{ fontSize: "0.85rem", padding: "6px 12px" }}>Đời dự đoán: {nameCarPredict.year}</Badge>
+              )}
+              {nameCarPredict?.version && nameCarPredict.version !== "Unknown" && (
+                <Badge bg="secondary" style={{ fontSize: "0.85rem", padding: "6px 12px" }}>Phiên bản: {nameCarPredict.version}</Badge>
+              )}
+            </div>
+          </div>
+
+          <hr style={{ borderColor: "#e7e8e9", margin: "24px 0" }} />
+
+          <div style={{ textAlign: "left" }}>
+            <h6 style={{ fontWeight: 700, color: "#191c1d", marginBottom: "16px" }}>Gợi ý xe tương tự tại Showroom:</h6>
+            {cars.length > 0 ? (
+              <div style={{ display: "flex", gap: "15px", overflowX: "auto", paddingBottom: "10px", flexWrap: "wrap" }}>
+                {cars.slice(0, 3).map(car => (
+                  <Card key={car.id} style={{ flex: 1, minWidth: "220px", border: "1px solid #e7e8e9", borderRadius: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.02)" }}>
+                    <Card.Img variant="top" src={car.thumbnail || car.image || car.imageCar} style={{ height: "140px", objectFit: "cover", borderTopLeftRadius: "12px", borderTopRightRadius: "12px" }} />
+                    <Card.Body style={{ padding: "16px" }}>
+                      <Card.Title style={{ fontSize: "1rem", fontWeight: 800, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{car.name}</Card.Title>
+                      <div style={{ color: "#1a73e8", fontWeight: 700, fontSize: "1rem" }}>{car.price ? car.price.toLocaleString("vi-VN") + "đ" : "Liên hệ"}</div>
+                      <Button onClick={() => window.location.href = `/get-car-by-id/${car.id}`} size="sm" style={{ width: "100%", marginTop: "12px", backgroundColor: "#f8f9fa", color: "#1a73e8", border: "1px solid #1a73e8", fontWeight: 600 }}>Xem chi tiết</Button>
+                    </Card.Body>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <Alert variant="warning" style={{ borderRadius: "8px", border: "none", color: "#856404", backgroundColor: "#fff3cd" }}>
+                Hiện tại showroom chưa có mẫu xe này hoặc các phiên bản tương tự. Bạn có thể liên hệ trực tiếp để nhận thông báo khi xe về!
+              </Alert>
+            )}
+          </div>
         </Modal.Body>
-        <Modal.Footer style={{ borderTop: "none", justifyContent: "center" }}>
-          <Button onClick={() => setShowModal(false)} style={{ background: "#1a73e8", color: "#ffffff", border: "none", fontWeight: 600, borderRadius: "4px", padding: "8px 32px" }}>Xác nhận</Button>
-        </Modal.Footer>
       </Modal>
 
       <Chat />

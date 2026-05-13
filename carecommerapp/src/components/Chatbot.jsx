@@ -106,11 +106,14 @@ export default function Chatbot() {
   }, [messages, chatLoading]);
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && !isMinimized) {
       setHasUnread(false);
-      setTimeout(() => inputRef.current?.focus(), 300);
+      setTimeout(() => {
+        inputRef.current?.focus();
+        endRef.current?.scrollIntoView({ behavior: "auto" });
+      }, 300);
     }
-  }, [isOpen]);
+  }, [isOpen, isMinimized]);
 
   useEffect(() => {
     const timer = setTimeout(() => setPulseBtn(false), 5000);
@@ -209,6 +212,8 @@ export default function Chatbot() {
         image: c.image || c.thumbnail || (Array.isArray(c.images) && c.images[0]) || fallbackCarImage,
         link: c.id ? `/get-car-by-id/${c.id}` : "/car-new",
         bodyType: c.body_type || c.bodyType || "",
+        year: c.year || "",
+        engine: c.engine || "",
       })).slice(0, 3);
 
       if (!cards.length) cards = buildLocalCards(text);
@@ -236,6 +241,8 @@ export default function Chatbot() {
             image: c.image || c.thumbnail || fallbackCarImage,
             link: c.id ? `/get-car-by-id/${c.id}` : "/car-new",
             bodyType: c.body_type || c.bodyType || "",
+            year: c.year || "",
+            engine: c.engine || "",
           }))
           : fallbackCards,
       });
@@ -506,8 +513,11 @@ export default function Chatbot() {
                                 onError={(e) => { e.currentTarget.src = fallbackCarImage; }}
                               />
                               <div style={styles.cardBody}>
-                                <div style={styles.carName}>{car.name}</div>
-                                {car.bodyType && <div style={styles.carBadge}>{car.bodyType}</div>}
+                                <div style={styles.carName}>{car.name} {car.year ? `(${car.year})` : ""}</div>
+                                <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", marginTop: "4px" }}>
+                                  {car.bodyType && <div style={styles.carBadge}>{car.bodyType}</div>}
+                                  {car.engine && <div style={styles.carBadge}>{car.engine}</div>}
+                                </div>
                                 <div style={styles.carPrice}>
                                   {car.priceLabel || toCurrency(car.price)}
                                 </div>
@@ -545,20 +555,7 @@ export default function Chatbot() {
                 <div ref={endRef} />
               </div>
 
-              {/* Quick suggestions */}
-              <div style={styles.quickRow}>
-                {quickSuggestions.map((q) => (
-                  <button
-                    key={q}
-                    className="chatbot-quick-btn"
-                    style={styles.quickBtn}
-                    onClick={() => sendMessage(q)}
-                    disabled={chatLoading}
-                  >
-                    {q}
-                  </button>
-                ))}
-              </div>
+              {/* Quick suggestions removed per request */}
 
               {/* Input row */}
               <div style={styles.inputRow}>
@@ -571,6 +568,7 @@ export default function Chatbot() {
                   rows={1}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {
+                      if (e.nativeEvent.isComposing) return;
                       e.preventDefault();
                       sendMessage();
                     }

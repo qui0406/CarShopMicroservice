@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Container, Row, Col, Form, Button, ProgressBar, Badge, Alert } from "react-bootstrap";
 import APIs, { endpoints } from "../configs/APIs";
 import {
@@ -20,8 +20,11 @@ export default function AIValuation({ isSection = false }) {
   const [files, setFiles] = useState([]);
   const [error, setError] = useState(null);
   const [valuationResult, setValuationResult] = useState(null);
+  const [branches, setBranches] = useState([]);
+  const [categories, setCategories] = useState([]);
 
   const [formData, setFormData] = useState({
+    brand_name: "",
     model_name: "",
     trim_name: "",
     year: new Date().getFullYear(),
@@ -40,6 +43,23 @@ export default function AIValuation({ isSection = false }) {
     airbags: 6
   });
 
+  useEffect(() => {
+    const fetchMetadata = async () => {
+      try {
+        const branchRes = await APIs.get(endpoints["get-all-branch"]);
+        const bData = branchRes.data?.result?.data || branchRes.data?.result || [];
+        setBranches(Array.isArray(bData) ? bData : []);
+        
+        const catRes = await APIs.get(endpoints["get-all-category"]);
+        const cData = catRes.data?.result?.data || catRes.data?.result || [];
+        setCategories(Array.isArray(cData) ? cData : []);
+      } catch (err) {
+        console.error("Error fetching metadata:", err);
+      }
+    };
+    fetchMetadata();
+  }, []);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({
@@ -51,6 +71,19 @@ export default function AIValuation({ isSection = false }) {
   const handleValuation = async () => {
     if (files.length === 0) {
       setError("Vui lòng tải lên ít nhất một ảnh xe để AI có thể phân tích ngoại thất.");
+      return;
+    }
+
+    // Client-side Mazda validation
+    const MAZDA_ALIASES = ["mazda", "madaz", "madza", "mazada"];
+    const modelLower = (formData.model_name || "").toLowerCase();
+    const brandLower = (formData.brand_name || "").toLowerCase();
+    
+    const isMazda = MAZDA_ALIASES.some(alias => modelLower.includes(alias) || brandLower.includes(alias));
+    
+    if (!isMazda && (formData.model_name || formData.brand_name)) {
+      setError(`⚠️ Mô hình định giá của chúng tôi chỉ hỗ trợ dòng xe Mazda. Xe "${formData.brand_name} ${formData.model_name}" không nằm trong phạm vi hỗ trợ.`);
+      setValuing(false);
       return;
     }
 
@@ -78,7 +111,6 @@ export default function AIValuation({ isSection = false }) {
       if (response.data.success) {
         setValuationResult(response.data.data);
         setShowResult(true);
-        // Scroll to results on mobile
         if (window.innerWidth < 992) {
           window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         }
@@ -191,7 +223,24 @@ export default function AIValuation({ isSection = false }) {
               </div>
 
               <Row className="g-4">
-                <Col md={6}>
+                <Col md={4}>
+                  <Form.Group>
+                    <Form.Label style={labelStyle}>THƯƠNG HIỆU (BRAND_NAME)</Form.Label>
+                    <Form.Select
+                      style={inputStyle}
+                      name="brand_name"
+                      value={formData.brand_name}
+                      onChange={handleInputChange}
+                      required
+                    >
+                      <option value="">Chọn thương hiệu</option>
+                      {branches.map(b => (
+                        <option key={b.id} value={b.name}>{b.name}</option>
+                      ))}
+                    </Form.Select>
+                  </Form.Group>
+                </Col>
+                <Col md={4}>
                   <Form.Group>
                     <Form.Label style={labelStyle}>DÒNG XE (MODEL_NAME)</Form.Label>
                     <Form.Control
@@ -205,7 +254,7 @@ export default function AIValuation({ isSection = false }) {
                     />
                   </Form.Group>
                 </Col>
-                <Col md={6}>
+                <Col md={4}>
                   <Form.Group>
                     <Form.Label style={labelStyle}>PHIÊN BẢN (TRIM_NAME)</Form.Label>
                     <Form.Control
@@ -353,13 +402,10 @@ export default function AIValuation({ isSection = false }) {
                       value={formData.body_type}
                       onChange={handleInputChange}
                     >
-                      <option value="SUV">SUV</option>
-                      <option value="Sedan">Sedan</option>
-                      <option value="Hatchback">Hatchback</option>
-                      <option value="Coupe">Coupe</option>
-                      <option value="Convertible">Convertible</option>
-                      <option value="Pickup">Pickup</option>
-                      <option value="Van">Van</option>
+                      <option value="">Chọn kiểu dáng</option>
+                      {categories.map(c => (
+                        <option key={c.id} value={c.name}>{c.name}</option>
+                      ))}
                     </Form.Select>
                   </Form.Group>
                 </Col>
@@ -553,6 +599,45 @@ export default function AIValuation({ isSection = false }) {
                     {(valuationResult.summary.final_price * 1000000).toLocaleString('vi-VN')} VNĐ
                   </h2>
 
+                </div>
+
+                <div style={{ backgroundColor: "#f0fdf4", borderRadius: "24px", padding: "24px", border: "1px solid #bbf7d0", marginBottom: "24px" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: "8px", color: "#166534" }}>
+                      <BiInfoCircle size={22} />
+                      <h5 style={{ margin: 0, fontWeight: 700, fontSize: "1rem" }}>Lý giải từ AI</h5>
+                    </div>
+                    {valuationResult.summary.model_info?.segment && (
+                      <span style={{ 
+                        backgroundColor: "#dcfce7", 
+                        color: "#166534", 
+                        padding: "4px 12px", 
+                        borderRadius: "100px", 
+                        fontSize: "0.75rem", 
+                        fontWeight: 700,
+                        border: "1px solid #bbf7d0"
+                      }}>
+                        Phân khúc: {valuationResult.summary.model_info.segment}
+                      </span>
+                    )}
+                  </div>
+                  <p style={{ fontSize: "0.95rem", color: "#166534", margin: "0 0 12px 0", lineHeight: 1.6 }}>
+                    Dựa trên dữ liệu thị trường, mẫu xe <strong>{formData.model_name} {formData.year}</strong> có giá trị gốc khoảng <strong>{valuationResult.summary.raw_price.toLocaleString('vi-VN')} triệu VNĐ</strong>.
+                    Sau khi AI phân tích mức ODO ({formData.odo}km) cùng tình trạng hiện tại, hệ thống ghi nhận <strong>{valuationResult.deductions.length} yếu tố khấu hao</strong>, làm giảm <strong>{valuationResult.summary.total_penalty.toLocaleString('vi-VN')} triệu VNĐ</strong>.
+                    Mức giá đề xuất đảm bảo sát với tình trạng thực tế của xe.
+                  </p>
+                  {valuationResult.summary.ref_note && (
+                    <div style={{ 
+                      fontSize: "0.75rem", 
+                      color: "#166534", 
+                      opacity: 0.8, 
+                      paddingTop: "12px", 
+                      borderTop: "1px dashed #bbf7d0",
+                      fontStyle: "italic" 
+                    }}>
+                      Nguồn tham chiếu: {valuationResult.summary.ref_note}
+                    </div>
+                  )}
                 </div>
 
                 <div style={{ backgroundColor: "#fff", borderRadius: "24px", padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.03)", border: "1px solid #f1f5f9" }}>
