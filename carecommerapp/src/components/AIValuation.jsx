@@ -687,38 +687,7 @@ export default function AIValuation({ isSection = false }) {
                     )}
                   </div>
 
-                  {valuationResult.processed_images && valuationResult.processed_images.length > 0 && (
-                    <>
-                      <h5 style={{ fontSize: "0.95rem", fontWeight: 700, marginBottom: "16px", color: "#1e293b" }}>Kết quả phân tách hình ảnh</h5>
-                      <Row className="g-2 mb-3">
-                        {valuationResult.processed_images.map((img, idx) => (
-                          <Col xs={6} key={idx}>
-                            <div style={{ position: "relative", borderRadius: "12px", overflow: "hidden" }}>
-                              <img
-                                src={`data:image/jpeg;base64,${img}`}
-                                style={{ width: "100%", height: "80px", objectFit: "cover" }}
-                                alt={`AI analysis ${idx}`}
-                              />
-                              <div style={{
-                                position: "absolute",
-                                bottom: 0,
-                                left: 0,
-                                right: 0,
-                                backgroundColor: "rgba(25, 118, 210, 0.8)",
-                                color: "#fff",
-                                fontSize: "0.6rem",
-                                padding: "2px 6px",
-                                fontWeight: 800,
-                                textAlign: "center"
-                              }}>
-                                ĐÃ PHÂN TÍCH
-                              </div>
-                            </div>
-                          </Col>
-                        ))}
-                      </Row>
-                    </>
-                  )}
+
 
                   <Button variant="outline-primary" style={{
                     width: "100%",

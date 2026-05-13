@@ -1,7 +1,7 @@
 import axios from "axios";
 import cookie from "react-cookies";
 
-const BASE_URL = "http://localhost:8888/api/v1";
+const BASE_URL = "https://ee2b-2001-ee0-4fc0-70c0-f4ce-64e2-e388-7e86.ngrok-free.app/api/v1";
 
 
 export const endpoints = {
