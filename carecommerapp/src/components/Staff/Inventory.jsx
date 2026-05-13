@@ -47,7 +47,7 @@ export default function Inventory() {
     const fetchCars = async () => {
       try {
         setLoading(true);
-        const res = await axios.get(endpoints["get-products"](page, 50));
+        const res = await axios.get(endpoints["get-cars"](page, 50));
         const resData = res.data?.result;
         let arr = resData?.data || [];
 
@@ -108,7 +108,7 @@ export default function Inventory() {
     
     // Fetch some generic cars for dropdown initially
     try {
-      const res = await axios.get(endpoints["get-products"](1, 500));
+      const res = await axios.get(endpoints["get-cars"](1, 500));
       setCarOptions(res.data?.result?.data || []);
     } catch (e) {}
   };

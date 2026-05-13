@@ -35,7 +35,7 @@ export default function PaymentCompleted() {
         setOrderInfo(order);
         const carId = order?.orderItems?.[0]?.carId;
         if (carId) {
-          const cRes = await axios.get(endpoints['get-product-by-id'](carId));
+          const cRes = await axios.get(endpoints['get-car-by-id'](carId));
           setCarInfo(cRes.data?.result || cRes.data);
         }
       } catch (e) { console.error('Fetch order/car failed', e); }

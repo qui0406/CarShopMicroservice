@@ -19,6 +19,7 @@ export default function Home() {
   const [categories, setCategories] = useState([]);
   const [models, setModels] = useState([]);
   const [cars, setCars] = useState([]);
+  const [carsIsReady, setCarsIsReady] = useState([]);
   const [nameCarPredict, setNameCarPredict] = useState([])
   const [showModal, setShowModal] = useState(false);
   const [predictCar, setPredictedCar] = useState([])
@@ -131,13 +132,13 @@ export default function Home() {
 
       if (selectedBranch) params.carBranch = selectedBranch;
       if (selectedCategory) params.carCategory = selectedCategory;
-      if (selectedPriceRange) params.price = selectedPriceRange;
+      if (selectedPriceRange) params.price = selectedPriceRange * 1_000_000; // convert triệu → VND
       if (selectedModel) params.carName = selectedModel;
 
       // Use filter-car if any filters are active, else use get-products
       const endpoint = (selectedBranch || selectedCategory || selectedPriceRange || selectedModel)
         ? endpoints["filter-car"](params)
-        : endpoints["get-products"](pageNum, 12);
+        : endpoints["get-cars"](pageNum, 12);
 
       const res = await axios.get(endpoint);
       const resData = res.data?.result || res.data || {};
@@ -161,6 +162,7 @@ export default function Home() {
     fetchBranches();
     fetchCategories();
     fetchModels();
+    isListReadyCar();
   }, []);
 
   useEffect(() => {
@@ -172,6 +174,18 @@ export default function Home() {
     setPageBranch(pageNumber);
     setCurrentPage(pageNumber);
   };
+
+  const isListReadyCar = async () => {
+    try {
+      const res = await axios.get(endpoints["get-cars"]());
+      const resData = res.data?.result || res.data || {};
+      const data = Array.isArray(resData.data) ? resData.data : (Array.isArray(resData) ? resData : []);
+      // Show all available cars as suggestions in the AI modal
+      setCarsIsReady(data);
+    } catch (err) {
+      console.error("Fetch cars error:", err);
+    }
+  }
 
   const handleCarPageChange = (pageNumber) => {
     setCarPage(pageNumber);
@@ -197,6 +211,9 @@ export default function Home() {
     }
   };
 
+
+
+
   const handleImageSearch = async () => {
 
     if (!selectedImage) return;
@@ -216,7 +233,9 @@ export default function Home() {
       const responseData = resPredict.data;
       if (responseData.success) {
         setNameCarPredict(responseData.ai_detected);
-        setCars(Array.isArray(responseData.data) ? responseData.data : []);
+        const data = Array.isArray(responseData.data) ? responseData.data : [];
+        setCars(data);
+        setCarsIsReady(data); // Show these recommended cars in the modal
         setCarTotalPages(1);
         setShowModal(true);
       } else {
@@ -245,7 +264,7 @@ export default function Home() {
   return (
     <div style={{ backgroundColor: "#f4f6f8", minHeight: "100vh", paddingBottom: "50px" }}>
       {/* 1. Hero Section */}
-      <div style={{ padding: "80px 10%", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", backgroundColor: "#f4f6f8" }}>
+      <div style={{ padding: "142px 10% 80px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", backgroundColor: "#f4f6f8" }}>
         <div style={{ flex: 1, minWidth: "400px", paddingRight: "40px", marginBottom: "40px" }}>
           <div style={{ display: "inline-flex", alignItems: "center", padding: "6px 12px", backgroundColor: "#e8f0fe", borderRadius: "50px", marginBottom: "20px" }}>
             <span style={{ color: "#1a73e8", fontWeight: 700, fontSize: "0.8rem", textTransform: "uppercase", display: "flex", alignItems: "center", gap: "6px" }}>
@@ -271,9 +290,7 @@ export default function Home() {
         <div style={{ flex: 1, minWidth: "400px", position: "relative", display: "flex", justifyContent: "flex-end" }}>
           <div style={{ width: "90%", borderRadius: "20px", overflow: "hidden", position: "relative", boxShadow: "0 20px 40px rgba(0,0,0,0.2)" }}>
             <img src="https://mazdalongan.vn/media/1vxbkcbp/new-mazda6_1.jpg" alt="AI Valuation Car" style={{ width: "100%", display: "block", filter: "brightness(0.9)" }} />
-            <div style={{ position: "absolute", top: "20px", right: "20px", backgroundColor: "rgba(255,255,255,0.85)", padding: "8px 16px", borderRadius: "8px", backdropFilter: "blur(10px)" }}>
-              <span style={{ fontWeight: 700, fontSize: "0.85rem", color: "#191c1d" }}>🎯 Phân tích: 98%</span>
-            </div>
+
           </div>
         </div>
       </div>
@@ -368,7 +385,7 @@ export default function Home() {
             <h2 style={{ fontSize: "1.8rem", fontWeight: 800, color: "#191c1d", marginBottom: "8px" }}>Mẫu xe Nổi bật</h2>
             <p style={{ color: "#5d6571", fontSize: "0.95rem", margin: 0, fontWeight: 500 }}>Khám phá những dòng xe Mazda được ưa chuộng nhất hiện nay.</p>
           </div>
-          <Link to="#" style={{ color: "#0056b3", fontWeight: 700, fontSize: "0.95rem", textDecoration: "none" }}>Xem tất cả &rarr;</Link>
+          <Link to="/car-new" style={{ color: "#0056b3", fontWeight: 700, fontSize: "0.95rem", textDecoration: "none" }}>Xem tất cả &rarr;</Link>
         </div>
 
         {loading ? (
@@ -396,7 +413,7 @@ export default function Home() {
                       <Card.Body style={{ padding: "20px" }}>
                         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "4px" }}>
                           <Card.Title style={{ color: "#191c1d", fontWeight: 800, fontSize: "1.2rem", margin: 0, textOverflow: "ellipsis", overflow: "hidden", whiteSpace: "nowrap", maxWidth: "70%" }}>
-                            {car.name || car.carName || car.modelName || "Unknown Car"}
+                            {car.name || car.carModel?.name || car.carName || car.modelName || car.car_model?.name || "Mẫu xe đang cập nhật"}
                           </Card.Title>
                           <span style={{ fontSize: "0.6rem", fontWeight: 800, backgroundColor: "#f4f6f8", padding: "4px 8px", borderRadius: "4px", color: "#191c1d", border: "1px solid #e7e8e9" }}>{badges[idx % 3]}</span>
                         </div>
@@ -496,13 +513,13 @@ export default function Home() {
 
           <div style={{ textAlign: "left" }}>
             <h6 style={{ fontWeight: 700, color: "#191c1d", marginBottom: "16px" }}>Gợi ý xe tương tự tại Showroom:</h6>
-            {cars.length > 0 ? (
+            {carsIsReady.length > 0 ? (
               <div style={{ display: "flex", gap: "15px", overflowX: "auto", paddingBottom: "10px", flexWrap: "wrap" }}>
-                {cars.slice(0, 3).map(car => (
+                {carsIsReady.slice(0, 3).map(car => (
                   <Card key={car.id} style={{ flex: 1, minWidth: "220px", border: "1px solid #e7e8e9", borderRadius: "12px", boxShadow: "0 4px 12px rgba(0,0,0,0.02)" }}>
                     <Card.Img variant="top" src={car.thumbnail || car.image || car.imageCar} style={{ height: "140px", objectFit: "cover", borderTopLeftRadius: "12px", borderTopRightRadius: "12px" }} />
                     <Card.Body style={{ padding: "16px" }}>
-                      <Card.Title style={{ fontSize: "1rem", fontWeight: 800, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{car.name}</Card.Title>
+                      <Card.Title style={{ fontSize: "1rem", fontWeight: 800, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{car.name || car.carModel?.name || car.carName || car.modelName || car.car_model?.name || "Mẫu xe đang cập nhật"}</Card.Title>
                       <div style={{ color: "#1a73e8", fontWeight: 700, fontSize: "1rem" }}>{car.price ? car.price.toLocaleString("vi-VN") + "đ" : "Liên hệ"}</div>
                       <Button onClick={() => window.location.href = `/get-car-by-id/${car.id}`} size="sm" style={{ width: "100%", marginTop: "12px", backgroundColor: "#f8f9fa", color: "#1a73e8", border: "1px solid #1a73e8", fontWeight: 600 }}>Xem chi tiết</Button>
                     </Card.Body>

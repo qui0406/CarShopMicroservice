@@ -29,7 +29,7 @@ function getOrCreateSessionId() {
 }
 
 const WELCOME_TEXT =
-  "Xin chào! 👋 Tôi là **Car AI Assistant** – trợ lý tư vấn xe thông minh của showroom.\n\nTôi có thể giúp bạn:\n• 🔍 Tìm xe theo nhu cầu & ngân sách\n• 📊 So sánh các dòng xe\n• 📷 Nhận diện xe qua hình ảnh\n• 💰 Tư vấn giá và thương lượng\n\nBạn cần tìm xe như thế nào?";
+  "Xin chào! 👋 Tôi là **Car AI Assistant** – trợ lý tư vấn xe thông minh của showroom.\n\nTôi có thể giúp bạn:\n• 🔍 Tìm xe theo nhu cầu & ngân sách\n• 📊 So sánh các dòng xe\n• 💰 Tư vấn giá và thương lượng\n\nBạn cần tìm xe như thế nào?";
 
 function makeWelcomeMessage() {
   return {
@@ -46,7 +46,7 @@ const normalizeCars = (data) => {
   if (!Array.isArray(list)) return [];
   return list.map((car) => ({
     id: car.id,
-    name: car.name || "Mẫu xe đang cập nhật",
+    name: car.name || car.carModel?.name || "Mẫu xe đang cập nhật",
     price: car.price || 0,
     bodyType: car?.carModel?.bodyType || "",
     image: car?.imageUrls?.[0] || car?.carModel?.thumbnailImage || fallbackCarImage,
@@ -56,20 +56,7 @@ const normalizeCars = (data) => {
   }));
 };
 
-const extractCardsFromIdentify = (result, allCars) => {
-  if (!result) return [];
-  const potentialNames = [
-    result?.ai_detected?.model,
-    result?.ai_detected?.version,
-    result?.detected_car?.model,
-    result?.detected_car?.name,
-  ]
-    .filter(Boolean)
-    .map((x) => String(x).toLowerCase());
-  return allCars
-    .filter((car) => potentialNames.some((name) => car.name.toLowerCase().includes(name)))
-    .slice(0, 3);
-};
+
 
 const formatBotText = (text) => {
   if (!text) return "";
@@ -84,22 +71,16 @@ export default function Chatbot() {
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [activeTab, setActiveTab] = useState("chat");
   const [cars, setCars] = useState([]);
   const [messages, setMessages] = useState(() => [makeWelcomeMessage()]);
   const [input, setInput] = useState("");
   const [chatLoading, setChatLoading] = useState(false);
   const [sessionId, setSessionId] = useState(getOrCreateSessionId);
-  const [imageFile, setImageFile] = useState(null);
-  const [preview, setPreview] = useState("");
-  const [identifyLoading, setIdentifyLoading] = useState(false);
-  const [identifyResult, setIdentifyResult] = useState(null);
   const [hasUnread, setHasUnread] = useState(false);
   const [pulseBtn, setPulseBtn] = useState(true);
 
   const endRef = useRef(null);
   const inputRef = useRef(null);
-  const fileInputRef = useRef(null);
 
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -123,7 +104,7 @@ export default function Chatbot() {
   useEffect(() => {
     const loadCars = async () => {
       try {
-        const res = await axios.get(endpoints["get-products"](1, 30));
+        const res = await axios.get(endpoints["get-cars"](1, 30));
         setCars(normalizeCars(res.data));
       } catch {
         setCars([]);
@@ -206,7 +187,7 @@ export default function Chatbot() {
 
       let cards = remoteCardsList.map((c) => ({
         id: c.id,
-        name: c.name || c.model || c.car_name || "Mẫu xe",
+        name: c.name || c.carModel?.name || c.model || c.car_name || "Mẫu xe",
         price: c.price || 0,
         priceLabel: c.price_formatted || (c.price != null && Number(c.price) > 0 ? toCurrency(c.price) : ""),
         image: c.image || c.thumbnail || (Array.isArray(c.images) && c.images[0]) || fallbackCarImage,
@@ -235,7 +216,7 @@ export default function Chatbot() {
         cards: Array.isArray(errorCards) && errorCards.length
           ? errorCards.slice(0, 2).map((c) => ({
             id: c.id,
-            name: c.name || c.model || "Mẫu xe",
+            name: c.name || c.carModel?.name || c.model || "Mẫu xe",
             price: c.price || 0,
             priceLabel: c.price_formatted || toCurrency(c.price),
             image: c.image || c.thumbnail || fallbackCarImage,
@@ -252,58 +233,7 @@ export default function Chatbot() {
     }
   };
 
-  const handleFileChange = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setImageFile(file);
-    setIdentifyResult(null);
-    setPreview((prev) => {
-      if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
-      return URL.createObjectURL(file);
-    });
-  };
-
-  const handleIdentify = async () => {
-    if (!imageFile || identifyLoading) return;
-    setIdentifyLoading(true);
-    setIdentifyResult(null);
-    try {
-      const formData = new FormData();
-      formData.append("file", imageFile);
-      const res = await axios.post(endpoints["identify-car"], formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
-      const result = res.data?.result || res.data || {};
-      const cards = extractCardsFromIdentify(result, cars);
-      setIdentifyResult({ ok: true, result, cards });
-      addMessage({
-        role: "bot",
-        text: `🔍 Đã nhận diện được xe!\n**Hãng:** ${result?.ai_detected?.brand || "--"}\n**Dòng xe:** ${result?.ai_detected?.model || "--"}\n**Phiên bản:** ${result?.ai_detected?.version || "--"}\n\nDưới đây là những xe tương tự trong showroom:`,
-        time: now(),
-        cards,
-      });
-      setActiveTab("chat");
-    } catch {
-      setIdentifyResult({ ok: false, error: "Không thể nhận diện ảnh. Vui lòng thử lại với ảnh rõ hơn." });
-    } finally {
-      setIdentifyLoading(false);
-    }
-  };
-
-  const handleDropZoneClick = () => fileInputRef.current?.click();
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    const file = e.dataTransfer.files?.[0];
-    if (file && file.type.startsWith("image/")) {
-      setImageFile(file);
-      setIdentifyResult(null);
-      setPreview((prev) => {
-        if (prev?.startsWith("blob:")) URL.revokeObjectURL(prev);
-        return URL.createObjectURL(file);
-      });
-    }
-  };
+  // Identify logic removed
 
   /* ─── floating button ─── */
   if (!isOpen) {
@@ -332,7 +262,7 @@ export default function Chatbot() {
           }
         `}</style>
         <div style={styles.floatingBtnInner}>
-          <span style={styles.floatingIcon}>🤖</span>
+          <img src="https://api.dicebear.com/7.x/bottts-neutral/svg?seed=CarBot&backgroundColor=b6e3f4" alt="AI" style={{ width: 32, height: 32, borderRadius: "50%" }} />
           {hasUnread && <span style={styles.unreadBadge} />}
         </div>
         <div style={styles.floatingLabel}>AI Tư Vấn</div>
@@ -380,7 +310,9 @@ export default function Chatbot() {
       <header style={styles.header}>
         <div style={styles.headerLeft}>
           <div style={styles.avatarWrap}>
-            <div style={styles.avatar}>🤖</div>
+            <div style={styles.avatar}>
+              <img src="https://api.dicebear.com/7.x/bottts-neutral/svg?seed=CarBot&backgroundColor=b6e3f4" alt="AI Bot" style={{ width: 32, height: 32, borderRadius: "50%" }} />
+            </div>
             <div style={styles.onlineDot} />
           </div>
           <div>
@@ -397,7 +329,7 @@ export default function Chatbot() {
             disabled={chatLoading}
             title="Cuộc hội thoại mới"
           >
-            ✨ Mới
+            Chat mới
           </button>
           <button
             type="button"
@@ -431,7 +363,6 @@ export default function Chatbot() {
           <div style={styles.loginFeatures}>
             {[
               { icon: "💬", text: "Tư vấn xe theo nhu cầu" },
-              { icon: "📷", text: "Nhận diện xe qua hình ảnh" },
               { icon: "🔍", text: "So sánh giá & thông số" },
             ].map((f) => (
               <div key={f.text} style={styles.loginFeatureItem}>
@@ -444,7 +375,7 @@ export default function Chatbot() {
             style={styles.loginBtn}
             onClick={() => { setIsOpen(false); navigate("/login"); }}
           >
-            🚀 Đăng nhập ngay
+            Đăng nhập ngay
           </button>
           <button
             style={styles.registerBtn}
@@ -457,27 +388,8 @@ export default function Chatbot() {
 
       {!isMinimized && user && (
         <>
-          {/* Tabs */}
-          <div style={styles.tabRow}>
-            <button
-              className="chatbot-tab"
-              style={{ ...styles.tabBtn, ...(activeTab === "chat" ? styles.tabActive : {}) }}
-              onClick={() => setActiveTab("chat")}
-            >
-              <span>💬</span> Chat tư vấn
-            </button>
-            <button
-              className="chatbot-tab"
-              style={{ ...styles.tabBtn, ...(activeTab === "vision" ? styles.tabActive : {}) }}
-              onClick={() => setActiveTab("vision")}
-            >
-              <span>📷</span> Nhận diện ảnh
-            </button>
-          </div>
-
-          {/* Chat Tab */}
-          {activeTab === "chat" && (
-            <div style={styles.chatWrapper}>
+          {/* Chat Interface */}
+          <div style={styles.chatWrapper}>
               <div style={styles.messages}>
                 {messages.map((m) => (
                   <div
@@ -489,7 +401,9 @@ export default function Chatbot() {
                     }}
                   >
                     {m.role === "bot" && (
-                      <div style={styles.botAvatar}>🤖</div>
+                      <div style={styles.botAvatar}>
+                        <img src="https://api.dicebear.com/7.x/bottts-neutral/svg?seed=CarBot&backgroundColor=b6e3f4" alt="bot" style={{ width: 28, height: 28, borderRadius: "50%" }} />
+                      </div>
                     )}
                     <div style={{ maxWidth: "82%" }}>
                       <div style={{
@@ -505,7 +419,12 @@ export default function Chatbot() {
                       {Array.isArray(m.cards) && m.cards.length > 0 && (
                         <div style={styles.cardGrid}>
                           {m.cards.map((car, idx) => (
-                            <div key={`${car.id || car.name}-${idx}`} className="chatbot-car-card" style={styles.carCard}>
+                            <div
+                              key={`${car.id || car.name}-${idx}`}
+                              className="chatbot-car-card"
+                              style={styles.carCard}
+                              onClick={() => navigate(car.link)}
+                            >
                               <img
                                 src={car.image || fallbackCarImage}
                                 alt={car.name}
@@ -536,7 +455,9 @@ export default function Chatbot() {
                 {/* Typing indicator */}
                 {chatLoading && (
                   <div className="chatbot-msg" style={styles.messageRow}>
-                    <div style={styles.botAvatar}>🤖</div>
+                    <div style={styles.botAvatar}>
+                      <img src="https://api.dicebear.com/7.x/bottts-neutral/svg?seed=CarBot&backgroundColor=b6e3f4" alt="bot" style={{ width: 28, height: 28, borderRadius: "50%" }} />
+                    </div>
                     <div style={{ ...styles.bubble, ...styles.bubbleBot }}>
                       <div style={styles.typingWrap}>
                         {[0, 1, 2].map((i) => (
@@ -587,114 +508,6 @@ export default function Chatbot() {
                 </button>
               </div>
             </div>
-          )}
-
-          {/* Vision Tab */}
-          {activeTab === "vision" && (
-            <div style={styles.visionWrap}>
-              {/* Upload zone */}
-              <div
-                style={styles.uploadZone}
-                onClick={handleDropZoneClick}
-                onDrop={handleDrop}
-                onDragOver={(e) => e.preventDefault()}
-              >
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="image/*"
-                  style={{ display: "none" }}
-                  onChange={handleFileChange}
-                />
-                {preview ? (
-                  <div style={styles.previewWrap}>
-                    <img src={preview} alt="preview" style={styles.previewImg} />
-                    <div style={styles.previewOverlay}>
-                      <span style={{ fontSize: "1.5rem" }}>🔄</span>
-                      <span>Đổi ảnh</span>
-                    </div>
-                  </div>
-                ) : (
-                  <div style={styles.uploadPlaceholder}>
-                    <div style={styles.uploadIconBig}>📷</div>
-                    <div style={styles.uploadTitle}>Tải ảnh xe lên</div>
-                    <div style={styles.uploadSub}>Kéo thả hoặc click để chọn ảnh</div>
-                    <div style={styles.uploadFormats}>JPG, PNG, WEBP</div>
-                  </div>
-                )}
-              </div>
-
-              <button
-                className="chatbot-identify-btn"
-                style={{
-                  ...styles.identifyBtn,
-                  opacity: imageFile && !identifyLoading ? 1 : 0.5,
-                }}
-                disabled={!imageFile || identifyLoading}
-                onClick={handleIdentify}
-              >
-                {identifyLoading ? (
-                  <span>
-                    <span style={styles.spinner}>⏳</span> Đang nhận diện...
-                  </span>
-                ) : (
-                  "🔍 Nhận diện hình ảnh"
-                )}
-              </button>
-
-              {/* Result */}
-              {identifyResult?.ok && (
-                <div style={styles.resultCard}>
-                  <div style={styles.resultHeader}>✅ Kết quả nhận diện</div>
-                  <div style={styles.resultGrid}>
-                    <div style={styles.resultItem}>
-                      <span style={styles.resultLabel}>Hãng xe</span>
-                      <span style={styles.resultValue}>
-                        {identifyResult.result?.ai_detected?.brand || "—"}
-                      </span>
-                    </div>
-                    <div style={styles.resultItem}>
-                      <span style={styles.resultLabel}>Dòng xe</span>
-                      <span style={styles.resultValue}>
-                        {identifyResult.result?.ai_detected?.model || "—"}
-                      </span>
-                    </div>
-                    <div style={styles.resultItem}>
-                      <span style={styles.resultLabel}>Phiên bản</span>
-                      <span style={styles.resultValue}>
-                        {identifyResult.result?.ai_detected?.version || "—"}
-                      </span>
-                    </div>
-                  </div>
-                  {identifyResult.cards?.length > 0 && (
-                    <>
-                      <div style={styles.resultSubtitle}>Xe tương tự trong showroom:</div>
-                      <div style={styles.cardGrid}>
-                        {identifyResult.cards.map((car) => (
-                          <div key={car.id} className="chatbot-car-card" style={styles.carCard}>
-                            <img src={car.image} alt={car.name} style={styles.carImage}
-                              onError={(e) => { e.currentTarget.src = fallbackCarImage; }} />
-                            <div style={styles.cardBody}>
-                              <div style={styles.carName}>{car.name}</div>
-                              <div style={styles.carPrice}>{toCurrency(car.price)}</div>
-                              <Link to={car.link} className="chatbot-link-btn" style={styles.linkBtn}>
-                                Xem xe →
-                              </Link>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                </div>
-              )}
-              {identifyResult && !identifyResult.ok && (
-                <div style={styles.errorCard}>
-                  ❌ {identifyResult.error}
-                </div>
-              )}
-            </div>
-          )}
         </>
       )}
     </div>
@@ -708,7 +521,7 @@ const styles = {
     position: "fixed",
     bottom: 28,
     right: 28,
-    background: "linear-gradient(135deg, #6366f1, #2563eb)",
+    background: "linear-gradient(135deg, #1a73e8, #0056b3)",
     border: "none",
     borderRadius: 20,
     padding: "10px 16px 10px 12px",
@@ -745,8 +558,8 @@ const styles = {
     position: "fixed",
     bottom: 100,
     right: 28,
-    width: 400,
-    height: 620,
+    width: 480,
+    height: 700,
     maxWidth: "92vw",
     maxHeight: "82vh",
     background: "#ffffff",
@@ -763,7 +576,7 @@ const styles = {
 
   /* Header */
   header: {
-    background: "linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)",
+    background: "linear-gradient(135deg, #1a73e8 0%, #0056b3 100%)",
     padding: "14px 16px",
     display: "flex",
     justifyContent: "space-between",
@@ -786,7 +599,7 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    fontSize: "1.3rem",
+    fontSize: "1rem",
     border: "2px solid rgba(255,255,255,0.25)",
   },
   onlineDot: {

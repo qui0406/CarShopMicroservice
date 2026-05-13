@@ -44,7 +44,7 @@ export default function Reserve() {
   useEffect(() => {
     const fetchCar = async () => {
       try {
-        const res = await axios.get(endpoints['get-product-by-id'](id));
+        const res = await axios.get(endpoints['get-car-by-id'](id));
         setCar(res.data?.result || res.data);
 
       } catch (err) { console.error(err); }
@@ -99,11 +99,7 @@ export default function Reserve() {
 
   const carImg = car?.imageUrls?.[0] || car?.carModel?.thumbnailImage || 'https://images.unsplash.com/photo-1617469767524-4f5eb3b2b2f1?w=900';
 
-  const paymentMethods = [
-    { key: 'vnpay-qr', label: 'VNPAY-QR', icon: '▦' },
-    { key: 'atm', label: 'Thẻ ngân hàng nội địa', icon: '🏦' },
-    { key: 'intl', label: 'Thẻ quốc tế', icon: '🌐' },
-  ];
+
 
   if (loading) return (
     <div style={s.centerPage}>
@@ -262,7 +258,7 @@ export default function Reserve() {
 
             <div style={s.divider}></div>
 
-            <p style={s.summaryMeta}>SỐ TIỀN ĐẶT CỌC</p>
+            <p style={s.summaryMeta}>SỐ TIỀN ĐẶT CỌC (ít nhất 1% giá trị của xe)</p>
             <p style={{ fontSize: '1.8rem', fontWeight: 900, color: '#111', margin: '4px 0 2px', fontStyle: 'italic' }}>
               {(car.price / 100).toLocaleString('vi-VN')} VNĐ
             </p>
@@ -276,47 +272,14 @@ export default function Reserve() {
             </div>
           </div>
 
-          {/* Payment Method */}
-          <div style={s.summaryCard}>
-            <p style={s.sectionLabel}>CHỌN PHƯƠNG THỨC THANH TOÁN</p>
-            <div style={s.methodList}>
-              {paymentMethods.map(m => (
-                <label key={m.key} style={{ ...s.methodRow, ...(paymentMethod === m.key ? s.methodRowActive : {}) }}>
-                  <input type="radio" name="paymethod" value={m.key} checked={paymentMethod === m.key}
-                    onChange={() => setPaymentMethod(m.key)} style={{ accentColor: '#0a58ca' }} />
-                  <span style={{ flex: 1, fontWeight: 700, fontSize: '0.9rem', color: '#111' }}>{m.label}</span>
-                  <span style={{ fontSize: '1.3rem' }}>{m.icon}</span>
-                </label>
-              ))}
-            </div>
-
             <button type="submit" form="reserve-form" disabled={submitting}
-              style={{ ...s.payBtn, opacity: submitting ? 0.7 : 1 }}>
+              style={{ ...s.payBtn, opacity: submitting ? 0.7 : 1, marginTop: '24px' }}>
               {submitting
                 ? <><span style={s.spinnerSmall}></span> Đang xử lý...</>
-                : 'Xác nhận và Thanh toán qua VNPAY →'}
+                : 'Xác nhận và Gửi yêu cầu →'}
             </button>
-
-            <div style={s.pciRow}>
-              <span style={s.pciIcon}>🔒</span>
-              <span style={s.pciText}>HẠ TẦNG TUÂN THỦ TIÊU CHUẨN PCI-DSS</span>
-            </div>
           </div>
-
         </div>
-      </div>
-
-      {/* FOOTER */}
-      <footer style={s.footer}>
-        <div style={s.footerLeft}>
-          <span style={s.footerLogo}>PRECISION</span>
-          {['THÔNG BÁO PHÁP LÝ', 'CHÍNH SÁCH BẢO MẬT', 'COOKIE', 'KHẢ NĂNG TRUY CẬP', 'HỆ THỐNG TỐ GIÁC'].map(l => (
-            <a key={l} href="#" style={s.footerLink}>{l}</a>
-          ))}
-        </div>
-        <span style={{ fontSize: '0.7rem', color: '#9ca3af' }}>© 2026 TẬP ĐOÀN Ô TÔ PRECISION, INC.</span>
-      </footer>
-
       <style>{`
         @keyframes spin{to{transform:rotate(360deg)}}
         input[type="checkbox"]{width:16px;height:16px;cursor:pointer}

@@ -621,11 +621,22 @@ export default function AIValuation({ isSection = false }) {
                       </span>
                     )}
                   </div>
-                  <p style={{ fontSize: "0.95rem", color: "#166534", margin: "0 0 12px 0", lineHeight: 1.6 }}>
+                  <div style={{ fontSize: "0.95rem", color: "#166534", margin: "0 0 12px 0", lineHeight: 1.6 }}>
                     Dựa trên dữ liệu thị trường, mẫu xe <strong>{formData.model_name} {formData.year}</strong> có giá trị gốc khoảng <strong>{valuationResult.summary.raw_price.toLocaleString('vi-VN')} triệu VNĐ</strong>.
-                    Sau khi AI phân tích mức ODO ({formData.odo}km) cùng tình trạng hiện tại, hệ thống ghi nhận <strong>{valuationResult.deductions.length} yếu tố khấu hao</strong>, làm giảm <strong>{valuationResult.summary.total_penalty.toLocaleString('vi-VN')} triệu VNĐ</strong>.
-                    Mức giá đề xuất đảm bảo sát với tình trạng thực tế của xe.
-                  </p>
+                    Sau khi phân tích kỹ thuật, hệ thống ghi nhận các yếu tố ảnh hưởng đến giá trị:
+                    <ul style={{ paddingLeft: "20px", marginTop: "8px", marginBottom: "8px" }}>
+                      <li key="odo">Mức ODO <strong>{formData.odo.toLocaleString()}km</strong>: {formData.odo > (new Date().getFullYear() - formData.year) * 15000 ? "Vượt mức trung bình." : "Hành trình lý tưởng."}</li>
+                      {valuationResult.deductions.map((d, i) => (
+                        <li key={i}>
+                          <strong>{d.label}</strong>: {d.amount > 0 
+                            ? <>Làm giảm <strong style={{color: '#c53030'}}>{d.amount.toLocaleString('vi-VN')} triệu VNĐ</strong></>
+                            : <>Cộng thêm <strong style={{color: '#166534'}}>{Math.abs(d.amount).toLocaleString('vi-VN')} triệu VNĐ</strong></>
+                          } vào giá trị thực tế.
+                        </li>
+                      ))}
+                    </ul>
+                    Tổng mức khấu trừ là <strong>{valuationResult.summary.total_penalty.toLocaleString('vi-VN')} triệu VNĐ</strong>. Mức giá đề xuất đảm bảo sát với tình trạng thực tế của xe.
+                  </div>
                   {valuationResult.summary.ref_note && (
                     <div style={{ 
                       fontSize: "0.75rem", 
@@ -643,23 +654,23 @@ export default function AIValuation({ isSection = false }) {
                 <div style={{ backgroundColor: "#fff", borderRadius: "24px", padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.03)", border: "1px solid #f1f5f9" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "12px" }}>
                     <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase" }}>PHÂN BỔ GIÁ TRỊ</span>
-                    <span style={{ fontSize: "0.8rem", fontWeight: 700, color: "#e3342f" }}>
-                      KHẤU TRỪ: -{valuationResult.summary.total_penalty.toFixed(1)}TR
+                    <span style={{ fontSize: "0.8rem", fontWeight: 700, color: valuationResult.summary.total_penalty > 0 ? "#e3342f" : "#166534" }}>
+                      {valuationResult.summary.total_penalty > 0 ? `KHẤU TRỪ: -${valuationResult.summary.total_penalty.toFixed(1)}TR` : `TĂNG GIÁ: +${Math.abs(valuationResult.summary.total_penalty).toFixed(1)}TR`}
                     </span>
                   </div>
                   <ProgressBar
-                    now={(valuationResult.summary.final_price / valuationResult.summary.raw_price) * 100}
-                    variant="primary"
+                    now={Math.min(100, (valuationResult.summary.final_price / valuationResult.summary.raw_price) * 100)}
+                    variant={valuationResult.summary.final_price >= valuationResult.summary.raw_price ? "success" : "primary"}
                     style={{ height: "10px", borderRadius: "100px", marginBottom: "8px" }}
                   />
                   <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.75rem", color: "#64748b" }}>
                     <span>Giá gốc: {valuationResult.summary.raw_price.toFixed(1)}tr</span>
-                    <span>Tổng khấu trừ</span>
+                    <span>{valuationResult.summary.total_penalty > 0 ? "Tổng khấu trừ" : "Giá trị cộng thêm"}</span>
                   </div>
 
                   <hr style={{ margin: "24px 0", borderTop: "1px solid #f1f5f9" }} />
 
-                  <h5 style={{ fontSize: "0.95rem", fontWeight: 700, marginBottom: "16px", color: "#1e293b" }}>Chi tiết khấu trừ AI</h5>
+                  <h5 style={{ fontSize: "0.95rem", fontWeight: 700, marginBottom: "16px", color: "#1e293b" }}>Chi tiết các yếu tố AI</h5>
                   <div style={{ display: "flex", flexDirection: "column", gap: "12px", marginBottom: "24px" }}>
                     {valuationResult.deductions.map((d, index) => (
                       <div key={index} style={{
@@ -674,8 +685,8 @@ export default function AIValuation({ isSection = false }) {
                         {d.amount > 0 ? <BiErrorCircle color="#e53e3e" /> : <BiCheckCircle color="#38a169" />}
                         <div style={{ flex: 1 }}>
                           <div style={{ fontSize: "0.75rem", color: d.amount > 0 ? "#c53030" : "#22543d", fontWeight: 600 }}>{d.label}:</div>
-                          <div style={{ fontSize: "0.85rem", fontWeight: 700, color: "#111" }}>
-                            {d.amount > 0 ? `-${d.amount.toFixed(2)}tr` : "0đ"}
+                          <div style={{ fontSize: "0.85rem", fontWeight: 700, color: d.amount > 0 ? "#c53030" : "#38a169" }}>
+                            {d.amount > 0 ? `-${d.amount.toFixed(2)}tr` : `+${Math.abs(d.amount).toFixed(2)}tr`}
                           </div>
                         </div>
                       </div>

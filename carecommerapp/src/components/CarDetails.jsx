@@ -22,7 +22,7 @@ export default function CarDetails() {
   const fetchCarDetails = async () => {
     try {
       setLoading(true);
-      const res = await axios.get(endpoints["get-product-by-id"](id));
+      const res = await axios.get(endpoints["get-car-by-id"](id));
       const resData = res.data?.result || res.data;
       setCar(resData);
       setCarImages(resData?.imageUrls?.length > 0 ? resData.imageUrls : (resData?.carModel?.thumbnailImage ? [resData.carModel.thumbnailImage] : []));

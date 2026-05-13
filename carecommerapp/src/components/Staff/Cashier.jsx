@@ -140,19 +140,13 @@ export default function Cashier() {
   const fetchOrder = async () => {
     setLoading(true);
     try {
-      const res = await authApis().get(endpoints["get-all-deposit"]);
-      if (res.status === 200 || res.status === 201) {
-        setOrders(res.data.result || []);
-      }
+      const res = await authApis().get(endpoints["get-all-orders-management"](1, 50));
+      const d = res.data?.result || res.data || {};
+      const list = Array.isArray(d.data) ? d.data : (Array.isArray(d) ? d : []);
+      setOrders(list);
     } catch (error) {
-      console.error("Lỗi:", error);
-      // Mock data for display when API fails
-      setOrders([
-        { orderId: "911001", fullName: "Lê Anh Tuấn",     phone: "0902123456", carName: "Porsche 911 GT3",       price: 12650000000, depositAmount: 500000000, remainingAmount: 12150000000, createdAt: "2023-10-24T10:00:00" },
-        { orderId: "911042", fullName: "Nguyễn Minh Hoàng",phone: "0981123456", carName: "Porsche 911 GT3 (PTS)", price: 14200000000, depositAmount: 700000000, remainingAmount: 13500000000, createdAt: "2023-10-23T09:15:00", isTransfer: true },
-        { orderId: "TYC099", fullName: "Trần Thị Lan",     phone: "0944123456", carName: "Porsche Taycan 4S",     price: 5990000000,  depositAmount: 300000000, remainingAmount: 5690000000,  createdAt: "2023-10-22T14:30:00" },
-        { orderId: "911005", fullName: "Phạm Văn Nam",     phone: "0938123456", carName: "Porsche 911 Turbo S",   price: 19800000000, depositAmount: 1000000000, remainingAmount: 18800000000, createdAt: "2023-10-21T11:00:00" },
-      ]);
+      console.error("Lỗi fetch orders:", error);
+      setOrders([]);
     } finally {
       setLoading(false);
     }
@@ -164,13 +158,12 @@ export default function Cashier() {
   const handleConfirmPayment = async (orderId) => {
     setActLoad(true);
     try {
-      const res = await authApis().post(endpoints["payment-cashier"], { orderId, success: true });
-      if (res.status === 200 || res.status === 201) {
-        showToast("✅ Thanh toán thành công");
-      }
-    } catch { showToast("✅ Thanh toán thành công (mock)"); }
-    finally { setActLoad(false); }
-
+      await authApis().post(endpoints["confirm-offline"], { orderId, success: true });
+      showToast("✅ Thanh toán thành công");
+      await fetchOrder(); // refresh danh sách
+    } catch (err) {
+      showToast("❌ Xác nhận thất bại: " + (err.response?.data?.message || "Vui lòng thử lại"));
+    } finally { setActLoad(false); }
     setOrders(prev => prev.map(o =>
       o.orderId === orderId ? { ...o, paymentStatus: "PAID", remainingAmount: 0 } : o
     ));
@@ -183,11 +176,12 @@ export default function Cashier() {
     if (!window.confirm("Bạn có chắc chắn muốn hủy đơn hàng này?")) return;
     setActLoad(true);
     try {
-      const res = await authApis().post(endpoints["payment-cashier"], { orderId, success: false });
-      if (res.status === 200 || res.status === 201) showToast("🗑️ Hủy đơn hàng thành công");
-    } catch { showToast("🗑️ Đã hủy đơn hàng (mock)"); }
-    finally { setActLoad(false); }
-
+      await authApis().post(endpoints["admin-cancel-order"](orderId, "Hủy bởi nhân viên"));
+      showToast("🗑️ Hủy đơn hàng thành công");
+      await fetchOrder();
+    } catch (err) {
+      showToast("❌ Hủy thất bại: " + (err.response?.data?.message || "Vui lòng thử lại"));
+    } finally { setActLoad(false); }
     setOrders(prev => prev.map(o =>
       o.orderId === orderId ? { ...o, paymentStatus: "CANCELLED" } : o
     ));

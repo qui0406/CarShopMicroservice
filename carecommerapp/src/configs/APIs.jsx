@@ -33,14 +33,18 @@ export const endpoints = {
     "delete-model": id => `/catalog/api/staff/car-model/delete-car-model/${id}`,
     "update-model": id => `/catalog/api/staff/car-model/update-car-model/${id}`,
 
-    "get-products": (page = 1, size = 12) => `/catalog/api/car/get-products?page=${page}&size=${size}`,
+    "get-cars": (page = 1, size = 12, extraParams = {}) => {
+        const base = `/catalog/api/car/get-cars?page=${page}&size=${size}`;
+        const extra = new URLSearchParams(extraParams).toString();
+        return extra ? `${base}&${extra}` : base;
+    },
     "get-price": id => `/catalog/api/get-price/${id}`,
-    "get-product-by-id": id => `/catalog/api/car/get-product-by-id/${id}`,
+    "get-car-by-id": id => `/catalog/api/car/get-car-by-id/${id}`,
     "filter-car": params => `/catalog/api/car/filter-car?${new URLSearchParams(params).toString()}`,
 
-    "create-product": "/catalog/api/staff/car/create-product",
+    "create-car": "/catalog/api/staff/car/create-car",
     "upload-3d-model": id => `/catalog/api/staff/car/upload-3d-model/${id}`,
-    "delete-product": id => `/catalog/api/staff/car/delete-product/${id}`,
+    "delete-car": id => `/catalog/api/staff/car/delete-car/${id}`,
 
     "get-inventory": id => `/catalog/api/inventory/get-inventory/${id}`,
     "get-inventory-by-car-id": carId => `/catalog/api/inventory/get-inventory-by-car-id/${carId}`,
@@ -99,6 +103,16 @@ export const endpoints = {
     "predict-car-price": "/ai/predict-price",
     "ai-health": "/ai/health",
     "ai-root": "/ai/",
+
+    // Appraisal Service
+    "create-appraisal": "/catalog/api/appraisals/create",
+    "my-appraisals": "/catalog/api/appraisals/my-requests",
+    "respond-to-offer": (id, accepted) => `/catalog/api/appraisals/${id}/respond-to-offer?accepted=${accepted}`,
+    "get-all-appraisals": (page = 1, size = 10, status = "") =>
+        `/catalog/api/appraisals/get-all-appraisals?page=${page}&size=${size}${status ? `&status=${status}` : ""}`,
+    "offer-price": (id) => `/catalog/api/appraisals/${id}/offer-price`,
+    "update-appraisal-status": (id) => `/catalog/api/appraisals/${id}/status`,
+    "convert-to-inventory": (id) => `/catalog/api/appraisals/convert-to-inventory/${id}`,
 
 }
 

@@ -35,6 +35,8 @@ import MasterData from "./components/Admin/MasterData"
 import AdminUsers from "./components/Admin/AdminUsers"
 import ModerationSettings from "./components/Admin/ModerationSettings"
 import DirectPayment from "./components/Staff/DirectPayment"
+import SellCar from "./components/SellCar"
+import AppraisalManagement from "./components/Staff/AppraisalManagement"
 
 
 import { MyDispatchContext, MyUserContext } from "./configs/MyContexts";
@@ -128,7 +130,9 @@ function App() {
               <Route path="/staff/home/cashier" element={<Cashier />} />
               <Route path="/quotation/:id" element={<Quotation />} />
               <Route path="/valuation" element={<AIValuation />} />
+              <Route path="/sell-car" element={<SellCar />} />
               <Route path="/deposit-confirm" element={<DepositConfirm />} />
+              <Route path="/staff/appraisals" element={<AppraisalManagement />} />
 
             </Routes>
           </AppLayout>
