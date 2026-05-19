@@ -43,6 +43,25 @@ export default function PaymentCompleted() {
     load();
   }, [urlStatus, orderId]);
 
+  const handleExportInvoice = async () => {
+    if (!orderId) return;
+    try {
+      const response = await authApis().get(endpoints['download-order-pdf'](orderId), {
+        responseType: 'blob'
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `Invoice-${orderId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error("Export failed:", err);
+      alert("Xuất hóa đơn thất bại!");
+    }
+  };
+
   /* ─── LOADING ─── */
   if (status === 'loading') return (
     <div style={s.center}>
@@ -162,7 +181,10 @@ export default function PaymentCompleted() {
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <button onClick={() => navigate('/all-my-reserve')} style={s.primaryBtn}>
+            <button onClick={handleExportInvoice} style={{ ...s.primaryBtn, background: '#198754' }}>
+              📄 Tải hóa đơn PDF
+            </button>
+            <button onClick={() => navigate('/all-my-deposit')} style={s.primaryBtn}>
               🕒 Xem lịch sử đơn hàng
             </button>
             <button onClick={() => navigate('/')} style={s.outlineBtn}>

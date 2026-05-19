@@ -14,9 +14,9 @@ export default function DepositConfirm() {
   const [error, setError] = useState('');
   const user = useContext(MyUserContext);
 
-  // Guard: not logged in → go to login, come back after
+  // Guard: explicitly not logged in → go to login, come back after
   useEffect(() => {
-    if (user !== undefined && user === null) {
+    if (user === null) {
       navigate('/login?next=/deposit-confirm', { state: location.state });
     }
   }, [user, navigate, location.state]);
@@ -40,6 +40,7 @@ export default function DepositConfirm() {
         type: 'DEPOSIT'
       });
       const url = res.data?.result.paymentUrl;
+      console.log("PAYMENT URL:", res.data?.result);
       if (url) {
         window.location.href = url;
       } else {

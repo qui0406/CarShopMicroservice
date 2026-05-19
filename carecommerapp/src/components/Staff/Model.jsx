@@ -188,7 +188,7 @@ export default function UnifiedDashboard() {
                 {/* Local View Switcher */}
                 <div className="flex border-b border-gray-200 mb-6 gap-8">
                     <button onClick={()=>{setActiveTopNav("Dashboard"); setActiveSidebar("Dashboard");}} className={`pb-3 text-sm font-bold border-b-2 transition-colors ${activeTopNav === "Dashboard" ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-800"}`}>Dashboard</button>
-                    <button onClick={()=>{setActiveTopNav("Inventory"); setActiveSidebar("Models");}} className={`pb-3 text-sm font-medium border-b-2 transition-colors ${activeTopNav === "Inventory" ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-800"}`}>Models Inventory</button>
+                    <button onClick={()=>{setActiveTopNav("Inventory"); setActiveSidebar("Models");}} className={`pb-3 text-sm font-medium border-b-2 transition-colors ${activeTopNav === "Inventory" ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-800"}`}>Kho xe (Model)</button>
                     <button onClick={()=>{setActiveTopNav("Branches"); setActiveSidebar("Branches");}} className={`pb-3 text-sm font-medium border-b-2 transition-colors ${activeTopNav === "Branches" ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-800"}`}>Branches</button>
                     <button onClick={()=>{setActiveTopNav("Categories"); setActiveSidebar("Categories");}} className={`pb-3 text-sm font-medium border-b-2 transition-colors ${activeTopNav === "Categories" ? "border-blue-600 text-blue-600" : "border-transparent text-gray-500 hover:text-gray-800"}`}>Categories</button>
                 </div>

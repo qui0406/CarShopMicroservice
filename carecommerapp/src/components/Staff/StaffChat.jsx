@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo, useContext } from "react";
 import { Send, Plus, Search, Phone, Video, MoreVertical, Smile, Paperclip, MessageSquare } from "lucide-react";
-import { authApis, endpoints } from "./../../configs/APIs";
+import { authApis, endpoints, CHAT_URL } from "./../../configs/APIs";
 import cookie from "react-cookies";
 import { io } from "socket.io-client";
 import { MyUserContext } from "./../../configs/MyContexts"; // <-- dùng context
 
-const CHAT_SERVER_URL = process.env.REACT_APP_CHAT_URL || "http://localhost:8099";
+const CHAT_SERVER_URL = CHAT_URL;
 
 export default function CustomerStaffChat() {
   // lấy raw user từ context (giống Header)
@@ -271,7 +271,9 @@ export default function CustomerStaffChat() {
     if (socketRef.current || !currentUser) return;
 
     const token = cookie.load("token");
-    const s = io(CHAT_SERVER_URL, {
+    const chatUrl = "https://ee2b-2001-ee0-4fc0-70c0-f4ce-64e2-e388-7e86.ngrok-free.app";
+    console.log("!!! STAFF CONNECTING TO CHAT AT:", chatUrl);
+    const s = io(chatUrl, {
       query: { token },
       transports: ["websocket", "polling"]
     });

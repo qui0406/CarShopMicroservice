@@ -63,7 +63,7 @@ export default function CarOld() {
       setLoading(true);
       try {
         // Default: get-cars with isReady+used. With filters: filter-car with isReady+used.
-        const BASE_PARAMS = { isReady: true, used: true };
+        const BASE_PARAMS = { isReady: true, isUsed: true };
         const hasFilter = applied.branch || applied.category || applied.price || applied.mileage;
         let endpoint;
         if (hasFilter) {
@@ -151,7 +151,7 @@ export default function CarOld() {
     <div style={{ backgroundColor: "#f8fafc", minHeight: "100vh", fontFamily: "'Inter','Roboto',sans-serif" }}>
 
       {/* Hero */}
-      <div style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e3a5f 55%, #1a73e8 100%)", padding: "52px 10%", position: "relative", overflow: "hidden" }}>
+      <div style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e3a5f 55%, #1a73e8 100%)", padding: "90px 10% 40px", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: -80, right: -80, width: 300, height: 300, borderRadius: "50%", background: "rgba(255,255,255,0.03)" }} />
         <div style={{ position: "absolute", bottom: -60, left: "38%", width: 220, height: 220, borderRadius: "50%", background: "rgba(26,115,232,0.12)" }} />
         <div style={{ position: "relative", zIndex: 1 }}>

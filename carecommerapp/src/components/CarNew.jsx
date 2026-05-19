@@ -53,7 +53,7 @@ export default function CarNew() {
       setLoading(true);
       try {
         // Default: get-cars with isReady+used. With filters: filter-car with isReady+used.
-        const BASE_PARAMS = { isReady: true, used: false };
+        const BASE_PARAMS = { isReady: true, isUsed: false };
         const hasFilter = activeSearch || selectedBranch || selectedCategory || selectedPrice;
         let endpoint;
         if (hasFilter) {
@@ -126,7 +126,7 @@ export default function CarNew() {
     <div style={{ backgroundColor: "#f8fafc", minHeight: "100vh", fontFamily: "'Inter', 'Roboto', sans-serif" }}>
 
       {/* Hero */}
-      <div style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e3a5f 55%, #1a73e8 100%)", padding: "56px 10%", position: "relative", overflow: "hidden" }}>
+      <div style={{ background: "linear-gradient(135deg, #0f172a 0%, #1e3a5f 55%, #1a73e8 100%)", padding: "90px 10% 40px", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: -100, right: -100, width: 350, height: 350, borderRadius: "50%", background: "rgba(255,255,255,0.03)" }} />
         <div style={{ position: "absolute", bottom: -80, left: "35%", width: 250, height: 250, borderRadius: "50%", background: "rgba(26,115,232,0.12)" }} />
         <div style={{ position: "relative", zIndex: 1 }}>

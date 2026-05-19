@@ -6,12 +6,12 @@ export default function About() {
   const mapRef = useRef(null);
   const shopMarkerRef = useRef(null);
   const leafletMapRef = useRef(null);
-  
+
   const [L, setL] = useState(null);
   const [selectedImage, setSelectedImage] = useState(0);
 
   const shop = {
-    name: "Porsche Centre Saigon",
+    name: "CarShop",
     slogan: "Đẳng cấp kiến tạo từ sự khác biệt. Nơi đam mê tốc độ và sự hoàn mỹ gặp gỡ.",
     phone: "033 751 8997",
     email: "anhqui04062004@gmail.com",
@@ -80,7 +80,7 @@ export default function About() {
       leafletMapRef.current = L.map(mapRef.current, { zoomControl: false }).setView(
         [activeBranch.latitude, activeBranch.longitude], 15
       );
-      
+
       // Clean, minimal CartoDB map style for luxury vibe
       L.tileLayer("https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png", {
         maxZoom: 19,
@@ -112,15 +112,15 @@ export default function About() {
       .openPopup();
 
     leafletMapRef.current.flyTo([activeBranch.latitude, activeBranch.longitude], 15, {
-        animate: true,
-        duration: 1.5
+      animate: true,
+      duration: 1.5
     });
 
   }, [L, activeBranch]);
 
   return (
     <div className="min-h-screen bg-[#f8f9fc] font-['Inter',_sans-serif]">
-      
+
       {/* 1. HERO SECTION */}
       <div className="relative w-full h-[600px] bg-black overflow-hidden mt-[70px]">
         {shop.images.map((img, index) => (
@@ -133,18 +133,18 @@ export default function About() {
         ))}
         {/* Luxury gradient overlay to make text pop */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-black/80"></div>
-        
+
         <div className="absolute inset-0 max-w-7xl mx-auto px-4 lg:px-6 h-full flex flex-col justify-center items-end">
           <div className="max-w-md w-full backdrop-blur-xl bg-white/10 p-8 rounded-3xl shadow-[0_20px_40px_rgba(0,0,0,0.2)] border border-white/20 transform translate-y-8 animate-fade-in-up">
             <h1 className="text-4xl font-black text-white mb-3 uppercase tracking-tight antialiased drop-shadow-md">{shop.name}</h1>
             <p className="text-gray-200 font-medium mb-8 leading-relaxed antialiased">{shop.slogan}</p>
             <div className="flex gap-4">
-               <a href={`tel:${shop.phone}`} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center gap-2">
-                 <Phone size={18} /> Gọi Ngay
-               </a>
-               <a href={`https://maps.google.com/?q=${activeBranch.latitude},${activeBranch.longitude}`} target="_blank" rel="noreferrer" className="flex-1 backdrop-blur-md bg-white/20 hover:bg-white/30 text-white font-bold py-4 rounded-xl border-2 border-white/50 transition-all flex items-center justify-center gap-2">
-                 <Navigation size={18} /> Chỉ Đường
-               </a>
+              <a href={`tel:${shop.phone}`} className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl shadow-lg shadow-blue-600/30 transition-all flex items-center justify-center gap-2">
+                <Phone size={18} /> Gọi Ngay
+              </a>
+              <a href={`https://maps.google.com/?q=${activeBranch.latitude},${activeBranch.longitude}`} target="_blank" rel="noreferrer" className="flex-1 backdrop-blur-md bg-white/20 hover:bg-white/30 text-white font-bold py-4 rounded-xl border-2 border-white/50 transition-all flex items-center justify-center gap-2">
+                <Navigation size={18} /> Chỉ Đường
+              </a>
             </div>
           </div>
         </div>
@@ -164,7 +164,7 @@ export default function About() {
               <div className="text-blue-600 font-bold text-sm mt-1 flex items-center gap-1">Zalo Hỗ Trợ: {shop.zalo}</div>
             </div>
           </div>
-          
+
           {/* Card 2: Social & Mail */}
           <div className="bg-white rounded-2xl p-8 shadow-xl shadow-gray-200/50 flex flex-col gap-5 border border-gray-100/50 hover:-translate-y-1 transition-transform">
             <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#8a2387] via-[#e94057] to-[#f27121] flex items-center justify-center text-white shadow-lg shadow-rose-500/30">
@@ -198,7 +198,7 @@ export default function About() {
           <div className="w-16 h-1.5 bg-[#0056b3] rounded-full mx-auto mt-4 mb-4"></div>
           <p className="text-gray-500 max-w-2xl mx-auto font-medium">Tận hưởng trải nghiệm mua sắm đẳng cấp với khu vực trưng bày hiện đại, phòng khách VIP và không gian giao xe độc quyền mang đậm tinh thần DNA của thương hiệu.</p>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 md:grid-rows-2 h-auto md:h-[500px]">
           {/* Ảnh Lớn (Span 2 cols, 2 rows) */}
           <div className="md:col-span-2 md:row-span-2 relative rounded-3xl overflow-hidden group h-[300px] md:h-auto shadow-lg">
@@ -208,7 +208,7 @@ export default function About() {
               <div className="text-gray-300 text-sm font-medium">Hơn 50+ mẫu xe hiệu suất cao thế hệ mới.</div>
             </div>
           </div>
-          
+
           {/* Ảnh nhỏ 1 */}
           <div className="md:col-span-1 md:row-span-1 relative rounded-3xl overflow-hidden group h-[200px] md:h-auto shadow-lg">
             <img src={shop.images[1]} alt="Showroom Interior" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
@@ -238,45 +238,44 @@ export default function About() {
           <h2 className="text-3xl font-black text-gray-900 uppercase tracking-tight">Hệ Thống Chi Nhánh</h2>
           <div className="w-16 h-1.5 bg-[#0056b3] rounded-full mx-auto mt-4"></div>
         </div>
-        
+
         <div className="grid lg:grid-cols-12 gap-6 lg:gap-8">
-          
+
           {/* Left: Branches List (1/3) */}
           <div className="lg:col-span-4 flex flex-col gap-4">
             {branches.map(b => (
-              <div 
-                key={b.id} 
+              <div
+                key={b.id}
                 onClick={() => setActiveBranch(b)}
-                className={`p-6 rounded-2xl cursor-pointer transition-all duration-300 border-2 ${
-                  activeBranch.id === b.id 
-                    ? 'border-[#0056b3] bg-blue-50/40 shadow-xl shadow-blue-100/50' 
+                className={`p-6 rounded-2xl cursor-pointer transition-all duration-300 border-2 ${activeBranch.id === b.id
+                    ? 'border-[#0056b3] bg-blue-50/40 shadow-xl shadow-blue-100/50'
                     : 'border-transparent bg-white hover:border-gray-200 shadow-sm'
-                }`}
+                  }`}
               >
-                 <h4 className={`font-extrabold text-lg mb-3 ${activeBranch.id === b.id ? 'text-[#0056b3]' : 'text-gray-900'}`}>{b.name}</h4>
-                 <div className="flex gap-3 items-start text-[0.85rem] text-gray-600 mb-3 leading-relaxed font-medium">
-                    <MapPin size={18} className="mt-0.5 flex-shrink-0 text-gray-400" />
-                    <p>{b.address}</p>
-                 </div>
-                 <div className="flex gap-3 items-center text-[0.85rem] font-bold text-gray-800">
-                    <Phone size={16} className="text-gray-400" />
-                    <span>{b.phone}</span>
-                 </div>
+                <h4 className={`font-extrabold text-lg mb-3 ${activeBranch.id === b.id ? 'text-[#0056b3]' : 'text-gray-900'}`}>{b.name}</h4>
+                <div className="flex gap-3 items-start text-[0.85rem] text-gray-600 mb-3 leading-relaxed font-medium">
+                  <MapPin size={18} className="mt-0.5 flex-shrink-0 text-gray-400" />
+                  <p>{b.address}</p>
+                </div>
+                <div className="flex gap-3 items-center text-[0.85rem] font-bold text-gray-800">
+                  <Phone size={16} className="text-gray-400" />
+                  <span>{b.phone}</span>
+                </div>
               </div>
             ))}
           </div>
-          
+
           {/* Right: Map (2/3) */}
           <div className="lg:col-span-8 bg-white p-2 rounded-3xl shadow-2xl shadow-gray-200/60 border border-gray-100 h-[500px] overflow-hidden relative">
-             <div ref={mapRef} className="w-full h-full rounded-2xl z-0" style={{ background: '#f8fafc' }}></div>
-             <div className="absolute top-6 right-6 bg-white/90 backdrop-blur-md px-4 py-2 rounded-full shadow-lg border border-white font-bold text-[#0056b3] text-xs uppercase tracking-wider z-[1000] pointer-events-none">
-                Đang hiển thị vệ tinh: {activeBranch.name}
-             </div>
+            <div ref={mapRef} className="w-full h-full rounded-2xl z-0" style={{ background: '#f8fafc' }}></div>
+            <div className="absolute top-6 right-6 bg-white/90 backdrop-blur-md px-4 py-2 rounded-full shadow-lg border border-white font-bold text-[#0056b3] text-xs uppercase tracking-wider z-[1000] pointer-events-none">
+              Đang hiển thị vệ tinh: {activeBranch.name}
+            </div>
           </div>
 
         </div>
       </div>
-      
+
     </div>
   );
 }

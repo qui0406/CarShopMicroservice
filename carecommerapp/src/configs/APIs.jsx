@@ -1,7 +1,9 @@
 import axios from "axios";
 import cookie from "react-cookies";
 
-const BASE_URL = "https://ee2b-2001-ee0-4fc0-70c0-f4ce-64e2-e388-7e86.ngrok-free.app/api/v1";
+const BASE_URL = "https://bb5e-2405-4803-5241-5a20-b4f4-189c-e50d-c82a.ngrok-free.app/api/v1";
+export const CHAT_URL = "https://bb5e-2405-4803-5241-5a20-b4f4-189c-e50d-c82a.ngrok-free.app";
+// console.log("CHAT_URL initialized as:", CHAT_URL);
 
 
 export const endpoints = {
@@ -10,7 +12,7 @@ export const endpoints = {
     "register": "/identity/api/register",
     "refresh": "/identity/api/refresh",
     "logout": "/identity/api/logout",
-    "create-staff": "/identy/api/create-staff",
+    "create-staff": "/identity/api/create-staff",
     "my-profile": "/identity/api/profile/my-profile",
     "all-profiles": "/identity/api/profile/all-profiles",
 
@@ -38,11 +40,14 @@ export const endpoints = {
         const extra = new URLSearchParams(extraParams).toString();
         return extra ? `${base}&${extra}` : base;
     },
+    "get-staff-cars": (page = 1, size = 12) => `/catalog/api/staff/car/get-cars?page=${page}&size=${size}`,
+    "get-staff-management-cars": (page = 1, size = 10) => `/catalog/api/staff/management/cars?page=${page}&size=${size}`,
     "get-price": id => `/catalog/api/get-price/${id}`,
     "get-car-by-id": id => `/catalog/api/car/get-car-by-id/${id}`,
     "filter-car": params => `/catalog/api/car/filter-car?${new URLSearchParams(params).toString()}`,
 
     "create-car": "/catalog/api/staff/car/create-car",
+    "update-car": id => `/catalog/api/staff/car/update-car/${id}`,
     "upload-3d-model": id => `/catalog/api/staff/car/upload-3d-model/${id}`,
     "delete-car": id => `/catalog/api/staff/car/delete-car/${id}`,
 
@@ -81,20 +86,35 @@ export const endpoints = {
     "get-revenue": (start, end) => `/ordering/staff/orders/revenue?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`,
     "get-status-count": "/ordering/staff/orders/stats/status-count",
     "get-monthly-revenue": (year = 2026) => `/ordering/staff/orders/revenue/monthly?year=${year}`,
+    "get-stats-revenue": (year = 2026, month = "") => {
+        const params = [];
+        if (year) params.push(`year=${year}`);
+        if (month) params.push(`month=${month}`);
+        return `/ordering/staff/orders/stats/revenue${params.length ? `?${params.join("&")}` : ""}`;
+    },
+    "get-stats-brands": (year = 2026, month = "") => {
+        const params = [];
+        if (year) params.push(`year=${year}`);
+        if (month) params.push(`month=${month}`);
+        return `/ordering/staff/orders/stats/brands${params.length ? `?${params.join("&")}` : ""}`;
+    },
 
     // Payment Service
     "create-vnpay-url": "/payment/payments/create-vnpay-url",
     "confirm-offline": "/payment/payments/staff/confirm-offline",
     "create-offline-payment": "/payment/payments/staff/create-payment",
     "get-payment-status": orderId => `/payment/payments/status/${orderId}`,
+    "get-all-payments-management": (page = 1, size = 10, status = "PARTIALLY_PAID") => `/payment/payments/staff/all-payments?page=${page}&size=${size}&status=${status}`,
 
     // Chat Service
     "create-message": "/chat/api/messages/create",
-    "get-all-messages": conversationId => `/chat/api/messages/get-all-message?conversationId=${conversationId}`,
+    "get-message": "/chat/api/messages/get-all-message",
     "create-or-get-conversation": "/chat/api/conversations/create-or-get",
+    "get-or-create-conversation": "/chat/api/conversations/create-or-get",
     "customer-get-conversation": "/chat/api/conversations/customer-get-conversation",
     "staff-join-conversation": id => `/chat/api/conversations/join/${id}`,
-    "get-all-conversations": (page = 1, size = 12) => `/chat/api/conversations/get-all-conversation?page=${page}&size=${size}`,
+    "get-all-conversation": "/chat/api/conversations/get-all-conversation",
+    "get-all-conversations": "/chat/api/conversations/get-all-conversation",
 
     //AI Service
     "chat": "/ai/chat",

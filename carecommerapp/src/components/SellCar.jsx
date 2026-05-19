@@ -106,7 +106,7 @@ export default function SellCar() {
   return (
     <div style={{ background: "#f8fafc", minHeight: "100vh" }}>
       {/* Hero */}
-      <div style={{ background: "linear-gradient(135deg, #0f172a, #1e3a5f 55%, #1a73e8)", padding: "48px 10%", position: "relative", overflow: "hidden" }}>
+      <div style={{ background: "linear-gradient(135deg, #0f172a, #1e3a5f 55%, #1a73e8)", padding: "90px 10% 48px", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: -80, right: -80, width: 300, height: 300, borderRadius: "50%", background: "rgba(255,255,255,0.03)" }} />
         <div style={{ position: "relative", zIndex: 1 }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(26,115,232,0.2)", border: "1px solid rgba(96,165,250,0.35)", borderRadius: 50, padding: "5px 14px", marginBottom: 14 }}>

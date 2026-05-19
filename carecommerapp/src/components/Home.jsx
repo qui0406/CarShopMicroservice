@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { FaCarSide, FaTruckPickup, FaCamera, FaSearch, FaFilter, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 import { GiCarSeat, GiGearStick } from "react-icons/gi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Card, Button, Row, Col, Spinner, Modal, Form, Alert, Badge } from "react-bootstrap";
 import axios, { authApis, endpoints } from "./../configs/APIs";
 import "./../styles/Home.css";
@@ -14,6 +14,18 @@ import AIValuation from "./AIValuation";
 export default function Home() {
   // Initialize state as arrays to prevent undefined errors
   const user = useContext(MyUserContext);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      const roles = user.result?.roles || [];
+      if (roles.includes("ADMIN")) {
+        navigate("/admin");
+      } else if (roles.includes("STAFF")) {
+        navigate("/staff/home");
+      }
+    }
+  }, [user, navigate]);
 
   const [branches, setBranches] = useState([]);
   const [categories, setCategories] = useState([]);

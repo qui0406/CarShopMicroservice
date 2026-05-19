@@ -5,7 +5,7 @@ import StaffLayout from "./StaffLayout";
 /* ─── Mock staff data ───────────────────────────────────── */
 const MOCK_STAFF = [
   {
-    id: 1, name: "Marcus Vane",     role: "Inventory Manager", dept: "Operations",
+    id: 1, name: "Marcus Vane",     role: "Quản lý danh sách xe", dept: "Operations",
     email: "m.vane@precision.com",  phone: "+1 (555) 201-4821",
     status: "ACTIVE", statusColor: "#16a34a", statusBg: "#dcfce7",
     joined: "Jan 2021", avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&q=80&fit=crop&crop=face",

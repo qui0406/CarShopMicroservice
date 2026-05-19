@@ -1,15 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import cookie from "react-cookies";
 
 /* ─── Sidebar nav ────────────────────────────────────────── */
 const NAV = [
-  { icon: "⊞",  label: "BẢNG ĐIỀU KHIỂN",   key: "dashboard",  to: "/admin" },
-  { icon: "🚗", label: "KHO XE",    key: "inventory",  to: "/staff/inventory"},
-  { icon: "👥", label: "NGƯỜI DÙNG",        key: "users",      to: null },
-  { icon: "🗃️", label: "DỮ LIỆU GỐC",  key: "master",     to: "/admin/master-data" },
-  { icon: "🛡️", label: "KIỂM DUYỆT",   key: "moderation", to: null },
-  { icon: "📊", label: "PHÂN TÍCH",    key: "analytics",  to: null },
-  { icon: "⚙️", label: "CÀI ĐẶT",     key: "settings",   to: null },
+  { icon: "⊞", label: "BẢNG ĐIỀU KHIỂN", key: "dashboard", to: "/admin" },
+  { icon: "👥", label: "NGƯỜI DÙNG", key: "users", to: "/admin/users" },
+  { icon: "⚙️", label: "CÀI ĐẶT", key: "settings", to: "/admin/moderation" },
 ];
 
 /* ─── Mock brands ────────────────────────────────────────── */
@@ -181,7 +178,10 @@ export default function MasterData() {
         </nav>
         <div className="pb-5 border-t border-gray-100 pt-3">
           <NavItem icon="❓" label="HỖ TRỢ" active={false} onClick={() => {}}/>
-          <NavItem icon="↪"  label="ĐĂNG XUẤT"  active={false} onClick={() => navigate("/login")}/>
+          <NavItem icon="↪"  label="ĐĂNG XUẤT"  active={false} onClick={() => {
+            cookie.remove("token");
+            navigate("/login");
+          }}/>
         </div>
       </aside>
 
@@ -199,8 +199,8 @@ export default function MasterData() {
             <button className="text-gray-400 hover:text-gray-700 text-lg">🔔</button>
             <button className="text-gray-400 hover:text-gray-700 text-lg">❓</button>
             <div className="text-right hidden sm:block">
-              <p className="text-xs font-black text-gray-900 leading-tight">Alex Rivera</p>
-              <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">Fleet Supervisor</p>
+              <p className="text-xs font-black text-gray-900 leading-tight">Marcus Vance</p>
+              <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider">System Admin</p>
             </div>
             <div className="w-8 h-8 rounded-full overflow-hidden border border-gray-200 shrink-0">
               <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=40&q=80&fit=crop&crop=face" alt="admin" className="w-full h-full object-cover"/>

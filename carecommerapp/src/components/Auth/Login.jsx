@@ -32,7 +32,18 @@ const Login = () => {
                 "payload": userInfo.data
             });
             let next = q.get('next');
-            nav(next ? next : '/home');
+            if (next) {
+                nav(next);
+            } else {
+                const roles = userInfo.data.result?.roles || [];
+                if (roles.includes("ADMIN")) {
+                    nav("/admin");
+                } else if (roles.includes("STAFF")) {
+                    nav("/staff/home");
+                } else {
+                    nav("/home");
+                }
+            }
         } catch (e) {
             alert("Đăng nhập thất bại!");
         } finally {

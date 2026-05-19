@@ -59,9 +59,9 @@ export default function HomeStaff() {
       const res = await authApis().get(endpoints["get-status-count"]);
       const d = res.data?.result || res.data || {};
       setStats({
-        pending:     d.PENDING     || d.pending     || 0,
-        paid:        d.PAID        || d.paid        || 0,
-        cancelled:   d.CANCELLED   || d.cancelled   || 0,
+        pending: d.PENDING || d.pending || 0,
+        paid: d.PAID || d.paid || 0,
+        cancelled: d.CANCELLED || d.cancelled || 0,
         totalOrders: (d.PENDING || 0) + (d.PAID || 0) + (d.CANCELLED || 0) + (d.CONFIRMED || 0),
       });
     } catch { /* silently fail */ }
@@ -72,7 +72,7 @@ export default function HomeStaff() {
       const year = new Date().getFullYear();
       const res = await authApis().get(endpoints["get-monthly-revenue"](year));
       const d = res.data?.result || res.data || [];
-      const MONTHS = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+      const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
       // Backend may return array of {month, revenue} or object keyed by month
       let arr = [];
       if (Array.isArray(d)) {
@@ -103,6 +103,7 @@ export default function HomeStaff() {
     try {
       const res = await authApis().get(endpoints["get-all-orders-management"](1, 5));
       const d = res.data?.result || res.data || {};
+      console.log(d);
       const list = Array.isArray(d.data) ? d.data : (Array.isArray(d) ? d : []);
       setRecentOrders(list);
     } catch { setRecentOrders([]); }
@@ -113,18 +114,18 @@ export default function HomeStaff() {
   const sorted = [...monthlyRevenue].sort((a, b) => b.value - a.value);
 
   const statusCards = [
-    { label: "TỔNG ĐƠN HÀNG",  value: stats.totalOrders, color: "#1d4ed8" },
-    { label: "CHỜ XỬ LÝ",      value: stats.pending,     color: "#f59e0b" },
-    { label: "ĐÃ HOÀN TẤT",    value: stats.paid,        color: "#10b981" },
-    { label: "ĐÃ HỦY",         value: stats.cancelled,   color: "#ef4444" },
+    { label: "TỔNG ĐƠN HÀNG", value: stats.totalOrders, color: "#1d4ed8" },
+    { label: "CHỜ XỬ LÝ", value: stats.pending, color: "#f59e0b" },
+    { label: "ĐÃ HOÀN TẤT", value: stats.paid, color: "#10b981" },
+    { label: "ĐÃ HỦY", value: stats.cancelled, color: "#ef4444" },
   ];
 
   const getOrderStatus = (s) => {
     const m = {
-      PENDING:   { text: "Chờ xử lý", color: "#d97706", bg: "#fffbeb" },
-      PAID:      { text: "Đã TT",     color: "#15803d", bg: "#f0fdf4" },
-      CONFIRMED: { text: "Xác nhận",  color: "#1d4ed8", bg: "#eff6ff" },
-      CANCELLED: { text: "Đã hủy",    color: "#dc2626", bg: "#fef2f2" },
+      PENDING: { text: "Chờ xử lý", color: "#d97706", bg: "#fffbeb" },
+      PAID: { text: "Đã TT", color: "#15803d", bg: "#f0fdf4" },
+      CONFIRMED: { text: "Xác nhận", color: "#1d4ed8", bg: "#eff6ff" },
+      CANCELLED: { text: "Đã hủy", color: "#dc2626", bg: "#fef2f2" },
     };
     return m[s] || { text: s || "—", color: "#6b7280", bg: "#f3f4f6" };
   };
@@ -136,8 +137,7 @@ export default function HomeStaff() {
         {/* Title */}
         <div className="flex items-start justify-between mb-6">
           <div>
-            <h2 className="text-3xl font-black text-gray-900 leading-tight">Terminal Overview</h2>
-            <p className="text-sm text-gray-500 mt-0.5">Dữ liệu thực từ hệ thống</p>
+            <h2 className="text-3xl font-black text-gray-900 leading-tight">Bảng điều khiển</h2>
           </div>
           <div className="flex gap-3">
             <button onClick={fetchAll} className="px-4 py-2 text-sm font-bold border border-gray-200 rounded bg-white hover:bg-gray-50 transition-colors shadow-sm">
@@ -181,7 +181,7 @@ export default function HomeStaff() {
             </div>
             {loading ? (
               <div className="flex items-end gap-5 h-44 px-2 animate-pulse">
-                {[40,65,50,75,85,100].map((h,i) => (
+                {[40, 65, 50, 75, 85, 100].map((h, i) => (
                   <div key={i} className="flex-1 flex flex-col items-center gap-2">
                     <div className="w-full rounded-t bg-gray-100" style={{ height: `${h}%` }} />
                     <div className="h-2 bg-gray-100 rounded w-8" />
@@ -217,7 +217,7 @@ export default function HomeStaff() {
               <div className="flex flex-col items-center gap-4 animate-pulse">
                 <div className="w-44 h-44 rounded-full border-[22px] border-gray-100" />
                 <div className="space-y-2 w-full">
-                  {[1,2,3].map(i => <div key={i} className="h-3 bg-gray-100 rounded w-full" />)}
+                  {[1, 2, 3].map(i => <div key={i} className="h-3 bg-gray-100 rounded w-full" />)}
                 </div>
               </div>
             ) : (
@@ -226,17 +226,17 @@ export default function HomeStaff() {
                   <DonutChart
                     data={[
                       { name: "Chờ xử lý", pct: stats.totalOrders ? Math.round(stats.pending / stats.totalOrders * 100) : 0, color: "#f59e0b" },
-                      { name: "Hoàn tất",  pct: stats.totalOrders ? Math.round(stats.paid / stats.totalOrders * 100) : 0,    color: "#10b981" },
-                      { name: "Đã hủy",    pct: stats.totalOrders ? Math.round(stats.cancelled / stats.totalOrders * 100) : 0,color: "#ef4444" },
+                      { name: "Hoàn tất", pct: stats.totalOrders ? Math.round(stats.paid / stats.totalOrders * 100) : 0, color: "#10b981" },
+                      { name: "Đã hủy", pct: stats.totalOrders ? Math.round(stats.cancelled / stats.totalOrders * 100) : 0, color: "#ef4444" },
                     ]}
                     total={stats.totalOrders}
                   />
                 </div>
                 <div className="space-y-2">
                   {[
-                    { name: "Chờ xử lý", count: stats.pending,   color: "#f59e0b" },
-                    { name: "Hoàn tất",  count: stats.paid,       color: "#10b981" },
-                    { name: "Đã hủy",    count: stats.cancelled,  color: "#ef4444" },
+                    { name: "Chờ xử lý", count: stats.pending, color: "#f59e0b" },
+                    { name: "Hoàn tất", count: stats.paid, color: "#10b981" },
+                    { name: "Đã hủy", count: stats.cancelled, color: "#ef4444" },
                   ].map(b => (
                     <div key={b.name} className="flex items-center justify-between text-sm">
                       <div className="flex items-center gap-2">
@@ -273,9 +273,9 @@ export default function HomeStaff() {
             </thead>
             <tbody className="divide-y divide-gray-50">
               {loading
-                ? Array(3).fill(0).map((_,i) => (
+                ? Array(3).fill(0).map((_, i) => (
                   <tr key={i} className="animate-pulse">
-                    {Array(5).fill(0).map((__,j) => <td key={j} className="px-6 py-4"><div className="h-3 bg-gray-100 rounded w-24" /></td>)}
+                    {Array(5).fill(0).map((__, j) => <td key={j} className="px-6 py-4"><div className="h-3 bg-gray-100 rounded w-24" /></td>)}
                   </tr>
                 ))
                 : recentOrders.length === 0
@@ -283,11 +283,11 @@ export default function HomeStaff() {
                   : recentOrders.map((o, i) => {
                     const st = getOrderStatus(o.status || o.orderStatus);
                     return (
-                      <tr key={o.orderId || i} className="hover:bg-gray-50/50 transition-colors cursor-pointer" onClick={() => navigate("/staff/home/cashier")}>
-                        <td className="px-6 py-4 text-[11px] font-black text-blue-600">#{String(o.orderId || i+1).slice(-6)}</td>
-                        <td className="px-6 py-4 font-medium text-gray-800">{o.fullName || o.customerName || "—"}</td>
-                        <td className="px-6 py-4 text-gray-600">{o.carName || o.productName || "—"}</td>
-                        <td className="px-6 py-4 font-bold text-gray-800">{fmt(o.price || o.totalAmount)} đ</td>
+                      <tr key={o.id || i} className="hover:bg-gray-50/50 transition-colors cursor-pointer" onClick={() => navigate("/staff/home/cashier")}>
+                        <td className="px-6 py-4 text-[11px] font-black text-blue-600">#{String(o.id || i + 1).slice(-6)}</td>
+                        <td className="px-6 py-4 font-medium text-gray-800">{o.orderItems?.[0]?.fullName || o.fullName || o.customerName || "—"}</td>
+                        <td className="px-6 py-4 text-gray-600">{o.orderItems?.[0]?.carName || o.orderItems?.[0]?.car?.name || o.orderItems?.[0]?.carModel?.name || o.carName || "—"}</td>
+                        <td className="px-6 py-4 font-bold text-gray-800">{fmt(o.totalAmount || o.price)} đ</td>
                         <td className="px-6 py-4">
                           <span className="px-2.5 py-1 text-[10px] font-black rounded uppercase tracking-wider"
                             style={{ color: st.color, backgroundColor: st.bg }}>
@@ -305,12 +305,8 @@ export default function HomeStaff() {
       </div>
 
       <footer className="h-10 bg-white border-t border-gray-100 flex items-center justify-between px-8 shrink-0">
-        <div className="flex gap-6 text-[9px] font-bold text-gray-400 tracking-widest uppercase">
-          <span>Precision Engine V4.2.0</span>
-          <span>Server: US-East-1</span>
-        </div>
+
         <div className="flex gap-5 text-[9px] font-bold text-gray-500 tracking-widest uppercase">
-          <button className="hover:text-blue-600 transition-colors">Terms of Service</button>
         </div>
       </footer>
     </StaffLayout>

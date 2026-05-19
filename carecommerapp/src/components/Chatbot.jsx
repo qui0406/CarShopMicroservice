@@ -65,6 +65,106 @@ const formatBotText = (text) => {
     .replace(/\n/g, '<br/>');
 };
 
+const BotAvatar = ({ size = 32, style = {} }) => {
+  return (
+    <div style={{
+      width: size,
+      height: size,
+      borderRadius: "50%",
+      background: "linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      border: "1.5px solid #e2e8f0",
+      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05), 0 0 8px rgba(99, 102, 241, 0.15)",
+      flexShrink: 0,
+      position: "relative",
+      overflow: "hidden",
+      ...style
+    }}>
+      {/* Cyber Grid Background */}
+      <div style={{
+        position: "absolute",
+        inset: 0,
+        opacity: 0.2,
+        backgroundImage: "radial-gradient(rgba(99, 102, 241, 0.1) 1px, transparent 0)",
+        backgroundSize: "6px 6px"
+      }} />
+      
+      <svg
+        width="75%"
+        height="75%"
+        viewBox="0 0 24 24"
+        fill="none"
+        xmlns="http://www.w3.org/2000/svg"
+        style={{ zIndex: 1 }}
+      >
+        {/* Glow Aura */}
+        <circle cx="12" cy="12" r="10" fill="url(#botGlow)" opacity="0.15" />
+        
+        {/* Cute sleek white robot helmet */}
+        <rect x="4" y="6" width="16" height="12" rx="6" fill="url(#helmetGrad)" stroke="#cbd5e1" strokeWidth="1" />
+        
+        {/* Dark Visor */}
+        <rect x="6" y="8" width="12" height="7" rx="3.5" fill="#0f172a" stroke="#4f46e5" strokeWidth="1" />
+        
+        {/* Expressive Glowing Eyes */}
+        <circle cx="9.5" cy="11.5" r="1.5" fill="#22d3ee" className="eye-glow" />
+        <circle cx="14.5" cy="11.5" r="1.5" fill="#22d3ee" className="eye-glow" />
+        
+        {/* Subtle cute smile */}
+        <path d="M11 13.5Q12 14.5 13 13.5" stroke="#22d3ee" strokeWidth="1" strokeLinecap="round" />
+        
+        {/* Sleek Blue Side Sensors / Ears */}
+        <rect x="2" y="9" width="2" height="6" rx="1" fill="#4f46e5" />
+        <rect x="20" y="9" width="2" height="6" rx="1" fill="#4f46e5" />
+
+        {/* Small Antenna */}
+        <path d="M12 6V3.5" stroke="#4f46e5" strokeWidth="1.5" strokeLinecap="round" />
+        <circle cx="12" cy="2.5" r="1" fill="#4f46e5" />
+        
+        <defs>
+          <linearGradient id="helmetGrad" x1="4" y1="6" x2="20" y2="18" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#ffffff" />
+            <stop offset="1" stopColor="#e2e8f0" />
+          </linearGradient>
+          <radialGradient id="botGlow" cx="50%" cy="50%" r="50%">
+            <stop stopColor="#4f46e5" />
+            <stop offset="1" stopColor="transparent" />
+          </radialGradient>
+        </defs>
+      </svg>
+      
+      {/* Neon Light Scanlines / Sweep */}
+      <div style={{
+        position: "absolute",
+        top: 0,
+        left: "-100%",
+        width: "50%",
+        height: "100%",
+        background: "linear-gradient(90deg, transparent, rgba(99, 102, 241, 0.25), transparent)",
+        transform: "skewX(-25deg)",
+        animation: "botSweep 2.5s infinite linear"
+      }} />
+
+      <style>{`
+        @keyframes botSweep {
+          0% { left: -100%; }
+          40% { left: 150%; }
+          100% { left: 150%; }
+        }
+        .eye-glow {
+          animation: eyeBlink 4s infinite;
+        }
+        @keyframes eyeBlink {
+          0%, 96%, 100% { transform: scaleY(1); }
+          98% { transform: scaleY(0.1); }
+        }
+      `}</style>
+    </div>
+  );
+};
+
 /* ─────────────────────────── component ─────────────────────────── */
 export default function Chatbot() {
   const user = useContext(MyUserContext);
@@ -240,17 +340,40 @@ export default function Chatbot() {
     return (
       <button
         type="button"
-        style={{
-          ...styles.floatingBtn,
-          animation: pulseBtn ? "chatbotPulse 2s infinite" : "none",
-        }}
+        className="chatbot-trigger-btn"
         onClick={() => setIsOpen(true)}
         aria-label="Mở trợ lý AI"
       >
         <style>{`
+          .chatbot-trigger-btn {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4f46e5 100%);
+            border: 1.5px solid rgba(99, 102, 241, 0.4);
+            border-radius: 50px;
+            padding: 10px 22px 10px 12px;
+            cursor: pointer;
+            z-index: 9999;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.2);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-family: 'Inter', sans-serif;
+            animation: chatbotPulse 2.5s infinite;
+          }
+          .chatbot-trigger-btn:hover {
+            transform: translateY(-4px) scale(1.05);
+            border-color: rgba(56, 189, 248, 0.8);
+            box-shadow: 0 15px 35px rgba(99, 102, 241, 0.5), 0 0 15px rgba(56, 189, 248, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+          }
+          .chatbot-trigger-btn:active {
+            transform: translateY(-1px) scale(0.98);
+          }
           @keyframes chatbotPulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(37,99,235,0.5), 0 8px 25px rgba(37,99,235,0.4); }
-            50% { box-shadow: 0 0 0 12px rgba(37,99,235,0), 0 8px 25px rgba(37,99,235,0.4); }
+            0%, 100% { box-shadow: 0 0 0 0 rgba(79,70,229,0.6), 0 8px 32px rgba(99,102,241,0.35); }
+            50% { box-shadow: 0 0 0 12px rgba(79,70,229,0), 0 8px 32px rgba(99,102,241,0.35); }
           }
           @keyframes chatbotSlideIn {
             from { opacity: 0; transform: translateY(20px) scale(0.95); }
@@ -262,7 +385,7 @@ export default function Chatbot() {
           }
         `}</style>
         <div style={styles.floatingBtnInner}>
-          <img src="https://api.dicebear.com/7.x/bottts-neutral/svg?seed=CarBot&backgroundColor=b6e3f4" alt="AI" style={{ width: 32, height: 32, borderRadius: "50%" }} />
+          <BotAvatar size={34} />
           {hasUnread && <span style={styles.unreadBadge} />}
         </div>
         <div style={styles.floatingLabel}>AI Tư Vấn</div>
@@ -310,9 +433,7 @@ export default function Chatbot() {
       <header style={styles.header}>
         <div style={styles.headerLeft}>
           <div style={styles.avatarWrap}>
-            <div style={styles.avatar}>
-              <img src="https://api.dicebear.com/7.x/bottts-neutral/svg?seed=CarBot&backgroundColor=b6e3f4" alt="AI Bot" style={{ width: 32, height: 32, borderRadius: "50%" }} />
-            </div>
+            <BotAvatar size={38} style={{ border: "2px solid rgba(255,255,255,0.3)" }} />
             <div style={styles.onlineDot} />
           </div>
           <div>
@@ -401,9 +522,7 @@ export default function Chatbot() {
                     }}
                   >
                     {m.role === "bot" && (
-                      <div style={styles.botAvatar}>
-                        <img src="https://api.dicebear.com/7.x/bottts-neutral/svg?seed=CarBot&backgroundColor=b6e3f4" alt="bot" style={{ width: 28, height: 28, borderRadius: "50%" }} />
-                      </div>
+                      <BotAvatar size={28} />
                     )}
                     <div style={{ maxWidth: "82%" }}>
                       <div style={{
@@ -455,9 +574,7 @@ export default function Chatbot() {
                 {/* Typing indicator */}
                 {chatLoading && (
                   <div className="chatbot-msg" style={styles.messageRow}>
-                    <div style={styles.botAvatar}>
-                      <img src="https://api.dicebear.com/7.x/bottts-neutral/svg?seed=CarBot&backgroundColor=b6e3f4" alt="bot" style={{ width: 28, height: 28, borderRadius: "50%" }} />
-                    </div>
+                    <BotAvatar size={28} />
                     <div style={{ ...styles.bubble, ...styles.bubbleBot }}>
                       <div style={styles.typingWrap}>
                         {[0, 1, 2].map((i) => (
@@ -521,7 +638,7 @@ const styles = {
     position: "fixed",
     bottom: 28,
     right: 28,
-    background: "linear-gradient(135deg, #1a73e8, #0056b3)",
+    background: "linear-gradient(135deg, #4f46e5, #3b82f6)",
     border: "none",
     borderRadius: 20,
     padding: "10px 16px 10px 12px",
@@ -530,7 +647,7 @@ const styles = {
     display: "flex",
     alignItems: "center",
     gap: 8,
-    boxShadow: "0 8px 25px rgba(37,99,235,0.4)",
+    boxShadow: "0 8px 25px rgba(99,102,241,0.35)",
     transition: "transform 0.2s ease",
   },
   floatingBtnInner: { position: "relative", display: "flex" },
@@ -576,7 +693,7 @@ const styles = {
 
   /* Header */
   header: {
-    background: "linear-gradient(135deg, #1a73e8 0%, #0056b3 100%)",
+    background: "linear-gradient(135deg, #4f46e5 0%, #3b82f6 100%)",
     padding: "14px 16px",
     display: "flex",
     justifyContent: "space-between",
@@ -610,7 +727,7 @@ const styles = {
     height: 9,
     borderRadius: "50%",
     background: "#22c55e",
-    border: "2px solid #5560ff",
+    border: "2px solid #4f46e5",
   },
   headerTitle: {
     fontWeight: 700,

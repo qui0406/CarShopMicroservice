@@ -17,6 +17,7 @@ export default function CarDetails() {
   const [show3DModel, setShow3DModel] = useState(false);
   const [selectedImage, setSelectedImage] = useState(0);
   const [carImages, setCarImages] = useState([]);
+  const [activeTab, setActiveTab] = useState("overview");
   const user = useContext(MyUserContext);
 
   const fetchCarDetails = async () => {
@@ -162,60 +163,75 @@ export default function CarDetails() {
           {/* LEFT TABS AND INFO */}
           <Col lg={8}>
             <div style={{ display: "flex", gap: "30px", borderBottom: "1px solid #dee2e6", marginBottom: "30px", backgroundColor: "#fff", padding: "15px 30px 0 30px", borderRadius: "4px" }}>
-              <div style={{ paddingBottom: "15px", borderBottom: "3px solid #0a58ca", color: "#0a58ca", fontWeight: 800, fontSize: "0.95rem", cursor: "pointer" }}>Tổng quan</div>
-              <div style={{ paddingBottom: "15px", color: "#495057", fontWeight: 600, fontSize: "0.95rem", cursor: "pointer" }}>Thông số kỹ thuật</div>
-              <div style={{ paddingBottom: "15px", color: "#495057", fontWeight: 600, fontSize: "0.95rem", cursor: "pointer" }}>Trang bị</div>
+              <div 
+                onClick={() => setActiveTab("overview")}
+                style={{ paddingBottom: "15px", borderBottom: activeTab === "overview" ? "3px solid #0a58ca" : "3px solid transparent", color: activeTab === "overview" ? "#0a58ca" : "#495057", fontWeight: activeTab === "overview" ? 800 : 600, fontSize: "0.95rem", cursor: "pointer", transition: "all 0.2s" }}
+              >Tổng quan</div>
+              <div 
+                onClick={() => setActiveTab("spec")}
+                style={{ paddingBottom: "15px", borderBottom: activeTab === "spec" ? "3px solid #0a58ca" : "3px solid transparent", color: activeTab === "spec" ? "#0a58ca" : "#495057", fontWeight: activeTab === "spec" ? 800 : 600, fontSize: "0.95rem", cursor: "pointer", transition: "all 0.2s" }}
+              >Thông số kỹ thuật</div>
+              <div 
+                onClick={() => setActiveTab("equipment")}
+                style={{ paddingBottom: "15px", borderBottom: activeTab === "equipment" ? "3px solid #0a58ca" : "3px solid transparent", color: activeTab === "equipment" ? "#0a58ca" : "#495057", fontWeight: activeTab === "equipment" ? 800 : 600, fontSize: "0.95rem", cursor: "pointer", transition: "all 0.2s" }}
+              >Trang bị</div>
             </div>
 
             <div style={{ backgroundColor: "#fff", padding: "40px 30px", borderRadius: "4px", border: "1px solid #e0e5f2" }}>
-              <h4 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#212529", marginBottom: "24px" }}>Hiệu suất & Chi tiết xe</h4>
-
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "45px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", backgroundColor: "#f8f9fa", padding: "16px 20px", borderRadius: "4px" }}>
-                  <span style={{ color: "#6c757d", fontSize: "0.9rem" }}>Dung tích động cơ</span>
-                  <span style={{ fontWeight: 800, color: "#212529", fontSize: "0.9rem" }}>{car.carModel?.technicalSpec?.engineSize || "1.5L"}</span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", backgroundColor: "#f8f9fa", padding: "16px 20px", borderRadius: "4px" }}>
-                  <span style={{ color: "#6c757d", fontSize: "0.9rem" }}>Công suất tối đa</span>
-                  <span style={{ fontWeight: 800, color: "#212529", fontSize: "0.9rem" }}>{car.carModel?.technicalSpec?.horsepower || "110"} Hp</span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", backgroundColor: "#f8f9fa", padding: "16px 20px", borderRadius: "4px" }}>
-                  <span style={{ color: "#6c757d", fontSize: "0.9rem" }}>Mô-men xoắn tối đa</span>
-                  <span style={{ fontWeight: 800, color: "#212529", fontSize: "0.9rem" }}>{car.carModel?.technicalSpec?.torque || "146"} Nm</span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", backgroundColor: "#f8f9fa", padding: "16px 20px", borderRadius: "4px" }}>
-                  <span style={{ color: "#6c757d", fontSize: "0.9rem" }}>Bình nhiên liệu</span>
-                  <span style={{ fontWeight: 800, color: "#212529", fontSize: "0.9rem" }}>{car.carModel?.technicalSpec?.fuelCapacity || "51"} L</span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", backgroundColor: "#f8f9fa", padding: "16px 20px", borderRadius: "4px" }}>
-                  <span style={{ color: "#6c757d", fontSize: "0.9rem" }}>Chiều dài cơ sở</span>
-                  <span style={{ fontWeight: 800, color: "#212529", fontSize: "0.9rem" }}>{car.carModel?.technicalSpec?.length || "2,725"} mm</span>
-                </div>
-                <div style={{ display: "flex", justifyContent: "space-between", backgroundColor: "#f8f9fa", padding: "16px 20px", borderRadius: "4px" }}>
-                  <span style={{ color: "#6c757d", fontSize: "0.9rem" }}>Khoảng sáng gầm</span>
-                  <span style={{ fontWeight: 800, color: "#212529", fontSize: "0.9rem" }}>{car.carModel?.technicalSpec?.groundClearance || "145"} mm</span>
-                </div>
-              </div>
-
-              <h4 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#212529", marginBottom: "24px" }}>An toàn & Trang bị thông minh</h4>
-
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "20px", paddingBottom: "20px" }}>
-                {[
-                  car.carModel?.equipment?.laneKeepAssist ? "Hỗ trợ giữ làn" : null,
-                  car.carModel?.equipment?.hasBluetooth ? "Hệ thống Bluetooth" : null,
-                  car.carModel?.equipment?.hasAirbags ? "Bảo vệ túi khí" : null,
-                  car.carModel?.equipment?.smartKey ? "Công nghệ chìa khóa thông minh" : null,
-                  car.carModel?.equipment?.hasCamera ? "Hệ thống Camera" : null,
-                  car.carModel?.equipment?.electricTrunk ? "Cốp điện" : null,
-                  car.carModel?.equipment?.wirelessCharge ? "Sạc không dây" : null,
-                  car.carModel?.equipment?.headlampType ? `Đèn ${car.carModel?.equipment?.headlampType}` : null,
-                  car.carModel?.equipment?.seatMaterial || "Ghế cao cấp",
-                ].filter(Boolean).map((feat, idx) => (
-                  <div key={idx} style={{ width: "calc(33.33% - 15px)", display: "flex", alignItems: "center", gap: "10px", fontSize: "0.85rem", color: "#111", fontWeight: 600 }}>
-                    <FaCheckCircle color="#0a58ca" size={16} /> {feat}
+              {(activeTab === "overview" || activeTab === "spec") && (
+                <>
+                  <h4 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#212529", marginBottom: "24px" }}>Hiệu suất & Chi tiết xe</h4>
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: activeTab === "overview" ? "45px" : "0" }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", backgroundColor: "#f8f9fa", padding: "16px 20px", borderRadius: "4px" }}>
+                      <span style={{ color: "#6c757d", fontSize: "0.9rem" }}>Dung tích động cơ</span>
+                      <span style={{ fontWeight: 800, color: "#212529", fontSize: "0.9rem" }}>{car.carModel?.technicalSpec?.engineSize || "1.5L"}</span>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", backgroundColor: "#f8f9fa", padding: "16px 20px", borderRadius: "4px" }}>
+                      <span style={{ color: "#6c757d", fontSize: "0.9rem" }}>Công suất tối đa</span>
+                      <span style={{ fontWeight: 800, color: "#212529", fontSize: "0.9rem" }}>{car.carModel?.technicalSpec?.horsepower || "110"} Hp</span>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", backgroundColor: "#f8f9fa", padding: "16px 20px", borderRadius: "4px" }}>
+                      <span style={{ color: "#6c757d", fontSize: "0.9rem" }}>Mô-men xoắn tối đa</span>
+                      <span style={{ fontWeight: 800, color: "#212529", fontSize: "0.9rem" }}>{car.carModel?.technicalSpec?.torque || "146"} Nm</span>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", backgroundColor: "#f8f9fa", padding: "16px 20px", borderRadius: "4px" }}>
+                      <span style={{ color: "#6c757d", fontSize: "0.9rem" }}>Bình nhiên liệu</span>
+                      <span style={{ fontWeight: 800, color: "#212529", fontSize: "0.9rem" }}>{car.carModel?.technicalSpec?.fuelCapacity || "51"} L</span>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", backgroundColor: "#f8f9fa", padding: "16px 20px", borderRadius: "4px" }}>
+                      <span style={{ color: "#6c757d", fontSize: "0.9rem" }}>Chiều dài cơ sở</span>
+                      <span style={{ fontWeight: 800, color: "#212529", fontSize: "0.9rem" }}>{car.carModel?.technicalSpec?.length || "2,725"} mm</span>
+                    </div>
+                    <div style={{ display: "flex", justifyContent: "space-between", backgroundColor: "#f8f9fa", padding: "16px 20px", borderRadius: "4px" }}>
+                      <span style={{ color: "#6c757d", fontSize: "0.9rem" }}>Khoảng sáng gầm</span>
+                      <span style={{ fontWeight: 800, color: "#212529", fontSize: "0.9rem" }}>{car.carModel?.technicalSpec?.groundClearance || "145"} mm</span>
+                    </div>
                   </div>
-                ))}
-              </div>
+                </>
+              )}
+
+              {(activeTab === "overview" || activeTab === "equipment") && (
+                <>
+                  <h4 style={{ fontSize: "1.2rem", fontWeight: 800, color: "#212529", marginBottom: "24px", marginTop: activeTab === "overview" ? "0" : "0" }}>An toàn & Trang bị thông minh</h4>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "20px" }}>
+                    {[
+                      car.carModel?.equipment?.laneKeepAssist ? "Hỗ trợ giữ làn" : null,
+                      car.carModel?.equipment?.hasBluetooth ? "Hệ thống Bluetooth" : null,
+                      car.carModel?.equipment?.hasAirbags ? "Bảo vệ túi khí" : null,
+                      car.carModel?.equipment?.smartKey ? "Công nghệ chìa khóa thông minh" : null,
+                      car.carModel?.equipment?.hasCamera ? "Hệ thống Camera" : null,
+                      car.carModel?.equipment?.electricTrunk ? "Cốp điện" : null,
+                      car.carModel?.equipment?.wirelessCharge ? "Sạc không dây" : null,
+                      car.carModel?.equipment?.headlampType ? `Đèn ${car.carModel?.equipment?.headlampType}` : null,
+                      car.carModel?.equipment?.seatMaterial || "Ghế cao cấp",
+                    ].filter(Boolean).map((feat, idx) => (
+                      <div key={idx} style={{ width: "calc(33.33% - 15px)", display: "flex", alignItems: "center", gap: "10px", fontSize: "0.85rem", color: "#111", fontWeight: 600 }}>
+                        <FaCheckCircle color="#0a58ca" size={16} /> {feat}
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
             </div>
 
             {/* Artisan & Eco Cards */}

@@ -66,19 +66,17 @@ const Header = () => {
   const logout = () => { dispatch({ type: "logout" }); nav("/login"); };
   const isStaff = user?.result?.roles?.includes("STAFF");
 
+  if (user === undefined) return <div style={NAV_STYLE}><div style={{ height: 60 }} /></div>; // Loading placeholder
+
   const productItems = [
-    { to: "/car-new",  icon: FaCarSide, label: "Xe ô tô mới" },
-    { to: "/car-old",  icon: FaCarSide, label: "Xe ô tô cũ (Lướt)" },
-    { to: "/sell-car", icon: FaTags,    label: "Bán xe cũ của bạn" },
-    { to: "/voucher",  icon: FaTags,    label: "Voucher ưu đãi" },
+    { to: "/car-new", icon: FaCarSide, label: "Xe ô tô mới" },
+    { to: "/car-old", icon: FaCarSide, label: "Xe ô tô cũ (Lướt)" },
+    { to: "/sell-car", icon: FaTags, label: "Bán xe cũ của bạn" },
+    { to: "/voucher", icon: FaTags, label: "Voucher ưu đãi" },
   ];
   const serviceItems = [
-    { to: "/news",      icon: FaNewspaper, label: "Tin tức thị trường" },
-    { to: "/valuation", icon: FaStar,      label: "Định giá xe AI" },
-  ];
-  const personalItems = [
-    { to: "/all-my-reserve", icon: FaBox,    label: "Đơn hàng đã đặt" },
-    { to: "/all-my-deposit", icon: FaHistory, label: "Lịch sử giao dịch" },
+    { to: "/news", icon: FaNewspaper, label: "Tin tức thị trường" },
+    { to: "/valuation", icon: FaStar, label: "Định giá xe AI" },
   ];
 
   return (
@@ -86,7 +84,7 @@ const Header = () => {
       <div style={{ display: "flex", alignItems: "center", padding: "10px 40px", gap: 8 }}>
 
         {/* Logo */}
-        <Link to="/home" style={{ fontWeight: 800, fontSize: "1.4rem", color: "#1a73e8", letterSpacing: "-1px", textDecoration: "none", marginRight: 20, flexShrink: 0 }}>
+        <Link to="/" style={{ fontWeight: 800, fontSize: "1.4rem", color: "#1a73e8", letterSpacing: "-1px", textDecoration: "none", marginRight: 20, flexShrink: 0 }}>
           CarShop
         </Link>
 
@@ -100,9 +98,8 @@ const Header = () => {
             </>
           ) : (
             <>
-              <DropdownMenu label="Sản phẩm"      items={productItems} />
+              <DropdownMenu label="Sản phẩm" items={productItems} />
               <DropdownMenu label="Dịch vụ & Tin tức" items={serviceItems} />
-              <DropdownMenu label="Cá nhân"        items={personalItems} />
               <NavLink to="/about" style={({ isActive }) => ({ ...LINK, color: isActive ? "#1a73e8" : "#191c1d" })}>Về chúng tôi</NavLink>
             </>
           )}
@@ -110,11 +107,6 @@ const Header = () => {
 
         {/* Right Section */}
         <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
-          {/* Cart */}
-          <div style={{ position: "relative", cursor: "pointer", padding: 8, borderRadius: "50%", background: "#f8f9fa", color: "#5d6571" }}>
-            <FaShoppingCart size={17} />
-            <Badge bg="danger" pill style={{ position: "absolute", top: -2, right: -6, fontSize: "0.55rem", border: "2px solid white", padding: "2px 5px" }}>2</Badge>
-          </div>
 
           {/* Auth */}
           {user === null ? (
@@ -123,22 +115,35 @@ const Header = () => {
               <Link to="/register" style={{ padding: "8px 16px", background: "#1a73e8", color: "#fff", borderRadius: 6, fontWeight: 700, textDecoration: "none", fontSize: "0.88rem" }}>Đăng ký</Link>
             </div>
           ) : (
-            <div style={{ paddingLeft: 16, borderLeft: "1px solid #e2e8f0", position: "relative" }}
-              onMouseEnter={() => setUserMenuOpen(true)}
-              onMouseLeave={() => setUserMenuOpen(false)}>
-              <button style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 8 }}>
-                <img
-                  src={user.result?.avatar || "https://via.placeholder.com/32"}
-                  alt="avatar"
-                  style={{ width: 34, height: 34, borderRadius: "50%", objectFit: "cover", border: "2px solid #e8f0fe" }}
-                />
-                <FaChevronDown size={10} style={{ color: "#94a3b8" }} />
-              </button>
+            <div style={{ display: "flex", alignItems: "center", gap: 16, paddingLeft: 16, borderLeft: "1px solid #e2e8f0" }}>
+              {/* Order History Icon Link */}
+              <Link to="/all-my-deposit" title="Đơn hàng của tôi" 
+                style={{ 
+                  color: "#64748b", background: "#f8fafc", width: 38, height: 38, 
+                  borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center",
+                  transition: "all 0.2s", border: "1px solid #f1f5f9"
+                }}
+                onMouseEnter={e => { e.currentTarget.style.color = "#1a73e8"; e.currentTarget.style.background = "#eff6ff"; }}
+                onMouseLeave={e => { e.currentTarget.style.color = "#64748b"; e.currentTarget.style.background = "#f8fafc"; }}>
+                <FaShoppingCart size={18} />
+              </Link>
+
+              <div style={{ position: "relative" }}
+                onMouseEnter={() => setUserMenuOpen(true)}
+                onMouseLeave={() => setUserMenuOpen(false)}>
+                <button style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 8 }}>
+                  <img
+                    src={user?.result?.avatar || "https://via.placeholder.com/32"}
+                    alt="avatar"
+                    style={{ width: 34, height: 34, borderRadius: "50%", objectFit: "cover", border: "2px solid #e8f0fe" }}
+                  />
+                  <FaChevronDown size={10} style={{ color: "#94a3b8" }} />
+                </button>
               {userMenuOpen && (
                 <div style={{ position: "absolute", top: "100%", right: 0, background: "#fff", borderRadius: 10, boxShadow: "0 8px 24px rgba(0,0,0,0.12)", border: "1px solid #e8f0fe", minWidth: 200, zIndex: 1100, padding: "6px 0" }}>
                   <div style={{ padding: "10px 18px 8px", borderBottom: "1px solid #f1f5f9", marginBottom: 4 }}>
                     <div style={{ fontSize: "0.75rem", color: "#94a3b8" }}>Xin chào,</div>
-                    <div style={{ fontWeight: 700, color: "#0f172a" }}>{user.result?.username}</div>
+                    <div style={{ fontWeight: 700, color: "#0f172a" }}>{user?.result?.username}</div>
                   </div>
                   <Link to="/profile" style={{ ...DROP_ITEM }}
                     onMouseEnter={e => e.currentTarget.style.background = "#f0f7ff"}
@@ -153,6 +158,7 @@ const Header = () => {
                 </div>
               )}
             </div>
+          </div>
           )}
 
           {/* Mobile toggle */}
@@ -167,7 +173,7 @@ const Header = () => {
       {/* Mobile menu */}
       {mobileOpen && (
         <div style={{ borderTop: "1px solid #f1f5f9", padding: "12px 24px 20px", display: "flex", flexDirection: "column", gap: 6 }}>
-          {[...productItems, ...serviceItems, ...personalItems, { to: "/about", label: "Về chúng tôi" }].map(({ to, label }) => (
+          {[...productItems, ...serviceItems, { to: "/all-my-deposit", label: "Đơn hàng của tôi" }, { to: "/about", label: "Về chúng tôi" }].map(({ to, label }) => (
             <Link key={to} to={to} onClick={() => setMobileOpen(false)}
               style={{ ...LINK, padding: "10px 0", borderBottom: "1px solid #f8fafc" }}>
               {label}
