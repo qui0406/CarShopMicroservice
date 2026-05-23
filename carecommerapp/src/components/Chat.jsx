@@ -141,7 +141,7 @@ const Chat = () => {
   useEffect(() => {
     if (!socketRef.current) {
       const token = cookie.load("token");
-      const chatUrl = "https://ee2b-2001-ee0-4fc0-70c0-f4ce-64e2-e388-7e86.ngrok-free.app"; 
+      const chatUrl = CHAT_URL; 
       console.log("!!! CONNECTING TO CHAT AT:", chatUrl);
       socketRef.current = io(chatUrl, {
         path: "/socket.io",

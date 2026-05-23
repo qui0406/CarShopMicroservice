@@ -105,17 +105,62 @@ export default function OrderHistory() {
     }
   };
 
+  const handlePayDeposit = async (orderInfo) => {
+    setIsModalOpen(true);
+    setLoadingDetails(true);
+    setSelectedOrder(null);
+    try {
+      const res = await authApis().get(endpoints["get-order-by-id"](orderInfo.id));
+      const orderData = res.data?.result || res.data;
+      const item = orderData.orderItems?.[0] || {};
+      
+      setIsModalOpen(false);
+      navigate('/deposit-confirm', {
+        state: {
+          order: { id: orderData.id },
+          form: {
+            fullName: item.fullName || '',
+            phone: item.phoneNumber || '',
+            idNumber: item.cccd || '',
+            address: item.address || ''
+          },
+          car: {
+            name: orderInfo.carName || '',
+            price: orderData.baseAmount || orderInfo.totalAmount || 0,
+            imageUrls: [orderInfo.carImage || '']
+          },
+          paymentMethod: 'vnpay-qr',
+          depositAmount: orderInfo.depositAmount || 0
+        }
+      });
+    } catch (err) {
+      console.error(err);
+      alert("Không thể lấy thông tin đơn hàng để đặt cọc.");
+      setIsModalOpen(false);
+    } finally {
+      setLoadingDetails(false);
+    }
+  };
+
+  const handleCardClick = (order) => {
+    if (order.paymentStatus === "PENDING") {
+      handlePayDeposit(order);
+    } else {
+      handleOpenDetails(order.id);
+    }
+  };
+
   const closeModal = () => {
     setIsModalOpen(false);
     setSelectedOrder(null);
   };
 
   const filteredOrders = useMemo(() => {
-    const isPaid = (status) => ["PAID", "DEPOSITED", "CONFIRMED", "DELIVERED", "COMPLETED"].includes(status);
     if (activeTab === "ALL") return orders;
-    if (activeTab === "PAID") return orders.filter((o) => isPaid(o.paymentStatus));
+    if (activeTab === "PAID") return orders.filter((o) => ["PAID", "DELIVERED", "COMPLETED"].includes(o.paymentStatus));
+    if (activeTab === "DEPOSITED") return orders.filter((o) => o.paymentStatus === "DEPOSITED");
     if (activeTab === "CANCELLED") return orders.filter((o) => o.paymentStatus === "CANCELLED");
-    if (activeTab === "PENDING") return orders.filter((o) => !isPaid(o.paymentStatus) && o.paymentStatus !== "CANCELLED");
+    if (activeTab === "PENDING") return orders.filter((o) => ["PENDING", "WAITING_FOR_PAID"].includes(o.paymentStatus));
     return orders;
   }, [orders, activeTab]);
 
@@ -138,7 +183,13 @@ export default function OrderHistory() {
               style={{ ...s.tabBtn, ...(activeTab === "PENDING" ? s.tabBtnActive : {}) }}
               onClick={() => setActiveTab("PENDING")}
             >
-              Chờ thanh toán
+              Chờ cọc
+            </button>
+            <button
+              style={{ ...s.tabBtn, ...(activeTab === "DEPOSITED" ? s.tabBtnActive : {}) }}
+              onClick={() => setActiveTab("DEPOSITED")}
+            >
+              Đã cọc
             </button>
             <button
               style={{ ...s.tabBtn, ...(activeTab === "PAID" ? s.tabBtnActive : {}) }}
@@ -166,32 +217,49 @@ export default function OrderHistory() {
             !error &&
             filteredOrders.map((order) => {
               const statusStr = order.paymentStatus;
-              const isPaid = ["PAID", "DEPOSITED", "CONFIRMED", "DELIVERED", "COMPLETED"].includes(statusStr);
-              const isCancelled = statusStr === "CANCELLED";
 
               let badgeStyle = s.badgePending;
               let badgeText = "CHỜ THANH TOÁN";
-              let amountLabel = "SỐ TIỀN ĐẶT CỌC";
-              let amountValue = order.depositAmount;
+              let amountLabel = "SỐ TIỀN THANH TOÁN";
+              let amountValue = order.totalAmount;
 
-              if (isPaid) { 
+              if (statusStr === "PENDING") {
+                badgeStyle = s.badgePending;
+                badgeText = "CHỜ ĐẶT CỌC";
+                amountLabel = "SỐ TIỀN CỌC";
+                amountValue = order.depositAmount;
+              } else if (statusStr === "DEPOSITED") {
+                badgeStyle = { color: "#1d4ed8", background: "#dbeafe" }; // Blue
+                badgeText = "ĐÃ ĐẶT CỌC";
+                amountLabel = "ĐÃ ĐẶT CỌC";
+                amountValue = order.depositAmount;
+              } else if (statusStr === "WAITING_FOR_PAID") {
+                badgeStyle = s.badgePending;
+                badgeText = "CHỜ THANH TOÁN TẤT TOÁN";
+                amountLabel = "SỐ TIỀN CÒN LẠI";
+                amountValue = order.totalAmount - order.depositAmount;
+              } else if (["PAID", "DELIVERED", "COMPLETED"].includes(statusStr)) { 
                 badgeStyle = s.badgePaid; 
                 badgeText = "ĐÃ THANH TOÁN"; 
                 amountLabel = "TỔNG THANH TOÁN";
-                amountValue = order.totalAmount || order.depositAmount;
-              }
-              if (isCancelled) { 
+                amountValue = order.totalAmount;
+              } else if (statusStr === "CANCELLED") { 
                 badgeStyle = { color: "#dc2626", background: "#fef2f2" }; 
                 badgeText = "ĐÃ HỦY"; 
                 amountLabel = "SỐ TIỀN";
                 amountValue = 0;
+              } else {
+                badgeStyle = s.badgePaid; 
+                badgeText = statusStr; 
+                amountLabel = "SỐ TIỀN";
+                amountValue = order.totalAmount;
               }
 
               return (
                 <article
                   key={order.id}
                   style={{ ...s.card, cursor: "pointer", transition: "transform 0.2s, box-shadow 0.2s" }}
-                  onClick={() => handleOpenDetails(order.id)}
+                  onClick={() => handleCardClick(order)}
                   onMouseOver={(e) => { e.currentTarget.style.boxShadow = "0 10px 15px -3px rgba(0,0,0,0.1)"; e.currentTarget.style.transform = "translateY(-2px)"; }}
                   onMouseOut={(e) => { e.currentTarget.style.boxShadow = "none"; e.currentTarget.style.transform = "translateY(0)"; }}
                 >

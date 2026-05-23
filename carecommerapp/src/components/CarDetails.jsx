@@ -102,8 +102,8 @@ export default function CarDetails() {
               <h2 style={{ fontSize: "1.8rem", fontWeight: 900, color: "#0a58ca", margin: 0 }}>
                 {formatPrice(car.price)}
               </h2>
-              <Button onClick={() => navigate(`/reserve/${id}`)} style={{ backgroundColor: "#0a58ca", color: "#fff", border: "none", padding: "12px 30px", fontWeight: 800, borderRadius: "4px", fontSize: "0.9rem", textTransform: "uppercase", letterSpacing: "1px", boxShadow: "0 4px 12px rgba(10, 88, 202, 0.2)" }}>
-                Đặt xe ngay
+              <Button disabled={car.sold || car.deposited} onClick={() => navigate(`/reserve/${id}`)} style={{ backgroundColor: car.sold || car.deposited ? "#6c757d" : "#0a58ca", color: "#fff", border: "none", padding: "12px 30px", fontWeight: 800, borderRadius: "4px", fontSize: "0.9rem", textTransform: "uppercase", letterSpacing: "1px", boxShadow: car.sold || car.deposited ? "none" : "0 4px 12px rgba(10, 88, 202, 0.2)", cursor: car.sold || car.deposited ? "not-allowed" : "pointer" }}>
+                {car.sold ? "Xe đã bán" : car.deposited ? "Đã đặt cọc" : "Đặt xe ngay"}
               </Button>
             </div>
 

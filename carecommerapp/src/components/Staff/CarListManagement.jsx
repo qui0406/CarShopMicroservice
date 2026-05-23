@@ -91,8 +91,8 @@ export default function CarListManagement() {
           catText: "#16a34a",
           year: car.year || 2024,
           price: car.price,
-          status: car.isReady ? "READY" : "NOT READY",
-          statusDot: car.isReady ? "#22c55e" : "#ef4444",
+          status: car.sold ? "Đã bán" : (car.deposited ? "Đã đặt cọc" : (car.isReady ? "Sẵn sàng" : "Chưa sẵn sàng")),
+          statusDot: car.sold ? "#9ca3af" : (car.deposited ? "#eab308" : (car.isReady ? "#22c55e" : "#ef4444")),
           quantity: car.quantity || 0,
           image: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=120&q=80&fit=crop", // Backend should ideally provide thumbnail
         }));
@@ -403,7 +403,7 @@ export default function CarListManagement() {
                         <div className="flex items-center gap-1.5">
                           <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: car.statusDot }} />
                           <span className="text-[11px] font-black text-gray-700 uppercase">
-                            {car.status === "READY" ? "Sẵn sàng" : "Chưa sẵn sàng"}
+                            {car.status}
                           </span>
                         </div>
                       </td>
@@ -636,7 +636,7 @@ export default function CarListManagement() {
                           <div className="flex items-center gap-2 mt-1">
                             <div className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: selectedCarForView.statusDot }} />
                             <span className="text-xs font-black text-gray-700 uppercase">
-                              {selectedCarForView.status === "READY" ? "Sẵn sàng" : "Chưa sẵn sàng"}
+                              {selectedCarForView.status}
                             </span>
                           </div>
                         </div>

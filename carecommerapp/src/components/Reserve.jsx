@@ -115,6 +115,13 @@ export default function Reserve() {
     </div>
   );
 
+  if (car.deposited || car.sold) return (
+    <div style={s.centerPage}>
+      <p style={{ color: '#6c757d', fontWeight: 600 }}>Rất tiếc, chiếc xe này đã được đặt cọc hoặc đã bán.</p>
+      <button onClick={() => navigate(-1)} style={s.blueBtn}>← Quay lại</button>
+    </div>
+  );
+
   return (
     <div style={s.page}>
       {/* NAV */}

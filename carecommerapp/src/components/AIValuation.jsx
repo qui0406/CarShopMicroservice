@@ -17,11 +17,22 @@ import { FaCarSide, FaCogs, FaClock, FaCalendarAlt, FaGasPump, FaUserFriends, Fa
 export default function AIValuation({ isSection = false }) {
   const [valuing, setValuing] = useState(false);
   const [showResult, setShowResult] = useState(false);
-  const [files, setFiles] = useState([]);
+  const [imageSlots, setImageSlots] = useState({
+    front: null,
+    front_angle: null,
+    side: null,
+    rear: null,
+    interior: null,
+    seats: null,
+  });
   const [error, setError] = useState(null);
   const [valuationResult, setValuationResult] = useState(null);
   const [branches, setBranches] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [carHierarchy, setCarHierarchy] = useState({});
+  const [availableModels, setAvailableModels] = useState([]);
+  const [availableTrims, setAvailableTrims] = useState([]);
+  const [isDisclaimerAgreed, setIsDisclaimerAgreed] = useState(false);
 
   const [formData, setFormData] = useState({
     brand_name: "",
@@ -34,13 +45,13 @@ export default function AIValuation({ isSection = false }) {
     owner_count: 1,
     service_history: "true",
     description: "",
-    body_type: "SUV",
+    body_type: "",
     color: "Trắng",
-    gearbox: "Tự động",
-    seats: 5,
-    engine_capacity: 2.0,
-    drivetrain: "FWD",
-    airbags: 6
+    gearbox: "",
+    seats: "",
+    engine_capacity: "",
+    drivetrain: "",
+    airbags: ""
   });
 
   useEffect(() => {
@@ -53,6 +64,15 @@ export default function AIValuation({ isSection = false }) {
         const catRes = await APIs.get(endpoints["get-all-category"]);
         const cData = catRes.data?.result?.data || catRes.data?.result || [];
         setCategories(Array.isArray(cData) ? cData : []);
+
+        try {
+          const hierarchyRes = await APIs.get(endpoints["get-car-hierarchy"]);
+          if (hierarchyRes.data?.success) {
+            setCarHierarchy(hierarchyRes.data.data);
+          }
+        } catch (hErr) {
+          console.error("Error fetching car hierarchy:", hErr);
+        }
       } catch (err) {
         console.error("Error fetching metadata:", err);
       }
@@ -62,27 +82,106 @@ export default function AIValuation({ isSection = false }) {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    
+    if (name === "brand_name") {
+      const matchedBrand = Object.keys(carHierarchy).find(k => k.toLowerCase() === value.toLowerCase());
+      
+      setFormData(prev => ({
+        ...prev,
+        brand_name: value,
+        model_name: "", // reset model
+        trim_name: ""   // reset trim
+      }));
+      
+      if (matchedBrand) {
+        setAvailableModels(Object.keys(carHierarchy[matchedBrand]).sort());
+      } else {
+        setAvailableModels([]);
+      }
+      setAvailableTrims([]);
+    } else if (name === "model_name") {
+      const matchedBrand = Object.keys(carHierarchy).find(k => k.toLowerCase() === formData.brand_name.toLowerCase());
+      
+      setFormData(prev => ({
+        ...prev,
+        model_name: value,
+        trim_name: "" // reset trim
+      }));
+      
+      if (matchedBrand && carHierarchy[matchedBrand][value]) {
+        setAvailableTrims(carHierarchy[matchedBrand][value]);
+      } else {
+        setAvailableTrims([]);
+      }
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        [name]: value
+      }));
+    }
   };
 
   const handleValuation = async () => {
-    if (files.length === 0) {
+    // 1. Check if files are uploaded
+    const selectedFiles = Object.values(imageSlots).filter(slot => slot !== null).map(slot => slot.file);
+    if (selectedFiles.length === 0) {
       setError("Vui lòng tải lên ít nhất một ảnh xe để AI có thể phân tích ngoại thất.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
       return;
     }
 
-    // Client-side Mazda validation
-    const MAZDA_ALIASES = ["mazda", "madaz", "madza", "mazada"];
+    // 2. Client-side field validations (since Form required attribute does not run without outer submit form)
+    if (!formData.brand_name) {
+      setError("Vui lòng chọn thương hiệu xe.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    if (!formData.model_name || !formData.model_name.trim()) {
+      setError("Vui lòng nhập dòng xe (ví dụ: Mazda 3).");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    if (!formData.trim_name || !formData.trim_name.trim()) {
+      setError("Vui lòng nhập phiên bản xe (ví dụ: 1.5L Luxury).");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    if (!formData.year) {
+      setError("Vui lòng điền năm sản xuất.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    if (formData.odo === undefined || formData.odo === null || formData.odo === "") {
+      setError("Vui lòng nhập số ODO hợp lệ.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    if (!formData.body_type) {
+      setError("Vui lòng chọn kiểu dáng xe (ví dụ: SUV, Sedan...).");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    if (!formData.gearbox) {
+      setError("Vui lòng chọn loại hộp số (Số sàn / Tự động).");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    if (!formData.seats) {
+      setError("Vui lòng nhập số chỗ ngồi.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    // 3. Client-side Multi-brand validation
+    const SUPPORTED_BRANDS = ["mazda", "hyundai", "huyndai", "toyota", "ford", "mitsubishi", "mitsu", "madaz", "madza", "mazada"];
     const modelLower = (formData.model_name || "").toLowerCase();
     const brandLower = (formData.brand_name || "").toLowerCase();
     
-    const isMazda = MAZDA_ALIASES.some(alias => modelLower.includes(alias) || brandLower.includes(alias));
+    const isSupported = SUPPORTED_BRANDS.some(brand => modelLower.includes(brand) || brandLower.includes(brand));
     
-    if (!isMazda && (formData.model_name || formData.brand_name)) {
-      setError(`⚠️ Mô hình định giá của chúng tôi chỉ hỗ trợ dòng xe Mazda. Xe "${formData.brand_name} ${formData.model_name}" không nằm trong phạm vi hỗ trợ.`);
+    if (!isSupported) {
+      setError(`⚠️ Mô hình định giá của chúng tôi chỉ hỗ trợ các dòng xe: Mazda, Hyundai, Toyota, Ford, Mitsubishi. Xe "${formData.brand_name} ${formData.model_name}" không nằm trong phạm vi hỗ trợ.`);
+      window.scrollTo({ top: 0, behavior: "smooth" });
       setValuing(false);
       return;
     }
@@ -97,7 +196,7 @@ export default function AIValuation({ isSection = false }) {
     });
 
     // Append files
-    files.forEach(file => {
+    selectedFiles.forEach(file => {
       data.append("files", file);
     });
 
@@ -116,18 +215,31 @@ export default function AIValuation({ isSection = false }) {
         }
       } else {
         setError(response.data.error || "Có lỗi xảy ra khi định giá.");
+        window.scrollTo({ top: 0, behavior: "smooth" });
       }
     } catch (err) {
       setError("Không thể kết nối đến máy chủ AI. Vui lòng kiểm tra lại kết nối mạng.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
       console.error(err);
     } finally {
       setValuing(false);
     }
   };
 
-  const onFileChange = (e) => {
-    if (e.target.files) {
-      setFiles([...files, ...Array.from(e.target.files)]);
+  const onSlotFileChange = (slotKey, e) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const previewUrl = URL.createObjectURL(file);
+      
+      setImageSlots(prev => {
+        if (prev[slotKey]?.previewUrl) {
+          URL.revokeObjectURL(prev[slotKey].previewUrl);
+        }
+        return {
+          ...prev,
+          [slotKey]: { file, previewUrl }
+        };
+      });
     }
   };
 
@@ -243,29 +355,37 @@ export default function AIValuation({ isSection = false }) {
                 <Col md={4}>
                   <Form.Group>
                     <Form.Label style={labelStyle}>DÒNG XE (MODEL_NAME)</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="Ví dụ: Mazda 3"
+                    <Form.Select
                       style={inputStyle}
                       name="model_name"
                       value={formData.model_name}
                       onChange={handleInputChange}
                       required
-                    />
+                      disabled={!formData.brand_name || availableModels.length === 0}
+                    >
+                      <option value="">Chọn dòng xe</option>
+                      {availableModels.map(m => (
+                        <option key={m} value={m}>{m}</option>
+                      ))}
+                    </Form.Select>
                   </Form.Group>
                 </Col>
                 <Col md={4}>
                   <Form.Group>
                     <Form.Label style={labelStyle}>PHIÊN BẢN (TRIM_NAME)</Form.Label>
-                    <Form.Control
-                      type="text"
-                      placeholder="Ví dụ: 1.5L Luxury"
+                    <Form.Select
                       style={inputStyle}
                       name="trim_name"
                       value={formData.trim_name}
                       onChange={handleInputChange}
                       required
-                    />
+                      disabled={!formData.model_name || availableTrims.length === 0}
+                    >
+                      <option value="">Chọn phiên bản</option>
+                      {availableTrims.map(t => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </Form.Select>
                   </Form.Group>
                 </Col>
                 <Col md={4}>
@@ -431,6 +551,7 @@ export default function AIValuation({ isSection = false }) {
                       value={formData.gearbox}
                       onChange={handleInputChange}
                     >
+                      <option value="">Chọn hộp số</option>
                       <option value="Tự động">Tự động</option>
                       <option value="Số sàn">Số sàn</option>
                     </Form.Select>
@@ -470,6 +591,7 @@ export default function AIValuation({ isSection = false }) {
                       value={formData.drivetrain}
                       onChange={handleInputChange}
                     >
+                      <option value="">Chọn dẫn động</option>
                       <option value="FWD">FWD (Cầu trước)</option>
                       <option value="RWD">RWD (Cầu sau)</option>
                       <option value="AWD">AWD (4 bánh toàn thời gian)</option>
@@ -508,43 +630,143 @@ export default function AIValuation({ isSection = false }) {
                 }}>4</div>
                 <h3 style={{ fontSize: "1.25rem", fontWeight: 700, margin: 0, color: "#1e293b" }}>Hình ảnh xe</h3>
               </div>
+              <p style={{ color: "#64748b", fontSize: "0.95rem", marginBottom: "20px" }}>Tải lên các góc độ xe để AI có thể đánh giá toàn diện nhất.</p>
 
-              <div
-                style={{
-                  border: "2px dashed #cbd5e1",
-                  borderRadius: "16px",
-                  padding: "40px",
-                  textAlign: "center",
-                  backgroundColor: "#f8faff",
-                  cursor: "pointer",
-                  marginBottom: "8px",
-                  transition: "all 0.3s ease"
-                }}
-                onMouseOver={(e) => e.currentTarget.style.borderColor = "#2563eb"}
-                onMouseOut={(e) => e.currentTarget.style.borderColor = "#cbd5e1"}
-                onClick={() => document.getElementById("hidden-file-input").click()}
-              >
-                <BiCloudUpload size={48} color="#2563eb" style={{ marginBottom: "16px" }} />
-                <h5 style={{ fontWeight: 700, color: "#1e293b" }}>Kéo thả hoặc tải lên 6-7 ảnh</h5>
-                <p style={{ color: "#64748b", fontSize: "0.9rem" }}>Hỗ trợ JPG, PNG (Tối đa 10MB/ảnh)</p>
-                <input type="file" id="hidden-file-input" multiple className="d-none" onChange={onFileChange} />
+              <Row className="g-3">
+                {[
+                  { key: 'front', label: 'Đầu xe' },
+                  { key: 'front_angle', label: 'Góc 3/4' },
+                  { key: 'side', label: 'Ngang hông' },
+                  { key: 'rear', label: 'Đuôi xe' },
+                  { key: 'interior', label: 'Khoang lái' },
+                  { key: 'seats', label: 'Hàng ghế sau' }
+                ].map((slot) => (
+                  <Col md={4} sm={6} key={slot.key}>
+                    <div
+                      style={{
+                        border: "2px dashed #cbd5e1",
+                        borderRadius: "12px",
+                        height: "140px",
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        backgroundColor: "#f8faff",
+                        cursor: "pointer",
+                        position: "relative",
+                        overflow: "hidden",
+                        transition: "all 0.3s ease"
+                      }}
+                      onMouseOver={(e) => {
+                        if (!imageSlots[slot.key]) e.currentTarget.style.borderColor = "#2563eb";
+                      }}
+                      onMouseOut={(e) => {
+                        if (!imageSlots[slot.key]) e.currentTarget.style.borderColor = "#cbd5e1";
+                      }}
+                      onClick={() => document.getElementById(`file-input-${slot.key}`).click()}
+                    >
+                      <input
+                        type="file"
+                        id={`file-input-${slot.key}`}
+                        accept="image/jpeg, image/png, image/webp"
+                        className="d-none"
+                        onChange={(e) => onSlotFileChange(slot.key, e)}
+                      />
+                      
+                      {imageSlots[slot.key] ? (
+                        <>
+                          <img
+                            src={imageSlots[slot.key].previewUrl}
+                            alt={slot.label}
+                            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                          />
+                          <div style={{
+                            position: "absolute",
+                            bottom: 0,
+                            left: 0,
+                            right: 0,
+                            backgroundColor: "rgba(0,0,0,0.6)",
+                            color: "#fff",
+                            fontSize: "0.75rem",
+                            padding: "6px 0",
+                            textAlign: "center",
+                            fontWeight: 600
+                          }}>
+                            {slot.label}
+                          </div>
+                          {/* Overlay on hover to change image */}
+                          <div
+                            style={{
+                              position: "absolute",
+                              top: 0,
+                              left: 0,
+                              right: 0,
+                              bottom: 0,
+                              backgroundColor: "rgba(0,0,0,0.4)",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              opacity: 0,
+                              transition: "opacity 0.2s ease"
+                            }}
+                            onMouseOver={(e) => e.currentTarget.style.opacity = 1}
+                            onMouseOut={(e) => e.currentTarget.style.opacity = 0}
+                          >
+                            <span style={{ color: "#fff", fontSize: "0.85rem", fontWeight: 600, border: "1px solid #fff", padding: "4px 12px", borderRadius: "100px", backdropFilter: "blur(4px)" }}>
+                              Đổi ảnh
+                            </span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <BiCloudUpload size={32} color="#94a3b8" style={{ marginBottom: "8px" }} />
+                          <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "#475569" }}>{slot.label}</span>
+                        </>
+                      )}
+                    </div>
+                  </Col>
+                ))}
+              </Row>
+            </div>
 
-                {files.length > 0 && (
-                  <div className="mt-3 d-flex flex-wrap gap-2 justify-content-center">
-                    {files.map((f, index) => (
-                      <Badge key={index} bg="primary" style={{ padding: "8px 12px", borderRadius: "6px" }}>{f.name}</Badge>
-                    ))}
+            {/* ERROR ALERT NEAR THE BUTTON FOR QUICK VISIBILITY */}
+            {error && (
+              <Alert variant="danger" style={{ borderRadius: "12px", marginBottom: "20px", border: "none", boxShadow: "0 4px 12px rgba(220, 38, 38, 0.1)" }}>
+                <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+                  <BiErrorCircle size={24} style={{ flexShrink: 0 }} />
+                  <div>
+                    <strong>Lỗi:</strong> {error}
                   </div>
-                )}
-              </div>
+                </div>
+              </Alert>
+            )}
+
+            <div style={{
+              backgroundColor: "#f8fafc",
+              border: "1px solid #e2e8f0",
+              borderRadius: "12px",
+              padding: "16px",
+              marginBottom: "24px"
+            }}>
+              <Form.Check 
+                type="checkbox"
+                id="disclaimer-checkbox"
+                checked={isDisclaimerAgreed}
+                onChange={(e) => setIsDisclaimerAgreed(e.target.checked)}
+                label={
+                  <span style={{ fontSize: "0.9rem", color: "#475569", lineHeight: 1.5, display: "block" }}>
+                    Tôi hiểu rằng mức giá AI cung cấp chỉ mang tính chất <strong>tham khảo</strong> để thuận tiện cho việc thương lượng. Kết quả định giá phụ thuộc hoàn toàn vào độ chính xác của thông số và hình ảnh cung cấp. Cửa hàng không chịu trách nhiệm pháp lý đối với các quyết định giao dịch hoặc sai lệch dựa trên mức giá tham khảo này.
+                  </span>
+                }
+              />
             </div>
 
             <Button
               onClick={handleValuation}
-              disabled={valuing}
+              disabled={valuing || !isDisclaimerAgreed}
               style={{
                 width: "100%",
-                backgroundColor: "#2563eb",
+                backgroundColor: isDisclaimerAgreed ? "#2563eb" : "#94a3b8",
                 border: "none",
                 borderRadius: "14px",
                 padding: "18px",
@@ -622,33 +844,8 @@ export default function AIValuation({ isSection = false }) {
                     )}
                   </div>
                   <div style={{ fontSize: "0.95rem", color: "#166534", margin: "0 0 12px 0", lineHeight: 1.6 }}>
-                    Dựa trên dữ liệu thị trường, mẫu xe <strong>{formData.model_name} {formData.year}</strong> có giá trị gốc khoảng <strong>{valuationResult.summary.raw_price.toLocaleString('vi-VN')} triệu VNĐ</strong>.
-                    Sau khi phân tích kỹ thuật, hệ thống ghi nhận các yếu tố ảnh hưởng đến giá trị:
-                    <ul style={{ paddingLeft: "20px", marginTop: "8px", marginBottom: "8px" }}>
-                      <li key="odo">Mức ODO <strong>{formData.odo.toLocaleString()}km</strong>: {formData.odo > (new Date().getFullYear() - formData.year) * 15000 ? "Vượt mức trung bình." : "Hành trình lý tưởng."}</li>
-                      {valuationResult.deductions.map((d, i) => (
-                        <li key={i}>
-                          <strong>{d.label}</strong>: {d.amount > 0 
-                            ? <>Làm giảm <strong style={{color: '#c53030'}}>{d.amount.toLocaleString('vi-VN')} triệu VNĐ</strong></>
-                            : <>Cộng thêm <strong style={{color: '#166534'}}>{Math.abs(d.amount).toLocaleString('vi-VN')} triệu VNĐ</strong></>
-                          } vào giá trị thực tế.
-                        </li>
-                      ))}
-                    </ul>
-                    Tổng mức khấu trừ là <strong>{valuationResult.summary.total_penalty.toLocaleString('vi-VN')} triệu VNĐ</strong>. Mức giá đề xuất đảm bảo sát với tình trạng thực tế của xe.
+                    {valuationResult.summary.explanation}
                   </div>
-                  {valuationResult.summary.ref_note && (
-                    <div style={{ 
-                      fontSize: "0.75rem", 
-                      color: "#166534", 
-                      opacity: 0.8, 
-                      paddingTop: "12px", 
-                      borderTop: "1px dashed #bbf7d0",
-                      fontStyle: "italic" 
-                    }}>
-                      Nguồn tham chiếu: {valuationResult.summary.ref_note}
-                    </div>
-                  )}
                 </div>
 
                 <div style={{ backgroundColor: "#fff", borderRadius: "24px", padding: "32px", boxShadow: "0 4px 20px rgba(0,0,0,0.03)", border: "1px solid #f1f5f9" }}>

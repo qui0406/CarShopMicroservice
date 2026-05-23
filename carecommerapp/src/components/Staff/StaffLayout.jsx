@@ -12,7 +12,8 @@ import {
   FaSignOutAlt,
   FaMoneyBillWave,
   FaFileInvoiceDollar,
-  FaClipboardList
+  FaClipboardList,
+  FaComments
 } from "react-icons/fa";
 
 function NavItem({ icon: Icon, label, active, onClick }) {
@@ -62,6 +63,7 @@ export default function StaffLayout({ children, searchPlaceholder = "Search...",
           <NavItem icon={FaMoneyBillWave} label="Thanh toán cọc" active={isActive("/staff/home/cashier")} onClick={() => navigate("/staff/home/cashier")} />
           <NavItem icon={FaFileInvoiceDollar} label="Thanh toán" active={isActive("/staff/direct-payment")} onClick={() => navigate("/staff/direct-payment")} />
           <NavItem icon={FaClipboardList} label="Thu mua xe cũ" active={isActive("/staff/appraisals")} onClick={() => navigate("/staff/appraisals")} />
+          <NavItem icon={FaComments} label="Hỗ trợ trực tuyến" active={isActive("/staff/home/chat")} onClick={() => navigate("/staff/home/chat")} />
           {isAdmin && (
             <NavItem icon={FaIdBadge} label="Nhân viên" active={isActive("/staff/directory")} onClick={() => navigate("/staff/directory")} />
           )}

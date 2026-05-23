@@ -336,16 +336,11 @@ export default function CarOld() {
                             </div>
                           </div>
 
-                          <div style={{ display: "flex", gap: 8 }}>
-                            <Button as={Link} to={`/get-car-by-id/${car.id}`} onClick={e => e.stopPropagation()}
-                              style={{ flex: 1, background: "#f8fafc", color: "#374151", border: "1px solid #e2e8f0", borderRadius: 10, fontWeight: 600, padding: "10px", fontSize: "0.82rem" }}>
-                              Chi tiết
-                            </Button>
-                            <Button as={Link} to={`/get-car-by-id/${car.id}`} onClick={e => e.stopPropagation()}
-                              style={{ flex: 1, background: "linear-gradient(135deg, #1a73e8, #0056b3)", border: "none", borderRadius: 10, fontWeight: 700, padding: "10px", fontSize: "0.82rem", color: "#fff" }}>
-                              Đặt lịch xem →
-                            </Button>
-                          </div>
+                          <Button as={Link} to={`/get-car-by-id/${car.id}`}
+                            onClick={e => e.stopPropagation()}
+                            style={{ width: "100%", background: "linear-gradient(135deg, #1a73e8, #0056b3)", border: "none", borderRadius: 10, fontWeight: 700, padding: "11px", fontSize: "0.9rem", color: "#fff" }}>
+                            Xem chi tiết →
+                          </Button>
                         </Card.Body>
                       </Card>
                     </Col>

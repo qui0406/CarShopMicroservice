@@ -1,8 +1,8 @@
 import axios from "axios";
 import cookie from "react-cookies";
 
-const BASE_URL = "https://bb5e-2405-4803-5241-5a20-b4f4-189c-e50d-c82a.ngrok-free.app/api/v1";
-export const CHAT_URL = "https://bb5e-2405-4803-5241-5a20-b4f4-189c-e50d-c82a.ngrok-free.app";
+const BASE_URL = "http://localhost:8888/api/v1";
+export const CHAT_URL = "http://localhost:8099";
 // console.log("CHAT_URL initialized as:", CHAT_URL);
 
 
@@ -121,6 +121,7 @@ export const endpoints = {
     "clear-chat-history": "/ai/clear-history",
     "identify-car": "/ai/identify-car-pro",
     "predict-car-price": "/ai/predict-price",
+    "get-car-hierarchy": "/ai/car-hierarchy",
     "ai-health": "/ai/health",
     "ai-root": "/ai/",
 
