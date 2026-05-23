@@ -6,6 +6,20 @@ __pycache__/
 # C extensions
 *.so
 
+# Bỏ qua data thô và ảnh
+data/
+
+# Bỏ qua Vector DB
+database/
+
+# Bỏ qua model weights
+model/
+
+# Bỏ qua file rác và temp
+redis_data/
+scratch/
+*.pkl
+*_temp_*.jpg
 # Distribution / packaging
 .Python
 build/

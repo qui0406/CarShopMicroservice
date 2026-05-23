@@ -14,21 +14,14 @@ _TRANSFORMERS_PATH = os.path.join(_BASE_MODEL_PATH, "transformers")
 price_model  = None
 scaler       = None
 tfidf        = None
-le_model     = None
-le_fuel      = None
-le_body_type = None
-le_color     = None
-le_gearbox   = None
-le_origin    = None
-le_version      = None
-le_drivetrain   = None
+le_brand     = None
+ohe          = None
 
 _loaded = False
 
 
 def load_all() -> None:
-    global price_model, scaler, tfidf, le_model, le_fuel
-    global le_body_type, le_color, le_gearbox, le_origin, le_version, le_drivetrain, _loaded
+    global price_model, scaler, tfidf, ohe, _loaded
 
     if _loaded:
         return
@@ -38,14 +31,7 @@ def load_all() -> None:
     _load(name="price_model", path=os.path.join(_BASE_MODEL_PATH,   "car_price_model1.keras"),         loader_fn=_load_keras)
     _load(name="scaler",      path=os.path.join(_TRANSFORMERS_PATH, "scaler_numeric.pkl"),             loader_fn=_load_pickle)
     _load(name="tfidf",       path=os.path.join(_TRANSFORMERS_PATH, "tfidf_vectorizer.pkl"),           loader_fn=_load_pickle)
-    _load(name="le_model",    path=os.path.join(_TRANSFORMERS_PATH, "le_model.pkl"),                   loader_fn=_load_pickle)
-    _load(name="le_fuel",     path=os.path.join(_TRANSFORMERS_PATH, "le_fuel.pkl"),                    loader_fn=_load_pickle)
-    _load(name="le_body_type",path=os.path.join(_TRANSFORMERS_PATH, "le_body_type_clean.pkl"),         loader_fn=_load_pickle)
-    _load(name="le_color",    path=os.path.join(_TRANSFORMERS_PATH, "le_exterior_color.pkl"),          loader_fn=_load_pickle)
-    _load(name="le_gearbox",  path=os.path.join(_TRANSFORMERS_PATH, "le_gearbox.pkl"),                 loader_fn=_load_pickle)
-    _load(name="le_origin",   path=os.path.join(_TRANSFORMERS_PATH, "le_origin_clean.pkl"),            loader_fn=_load_pickle)
-    _load(name="le_version",  path=os.path.join(_TRANSFORMERS_PATH, "le_version_extracted.pkl"),       loader_fn=_load_pickle)
-    _load(name="le_drivetrain",path=os.path.join(_TRANSFORMERS_PATH, "le_drivetrain_clean.pkl"),        loader_fn=_load_pickle)
+    _load(name="ohe",         path=os.path.join(_TRANSFORMERS_PATH, "ohe_categorical.pkl"),            loader_fn=_load_pickle)
 
     _loaded = True
 
@@ -57,8 +43,7 @@ def is_ready() -> bool:
 
 
 def _load(name: str, path: str, loader_fn) -> None:
-    global price_model, scaler, tfidf, le_model, le_fuel
-    global le_body_type, le_color, le_gearbox, le_origin, le_version
+    global price_model, scaler, tfidf, ohe
 
     if not os.path.exists(path):
         logger.warning(f"File không tồn tại: {path}")

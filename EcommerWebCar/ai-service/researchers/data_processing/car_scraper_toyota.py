@@ -178,7 +178,7 @@ def get_car_detail(driver: webdriver.Chrome, url: str, car_id: str) -> bool:
             "doors":            get_item("doors"),
             "unladen_weight":   get_item("veh_unladen_weight"),
             "gross_weight":     get_item("veh_gross_weight"),
-            "image_folder":     f"car_{car_id}",
+            "image_folder":     f"toyota_{car_id}",
             "url":              url,
         }
 

@@ -1,6 +1,6 @@
 import os
 import base64
-from groq import Groq
+from openai import OpenAI
 import re
 import io
 from PIL import Image
@@ -10,7 +10,7 @@ import logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-_GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+_OPENAI_API_KEY = os.getenv("OPEN_API_KEY")
 
 _IDENTIFY_PROMPT = """Bạn là hệ thống nhận diện xe ô tô chuyên nghiệp.
 Nhìn vào ảnh, hãy phân tích và TRẢ VỀ DUY NHẤT 1 CHUỖI JSON. Không giải thích thêm.
@@ -34,10 +34,10 @@ def identify_car_from_bytes(image_bytes: bytes) -> str:
         buffer = io.BytesIO()
         img.save(buffer, format="JPEG", quality=80)
         base64_str = base64.b64encode(buffer.getvalue()).decode("utf-8")
-        client = Groq(api_key=_GROQ_API_KEY)
+        client = OpenAI(api_key=_OPENAI_API_KEY)
 
         resp = client.chat.completions.create(
-            model="meta-llama/llama-4-scout-17b-16e-instruct",
+            model="gpt-4o",
             messages=[{
                 "role": "user",
                 "content": [

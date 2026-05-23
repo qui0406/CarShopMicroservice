@@ -1,16 +1,23 @@
 [
   {
+    "Mô hình": "Multimodal (Ảnh + Metadata + Text)",
+    "MAE (triệu)": 74.95,
+    "RMSE (triệu)": 107.74,
+    "MAPE (%)": 15.75,
+    "R²": 0.8191
+  },
+  {
     "Mô hình": "GradientBoosting (Tabular-only)",
-    "MAE (triệu)": 24.68,
-    "RMSE (triệu)": 35.42,
-    "MAPE (%)": 6.09,
-    "R²": 0.9622
+    "MAE (triệu)": 42.65,
+    "RMSE (triệu)": 77.67,
+    "MAPE (%)": 9.53,
+    "R²": 0.906
   },
   {
     "Mô hình": "Naive Baseline (luôn đoán median)",
-    "MAE (triệu)": 144.53,
-    "RMSE (triệu)": 183.26,
-    "MAPE (%)": 45.57,
-    "R²": -0.0117
+    "MAE (triệu)": 189.78,
+    "RMSE (triệu)": 255.55,
+    "MAPE (%)": 55.69,
+    "R²": -0.0176
   }
 ]

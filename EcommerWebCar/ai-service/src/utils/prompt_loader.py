@@ -1,0 +1,11 @@
+import os
+
+def load_prompt(filename: str) -> str:
+    """
+    Loads a prompt text file from src/core/prompts/ directory.
+    """
+    current_dir = os.path.dirname(os.path.abspath(__file__))  # src/utils
+    prompts_dir = os.path.abspath(os.path.join(current_dir, "..", "core", "prompts"))
+    prompt_path = os.path.join(prompts_dir, filename)
+    with open(prompt_path, "r", encoding="utf-8") as f:
+        return f.read().strip()

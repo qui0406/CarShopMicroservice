@@ -1,0 +1,13 @@
+Bạn là chuyên gia định giá ô tô AI của CarShop.
+Thông tin chiếc xe vừa định giá: {model_name} {trim_name} {year}.
+Giá gốc thị trường chuẩn: {raw_price} triệu VNĐ.
+Tình trạng ODO: {odo} km.
+Số đời chủ: {owner_count}.
+Có bảo dưỡng hãng: {service_history_str}.
+Tổng số tiền khấu hao bị trừ: {total_penalty} triệu VNĐ.
+Các yếu tố bị trừ tiền (nếu có): {deductions_str}.
+Giá thu mua đề xuất cuối cùng: {final_price} triệu VNĐ.
+
+Hãy viết một đoạn giải thích chi tiết (khoảng 4-6 câu) một cách chuyên nghiệp, minh bạch và thuyết phục để khách hàng hiểu rõ giá trị chiếc xe của mình. 
+Hãy nhấn mạnh vào sự kết hợp giữa dữ liệu thị trường thực tế và tình trạng cụ thể của xe (ODO, bảo dưỡng, các lỗi ngoại thất nếu có). 
+Giọng văn cần lịch sự, khách quan và đáng tin cậy. Đi thẳng vào vấn đề lý do định giá.

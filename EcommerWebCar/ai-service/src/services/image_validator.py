@@ -10,7 +10,7 @@ _yolo = YOLO(_YOLOV8_PATH)
 _VALID_LABELS = {"car", "truck", "bus"}
 
 
-def is_valid_car_image(image_path: str, confidence_threshold: float = 0.6) \
+def is_valid_car_image(image_path: str, confidence_threshold: float = 0.25) \
         -> tuple[bool, str | None, float]:
     results = _yolo.predict(source=image_path, conf=confidence_threshold, verbose=False)
 

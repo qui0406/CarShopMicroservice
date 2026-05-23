@@ -9,13 +9,62 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+def _normalize_search_param(val: Optional[str]) -> Optional[str]:
+    if not val:
+        return val
+    import re
+    # Map hyundai/huyndai to the database spelling 'Huyndai'
+    val = re.sub(r'(?i)hyundai', 'Huyndai', val)
+    val = re.sub(r'(?i)huyndai', 'Huyndai', val)
+    # Map other brands to their exact database spelling case
+    val = re.sub(r'(?i)mazda', 'Mazda', val)
+    val = re.sub(r'(?i)madaz', 'Mazda', val)
+    val = re.sub(r'(?i)madza', 'Mazda', val)
+    val = re.sub(r'(?i)mazada', 'Mazda', val)
+    val = re.sub(r'(?i)mitsubishi', 'Mitsubishi', val)
+    val = re.sub(r'(?i)mitsu', 'Mitsubishi', val)
+    val = re.sub(r'(?i)porsche', 'Porsche', val)
+    val = re.sub(r'(?i)bmw', 'BMW', val)
+    val = re.sub(r'(?i)mercedes', 'Mercedes', val)
+    val = re.sub(r'(?i)mec', 'Mercedes', val)
+    return val
+
+
+def _diversify_cars(rows: list, limit: int = 10) -> list:
+    """
+    Trộn đều danh sách xe theo các hãng khác nhau bằng thuật toán Round-Robin.
+    Đảm bảo các hãng khác nhau đều được xuất hiện ngay ở các vị trí đầu tiên của danh sách thẻ,
+    tránh việc 1 hãng chiếm lĩnh toàn bộ đầu danh sách.
+    """
+    if not rows:
+        return []
+    
+    # Gom nhóm các dòng xe theo thương hiệu (branch_name)
+    groups = {}
+    for r in rows:
+        brand = r.get("branch_name") or "Other"
+        if brand not in groups:
+            groups[brand] = []
+        groups[brand].append(r)
+        
+    diversified = []
+    # Lấy lần lượt xe của từng thương hiệu xoay vòng (Round-Robin)
+    max_len = max(len(g) for g in groups.values()) if groups else 0
+    for i in range(max_len):
+        for brand in sorted(groups.keys()):
+            if i < len(groups[brand]):
+                diversified.append(groups[brand][i])
+                
+    return diversified[:limit]
+
+
 def _get_connection():
     return mysql.connector.connect(
-        host=os.getenv("MYSQL_HOST"),
-        port=int(os.getenv("MYSQL_PORT")),
-        user=os.getenv("MYSQL_USER"),
-        password=os.getenv("MYSQL_PASSWORD"),
-        database=os.getenv("MYSQL_DB"),
+        host=os.getenv("MYSQL_HOST", "localhost"),
+        port=int(os.getenv("MYSQL_PORT", 3306)),
+        user=os.getenv("MYSQL_USER", "root"),
+        password=os.getenv("MYSQL_PASSWORD", "12345678"),
+        database=os.getenv("MYSQL_DB", "catalog-ecommer-car"),
         charset="utf8mb4",
         connect_timeout=5,
     )
@@ -40,12 +89,27 @@ def get_all_cars(
     min_price: Optional[float | str] = None,
     max_price: Optional[float | str] = None,
 ) -> dict:
+    car_name = _normalize_search_param(car_name)
+    branch_name = _normalize_search_param(branch_name)
+
     conditions = ["c.is_used = 0"]
     params: list = []
 
     if car_name:
-        conditions.append("cm.name LIKE %s")
-        params.append(f"%{car_name}%")
+        import re
+        match = re.search(r'\b(20\d{2})\b', car_name)
+        if match:
+            year = match.group(1)
+            clean_name = car_name.replace(year, "").strip()
+            if clean_name:
+                conditions.append("(cm.name LIKE %s AND c.manufacturing_year = %s)")
+                params.extend([f"%{clean_name}%", year])
+            else:
+                conditions.append("c.manufacturing_year = %s")
+                params.append(year)
+        else:
+            conditions.append("cm.name LIKE %s")
+            params.append(f"%{car_name}%")
 
     if branch_name:
         conditions.append("cb.name LIKE %s")
@@ -59,10 +123,10 @@ def get_all_cars(
     if fuel_type:
         conditions.append("ts.fuel_type = %s")
         params.append(fuel_type.upper())
-    if min_price is not None:
+    if min_price is not None and min_price != "":
         conditions.append("c.price >= %s")
         params.append(float(min_price))
-    if max_price is not None:
+    if max_price is not None and max_price != "":
         conditions.append("c.price <= %s")
         params.append(float(max_price))
 
@@ -82,15 +146,17 @@ def get_all_cars(
             ts.transmission         AS transmission,
             ts.trim_level           AS trim_level,
             cb.name                 AS branch_name,
-            cat.name                AS category
+            cat.name                AS category,
+            ts.engine               AS engine,
+            (SELECT image FROM car_image WHERE car_id = c.id ORDER BY id ASC LIMIT 1) AS first_image
         FROM car c
         JOIN  car_model      cm  ON cm.id  = c.car_model_id
         LEFT JOIN car_branch     cb  ON cb.id  = cm.car_branch_id
         LEFT JOIN car_category   cat ON cat.id = cm.category_id
-        LEFT JOIN technical_spec ts  ON ts.id  = cm.technical_spec_id
+        LEFT JOIN technical_spec ts  ON ts.id  = c.technical_spec_id
         WHERE {' AND '.join(conditions)}
         ORDER BY c.price ASC
-        LIMIT 2
+        LIMIT 50
     """
 
     with _db() as cur:
@@ -100,11 +166,13 @@ def get_all_cars(
     if not rows:
         return {"status": "empty", "text": "Hiện tại showroom chưa có xe nào phù hợp.", "data": []}
 
+    rows = _diversify_cars(rows, limit=10)
+
     for r in rows:
         if r.get("price"):
             r["price_formatted"] = f"{int(r['price']):,} VNĐ"
 
-    lines = ["Dưới đây là một số xe đại diện phù hợp nhất:"]
+    lines = ["Dữ liệu thô từ database (AI hãy tự tạo câu trả lời tự nhiên, đa dạng, đừng copy nguyên văn dòng này):"]
     for r in rows:
         price_str  = r.get("price_formatted", "Liên hệ")
         body_str   = f" [{r['body_type']}]"    if r.get("body_type")   else ""
@@ -115,7 +183,7 @@ def get_all_cars(
             f"  • {r['car_name']} ({r['year']}){body_str}{fuel_str}{color_str}"
             f" — {price_str}{branch_str}"
         )
-    lines.append("\n(Mời anh/chị xem thêm chi tiết tất cả các xe tại website của showroom ạ!)")
+    lines.append("\n(AI nhớ nhắc khách xem thẻ sản phẩm (cards) bên dưới nhé)")
 
     return {"status": "ok", "text": "\n".join(lines), "data": rows}
 
@@ -124,6 +192,8 @@ def get_car_detail(
     car_name: Optional[str] = None,
     car_id: Optional[str] = None,
 ) -> dict:
+    car_name = _normalize_search_param(car_name)
+
     if not car_name and not car_id:
         return {"status": "error", "text": "Cần tên xe hoặc car_id.", "data": {}}
 
@@ -134,8 +204,20 @@ def get_car_detail(
         conditions.append("c.id = %s")
         params.append(car_id)
     else:
-        conditions.append("cm.name LIKE %s")
-        params.append(f"%{car_name}%")
+        import re
+        match = re.search(r'\b(20\d{2})\b', car_name)
+        if match:
+            year = match.group(1)
+            clean_name = car_name.replace(year, "").strip()
+            if clean_name:
+                conditions.append("(cm.name LIKE %s AND c.manufacturing_year = %s)")
+                params.extend([f"%{clean_name}%", year])
+            else:
+                conditions.append("c.manufacturing_year = %s")
+                params.append(year)
+        else:
+            conditions.append("cm.name LIKE %s")
+            params.append(f"%{car_name}%")
 
     sql = f"""
         SELECT
@@ -191,8 +273,8 @@ def get_car_detail(
         JOIN  car_model      cm  ON cm.id  = c.car_model_id
         LEFT JOIN car_branch     cb  ON cb.id  = cm.car_branch_id
         LEFT JOIN car_category   cat ON cat.id = cm.category_id
-        LEFT JOIN technical_spec ts  ON ts.id  = cm.technical_spec_id
-        LEFT JOIN equipment      eq  ON eq.id  = cm.equipment_id
+        LEFT JOIN technical_spec ts  ON ts.id  = c.technical_spec_id
+        LEFT JOIN equipment      eq  ON eq.id  = c.equipment_id
         WHERE {' AND '.join(conditions)}
         LIMIT 1
     """
@@ -274,12 +356,27 @@ def get_inventory(
     car_name: Optional[str] = None,
     branch_name: Optional[str] = None,
 ) -> dict:
+    car_name = _normalize_search_param(car_name)
+    branch_name = _normalize_search_param(branch_name)
+
     conditions = ["i.quantity > 0"]
     params: list = []
 
     if car_name:
-        conditions.append("cm.name LIKE %s")
-        params.append(f"%{car_name}%")
+        import re
+        match = re.search(r'\b(20\d{2})\b', car_name)
+        if match:
+            year = match.group(1)
+            clean_name = car_name.replace(year, "").strip()
+            if clean_name:
+                conditions.append("(cm.name LIKE %s AND c.manufacturing_year = %s)")
+                params.extend([f"%{clean_name}%", year])
+            else:
+                conditions.append("c.manufacturing_year = %s")
+                params.append(year)
+        else:
+            conditions.append("cm.name LIKE %s")
+            params.append(f"%{car_name}%")
     if branch_name:
         conditions.append("cb.name LIKE %s")
         params.append(f"%{branch_name}%")
@@ -290,6 +387,7 @@ def get_inventory(
             c.color              AS color,
             c.manufacturing_year AS year,
             c.price,
+            cm.thumbnail_image   AS thumbnail,
             i.quantity,
             ts.body_type         AS body_type,
             ts.fuel_type         AS fuel_type,
@@ -297,16 +395,18 @@ def get_inventory(
             sr.address,
             sr.phone,
             sr.zalo,
-            cb.name              AS branch_name
+            cb.name              AS branch_name,
+            ts.engine            AS engine,
+            (SELECT image FROM car_image WHERE car_id = c.id ORDER BY id ASC LIMIT 1) AS first_image
         FROM inventory i
         JOIN car        c   ON c.id   = i.car_id
         JOIN car_model  cm  ON cm.id  = c.car_model_id
-        LEFT JOIN technical_spec ts  ON ts.id  = cm.technical_spec_id
+        LEFT JOIN technical_spec ts  ON ts.id  = c.technical_spec_id
         LEFT JOIN car_branch     cb  ON cb.id  = cm.car_branch_id
         LEFT JOIN show_room      sr  ON sr.id  = i.show_room_id
         WHERE {' AND '.join(conditions)}
         ORDER BY i.quantity DESC
-        LIMIT 2
+        LIMIT 50
     """
 
     with _db() as cur:
@@ -317,11 +417,13 @@ def get_inventory(
         q = f"{car_name or ''} {branch_name or ''}".strip()
         return {"status": "empty", "text": f"Hiện không có xe '{q}' trong kho.", "data": []}
 
+    rows = _diversify_cars(rows, limit=10)
+
     for r in rows:
         if r.get("price"):
             r["price_formatted"] = f"{int(r['price']):,} VNĐ"
 
-    lines = ["Tồn kho hiện tại (hiển thị đại diện):"]
+    lines = ["Dữ liệu tồn kho từ database (AI hãy tự tạo câu trả lời tự nhiên, đa dạng):"]
     for r in rows:
         price_str  = r.get("price_formatted", "Liên hệ")
         color_str  = f" — {r['color']}"          if r.get("color")        else ""
@@ -332,7 +434,7 @@ def get_inventory(
             f"  • {r['car_name']} ({r['year']}){color_str}"
             f" — còn {r['quantity']} xe{sr_str} — {price_str}{phone_str}{zalo_str}"
         )
-    lines.append("\n(Mời anh/chị truy cập website để xem danh sách đầy đủ nhé!)")
+    lines.append("\n(AI nhớ nhắc khách xem thẻ sản phẩm (cards) bên dưới nhé)")
 
     return {"status": "ok", "text": "\n".join(lines), "data": rows}
 

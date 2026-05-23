@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from decimal import Decimal, ROUND_HALF_UP
 from typing import Literal
 
-from src.utils.db_utils import _get_connection
+from src.utils.db_utils import _get_connection, _normalize_search_param
 
 
 def get_car_and_calculate_rolling(car_name: str, address: str, quantity: int = 1):
@@ -12,15 +12,51 @@ def get_car_and_calculate_rolling(car_name: str, address: str, quantity: int = 1
     cursor = conn.cursor(dictionary=True)
 
     try:
-        query = """
-            SELECT cm.name as model_name, c.price as base_price, ts.fuel_type
+        import re
+        # Chuẩn hóa tên xe và sửa lỗi chính tả thương hiệu
+        car_name = _normalize_search_param(car_name)
+
+        # Trích xuất năm sản xuất nếu có trong câu hỏi (ví dụ: 2018)
+        year_match = re.search(r'\b(20\d{2})\b', car_name)
+        year_filter = None
+        if year_match:
+            year_filter = int(year_match.group(1))
+            # Loại bỏ năm ra khỏi tên xe để tìm kiếm model chính xác hơn
+            car_name = car_name.replace(year_match.group(0), "").strip()
+
+        words = car_name.split()
+        short_name = " ".join(words[:2]) if len(words) >= 2 else car_name
+
+        conditions = []
+        params = []
+
+        # Điều kiện tìm theo tên xe/model
+        conditions.append("(cm.name LIKE %s OR cm.name LIKE %s)")
+        params.extend([f"%{car_name}%", f"%{short_name}%"])
+
+        # Nếu có lọc theo năm, chèn thêm điều kiện sản xuất vào SQL
+        if year_filter:
+            conditions.append("c.manufacturing_year = %s")
+            params.append(year_filter)
+
+        query = f"""
+            SELECT 
+                c.id as car_id,
+                cm.name as model_name, 
+                c.price as base_price, 
+                ts.fuel_type,
+                c.manufacturing_year as year,
+                cm.thumbnail_image as thumbnail,
+                ts.engine,
+                (SELECT image FROM car_image WHERE car_id = c.id ORDER BY id ASC LIMIT 1) AS first_image
             FROM car_model cm
             JOIN car c ON c.car_model_id = cm.id
-            LEFT JOIN technical_spec ts ON ts.id = cm.technical_spec_id
-            WHERE cm.name LIKE %s AND c.is_used = 0
+            LEFT JOIN technical_spec ts ON ts.id = c.technical_spec_id
+            WHERE {" AND ".join(conditions)}
+            ORDER BY c.price ASC
             LIMIT 1
         """
-        cursor.execute(query, (f"%{car_name}%",))
+        cursor.execute(query, params)
         car = cursor.fetchone()
 
         if not car:
@@ -34,10 +70,15 @@ def get_car_and_calculate_rolling(car_name: str, address: str, quantity: int = 1
         )
 
         data = {
+            "car_id": car['car_id'],
             "car_name": car['model_name'],
             "price": int(car['base_price']),
             "price_formatted": result["unit_rolling_price"],
-            "rolling_price_detail": result
+            "rolling_price_detail": result,
+            "year": car['year'],
+            "thumbnail": car['thumbnail'],
+            "first_image": car['first_image'],
+            "engine": car['engine']
         }
 
         return result["summary"], data
@@ -58,9 +99,9 @@ _TAX_RATE_TABLE: dict[str, dict[str, Decimal]] = {
     },
     "HCM": {
         "ELECTRIC": Decimal("0.06"),
-        "GASOLINE": Decimal("0.10"),
-        "DIESEL":   Decimal("0.10"),
-        "HYBRID":   Decimal("0.08"),
+        "GASOLINE": Decimal("0.12"),
+        "DIESEL":   Decimal("0.12"),
+        "HYBRID":   Decimal("0.09"),
     },
     "DEFAULT": {
         "ELECTRIC": Decimal("0.06"),

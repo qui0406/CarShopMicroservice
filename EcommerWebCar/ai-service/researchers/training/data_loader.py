@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import joblib
 import logging
-from sklearn.preprocessing import LabelEncoder, MinMaxScaler
+from sklearn.preprocessing import LabelEncoder, MinMaxScaler, OneHotEncoder
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 CURRENT_DIR = os.path.abspath(__file__)
@@ -22,7 +22,7 @@ os.makedirs(MODEL_SAVE_DIR, exist_ok=True)
 logger = logging.getLogger(__name__)
 
 CAT_COLUMNS = [
-    'model', 'version_extracted', 'gearbox', 'fuel',
+    '_brand', 'model', 'version_extracted', 'gearbox', 'fuel',
     'body_type_clean', 'origin_clean', 'exterior_color', 'drivetrain_clean'
 ]
 
@@ -33,7 +33,6 @@ CURRENT_YEAR = 2025
 def _engineer_features(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     df["car_age"] = (CURRENT_YEAR - df["year"]).clip(lower=0)
-    df["log_odo"] = np.log1p(df["odo"].clip(lower=0))
     return df
 
 
@@ -55,20 +54,12 @@ def _load_images(df: pd.DataFrame) -> np.ndarray:
 
 
 def _encode_metadata(df: pd.DataFrame,
-                     encoders: dict,
+                     ohe: OneHotEncoder,
                      scaler: MinMaxScaler) -> np.ndarray:
     encoded_features = []
 
-    for col in CAT_COLUMNS:
-        le: LabelEncoder = encoders[col]
-        known = set(le.classes_)
-        safe = df[col].astype(str).apply(
-            lambda v: v if v in known else le.classes_[0]
-        )
-        encoded = le.transform(safe)
-        max_val = len(le.classes_) - 1
-        norm    = encoded / (max_val + 1e-7) if max_val > 0 else encoded.astype(float)
-        encoded_features.append(norm.reshape(-1, 1))
+    # OneHotEncoding categorical columns
+    cat_encoded = ohe.transform(df[CAT_COLUMNS].astype(str))
 
     encoded_features.append((df["is_single_owner"].astype(int).values / 1.0).reshape(-1, 1))
     encoded_features.append((df["seats_clean"].values / 8.0).reshape(-1, 1))
@@ -77,10 +68,10 @@ def _encode_metadata(df: pd.DataFrame,
     encoded_features.append((df["engine_capacity"].values / 5.0).reshape(-1, 1))
     encoded_features.append((df["airbags_clean"].values / 10.0).reshape(-1, 1))
 
-    numeric = df[["year", "odo", "car_age", "log_odo"]].values
+    numeric = df[["year", "odo", "car_age"]].values
     scaled  = scaler.transform(numeric)
 
-    return np.hstack([scaled] + encoded_features).astype("float32")
+    return np.hstack([scaled, cat_encoded] + encoded_features).astype("float32")
 
 
 def _vectorize_text(df: pd.DataFrame, tfidf: TfidfVectorizer) -> np.ndarray:
@@ -105,23 +96,20 @@ def load_multimodal_data():
         f"  median={df_train['price_million'].median():.0f}"
     )
 
-    encoders: dict[str, LabelEncoder] = {}
-    for col in CAT_COLUMNS:
-        le = LabelEncoder()
-        le.fit(df_train[col].astype(str))
-        encoders[col] = le
-        joblib.dump(le, os.path.join(MODEL_SAVE_DIR, f"le_{col}.pkl"))
+    ohe = OneHotEncoder(sparse_output=False, handle_unknown='ignore')
+    ohe.fit(df_train[CAT_COLUMNS].astype(str))
+    joblib.dump(ohe, os.path.join(MODEL_SAVE_DIR, "ohe_categorical.pkl"))
 
     scaler = MinMaxScaler()
-    scaler.fit(df_train[["year", "odo", "car_age", "log_odo"]].values)
+    scaler.fit(df_train[["year", "odo", "car_age"]].values)
     joblib.dump(scaler, os.path.join(MODEL_SAVE_DIR, "scaler_numeric.pkl"))
 
     tfidf = TfidfVectorizer(max_features=100)
     tfidf.fit(df_train["description"].fillna("xe đẹp nguyên bản"))
     joblib.dump(tfidf, os.path.join(MODEL_SAVE_DIR, "tfidf_vectorizer.pkl"))
 
-    meta_train = _encode_metadata(df_train, encoders, scaler)
-    meta_val   = _encode_metadata(df_val,   encoders, scaler)
+    meta_train = _encode_metadata(df_train, ohe, scaler)
+    meta_val   = _encode_metadata(df_val,   ohe, scaler)
 
     text_train = _vectorize_text(df_train, tfidf)
     text_val   = _vectorize_text(df_val,   tfidf)

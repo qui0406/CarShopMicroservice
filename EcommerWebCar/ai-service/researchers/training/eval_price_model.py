@@ -25,6 +25,7 @@ OUT_DIR = os.path.join(CURRENT_DIR, "evaluation_output")
 os.makedirs(OUT_DIR, exist_ok=True)
 
 CAT_COLUMNS = [
+    "_brand",
     "model",
     "version_extracted",
     "gearbox",
@@ -32,6 +33,7 @@ CAT_COLUMNS = [
     "body_type_clean",
     "origin_clean",
     "exterior_color",
+    "drivetrain_clean",
 ]
 
 

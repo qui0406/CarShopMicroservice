@@ -7,34 +7,34 @@ import json
 import logging
 import cv2
 from PIL import Image
-from groq import Groq
+from openai import OpenAI
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-_GROQ_API_KEY = os.getenv("GROQ_API_KEY")
+_OPENAI_API_KEY = os.getenv("OPEN_API_KEY")
 
-# _DAMAGE_PROMPT = """Bạn là chuyên gia thẩm định ngoại thất xe hơi.
-# Hãy quan sát kỹ hình ảnh và phát hiện các vết trầy xước (scratches), móp méo (dents) hoặc hư hại ngoại thất khác.
-# Trả về DUY NHẤT 1 chuỗi JSON theo cấu trúc sau:
-# {
-#   "damages": [
-#     {
-#       "item_key": "Mã lỗi (Chỉ chọn 1 trong: EXT_01, EXT_02, EXT_03, EXT_04)",
-#       "label": "Tên lỗi tiếng Việt",
-#       "confidence": 0.95
-#     }
-#   ]
-# }
-#
-# Quy ước mã lỗi:
-# - EXT_01: Trầy xước nhẹ (vết xước dăm, xước mờ)
-# - EXT_02: Trầy xước sâu (xước vào lớp sơn trong, xước lớn, tróc sơn)
-# - EXT_03: Móp méo thân vỏ (biến dạng bề mặt, lõm)
-# - EXT_04: Nứt/vỡ đèn hoặc kính
-#
-# Nếu không thấy bất kỳ lỗi nào, trả về: {"damages": []}
-# """
+_DAMAGE_PROMPT = """Bạn là chuyên gia thẩm định ngoại thất xe hơi.
+Hãy quan sát kỹ hình ảnh và phát hiện các vết trầy xước (scratches), móp méo (dents) hoặc hư hại ngoại thất khác.
+Trả về DUY NHẤT 1 chuỗi JSON theo cấu trúc sau:
+{
+  "damages": [
+    {
+      "item_key": "Mã lỗi (Chỉ chọn 1 trong: EXT_01, EXT_02, EXT_03, EXT_04)",
+      "label": "Tên lỗi tiếng Việt",
+      "confidence": 0.95
+    }
+  ]
+}
+
+Quy ước mã lỗi:
+- EXT_01: Trầy xước nhẹ (vết xước dăm, xước mờ)
+- EXT_02: Trầy xước sâu (xước vào lớp sơn trong, xước lớn, tróc sơn)
+- EXT_03: Móp méo thân vỏ (biến dạng bề mặt, lõm)
+- EXT_04: Nứt/vỡ đèn hoặc kính
+
+Nếu không thấy bất kỳ lỗi nào, trả về: {"damages": []}
+"""
 
 def detect_damage(image_bgr: np.ndarray) -> tuple[np.ndarray, list[dict]]:
     damages = []
@@ -52,14 +52,14 @@ def detect_damage(image_bgr: np.ndarray) -> tuple[np.ndarray, list[dict]]:
         pil_img.save(buffer, format="JPEG", quality=80)
         base64_str = base64.b64encode(buffer.getvalue()).decode("utf-8")
 
-        if not _GROQ_API_KEY:
-            logger.warning("GROQ_API_KEY missing. Skipping AI damage detection.")
+        if not _OPENAI_API_KEY:
+            logger.warning("OPEN_API_KEY missing. Skipping AI damage detection.")
             return image_bgr, damages
 
-        client = Groq(api_key=_GROQ_API_KEY)
+        client = OpenAI(api_key=_OPENAI_API_KEY)
         
         resp = client.chat.completions.create(
-            model="meta-llama/llama-4-scout-17b-16e-instruct", # Giống như car_classifier.py
+            model="gpt-4o",
             messages=[{
                 "role": "user",
                 "content": [

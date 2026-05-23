@@ -2,12 +2,18 @@ import sys
 import os
 import logging
 import numpy as np
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(ROOT_DIR)
 
 import tensorflow as tf
+try:
+    tf.config.set_visible_devices([], 'GPU')
+except Exception:
+    pass
 from tensorflow.keras.optimizers import Adam
 from multimodal_model import create_multimodal_model
 from data_loader import load_multimodal_data
@@ -44,13 +50,14 @@ def train_model():
         num_metadata_features=meta_train.shape[1]
     )
 
+    # Sử dụng 'mse' loss thay cho Huber Loss để loại bỏ hoàn toàn penaly hạn chế độ dốc
     model.compile(
-        optimizer=Adam(learning_rate=3e-4),
-        loss=tf.keras.losses.Huber(delta=0.5),
+        optimizer=Adam(learning_rate=1e-3),
+        loss='mse',
         metrics=['mae']
     )
 
-    EPOCHS     = 120
+    EPOCHS     = 60
     BATCH_SIZE = 16
 
     checkpoint = tf.keras.callbacks.ModelCheckpoint(
@@ -61,9 +68,10 @@ def train_model():
         verbose=0
     )
 
+    # Đặt patience ngắn hơn (12) để dừng sớm khi hội tụ nhanh
     early_stopping = tf.keras.callbacks.EarlyStopping(
         monitor='val_mae',
-        patience=25,
+        patience=12,
         restore_best_weights=True,
         verbose=1,
         mode='min',
@@ -72,7 +80,7 @@ def train_model():
     reduce_lr = tf.keras.callbacks.ReduceLROnPlateau(
         monitor='val_mae',
         factor=0.5,
-        patience=10,
+        patience=5,
         min_lr=1e-6,
         mode='min',
         verbose=1
@@ -126,7 +134,7 @@ if __name__ == "__main__":
         plt.subplot(1, 2, 2)
         plt.plot(epochs_range, loss,     label='Train Loss')
         plt.plot(epochs_range, val_loss, label='Val Loss')
-        plt.title('Huber Loss (log-space)')
+        plt.title('MSE Loss (log-space)')
         plt.xlabel('Epoch')
         plt.ylabel('Loss')
         plt.legend()
@@ -136,4 +144,3 @@ if __name__ == "__main__":
         plot_path = os.path.join(ROOT_DIR, "model", "training_curve.png")
         plt.savefig(plot_path, dpi=150)
         print(f"Biểu đồ lưu tại: {plot_path}")
-        plt.show()

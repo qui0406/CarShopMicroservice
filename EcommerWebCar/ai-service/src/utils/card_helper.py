@@ -2,7 +2,7 @@ from typing import Any
 
 
 def normalize_cards(data: Any, intent: str) -> list[dict]:
-    if not data:
+    if not data or intent == "rolling_price":
         return []
     if isinstance(data, dict):
         return [_build_card(data, intent)]
@@ -19,6 +19,8 @@ def _build_card(item: dict, intent: str) -> dict:
         "price":           _to_int(item.get("price")),
         "price_formatted": item.get("price_formatted", "Lien he"),
         "year":            item.get("year") or item.get("manufacturing_year"),
+        "image":           item.get("first_image") or item.get("thumbnail", ""),
+        "engine":          item.get("engine", ""),
     }
 
     if intent == "list_cars":

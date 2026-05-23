@@ -1,16 +1,16 @@
 {
   "=== THÔNG TIN TẬP DỮ LIỆU ===": "",
-  "n_total": 1541,
-  "n_train": 1232,
-  "n_val": 154,
-  "n_test": 155,
+  "n_total": 7196,
+  "n_train": 5756,
+  "n_val": 720,
+  "n_test": 720,
   "price_range_trieu": {
-    "min": 55.0,
-    "max": 975.0,
-    "median": 485.0
+    "min": 53.0,
+    "max": 1630.0,
+    "median": 472.5
   },
   "=== THÔNG SỐ MODEL ===": "",
-  "architecture": "EfficientNetB0 (frozen) + Metadata (16 feat) + TF-IDF (100 feat)",
+  "architecture": "EfficientNetB0 (frozen) + Metadata (17 feat) + TF-IDF (100 feat)",
   "target": "log1p(price_million) — học trong log-space",
   "optimizer": "Adam lr=3e-4",
   "loss_fn": "Huber(delta=0.5)",
@@ -21,10 +21,10 @@
   "batch_size": 16,
   "NOTE_train_val_gap": "Train MAE >> Val MAE là hiện tượng bình thường với Dropout+BatchNorm. Dropout inflate Train MAE; Inference mode cho Val MAE thực. Đây KHÔNG phải overfitting hay data leakage.",
   "=== KẾT QUẢ ĐÁNH GIÁ (tập Test) ===": "",
-  "MAE_trieu_VND": 77.94,
-  "RMSE_trieu_VND": 102.84,
-  "MAPE_percent": 17.44,
-  "R2_score": 0.6718,
-  "Ti_le_du_doan_sai_so_under_10pct": 39.35,
-  "Ti_le_du_doan_sai_so_under_20pct": 71.61
+  "MAE_trieu_VND": 74.95,
+  "RMSE_trieu_VND": 107.74,
+  "MAPE_percent": 15.75,
+  "R2_score": 0.8191,
+  "Ti_le_du_doan_sai_so_under_10pct": 42.36,
+  "Ti_le_du_doan_sai_so_under_20pct": 71.81
 }

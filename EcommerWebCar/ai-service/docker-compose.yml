@@ -1,6 +1,6 @@
 services:
   redis:
-    image: redis:7-alpine # Dùng bản stack để hỗ trợ tìm kiếm Vector (Semantic Cache)
+    image: redis/redis-stack:latest # Dùng bản stack để hỗ trợ tìm kiếm Vector (Semantic Cache)
     container_name: car_chatbot_redis
     ports:
       - "6379:6379" # Cổng mặc định của Redis
@@ -8,4 +8,3 @@ services:
     volumes:
       - ./redis_data:/data
     restart: always
-    command: redis-server --save "" --stop-writes-on-bgsave-error no

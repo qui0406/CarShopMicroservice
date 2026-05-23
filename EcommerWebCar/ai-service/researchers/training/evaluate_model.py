@@ -1,5 +1,15 @@
 import os
 import sys
+
+# Disable GPU and import TensorFlow FIRST to avoid library initialization deadlocks
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+os.environ["TF_CPP_MIN_LOG_LEVEL"] = "3"
+import tensorflow as tf
+try:
+    tf.config.set_visible_devices([], 'GPU')
+except Exception:
+    pass
+
 import json
 import numpy as np
 import pandas as pd
@@ -10,7 +20,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
-from sklearn.preprocessing import LabelEncoder, MinMaxScaler
+from sklearn.preprocessing import LabelEncoder, MinMaxScaler, OneHotEncoder
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
@@ -29,7 +39,7 @@ OUT_DIR    = os.path.join(CURRENT_DIR, "evaluation_output")
 os.makedirs(OUT_DIR, exist_ok=True)
 
 CAT_COLUMNS = [
-    "model", "version_extracted", "gearbox", "fuel",
+    "_brand", "model", "version_extracted", "gearbox", "fuel",
     "body_type_clean", "origin_clean", "exterior_color", "drivetrain_clean"
 ]
 CURRENT_YEAR = 2025
@@ -38,7 +48,6 @@ CURRENT_YEAR = 2025
 def engineer(df: pd.DataFrame) -> pd.DataFrame:
     df = df.copy()
     df["car_age"] = (CURRENT_YEAR - df["year"]).clip(lower=0)
-    df["log_odo"] = np.log1p(df["odo"].clip(lower=0))
     return df
 
 
@@ -65,27 +74,21 @@ def load_images(df: pd.DataFrame) -> np.ndarray:
     return imgs
 
 
-def encode_metadata(df, encoders, scaler):
-    parts = []
-    for col in CAT_COLUMNS:
-        le: LabelEncoder = encoders[col]
-        known = set(le.classes_)
-        safe  = df[col].astype(str).apply(lambda v: v if v in known else le.classes_[0])
-        enc   = le.transform(safe)
-        mx    = len(le.classes_) - 1
-        norm  = enc / (mx + 1e-7) if mx > 0 else enc.astype(float)
-        parts.append(norm.reshape(-1, 1))
+def encode_metadata(df, ohe, scaler):
+    encoded_features = []
+    
+    cat_encoded = ohe.transform(df[CAT_COLUMNS].astype(str))
 
-    parts.append((df["is_single_owner"].astype(int).values / 1.0).reshape(-1, 1))
-    parts.append((df["seats_clean"].values / 8.0).reshape(-1, 1))
+    encoded_features.append((df["is_single_owner"].astype(int).values / 1.0).reshape(-1, 1))
+    encoded_features.append((df["seats_clean"].values / 8.0).reshape(-1, 1))
     
     # New features
-    parts.append((df["engine_capacity"].values / 5.0).reshape(-1, 1))
-    parts.append((df["airbags_clean"].values / 10.0).reshape(-1, 1))
+    encoded_features.append((df["engine_capacity"].values / 5.0).reshape(-1, 1))
+    encoded_features.append((df["airbags_clean"].values / 10.0).reshape(-1, 1))
 
-    numeric = df[["year", "odo", "car_age", "log_odo"]].values
+    numeric = df[["year", "odo", "car_age"]].values
     scaled  = scaler.transform(numeric)
-    return np.hstack([scaled] + parts).astype("float32")
+    return np.hstack([scaled, cat_encoded] + encoded_features).astype("float32")
 
 
 def compute_metrics(y_true, y_pred):
@@ -172,7 +175,7 @@ def plot_pct_error_by_bucket(y_true, y_pred, path):
 
 
 def main():
-    import tensorflow as tf
+    # Enforce check on files
 
     # Kiểm tra file
     for p in (TRAIN_CSV, VAL_CSV, TEST_CSV, MODEL_PATH):
@@ -189,20 +192,17 @@ def main():
     log.info(f"Kích thước: Train={len(df_train)} | Val={len(df_val)} | Test={len(df_test)}")
 
     log.info("Fit encoders/scaler trên train...")
-    encoders = {}
-    for col in CAT_COLUMNS:
-        le = LabelEncoder()
-        le.fit(df_train[col].astype(str))
-        encoders[col] = le
+    transformers_dir = os.path.join(ROOT_DIR, "transformers")
+    ohe = joblib.load(os.path.join(transformers_dir, "ohe_categorical.pkl"))
+    scaler = joblib.load(os.path.join(transformers_dir, "scaler_numeric.pkl"))
 
-    scaler = MinMaxScaler()
-    scaler.fit(df_train[["year", "odo", "car_age", "log_odo"]].values)
+    print("Encoding metadata...")
+    meta_test = encode_metadata(df_test, ohe, scaler)
 
     tfidf = TfidfVectorizer(max_features=100)
     tfidf.fit(df_train["description"].fillna("xe đẹp nguyên bản"))
 
     log.info("Transform features...")
-    meta_test = encode_metadata(df_test, encoders, scaler)
     text_test = tfidf.transform(df_test["description"].fillna("xe đẹp nguyên bản")).toarray().astype("float32")
 
     log.info(f"Meta shape: {meta_test.shape} | Text shape: {text_test.shape}")
@@ -214,7 +214,7 @@ def main():
     model = tf.keras.models.load_model(MODEL_PATH)
     log.info("Model loaded!")
 
-    pred_log = model.predict([img_test, meta_test, text_test], verbose=1).reshape(-1)
+    pred_log = model.predict([img_test, meta_test, text_test], batch_size=8, verbose=0).reshape(-1)
 
     y_pred_million = np.expm1(pred_log)
     y_true_million = df_test["price_million"].values.astype("float64")
@@ -234,7 +234,7 @@ def main():
             "median": float(df_test["price_million"].median()),
         },
         "=== THÔNG SỐ MODEL ===": "",
-        "architecture": "EfficientNetB0 (frozen) + Metadata (16 feat) + TF-IDF (100 feat)",
+        "architecture": "EfficientNetB0 (frozen) + Metadata (17 feat) + TF-IDF (100 feat)",
         "target": "log1p(price_million) — học trong log-space",
         "optimizer": "Adam lr=3e-4",
         "loss_fn": "Huber(delta=0.5)",
@@ -253,7 +253,7 @@ def main():
     }
 
     print("\n" + "="*60)
-    print("      KẾT QUẢ ĐÁNH GIÁ MÔ HÌNH DỰ ĐOÁN GIÁ XE MAZDA")
+    print("      KẾT QUẢ ĐÁNH GIÁ MÔ HÌNH DỰ ĐOÁN GIÁ XE CŨ")
     print("="*60)
     print(f"   Tổng mẫu       : {n_total:,}")
     print(f"   Train           : {len(df_train):,} ({len(df_train)/n_total*100:.0f}%)")

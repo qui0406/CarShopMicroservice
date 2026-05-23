@@ -1,6 +1,6 @@
 import os
 from langchain_classic.agents import AgentExecutor, create_tool_calling_agent
-from langchain_groq import ChatGroq
+from langchain_openai import ChatOpenAI
 from langchain_core.tools import StructuredTool
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from pydantic import BaseModel, Field
@@ -61,10 +61,10 @@ class LoanFinanceInput(BaseModel):
 
 
 def get_car_agent():
-    llm = ChatGroq(
-        model_name="llama-3.3-70b-versatile",
+    llm = ChatOpenAI(
+        model_name="gpt-4o-mini",
         temperature=0,
-        groq_api_key=os.getenv("GROQ_API_KEY"),
+        api_key=os.getenv("OPEN_API_KEY"),
         max_tokens=1000,
     )
 
@@ -147,14 +147,13 @@ def get_car_agent():
             func=mysql_query,
             name="MySQL_Query_Tool",
             description=(
-                "Truy van du lieu THUC TE tu database showroom. "
-                "BAT BUOC dung khi khach hoi:\n"
-                "  - 'Showroom co xe gi?' -> intent='list_cars'\n"
-                "  - 'Con xe X khong?' -> intent='inventory'\n"
-                "  - 'Thong so/gia xe X?' -> intent='car_detail'\n"
-                "  - 'Dia chi/SDT?' -> intent='showroom_info'\n"
-                "  - 'Dinh gia xe cu' -> intent='appraisal'\n"
-                "KHONG dung cho: so sanh xe, FAQ, quy trinh mua."
+                "Truy van du lieu THUC TE tu database showroom de hien thi the san pham (cards) cho khach. "
+                "BAT BUOC dung khi:\n"
+                "  - Khach tim xe theo tieu chi (gia, ten xe, loai xe...) -> intent='list_cars'\n"
+                "  - Khach hoi chi tiet 1 xe cu the -> intent='car_detail'\n"
+                "  - Ban muon de xuat hoac hien thi mot mau xe cu the cho khach sau khi da tim tren FAQ.\n"
+                "  - Kiem tra ton kho -> intent='inventory'\n"
+                "  - Tra cuu dinh gia xe cu -> intent='appraisal'"
             ),
             args_schema=MySQLQueryInput,
             return_direct=False,
@@ -163,9 +162,9 @@ def get_car_agent():
             func=car_faq_search,
             name="Car_FAQ_Knowledge",
             description=(
-                "Tim kiem trong tai lieu FAQ noi bo (.md). "
-                "Dung khi khach hoi: so sanh xe, quy trinh mua, "
-                "bao hanh, cau hoi thuong gap, tu van chon xe."
+                "Tim kiem trong tai lieu FAQ noi bo. "
+                "Dung khi khach hoi so sanh xe, quy trinh mua, bao hanh, hoac hoi y kien tu van chung chung. "
+                "QUAN TRONG: Neu sau khi tim FAQ, ban quyet dinh de xuat 1 dong xe cu the (VD: Hyundai Creta), BAN PHAI goi tiep tool MySQL_Query_Tool de lay the san pham (cards) tu database ra cho khach xem!"
             ),
             args_schema=CarFAQInput,
             return_direct=False,
@@ -183,26 +182,11 @@ def get_car_agent():
     ]
 
 
+    from src.utils.prompt_loader import load_prompt
+    system_prompt_content = load_prompt("agent_system_prompt.txt")
+
     prompt = ChatPromptTemplate.from_messages([
-        ("system", """Bạn là Chuyên viên Tư vấn cấp cao của Showroom Ô tô, tên là 'Em'.
-Hãy trò chuyện TỰ NHIÊN, THÔNG MINH và NHIỆT TÌNH. Xưng "em", gọi khách là "anh/chi".
-
-MỤC TIÊU:
-1. Giải đáp chính xác thắc mắc của khách hàng dựa trên dữ liệu thực tế.
-2. Nếu khách thắc mắc "tại sao giá cao", "chi tiết thế nào" -> Hãy phân tích kỹ các thành phần (thuế, phí, trang bị) từ kết quả của tool để giải thích cho khách hiểu, đừng chỉ lặp lại con số tổng.
-3. Nếu khách có vẻ không hài lòng hoặc ngạc nhiên về giá -> Hãy kiên nhẫn, lịch sự giải thích đây là các chi phí bắt buộc theo quy định nhà nước (đối với giá lăn bánh) hoặc giá trị tương xứng với tình trạng xe.
-
-NGUYÊN TẮC TRUY VẤN (MySQL_Query_Tool):
-- 'list_cars': Dùng khi khách muốn xem danh sách xe theo tiêu chí (giá, loại xe, tên xe). 
-- 'car_detail': Dùng khi khách hỏi chi tiết CỤ THỂ 1 chiếc xe (trang bị, thông số, ảnh).
-- Luôn ưu tiên điền 'car_name' nếu khách nhắc tới một dòng xe cụ thể để lọc chính xác nhất.
-- 1 tỷ = 1000000000, 500 triệu = 500000000.
-
-NGUYÊN TẮC TRẢ LỜI:
-1. TRẢ LỜI ĐÚNG TRỌNG TÂM: Khách hỏi gì trả lời nấy. Nếu khách hỏi "tại sao", hãy giải thích lý do.
-2. KHÔNG COPY-PASTE TOÀN BỘ TOOL OUTPUT: Hãy tóm tắt lại một cách thông minh, dễ hiểu. Đối với danh sách xe, chỉ nêu các xe nổi bật nhất.
-3. TÔNG GIỌNG: Chuyên nghiệp nhưng gần gũi. Tránh trả lời như robot (ví dụ: không lặp đi lặp lại câu "Anh/chị muốn mua xe này không?").
-4. CÂU HỎI GỢI MỞ: Chỉ đặt câu hỏi ở cuối nếu thực sự cần thêm thông tin để tư vấn tiếp. Đừng ép buộc mỗi câu đều phải có câu hỏi."""),
+        ("system", system_prompt_content),
         MessagesPlaceholder(variable_name="chat_history"),
         ("human", "{input}"),
         MessagesPlaceholder(variable_name="agent_scratchpad"),
@@ -217,6 +201,6 @@ NGUYÊN TẮC TRẢ LỜI:
         max_iterations=6,
         max_execution_time=30,
         handle_parsing_errors=True,
-        early_stopping_method="force_robot",
+        early_stopping_method="force",
         return_intermediate_steps=False,
     )

@@ -1,13 +1,22 @@
 import os
 
-os.environ["TF_USE_LEGACY_KERAS"]               = "0"
+os.environ["CUDA_VISIBLE_DEVICES"]               = "-1"
+os.environ["TF_CPP_MIN_LOG_LEVEL"]               = "3"
+os.environ["TF_USE_LEGACY_KERAS"]                = "0"
 os.environ["TRANSFORMERS_NO_ADVISORY_WARNINGS"]  = "1"
 os.environ["TOKENIZERS_PARALLELISM"]             = "false"
 
+import tensorflow as tf
+try:
+    tf.config.set_visible_devices([], 'GPU')
+except Exception:
+    pass
+
+import json
 import re
 import ssl
 import uvicorn
-
+import numpy as np
 from fastapi.responses import JSONResponse
 from contextlib import asynccontextmanager
 from pydantic import BaseModel
@@ -20,8 +29,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from langchain_core.globals import set_llm_cache
 from langchain_redis import RedisSemanticCache
+from langchain_openai import ChatOpenAI
 from langchain_community.chat_message_histories import RedisChatMessageHistory
-from langchain_google_genai import ChatGoogleGenerativeAI
 
 from src.core.agent import get_car_agent
 from src.core.rag_engine import RAGEngine
@@ -30,12 +39,14 @@ from src.utils.logger import get_logger
 from src.utils.analysis import analyze_sentiment
 from src.utils.db_utils import get_inventory, get_last_result, reset_last_result
 from src.utils.card_helper import normalize_cards
+from src.utils.intent_classifier import classify_intent_local
 from src.services.car_classifier import identify_car_from_bytes
 from src.services.image_validator import is_valid_car_image
 from src.services.price_service import preprocess_image, preprocess_tabular, preprocess_text, predict_price
 from src.services.damage_detector import detect_damage
 from src.services.model_loader import load_all, is_ready
 from src.services.vision_helpers import get_penalty, to_base64
+from src.services.mazda_price_lookup import lookup_mazda_price, get_model_info
 
 import py_eureka_client.eureka_client as eureka_client
 
@@ -52,9 +63,9 @@ if REDIS_URL:
 
 load_all()
 
-vision_llm = ChatGoogleGenerativeAI(
-    model="gemini-2.5-pro",
-    google_api_key=os.getenv("GOOGLE_API_KEY"),
+vision_llm = ChatOpenAI(
+    model="gpt-4o",
+    api_key=os.getenv("OPEN_API_KEY"),
     temperature=0,
 )
 
@@ -147,6 +158,34 @@ def chat_endpoint(request: ChatRequest):
     reset_last_result()
 
     try:
+        # Gọi bộ phân loại Intent chạy local trước để chặn spam/ngoài lề, tiết kiệm chi phí tuyệt đối
+        is_off_topic, category = classify_intent_local(request.message)
+        if is_off_topic:
+            refusal_reply = (
+                "Dạ, em là trợ lý tư vấn của Showroom CarShop. Em chỉ có thể hỗ trợ "
+                "anh/chị các thông tin liên quan đến các dòng xe, giá lăn bánh, dịch vụ "
+                "và thủ tục mua bán tại showroom thôi ạ. Anh/chị có muốn tham khảo "
+                "dòng xe nào đang có sẵn tại showroom bên em không ạ?"
+            )
+            # Đồng bộ lịch sử trò chuyện cục bộ vào Redis
+            history = RedisChatMessageHistory(
+                session_id=request.session_id,
+                url=REDIS_URL,
+                ttl=3600,
+            )
+            history.add_user_message(request.message)
+            history.add_ai_message(refusal_reply)
+            
+            logger.info(f"[LOCAL_INTENT_CLASSIFIER] Blocked off-topic query ({category}) from session {request.session_id}")
+            return {
+                "reply":      refusal_reply,
+                "session_id": request.session_id,
+                "sentiment":  "NEUTRAL",
+                "alert":      False,
+                "cards":      [],
+                "intent":     "OFF_TOPIC_BLOCKED",
+            }
+
         history = RedisChatMessageHistory(
             session_id=request.session_id,
             url=REDIS_URL,
@@ -278,6 +317,7 @@ async def identify_car_pro(file: UploadFile = File(...)):
 
 @app.post("/predict-price")
 async def predict_price_endpoint(
+    brand_name: Optional[str] = Form("Mazda"),
     model_name: str = Form(...),
     trim_name: str = Form(...),
     year: int = Form(...),
@@ -303,21 +343,25 @@ async def predict_price_endpoint(
     if not files or len(files) == 0:
         return {"success": False, "error": "Cần ít nhất 1 ảnh."}
 
-    first_bytes = await files[0].read()
-    temp_path   = f"_temp_{files[0].filename}"
-    with open(temp_path, "wb") as f:
-        f.write(first_bytes)
+    logger.info("Reading images...")
+    img_list = []
+    for file in files:
+        file_bytes = await file.read()
+        _, img_in = preprocess_image(file_bytes)
+        if img_in is not None:
+            img_list.append(img_in)
+            
+    if not img_list:
+        logger.warning("No valid images found.")
+        return {"success": False, "error": "Không đọc được ảnh nào."}
+        
+    img_in_batch = np.vstack(img_list)
+    logger.info(f"img_in_batch shape: {img_in_batch.shape}")
 
     try:
-        is_car, label, conf = is_valid_car_image(temp_path)
-        if not is_car:
-            return {"success": False, "error": "Ảnh không phải xe hơi hoặc quá mờ."}
-
-        img_bgr_main, img_in = preprocess_image(first_bytes)
-        if img_in is None:
-            return {"success": False, "error": "Không đọc được ảnh."}
-
+        logger.info("Preprocessing tabular data...")
         meta_in, full_name = preprocess_tabular(
+            brand_name=brand_name,
             model_name=model_name,
             trim_name=trim_name,
             year=year,
@@ -336,90 +380,68 @@ async def predict_price_endpoint(
 
         service_history_bool = str(service_history).lower() in ("true", "1", "yes")
 
-        text_in   = preprocess_text(full_name, year, origin, owner_count, service_history_bool, description)
-        raw_price = round(predict_price(img_in, meta_in, text_in), 2)
+        logger.info("Preprocessing text data...")
+        text_in = preprocess_text(full_name, year, origin, owner_count, service_history_bool, description)
 
-        declared_keys  = extract_faults_from_description(description)
-        processed_keys = set()
+        logger.info("Calling predict_price one by one...")
+        preds = []
+        for i in range(len(img_list)):
+            img = img_in_batch[i:i+1] # shape (1, 224, 224, 3)
+            p = predict_price(img, meta_in, text_in)
+            preds.append(p)
+            logger.info(f"Image {i+1} prediction: {p}")
+            
+        raw_price_ai = float(np.mean(preds))
+        
+        # Hệ số điều chỉnh thị trường: 1.0 (Không cộng thêm biên độ thương lượng)
+        market_multiplier = 1.0 
+        raw_price = round(raw_price_ai * market_multiplier, 2)
+        
+        logger.info(f"AI raw: {raw_price_ai:.2f}, Final (with 1.0 buffer): {raw_price}")
+
+        _, _ = lookup_mazda_price(model_name, year, trim_name)
+        model_info = get_model_info(model_name, year)
+        ref_note = ""
+        # ──────────────────────────────────────────────────────────────────────
+
         total_penalty  = 0.0
         deduction_list = []
-        processed_images = []
-
-        for key in declared_keys:
-            if key in processed_keys:
-                continue
-            processed_keys.add(key)
-            amt = get_penalty(key)
-            total_penalty += amt
+        
+        desc_lower = description.lower()
+        if any(kw in desc_lower for kw in ["xe cty", "công ty", "taxi", "dịch vụ", "kinh doanh"]):
+            penalty = round(raw_price * 0.15, 2)
+            total_penalty += penalty
             deduction_list.append({
-                "category": "DECLARED",
-                "label":    f"Người dùng khai báo: {key}",
-                "key":      key,
-                "amount":   amt,
-                "source":   "description",
+                "label": "Lịch sử dịch vụ/công ty (Hao mòn cao)",
+                "amount": penalty
             })
+        
+        final_price = round(raw_price - total_penalty, 2)
 
-        # await files[0].seek(0)
-        # for f in files:
-        #     content = await f.read()
-        #     if not content:
-        #         continue
-        #
-        #     img_bgr, _ = preprocess_image(content)
-        #     if img_bgr is None:
-        #         continue
-        #
-        #     annotated, damages = detect_damage(img_bgr)
-        #     processed_images.append(to_base64(annotated))
-        #
-        #     for d in damages:
-        #         key = d["item_key"]
-        #         if key in processed_keys:
-        #             continue
-        #         processed_keys.add(key)
-        #         amt = get_penalty(key)
-        #         total_penalty += amt
-        #         deduction_list.append({
-        #             "category": "EXTERIOR_AI",
-        #             "label":    f"{d['label']} ",
-        #             "key":      key,
-        #             "amount":   amt,
-        #             "file":     f.filename,
-        #         })
+        try:
+            penalty_info = ""
+            if deduction_list:
+                penalty_info = "LƯU Ý: Hệ thống đã áp dụng các khoản khấu trừ sau:\n"
+                for d in deduction_list:
+                    penalty_info += f"- {d['label']}: giảm {d['amount']} triệu VNĐ\n"
 
-        std_odo = max(1, datetime.now().year - year) * 15_000
-        over_km = max(0, (odo - std_odo) // 1_000)
-        if over_km > 0:
-            p_odo = round(get_penalty("ODO_01") * over_km, 2)
-            total_penalty += p_odo
-            deduction_list.append({
-                "category": "USAGE",
-                "label":    f"Vượt ODO {over_km}k km so với chuẩn {std_odo // 1000}k km",
-                "key":      "ODO_01",
-                "amount":   p_odo,
-            })
-
-        if owner_count >= 2:
-            p = get_penalty("HIS_02")
-            total_penalty += p
-            deduction_list.append({
-                "category": "HISTORY",
-                "label":    f"Qua {owner_count} đời chủ (từ đời chủ thứ 2)",
-                "key":      "HIS_02",
-                "amount":   p,
-            })
-
-        if not service_history_bool:
-            mp = get_penalty("HIS_01")
-            total_penalty += mp
-            deduction_list.append({
-                "category": "HISTORY",
-                "label":    "Không có lịch sử bảo dưỡng chính hãng",
-                "key":      "HIS_01",
-                "amount":   mp,
-            })
-
-        final_price = max(0.0, round(raw_price - total_penalty, 2))
+            prompt = (
+                f"Bạn là chuyên gia định giá ô tô cũ. Hãy viết một đoạn phân tích chi tiết (khoảng 4-5 câu) "
+                f"để giải thích và đánh giá tình trạng chiếc xe {brand_name} {model_name} {trim_name} đời {year}. "
+                f"Xe đã đi được {odo} km, xuất xứ {origin}, hộp số {gearbox}, màu {color}. "
+                f"Lịch sử bảo dưỡng: {'Đầy đủ hãng' if service_history_bool else 'Bảo dưỡng ngoài'}. "
+                f"Số đời chủ: {owner_count}. "
+                f"Mô tả từ người bán: {description}.\n"
+                f"Giá trị gốc AI đánh giá dựa trên thị trường: {raw_price} triệu VNĐ.\n"
+                f"{penalty_info}"
+                f"Mức giá dự kiến cuối cùng sau khi tính hao mòn là {final_price} triệu VNĐ.\n"
+                f"Hãy phân tích chi tiết vì sao có mức giá này. ĐẶC BIỆT, nếu xe có các khoản bị khấu trừ (như là xe công ty/dịch vụ, lỗi, trầy xước...), BẮT BUỘC phải giải thích rõ ràng lý do tại sao yếu tố đó lại làm mất giá trị của chiếc xe so với xe gia đình thông thường. Giọng văn khách quan, thuyết phục."
+            )
+            llm_response = await vision_llm.ainvoke(prompt, config={"cache": False})
+            ai_explanation = llm_response.content
+        except Exception as e:
+            logger.error(f"Error generating GPT-4 explanation: {e}")
+            ai_explanation = f"Dựa trên dữ liệu thị trường và tình trạng xe, mô hình AI dự đoán mẫu xe {model_name} {year} có giá trị thực tế khoảng {final_price} triệu VNĐ."
 
         return {
             "success": True,
@@ -428,20 +450,37 @@ async def predict_price_endpoint(
                     "raw_price":     raw_price,
                     "total_penalty": round(total_penalty, 2),
                     "final_price":   final_price,
+                    "explanation":   ai_explanation,
+                    "ref_note":      ref_note,
+                    "model_info":    model_info,
                 },
                 "deductions":       deduction_list,
-                "processed_images": processed_images,
             },
         }
 
     except Exception as e:
-        logger.error(f"predict_price_endpoint: {e}")
-        return {"success": False, "error": "Lỗi xử lý nội bộ."}
+        logger.error(f"predict_price_endpoint: {e}", exc_info=True)
+        return {"success": False, "error": f"Lỗi xử lý nội bộ: {e}"}
 
-    finally:
-        if os.path.exists(temp_path):
-            os.remove(temp_path)
+@app.get("/car-hierarchy")
+async def get_car_hierarchy():
+    """
+    Returns the car hierarchy (Brand -> Models -> Trims) extracted from the dataset
+    to populate the dependent dropdowns on the frontend.
+    """
+    try:
+        # Resolve the absolute path to car_hierarchy.json
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(current_dir)
+        hierarchy_path = os.path.join(project_root, "car_hierarchy.json")
+        
+        with open(hierarchy_path, "r", encoding="utf-8") as f:
+            hierarchy_data = json.load(f)
+        return {"success": True, "data": hierarchy_data}
+    except Exception as e:
+        logger.error(f"Error loading car hierarchy: {e}")
+        return {"success": False, "error": str(e)}
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="penalty")
+    uvicorn.run(app, host="0.0.0.0", port=8000, log_level="info")

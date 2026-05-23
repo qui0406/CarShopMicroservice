@@ -22,8 +22,8 @@ OUT_DIR   = os.path.join(CURRENT_DIR, "evaluation_output")
 os.makedirs(OUT_DIR, exist_ok=True)
 
 CAT_COLS = [
-    "model", "version_extracted", "gearbox", "fuel",
-    "body_type_clean", "origin_clean", "exterior_color",
+    "_brand", "model", "version_extracted", "gearbox", "fuel",
+    "body_type_clean", "origin_clean", "exterior_color", "drivetrain_clean"
 ]
 CURRENT_YEAR = 2025
 
@@ -227,7 +227,7 @@ def _plot_comparison(df_cmp: pd.DataFrame, path: str):
         ax.set_title(title, fontsize=11, fontweight="bold")
         ax.grid(axis="y", alpha=0.3)
 
-    plt.suptitle("So sánh các mô hình dự đoán giá xe Mazda",
+    plt.suptitle("So sánh các mô hình dự đoán giá xe cũ",
                  fontsize=13, fontweight="bold", y=1.02)
     plt.tight_layout()
     plt.savefig(path, dpi=150, bbox_inches="tight")
