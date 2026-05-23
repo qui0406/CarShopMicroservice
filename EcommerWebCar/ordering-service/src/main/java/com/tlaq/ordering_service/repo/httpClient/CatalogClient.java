@@ -21,10 +21,22 @@ public interface CatalogClient {
     @GetMapping("/catalog/api/cars/get-price/{carId}")
     ApiResponse<BigDecimal> getCarPrice(@PathVariable String carId);
 
-    @GetMapping("/catalog/api/car/get-product-by-id/{carId}")
+    @GetMapping("/catalog/api/car/get-car-by-id/{carId}")
     ApiResponse<CarResponse> getProductById(@PathVariable String carId);
 
     @org.springframework.web.bind.annotation.PostMapping("/catalog/api/car/batch-validate")
     ApiResponse<List<com.tlaq.ordering_service.dto.response.CarBatchResponse>> validateBatch(
             @org.springframework.web.bind.annotation.RequestBody List<CarBatchItemRequest> request);
+
+    /**
+     * Giữ chỗ xe đồng bộ - gọi khi tạo đơn hàng để set isDeposited = true ngay lập tức.
+     */
+    @org.springframework.web.bind.annotation.PostMapping("/catalog/api/inventory/reserve/{carId}")
+    ApiResponse<Boolean> reserveCar(@PathVariable String carId);
+
+    /**
+     * Hủy giữ chỗ xe đồng bộ - gọi khi cần rollback reservation (lỗi tạo đơn).
+     */
+    @org.springframework.web.bind.annotation.PostMapping("/catalog/api/inventory/unreserve/{carId}")
+    ApiResponse<Boolean> unreserveCar(@PathVariable String carId);
 }

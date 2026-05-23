@@ -15,6 +15,7 @@ public class RabbitMQConfig {
     public static final String INVENTORY_ROUTING_KEY   = "routing.inventory";
     public static final String INVENTORY_ROLLBACK_RK   = "routing.inventory.rollback";
     public static final String ORDER_FAIL_RK           = "routing.order.fail";
+    public static final String CAR_SOLD_RK             = "routing.car-sold";
 
     @Bean
     public TopicExchange orderExchange() {
@@ -34,6 +35,11 @@ public class RabbitMQConfig {
     @Bean
     public Binding inventoryRollbackBinding() {
         return BindingBuilder.bind(inventoryQueue()).to(orderExchange()).with(INVENTORY_ROLLBACK_RK);
+    }
+
+    @Bean
+    public Binding carSoldBinding() {
+        return BindingBuilder.bind(inventoryQueue()).to(orderExchange()).with(CAR_SOLD_RK);
     }
 
     @Bean

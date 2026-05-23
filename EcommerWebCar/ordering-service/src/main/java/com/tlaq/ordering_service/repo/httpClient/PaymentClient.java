@@ -2,7 +2,6 @@ package com.tlaq.ordering_service.repo.httpClient;
 
 import com.tlaq.ordering_service.config.AuthenticationRequestInterceptor;
 import com.tlaq.ordering_service.dto.ApiResponse;
-import com.tlaq.ordering_service.dto.MonthlyRevenueProjection;
 import com.tlaq.ordering_service.dto.response.OrderPaymentResponse;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;

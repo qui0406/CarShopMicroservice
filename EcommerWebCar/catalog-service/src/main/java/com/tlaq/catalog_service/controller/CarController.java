@@ -34,15 +34,19 @@ import java.util.Map;
 public class CarController {
     CarService carDetailsService;
 
-    @GetMapping(value = "/car/get-products")
+    @GetMapping(value = "/car/get-cars")
     public ApiResponse<PageResponse<CarSummaryResponse>> getCars(
             @RequestParam(value ="page", required = false, defaultValue = "1") int page,
-            @RequestParam(value = "size", required = false, defaultValue = "12") int size
+            @RequestParam(value = "size", required = false, defaultValue = "12") int size,
+            @RequestParam(value = "isReady", required = false, defaultValue = "true") boolean isReady,
+            @RequestParam(value = "isUsed", required = false, defaultValue = "false") boolean isUsed
     ){
         return ApiResponse.<PageResponse<CarSummaryResponse>>builder()
-                .result(carDetailsService.getCar(page, size))
+                .result(carDetailsService.getCars(isReady, isUsed, page, size))
                 .build();
     }
+
+
 
     @GetMapping("/get-price/{carId}")
     public ApiResponse<BigDecimal> getCarPrice(@PathVariable String carId) {
@@ -51,7 +55,7 @@ public class CarController {
                 .build();
     }
 
-    @GetMapping(value ="/car/get-product-by-id/{carId}")
+    @GetMapping(value ="/car/get-car-by-id/{carId}")
     public ApiResponse<CarResponse> getCarById(@PathVariable String carId){
         return ApiResponse.<CarResponse>builder()
                 .result(carDetailsService.getCarDetails(carId))
@@ -66,13 +70,36 @@ public class CarController {
     }
 
     @PreAuthorize("hasRole('STAFF')")
-    @PostMapping(value = "/staff/car/create-product", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @GetMapping(value = "/staff/car/get-cars")
+    public ApiResponse<PageResponse<CarSummaryResponse>> getStaffCars(
+            @RequestParam(value ="page", required = false, defaultValue = "1") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "12") int size
+    ){
+        return ApiResponse.<PageResponse<CarSummaryResponse>>builder()
+                .result(carDetailsService.getStaffCars(page, size))
+                .build();
+    }
+
+    @PreAuthorize("hasRole('STAFF')")
+    @PostMapping(value = "/staff/car/create-car", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<CarResponse> createCar(
             @RequestPart("request") @Valid CarRequest request,
             @RequestPart("images") List<MultipartFile> images
     ) {
         return ApiResponse.<CarResponse>builder()
                 .result(carDetailsService.createCarDetail(request, images))
+                .build();
+    }
+
+    @PreAuthorize("hasRole('STAFF')")
+    @PutMapping(value = "/staff/car/update-car/{carId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ApiResponse<CarResponse> updateCar(
+            @PathVariable String carId,
+            @RequestPart("request") @Valid CarRequest request,
+            @RequestPart(value = "images", required = false) List<MultipartFile> images
+    ) {
+        return ApiResponse.<CarResponse>builder()
+                .result(carDetailsService.updateCarDetail(carId, request, images))
                 .build();
     }
 
@@ -87,7 +114,7 @@ public class CarController {
 
 
     @PreAuthorize("hasRole('STAFF')")
-    @DeleteMapping("/staff/car/delete-product/{carId}")
+    @DeleteMapping("/staff/car/delete-car/{carId}")
     public ApiResponse<Void> deleteCar(@PathVariable("carId") String carId){
         carDetailsService.delete(carId);
         return ApiResponse.<Void>builder()

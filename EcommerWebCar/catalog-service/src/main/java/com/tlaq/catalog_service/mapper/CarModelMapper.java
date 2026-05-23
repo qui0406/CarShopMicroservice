@@ -9,9 +9,7 @@ import org.mapstruct.Mapping;
 import java.util.List;
 
 @Mapper(componentModel = "spring",
-        uses = {TechSpecMapper.class,
-                EquipmentMapper.class,
-                CarBranchMapper.class,
+        uses = {CarBranchMapper.class,
                 CarCategoryMapper.class})
 public interface CarModelMapper {
 
@@ -19,7 +17,6 @@ public interface CarModelMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "cars", ignore = true)
-    @Mapping(source = "thumbnailImage", target = "thumbnailImage")
     CarModel toCarModel(CarModelRequest request);
 
     List<CarModelResponse> toListCarModel(List<CarModel> carModels);

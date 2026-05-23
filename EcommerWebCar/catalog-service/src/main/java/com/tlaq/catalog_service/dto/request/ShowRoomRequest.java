@@ -29,6 +29,4 @@ public class ShowRoomRequest {
 
     String about;
     String description;
-
-    String ownerId;
 }

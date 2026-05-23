@@ -5,12 +5,15 @@ import com.tlaq.catalog_service.dto.ApiResponse;
 import com.tlaq.catalog_service.dto.request.CarModelRequest;
 import com.tlaq.catalog_service.dto.response.CarModelResponse;
 import com.tlaq.catalog_service.service.CarModelService;
+import jakarta.validation.Valid;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 

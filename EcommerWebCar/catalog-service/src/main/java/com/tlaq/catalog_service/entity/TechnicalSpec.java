@@ -1,6 +1,5 @@
 package com.tlaq.catalog_service.entity;
 
-import com.tlaq.catalog_service.entity.enums.BodyType;
 import com.tlaq.catalog_service.entity.enums.FuelType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -31,8 +30,6 @@ public class TechnicalSpec {
     @Column(name = "fuel_type")
     FuelType fuelType;
 
-    @Enumerated(EnumType.STRING)
-    BodyType bodyType;
 
     BigDecimal displacement; // dungTichXiLanh
 

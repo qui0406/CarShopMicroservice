@@ -29,27 +29,18 @@ public interface OrdersMapper {
     @Mapping(target = "updatedAt",       ignore = true)
     Orders toOrdersEntity(OrdersRequest request);
 
-    // ────────────────────────────────────────────
-    // Entity → Response
-    // ────────────────────────────────────────────
     @Mapping(target = "orderItems", source = "orderItems")
     @Mapping(target = "depositAmount", ignore = true)
     OrdersResponse toOrdersResponse(Orders orders);
 
     List<OrdersResponse> toOrdersResponseList(List<Orders> orders);
 
-    // ────────────────────────────────────────────
-    // OrdersDetails Entity → Response
-    // totalAmount là @Transient (computed), MapStruct
-    // vẫn gọi được getter nên không cần @AfterMapping
-    // ────────────────────────────────────────────
-
     @Mapping(target = "totalAmount", ignore = true)
     OrdersDetailsResponse toOrdersDetailsResponse(OrdersDetails details);
 
     List<OrdersDetailsResponse> toOrdersDetailsResponseList(List<OrdersDetails> details);
 
-    @Mapping(target = "orderId", source = "order.id") // Lấy ID từ object Order lồng bên trong
+    @Mapping(target = "orderId", source = "order.id")
     OrdersHistoryResponse toOrdersHistoryResponse(OrdersHistory history);
 
 }

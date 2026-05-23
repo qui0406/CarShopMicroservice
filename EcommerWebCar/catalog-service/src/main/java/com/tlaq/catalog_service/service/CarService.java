@@ -15,9 +15,12 @@ import java.util.List;
 import java.util.Map;
 
 public interface CarService {
-    PageResponse<CarSummaryResponse> getCar(int page, int size);
+    PageResponse<CarSummaryResponse> getCars(boolean isReady, boolean isUsed, int page, int size);
+    PageResponse<CarSummaryResponse> getStaffCars(int page, int size);
+    PageResponse<com.tlaq.catalog_service.dto.response.ListCarStaffResponse> getStaffManagementCars(int page, int size);
     CarResponse getCarDetails(String carId);
     CarResponse createCarDetail(CarRequest carRequest, List<MultipartFile> images);
+    CarResponse updateCarDetail(String carId, CarRequest carRequest, List<MultipartFile> images);
     void delete(String carId);
     BigDecimal getPrice(String carId);
     PageResponse<CarResponse> filterCar(Map<String, String> filter);

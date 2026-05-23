@@ -12,7 +12,8 @@ import com.tlaq.notification_service.dto.requests.EmailRequest;
 import com.tlaq.notification_service.dto.requests.Recipient;
 import com.tlaq.notification_service.dto.responses.EmailResponse;
 import com.tlaq.notification_service.services.EmailService;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +22,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 
 @Service
-@RequiredArgsConstructor  // Lombok inject qua constructor, xóa @Builder/@Getter/@Setter thừa
+@RequiredArgsConstructor
 @Slf4j
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class EmailServiceImpl implements EmailService {
@@ -60,8 +61,7 @@ public class EmailServiceImpl implements EmailService {
     }
 
     private EmailResponse sendRequest(Mail mail) {
-        log.info("🔑 Using SendGrid API key: {}",
-                sendGridApiKey);
+        log.info("🔑 Using SendGrid API key: {}", sendGridApiKey);
 
         SendGrid sg = new SendGrid(sendGridApiKey);
         Request request = new Request();
@@ -85,5 +85,4 @@ public class EmailServiceImpl implements EmailService {
 
         return EmailResponse.builder().message("Failed to send email").build();
     }
-
 }

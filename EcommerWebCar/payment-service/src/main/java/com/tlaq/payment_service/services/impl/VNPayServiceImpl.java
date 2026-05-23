@@ -20,6 +20,7 @@ import com.tlaq.payment_service.services.PaymentService;
 import com.tlaq.payment_service.services.VNPayService;
 import com.tlaq.payment_service.utils.VNPayConfig;
 import com.tlaq.payment_service.utils.VNPayUtils;
+import com.tlaq.payment_service.helper.PaymentHelper;
 import feign.FeignException;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
@@ -44,6 +45,7 @@ public class VNPayServiceImpl implements VNPayService {
     OrderingClient orderingClient;
     IdentityClient identityClient;
     RabbitTemplate rabbitTemplate;
+    PaymentHelper paymentHelper;
 
     @Override
     @Transactional
@@ -182,6 +184,11 @@ public class VNPayServiceImpl implements VNPayService {
                     confirmMsg
             );
             log.info("Gửi lệnh xác nhận đơn hàng - OrderId: {}", orderId);
+
+            // Gửi thông báo xe đã bán khi thanh toán hoàn tất
+            if (transaction.getPayment().getStatus() == PaymentStatus.COMPLETED) {
+                paymentHelper.sendCarSoldUpdate(orderId);
+            }
 
             // Gửi Notification
             try {

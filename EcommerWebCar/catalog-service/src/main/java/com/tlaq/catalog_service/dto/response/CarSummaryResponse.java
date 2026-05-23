@@ -1,5 +1,6 @@
 package com.tlaq.catalog_service.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -20,4 +21,15 @@ public class CarSummaryResponse {
     String engineSize;
 
     BigDecimal price;
+    
+    @JsonProperty("isReady")
+    boolean isReady;
+
+    @JsonProperty("isDeposited")
+    boolean deposited;
+
+    @JsonProperty("isSold")
+    boolean sold;
+
+    Integer quantity; // Optional field for staff views
 }

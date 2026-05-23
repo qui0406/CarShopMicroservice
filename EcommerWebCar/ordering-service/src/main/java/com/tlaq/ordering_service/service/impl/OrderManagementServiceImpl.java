@@ -2,14 +2,16 @@ package com.tlaq.ordering_service.service.impl;
 
 import com.tlaq.ordering_service.config.RabbitMQConfig;
 import com.tlaq.ordering_service.dto.PageResponse;
-import com.tlaq.ordering_service.dto.response.MonthlyRevenueResponse;
 import com.tlaq.ordering_service.dto.response.OrdersResponse;
+import com.tlaq.ordering_service.dto.response.RevenueReportResponse;
+import com.tlaq.ordering_service.dto.response.BrandSalesResponse;
 import com.tlaq.ordering_service.entity.Orders;
 import com.tlaq.ordering_service.entity.enums.OrdersStatus;
 import com.tlaq.ordering_service.exceptions.AppException;
 import com.tlaq.ordering_service.exceptions.ErrorCode;
 import com.tlaq.ordering_service.mapper.OrdersMapper;
 import com.tlaq.ordering_service.repo.OrdersRepository;
+import com.tlaq.ordering_service.repo.httpClient.CatalogClient;
 import com.tlaq.ordering_service.service.OrderHistoryService;
 import com.tlaq.ordering_service.service.OrderManagementService;
 import jakarta.transaction.Transactional;
@@ -25,8 +27,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,6 +42,7 @@ public class OrderManagementServiceImpl implements OrderManagementService {
     OrdersMapper ordersMapper;
     OrderHistoryService orderHistoryService;
     RabbitTemplate rabbitTemplate;
+    CatalogClient catalogClient;
 
     @Override
     @Transactional
@@ -83,7 +86,10 @@ public class OrderManagementServiceImpl implements OrderManagementService {
         orderHistoryService.saveHistory(order, newStatus, historyNote, staffName);
 
         // 4. Lưu và trả về kết quả
-        return ordersMapper.toOrdersResponse(ordersRepository.save(order));
+        Orders savedOrder = ordersRepository.save(order);
+        OrdersResponse response = ordersMapper.toOrdersResponse(savedOrder);
+        populateCarNames(response);
+        return response;
     }
 
     private void validateStateTransition(OrdersStatus currentStatus, OrdersStatus newStatus) {
@@ -91,20 +97,18 @@ public class OrderManagementServiceImpl implements OrderManagementService {
         boolean isValid = false;
         switch (currentStatus) {
             case PENDING:
-            case WAITING_FOR_PAY:
-                isValid = (newStatus == OrdersStatus.DEPOSITED || newStatus == OrdersStatus.PAID || newStatus == OrdersStatus.CONFIRMED || newStatus == OrdersStatus.CANCELLED);
+                isValid = (newStatus == OrdersStatus.DEPOSITED || newStatus == OrdersStatus.CANCELLED);
                 break;
             case DEPOSITED:
-                isValid = (newStatus == OrdersStatus.PAID || newStatus == OrdersStatus.CONFIRMED || newStatus == OrdersStatus.CANCELLED);
+                isValid = (newStatus == OrdersStatus.WAITING_FOR_PAID || newStatus == OrdersStatus.CANCELLED);
+                break;
+            case WAITING_FOR_PAID:
+                isValid = (newStatus == OrdersStatus.PAID || newStatus == OrdersStatus.CANCELLED);
                 break;
             case PAID:
-                isValid = (newStatus == OrdersStatus.CONFIRMED || newStatus == OrdersStatus.CANCELLED);
-                break;
-            case CONFIRMED:
                 isValid = (newStatus == OrdersStatus.DELIVERED || newStatus == OrdersStatus.CANCELLED);
                 break;
             case DELIVERED:
-            case COMPLETED:
             case CANCELLED:
                 isValid = false; // Trạng thái cuối, không thể thay đổi
                 break;
@@ -132,9 +136,30 @@ public class OrderManagementServiceImpl implements OrderManagementService {
                 .totalPages(pageData.getTotalPages())
                 .totalElements(pageData.getTotalElements())
                 .data(pageData.getContent().stream()
-                        .map(ordersMapper::toOrdersResponse)
+                        .map(order -> {
+                            OrdersResponse response = ordersMapper.toOrdersResponse(order);
+                            populateCarNames(response);
+                            return response;
+                        })
                         .toList())
                 .build();
+    }
+
+    private void populateCarNames(OrdersResponse response) {
+        if (response.getOrderItems() != null && !response.getOrderItems().isEmpty()) {
+            response.getOrderItems().forEach(item -> {
+                try {
+                    var carRes = catalogClient.getProductById(item.getCarId());
+                    if (carRes != null && carRes.getResult() != null) {
+                        item.setCarName(carRes.getResult().getName());
+                    }
+                } catch (Exception e) {
+                    log.error("Error fetching car name for carId: {}. Error: {}", item.getCarId(), e.getMessage());
+                }
+            });
+            // Set top-level carName for convenience in UI tables
+            response.setCarName(response.getOrderItems().get(0).getCarName());
+        }
     }
 
     private OrdersStatus parseStatus(String status) {
@@ -147,29 +172,149 @@ public class OrderManagementServiceImpl implements OrderManagementService {
     }
 
     @Override
-    public BigDecimal calculateRevenue(LocalDateTime start, LocalDateTime end) {
-        // 1. Gọi Repository để tính tổng tiền [cite: 2026-03-12]
-        BigDecimal total = ordersRepository.calculateTotalRevenue(
+    public List<RevenueReportResponse> getRevenueReport(Integer year, Integer month) {
+        if (year == null) {
+            year = java.time.LocalDate.now().getYear();
+        }
+
+        LocalDateTime start;
+        LocalDateTime end;
+        boolean isDaily = (month != null);
+
+        if (isDaily) {
+            java.time.LocalDate date = java.time.LocalDate.of(year, month, 1);
+            start = date.atStartOfDay();
+            end = date.withDayOfMonth(date.lengthOfMonth()).atTime(23, 59, 59);
+        } else {
+            start = LocalDateTime.of(year, 1, 1, 0, 0, 0);
+            end = LocalDateTime.of(year, 12, 31, 23, 59, 59);
+        }
+
+        List<Orders> orders = ordersRepository.findByStatusInAndCreatedAtBetween(
+                List.of(OrdersStatus.PAID, OrdersStatus.DELIVERED),
                 start,
-                end,
-                OrdersStatus.DELIVERED
+                end
         );
 
-        // 2. Tránh trả về null, trả về 0 nếu không có doanh thu [cite: 2026-03-12]
-        return total != null ? total : BigDecimal.ZERO;
-    }
+        if (isDaily) {
+            int days = start.toLocalDate().lengthOfMonth();
+            Map<Integer, RevenueReportResponse> dayMap = new HashMap<>();
+            for (int d = 1; d <= days; d++) {
+                dayMap.put(d, RevenueReportResponse.builder()
+                        .label(String.format("%02d/%02d", d, month))
+                        .totalOrders(0L)
+                        .totalRevenue(java.math.BigDecimal.ZERO)
+                        .build());
+            }
 
-    @Override
-    public Map<OrdersStatus, Long> countOrdersByStatus() {
-        Map<OrdersStatus, Long> stats = new HashMap<>();
-        for (OrdersStatus status : OrdersStatus.values()) {
-            stats.put(status, ordersRepository.countByStatus(status));
+            for (Orders o : orders) {
+                int day = o.getCreatedAt().getDayOfMonth();
+                RevenueReportResponse report = dayMap.get(day);
+                if (report != null) {
+                    report.setTotalOrders(report.getTotalOrders() + 1);
+                    report.setTotalRevenue(report.getTotalRevenue().add(o.getTotalAmount()));
+                }
+            }
+
+            return dayMap.entrySet().stream()
+                    .sorted(Map.Entry.comparingByKey())
+                    .map(Map.Entry::getValue)
+                    .toList();
+        } else {
+            Map<Integer, RevenueReportResponse> monthMap = new HashMap<>();
+            for (int m = 1; m <= 12; m++) {
+                monthMap.put(m, RevenueReportResponse.builder()
+                        .label(String.format("Tháng %02d", m))
+                        .totalOrders(0L)
+                        .totalRevenue(java.math.BigDecimal.ZERO)
+                        .build());
+            }
+
+            for (Orders o : orders) {
+                int m = o.getCreatedAt().getMonthValue();
+                RevenueReportResponse report = monthMap.get(m);
+                if (report != null) {
+                    report.setTotalOrders(report.getTotalOrders() + 1);
+                    report.setTotalRevenue(report.getTotalRevenue().add(o.getTotalAmount()));
+                }
+            }
+
+            return monthMap.entrySet().stream()
+                    .sorted(Map.Entry.comparingByKey())
+                    .map(Map.Entry::getValue)
+                    .toList();
         }
-        return stats;
     }
 
     @Override
-    public List<MonthlyRevenueResponse> getYearlyRevenue(int year) {
-        return ordersRepository.getMonthlyRevenue(year, OrdersStatus.DELIVERED);
+    public List<BrandSalesResponse> getBrandSalesReport(Integer year, Integer month) {
+        if (year == null) {
+            year = java.time.LocalDate.now().getYear();
+        }
+
+        LocalDateTime start;
+        LocalDateTime end;
+        if (month != null) {
+            java.time.LocalDate date = java.time.LocalDate.of(year, month, 1);
+            start = date.atStartOfDay();
+            end = date.withDayOfMonth(date.lengthOfMonth()).atTime(23, 59, 59);
+        } else {
+            start = LocalDateTime.of(year, 1, 1, 0, 0, 0);
+            end = LocalDateTime.of(year, 12, 31, 23, 59, 59);
+        }
+
+        List<Orders> orders = ordersRepository.findByStatusInAndCreatedAtBetween(
+                List.of(OrdersStatus.PAID, OrdersStatus.DELIVERED),
+                start,
+                end
+        );
+
+        // Local cache for car details to optimize network calls
+        Map<String, com.tlaq.ordering_service.dto.response.CarResponse> carCache = new HashMap<>();
+        Map<String, BrandSalesResponse> brandMap = new HashMap<>();
+
+        for (Orders o : orders) {
+            if (o.getOrderItems() != null) {
+                for (com.tlaq.ordering_service.entity.OrdersDetails item : o.getOrderItems()) {
+                    String carId = item.getCarId();
+                    com.tlaq.ordering_service.dto.response.CarResponse car = carCache.computeIfAbsent(carId, id -> {
+                        try {
+                            var carRes = catalogClient.getProductById(id);
+                            if (carRes != null) {
+                                return carRes.getResult();
+                            }
+                        } catch (Exception e) {
+                            log.error("Failed to fetch car details for carId: {}", id, e);
+                        }
+                        return null;
+                    });
+
+                    String brandName = "Khác";
+                    String logoUrlVal = "";
+                    if (car != null && car.getCarModel() != null && car.getCarModel().getCarBranch() != null) {
+                        brandName = car.getCarModel().getCarBranch().getName();
+                        logoUrlVal = car.getCarModel().getCarBranch().getImageBranch();
+                    }
+                    final String logoUrl = logoUrlVal;
+
+                    BrandSalesResponse brandSales = brandMap.computeIfAbsent(brandName, b -> 
+                        BrandSalesResponse.builder()
+                                .brandName(b)
+                                .quantitySold(0L)
+                                .totalRevenue(java.math.BigDecimal.ZERO)
+                                .logoUrl(logoUrl)
+                                .build()
+                    );
+
+                    brandSales.setQuantitySold(brandSales.getQuantitySold() + item.getQuantity());
+                    java.math.BigDecimal itemRevenue = item.getUnitPrice().multiply(java.math.BigDecimal.valueOf(item.getQuantity()));
+                    brandSales.setTotalRevenue(brandSales.getTotalRevenue().add(itemRevenue));
+                }
+            }
+        }
+
+        return brandMap.values().stream()
+                .sorted((b1, b2) -> b2.getTotalRevenue().compareTo(b1.getTotalRevenue()))
+                .toList();
     }
 }

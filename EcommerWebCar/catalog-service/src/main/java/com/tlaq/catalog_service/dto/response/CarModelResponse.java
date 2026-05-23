@@ -13,11 +13,7 @@ public class CarModelResponse {
     String name;
     int seatCapacity;
     String description;
-    String thumbnailImage;
 
     CarCategoryResponse category;
     CarBranchResponse carBranch;
-
-    TechSpecResponse technicalSpec;
-    EquipmentResponse equipment;
 }

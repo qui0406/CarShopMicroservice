@@ -14,7 +14,7 @@ import java.util.Map;
 public interface KeyCloakClient {
 
     @PostMapping(
-            value = "/realms/anhqui/protocol/openid-connect/token/introspect",
+            value = "/introspect",
             consumes = MediaType.APPLICATION_FORM_URLENCODED_VALUE
     )
     IntrospectResponse introspect(@RequestBody Map<String, ?> formParams);

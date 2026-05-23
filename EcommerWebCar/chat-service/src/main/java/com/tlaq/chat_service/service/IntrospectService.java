@@ -21,8 +21,8 @@ public class IntrospectService {
     public IntrospectResponse introspect(String token) {
         Map<String, String> form = new HashMap<>();
         form.put("token", token);
-        form.put("client_id", "ecommer_app");
-        form.put("client_secret", "WKnFf5PHkolShqwY8CnVrYP7bHhYph4H");
+        form.put("client_id", "ecommer-app");
+        form.put("client_secret", "lVaXmGMg3bmpkAcDSvBcqhiu1QSEiUGG");
 
         return keycloakClient.introspect(form);
     }

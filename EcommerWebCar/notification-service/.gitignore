@@ -7,6 +7,8 @@ target/
 ### STS ###
 .apt_generated
 .classpath
+.DS_Store
+.env.properties
 .factorypath
 .project
 .settings

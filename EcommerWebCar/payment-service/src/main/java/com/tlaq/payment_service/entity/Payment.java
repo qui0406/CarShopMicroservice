@@ -29,10 +29,10 @@ public class Payment {
     String orderId;
 
     @Column(precision = 19, scale = 2, nullable = false)
-    BigDecimal totalAmount;  // Copy từ Orders.totalAmount khi tạo Payment (snapshot)
+    BigDecimal totalAmount;
 
     @Column(precision = 19, scale = 2)
-    BigDecimal paidAmount;   // Cập nhật mỗi khi có transaction thành công
+    BigDecimal paidAmount;
 
     @Enumerated(EnumType.STRING)
     PaymentStatus status;

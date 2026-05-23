@@ -1,5 +1,6 @@
 package com.tlaq.catalog_service.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -15,7 +16,7 @@ import java.util.List;
 public class CarResponse {
     String id;
     CarModelResponse carModel;
-
+    String thumbnail;
     String name;
 
     String vinNumber;
@@ -31,6 +32,21 @@ public class CarResponse {
 
     String model3dUrl;
     List<String> imageUrls;
+
+    @JsonProperty("isReady")
+    boolean isReady;
+
+    @JsonProperty("isDeposited")
+    boolean deposited;
+
+    @JsonProperty("isSold")
+    boolean sold;
+
+    TechSpecResponse technicalSpec;
+    EquipmentResponse equipment;
+
+    String showRoomId;
+    String showRoomName;
 
     LocalDateTime updatedAt;
 }

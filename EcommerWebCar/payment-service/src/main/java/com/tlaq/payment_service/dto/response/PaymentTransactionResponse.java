@@ -19,4 +19,5 @@ public class PaymentTransactionResponse {
     String status; // SUCCESS, FAILED
     LocalDateTime createdAt;
     String note;
+    String orderId;
 }

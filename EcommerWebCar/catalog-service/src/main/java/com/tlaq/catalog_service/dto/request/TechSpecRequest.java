@@ -15,7 +15,6 @@ public class TechSpecRequest {
     String engine;
     String transmission;
     String fuelType;
-    String bodyType;
 
     @Min(value = 0, message = "Công suất không được âm")
     BigDecimal horsepower;

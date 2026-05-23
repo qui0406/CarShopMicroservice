@@ -103,6 +103,7 @@ public class OrdersServiceImpl implements OrdersService {
         if (response != null && response.getTotalAmount() != null) {
             response.setDepositAmount(response.getTotalAmount().multiply(new BigDecimal("0.01")));
         }
+        populateCarNames(response);
         return response;
     }
 
@@ -146,6 +147,35 @@ public class OrdersServiceImpl implements OrdersService {
                 })
                 .collect(Collectors.toMap(res -> res.getCarDetail().getId(), res -> res));
 
+        // ========================================================================
+        // 3.5. GIỮ CHỖ XE NGAY LẬP TỨC (đồng bộ) - isDeposited = true LUÔN
+        //      Đảm bảo chỉ 1 người có thể đặt cọc 1 chiếc xe tại bất kỳ thời điểm nào.
+        //      Nếu có ai khác đã giữ chỗ rồi → báo lỗi ngay, không tạo đơn hàng.
+        // ========================================================================
+        List<String> reservedCarIds = new ArrayList<>();
+        try {
+            for (OrdersDetailsRequest itemDto : request.getOrderItems()) {
+                var reserveRes = catalogClient.reserveCar(itemDto.getCarId());
+                if (reserveRes == null || !Boolean.TRUE.equals(reserveRes.getResult())) {
+                    log.warn("Xe {} đã được người khác giữ chỗ hoặc không khả dụng.", itemDto.getCarId());
+                    throw new AppException(ErrorCode.QUANTITY_NOT_ENOUGH);
+                }
+                reservedCarIds.add(itemDto.getCarId());
+                log.info("✅ Đã giữ chỗ xe {} thành công (isDeposited = true)", itemDto.getCarId());
+            }
+        } catch (Exception e) {
+            // COMPENSATION: Hủy giữ chỗ tất cả xe đã reserve thành công trước đó
+            for (String carId : reservedCarIds) {
+                try {
+                    catalogClient.unreserveCar(carId);
+                    log.info("↩️ Đã hủy giữ chỗ xe {} do lỗi tạo đơn.", carId);
+                } catch (Exception ex) {
+                    log.error("❌ Lỗi hủy giữ chỗ xe {}: {}", carId, ex.getMessage());
+                }
+            }
+            throw e;
+        }
+
         // 4. Khởi tạo Orders
         Orders order = ordersMapper.toOrdersEntity(request);
         order.setUserId(profileId);
@@ -171,9 +201,9 @@ public class OrdersServiceImpl implements OrdersService {
 
         // 7. Lưu DB + ghi lịch sử
         Orders savedOrder = ordersRepository.save(order);
-        saveHistory(savedOrder, OrdersStatus.PENDING, "\u0110ơn hàng đã được khởi tạo.", profileId);
+        saveHistory(savedOrder, OrdersStatus.PENDING, "Đơn hàng đã được khởi tạo. Xe đã được giữ chỗ 24h.", profileId);
 
-        // 8. Gửi message SAU KHI transaction commit thành công
+        // 8. Gửi message hẹn giờ 24h + email SAU KHI transaction commit thành công
         OrderInventoryMessage inventoryMsg = buildInventoryMessage(savedOrder, false);
         schedulePostCommitMessages(savedOrder, inventoryMsg, profileId, profileRes.getEmail());
 
@@ -182,7 +212,7 @@ public class OrdersServiceImpl implements OrdersService {
         if (response != null && response.getTotalAmount() != null) {
             response.setDepositAmount(response.getTotalAmount().multiply(new BigDecimal("0.01")));
         }
-
+        populateCarNames(response);
         return response;
     }
 
@@ -208,10 +238,18 @@ public class OrdersServiceImpl implements OrdersService {
         String fuelType     = (car.getFuelType() != null) ? car.getFuelType() : "GASOLINE";
         BigDecimal qty      = BigDecimal.valueOf(itemDto.getQuantity());
         BigDecimal base     = car.getPrice();
-        BigDecimal taxRate  = feeConfigService.getRegistrationTaxRate(region, fuelType);
-        BigDecimal tax      = base.multiply(taxRate);
-        BigDecimal plate    = feeConfigService.getPlateFee(region);
-        BigDecimal inspect  = feeConfigService.getInspectionFee();
+        BigDecimal tax      = BigDecimal.ZERO;
+        BigDecimal plate    = BigDecimal.ZERO;
+        BigDecimal inspect  = BigDecimal.ZERO;
+
+        // Chỉ tính thuế phí nếu là thanh toán trực tiếp (PURCHASE)
+        if (order.getType() == com.tlaq.ordering_service.entity.enums.OrdersType.PURCHASE) {
+            BigDecimal taxRate  = feeConfigService.getRegistrationTaxRate(region, fuelType);
+            tax = base.multiply(taxRate);
+            plate = feeConfigService.getPlateFee(region);
+            inspect = feeConfigService.getInspectionFee();
+        }
+
         BigDecimal rolling  = base.add(tax).add(plate).add(inspect); // giá lăn bánh/chiếc
 
         // Cộng dồn vào tổng đơn
@@ -268,12 +306,14 @@ public class OrdersServiceImpl implements OrdersService {
         });
     }
 
-    /** Gửi lệnh trừ kho + bộ đếm timeout */
+    /**
+     * Gửi bộ đếm timeout 24h.
+     * Lưu ý: Không cần gửi lệnh trừ kho nữa vì xe đã được giữ chỗ đồng bộ
+     * (isDeposited = true) ngay khi tạo đơn hàng.
+     * Sau 24h nếu chưa thanh toán → OrderTimeoutListener sẽ hủy đơn + hoàn kho.
+     */
     private void sendInventoryMessages(String orderId, OrderInventoryMessage msg) {
-        log.info("Gửi lệnh trừ kho - OrderId: {}", orderId);
-        rabbitTemplate.convertAndSend(RabbitMQConfig.EXCHANGE, RabbitMQConfig.INVENTORY_ROUTING_KEY, msg);
-
-        log.info("Gửi lệnh hẹn giờ 3 phút - OrderId: {}", orderId);
+        log.info("Gửi lệnh hẹn giờ 24h - OrderId: {}", orderId);
         rabbitTemplate.convertAndSend(RabbitMQConfig.ORDER_TIMEOUT_EXCHANGE, RabbitMQConfig.ORDER_TIMEOUT_RK, msg);
     }
 
@@ -293,12 +333,14 @@ public class OrdersServiceImpl implements OrdersService {
                     .channel("EMAIL")
                     .recipientId(profileId)
                     .recipientEmail(userEmail)
-                    .subject("Xác nhận đặt xe thành công - Mã đơn: " + savedOrder.getId())
+                    .subject("Yêu cầu đặt cọc xe - Mã đơn: " + savedOrder.getId())
                     .body(String.format(
-                            "Cảm ơn bạn đã đặt xe tại cửa hàng chúng tôi. " +
-                            "Mã đơn hàng: %s. " +
-                            "Tổng giá trị: %s VN\u0110. " +
-                            "Chúng tôi sẽ liên hệ xác nhận trong thời gian sớm nhất.",
+                            "Cảm ơn bạn đã quan tâm và đặt xe tại Precision Motors. <br/>" +
+                            "Mã đơn hàng: <b>%s</b> <br/>" +
+                            "Tổng giá trị xe: <b>%s VNĐ</b> <br/>" +
+                            "<b>Vui lòng thanh toán cọc trong vòng 24 giờ</b> kể từ lúc nhận email này để hoàn thành việc đặt cọc và giữ chỗ chiếc xe của bạn. <br/>" +
+                            "Quá thời gian trên, nếu hệ thống chưa ghi nhận khoản cọc, đơn hàng sẽ tự động bị hủy để nhường cơ hội cho khách hàng khác. <br/>" +
+                            "Trân trọng cảm ơn!",
                             savedOrder.getId(), savedOrder.getTotalAmount()))
                     .param(notiParam)
                     .build();
@@ -337,6 +379,7 @@ public class OrdersServiceImpl implements OrdersService {
                     if (res.getTotalAmount() != null) {
                         res.setDepositAmount(res.getTotalAmount().multiply(new BigDecimal("0.01")));
                     }
+                    populateCarNames(res);
                     return res;
                 })
                 .collect(Collectors.toList());
@@ -344,7 +387,7 @@ public class OrdersServiceImpl implements OrdersService {
 
 
     @Override
-    public void confirmDelivery(String orderId) {
+    public void confirmOrders(String orderId) {
         Orders order = ordersRepository.findById(orderId)
                 .orElseThrow(() -> new AppException(ErrorCode.ORDER_NOT_FOUND));
 
@@ -496,5 +539,27 @@ public class OrdersServiceImpl implements OrdersService {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return auth.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_STAFF"));
+    }
+
+    private void populateCarNames(OrdersResponse response) {
+        if (response.getOrderItems() != null && !response.getOrderItems().isEmpty()) {
+            response.getOrderItems().forEach(item -> {
+                try {
+                    var carRes = catalogClient.getProductById(item.getCarId());
+                    if (carRes != null && carRes.getResult() != null) {
+                        item.setCarName(carRes.getResult().getName());
+                        // Chỉ lấy ảnh từ trường thumbnail của catalog-service
+                        String imgUrl = carRes.getResult().getThumbnail();
+                        if (imgUrl != null && !imgUrl.isBlank() && response.getCarImage() == null) {
+                            response.setCarImage(imgUrl);
+                        }
+                    }
+                } catch (Exception e) {
+                    log.error("Error fetching car details for carId: {}. Error: {}", item.getCarId(), e.getMessage());
+                }
+            });
+            // Set top-level carName for convenience
+            response.setCarName(response.getOrderItems().get(0).getCarName());
+        }
     }
 }

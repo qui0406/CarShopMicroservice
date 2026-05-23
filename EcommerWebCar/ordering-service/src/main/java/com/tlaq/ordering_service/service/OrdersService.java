@@ -19,5 +19,5 @@ public interface OrdersService {
     OrdersResponse getOrderById(String id);           // Xem chi tiết đơn
     List<OrdersResponse> getMyOrders(String userId);  // Danh sách đơn của tôi
     void cancelOrder(String orderId, String reason);  // Khách tự hủy khi chưa duyệt
-    void confirmDelivery(String orderId);             // Khách xác nhận đã nhận xe
+    void confirmOrders(String orderId);             // Khách xác nhận đã nhận xe
 }

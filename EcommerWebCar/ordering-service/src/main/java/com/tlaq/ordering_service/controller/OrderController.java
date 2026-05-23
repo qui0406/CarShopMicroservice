@@ -66,12 +66,5 @@ public class OrderController {
                 .build();
     }
 
-    @PreAuthorize("hasRole('STAFF')")
-    @PostMapping("/confirm-delivery/{id}")
-    public ApiResponse<String> confirmDelivery(@PathVariable String id) {
-        ordersService.confirmDelivery(id);
-        return ApiResponse.<String>builder()
-                .result("Xác nhận đơn hàng thành công!")
-                .build();
-    }
+
 }

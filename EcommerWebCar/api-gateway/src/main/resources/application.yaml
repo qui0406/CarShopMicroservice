@@ -17,6 +17,22 @@ eureka:
 spring:
   cloud:
     gateway:
+      globalcors:
+        add-to-idm-strategy: true
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns:
+              - "https://anhquicarshop.com"
+              - "http://localhost:3000"
+              - "https://*.ngrok-free.app"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
       discovery:
         locator:
           enabled: true
@@ -67,11 +83,7 @@ spring:
 idp:
   url: ${KEYCLOAK_URL:http://${PUBLIC_IP:localhost}:8180}
   client-id: ${KEYCLOAK_CLIENT_ID:ecommer-app}
-  client-secret: ${KEYCLOAK_CLIENT_SECRET:lVaXmGMg3bmpkAcDSvBcqhiu1QSEiUGG}
-
-app:
-  base-url: ${FRONTEND_URL:http://${PUBLIC_IP:localhost}:3000}
-
+  client-secret: ${KEYCLOAK_CLIENT_SECRET}
 
 
 logging:

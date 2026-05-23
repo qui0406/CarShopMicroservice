@@ -59,5 +59,5 @@ public class ShowRoom {
 
     // Quan hệ với xe trong kho của Showroom này (Nếu bạn làm tính năng kho riêng)
     @OneToMany(mappedBy = "showRoom")
-    List<Inventory> inventories;
+    List<Car> cars;
 }

@@ -1,4 +1,4 @@
-package com.tlaq.catalog_service.specifications;
+package com.tlaq.catalog_service.repo;
 
 import com.tlaq.catalog_service.entity.Car;
 import org.springframework.data.jpa.domain.Specification;
@@ -55,7 +55,6 @@ public class CarSpecification {
         );
     }
 
-    // Lọc theo khoảng năm sản xuất [cite: 2026-02-25]
     public static Specification<Car> yearBetween(Integer fromYear, Integer toYear) {
         return (root, query, cb) -> {
             if (fromYear != null && toYear != null) return cb.between(root.get("manufacturingYear"), fromYear, toYear);

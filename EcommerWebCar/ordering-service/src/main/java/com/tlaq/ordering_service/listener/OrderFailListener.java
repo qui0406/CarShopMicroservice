@@ -34,8 +34,6 @@ public class OrderFailListener {
 
         // Chỉ huỷ nếu đơn hàng chưa hoàn thành giao
         if (order.getStatus() == OrdersStatus.PENDING
-                || order.getStatus() == OrdersStatus.WAITING_FOR_PAY
-                || order.getStatus() == OrdersStatus.DEPOSITED
                 || order.getStatus() == OrdersStatus.PAID) {
 
             order.setStatus(OrdersStatus.CANCELLED);

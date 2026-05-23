@@ -45,10 +45,6 @@ public class ShowRoomServiceImpl implements ShowRoomService {
 
     @Override
     public ShowRoomResponse createShowRoom(ShowRoomRequest request, List<MultipartFile> images) {
-        if (showRoomRepository.count() > 0) {
-            throw new AppException(ErrorCode.SHOWROOM_ALREADY_EXISTS);
-        }
-
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String userKeyCloakId = authentication.getName();
 

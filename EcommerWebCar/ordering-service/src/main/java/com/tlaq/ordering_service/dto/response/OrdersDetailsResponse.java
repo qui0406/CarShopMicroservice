@@ -14,6 +14,7 @@ import java.time.LocalDate;
 public class OrdersDetailsResponse {
     String id;
     String carId;
+    String carName;
     String fullName;
     String phoneNumber;
     String address;

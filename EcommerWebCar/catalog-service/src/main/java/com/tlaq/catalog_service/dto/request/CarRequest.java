@@ -14,10 +14,15 @@ public class CarRequest {
     String name;
     BigDecimal price;
     Long carModelId;
+    String thumbnail;
     int manufacturingYear;
 
     boolean isUsed;
     int mileage;
     String vinNumber;
     String color;
+    String showRoomId;
+
+    TechSpecRequest technicalSpec;
+    EquipmentRequest equipment;
 }

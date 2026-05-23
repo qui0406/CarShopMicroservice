@@ -15,7 +15,6 @@ public class TechSpecResponse {
     String engineSize;
     String engine;
     String transmission;
-    String fuelType;  // Trả về String từ Enum
     String bodyType;
     BigDecimal horsepower;
     BigDecimal torque;

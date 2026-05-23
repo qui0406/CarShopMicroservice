@@ -51,16 +51,37 @@ public class Car {
 
     @Builder.Default
     @Column(name = "is_ready")
-    private boolean isReady = true;
+    boolean isReady = true;
 
     @Builder.Default
     @Column(name = "is_deleted")
     boolean deleted = false;
 
+    @Builder.Default
+    @Column(name = "is_deposited")
+    boolean deposited = false;
+
+    @Builder.Default
+    @Column(name = "is_sold")
+    boolean sold = false;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "show_room_id")
+    ShowRoom showRoom;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "technical_spec_id", referencedColumnName = "id")
+    TechnicalSpec technicalSpec;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "equipment_id", referencedColumnName = "id")
+    Equipment equipment;
+
     String model3dUrl;
+    String thumbnail;
 
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL, orphanRemoval = true)
-    List<CarImage> carImages; // Ảnh chụp thực tế góc cạnh của chiếc xe này
+    List<CarImage> carImages;
 
     @CreationTimestamp
     LocalDateTime createdAt;

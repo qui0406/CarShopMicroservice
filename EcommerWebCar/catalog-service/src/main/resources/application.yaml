@@ -13,8 +13,8 @@ spring:
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:mysql://${MYSQL_HOST:localhost}:3306/catalog-ecommer-car}
     driverClassName: "com.mysql.cj.jdbc.Driver"
-    username: ${SPRING_DATASOURCE_USERNAME:root}
-    password: ${SPRING_DATASOURCE_PASSWORD:12345678}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
   jpa:
     hibernate:
       ddl-auto: update
@@ -23,8 +23,8 @@ spring:
   rabbitmq:
     host: ${RABBITMQ_HOST:localhost}
     port: ${RABBITMQ_PORT:5672}
-    username: ${RABBITMQ_USERNAME:guest}
-    password: ${RABBITMQ_PASSWORD:guest}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
 
   security:
     oauth2:
@@ -33,9 +33,9 @@ spring:
           issuer-uri: ${KEYCLOAK_URL:http://${PUBLIC_IP:localhost}:8180}/realms/anhqui
 
 cloudinary:
-  cloud-name: do43r8nr0
-  api-key: 947875495844325
-  api-secret: evQEPk5TbxIMpCWbbXl8sLMbo6A
+  cloud-name: ${CLOUDINARY_NAME}
+  api-key: ${CLOUDINARY_API_KEY}
+  api-secret: ${CLOUDINARY_API_SECRET}
 
 aws:
   s3:
@@ -47,7 +47,7 @@ aws:
 idp:
   url: ${KEYCLOAK_URL:http://${PUBLIC_IP:localhost}:8180}
   client-id: ${KEYCLOAK_CLIENT_ID:ecommer-app}
-  client-secret: ${KEYCLOAK_CLIENT_SECRET:lVaXmGMg3bmpkAcDSvBcqhiu1QSEiUGG}
+  client-secret: ${KEYCLOAK_CLIENT_SECRET}
 
 app:
   services:

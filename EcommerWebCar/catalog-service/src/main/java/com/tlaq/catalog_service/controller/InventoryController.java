@@ -82,4 +82,28 @@ public class InventoryController {
                 .build();
     }
 
+    /**
+     * Giữ chỗ xe ngay lập tức khi người dùng xác nhận đơn hàng.
+     * Endpoint này được ordering-service gọi đồng bộ qua Feign để đảm bảo
+     * chỉ 1 người có thể đặt cọc 1 chiếc xe tại bất kỳ thời điểm nào.
+     */
+    @PostMapping("/inventory/reserve/{carId}")
+    public ApiResponse<Boolean> reserveCar(@PathVariable String carId) {
+        boolean success = inventoryService.reserveCar(carId);
+        return ApiResponse.<Boolean>builder()
+                .result(success)
+                .build();
+    }
+
+    /**
+     * Hủy giữ chỗ xe khi đơn hàng bị hủy hoặc hết hạn 24h.
+     */
+    @PostMapping("/inventory/unreserve/{carId}")
+    public ApiResponse<Boolean> unreserveCar(@PathVariable String carId) {
+        boolean success = inventoryService.unreserveCar(carId);
+        return ApiResponse.<Boolean>builder()
+                .result(success)
+                .build();
+    }
+
 }

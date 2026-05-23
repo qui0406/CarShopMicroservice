@@ -8,8 +8,7 @@ spring:
     name: chat-service
   data:
     mongodb:
-      uri: ${MONGODB_URI:mongodb://root:123456@${MONGODB_HOST:localhost}:27017/chat-service?authSource=admin}
-      auto-index-creation: false
+      uri: ${MONGODB_URI}/chat-service?authSource=admin
 
   security:
     oauth2:
@@ -37,4 +36,4 @@ eureka:
 idp:
   url: ${KEYCLOAK_URL:http://${PUBLIC_IP:localhost}:8180}/realms/anhqui/protocol/openid-connect/token
   client-id: ${KEYCLOAK_CLIENT_ID:ecommer-app}
-  client-secret: ${KEYCLOAK_CLIENT_SECRET:2anScggPiIAmbA5mW5SI5JnGZAcCVveo}
+  client-secret: ${KEYCLOAK_CLIENT_SECRET}

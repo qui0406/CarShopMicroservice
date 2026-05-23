@@ -26,24 +26,37 @@ public class WebClientConfiguration {
     }
 
     @Bean
-    public AuthClient authClient(WebClient webClient){
+    public AuthClient authClient(@Value("${idp.url}") String idpUrl){
+        WebClient webClient = WebClient.builder()
+                .baseUrl(idpUrl)
+                .build();
+
         HttpServiceProxyFactory httpServiceProxyFactory = HttpServiceProxyFactory
                 .builderFor(WebClientAdapter.create(webClient)).build();
 
         return httpServiceProxyFactory.createClient(AuthClient.class);
     }
 
+//    @Bean
+//    public CorsWebFilter corsWebFilter(){
+//        CorsConfiguration corsConfiguration = new CorsConfiguration();
+//        corsConfiguration.setAllowedOrigins(List.of("https://anhquicarshop.com", "http://localhost:3000", "http://localhost:8888"));
+//        corsConfiguration.setAllowedHeaders(List.of("*"));
+//        corsConfiguration.setAllowedMethods(List.of("*"));
+//        corsConfiguration.setAllowCredentials(true);
+//
+//        UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
+//        urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
+//
+//        return new CorsWebFilter(urlBasedCorsConfigurationSource);
+//    }
+
     @Bean
-    public CorsWebFilter corsWebFilter(){
-        CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.setAllowedOrigins(List.of("*"));
-        corsConfiguration.setAllowedHeaders(List.of("*"));
-        corsConfiguration.setAllowedMethods(List.of("*"));
-
-        UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
-        urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
-
-        return new CorsWebFilter(urlBasedCorsConfigurationSource);
+    public org.springframework.web.server.WebFilter privateNetworkAccessFilter() {
+        return (exchange, chain) -> {
+            exchange.getResponse().getHeaders().add("Access-Control-Allow-Private-Network", "true");
+            return chain.filter(exchange);
+        };
     }
 
 }

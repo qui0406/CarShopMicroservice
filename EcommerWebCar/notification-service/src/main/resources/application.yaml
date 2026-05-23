@@ -5,17 +5,25 @@ server:
 spring:
     application:
         name: notification-service
+    config:
+        import:
+            - optional:file:.env
+            - optional:file:../.env
+    data:
+        mongodb:
+          uri: ${MONGODB_URI}/notification-service?authSource=admin
+
 
     rabbitmq:
       host: ${RABBITMQ_HOST:localhost}
       port: ${RABBITMQ_PORT:5672}
-      username: ${RABBITMQ_USERNAME:root}
-      password: ${RABBITMQ_PASSWORD:123456}
+      username: ${RABBITMQ_USERNAME}
+      password: ${RABBITMQ_PASSWORD}
 
     send-grid:
-        api-key: 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
-        from-email: anhqui04062004@gmail.com
-        from-name: ecommer_car
+        api-key: ${SENDGRID_API_KEY}
+        from-email: ${SENDGRID_FROM_EMAIL:anhqui04062004@gmail.com}
+        from-name: ${SENDGRID_FROM_NAME:ecommer_car}
 
     security:
         oauth2:
@@ -34,7 +42,7 @@ eureka:
 idp:
   url: ${KEYCLOAK_URL:http://${PUBLIC_IP:localhost}:8180}
   client-id: ${KEYCLOAK_CLIENT_ID:ecommer-app}
-  client-secret: ${KEYCLOAK_CLIENT_SECRET:lVaXmGMg3bmpkAcDSvBcqhiu1QSEiUGG}
+  client-secret: ${KEYCLOAK_CLIENT_SECRET}
 
 
 logging:

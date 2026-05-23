@@ -5,9 +5,12 @@ import com.tlaq.payment_service.dto.request.ConfirmPaymentRequest;
 import com.tlaq.payment_service.dto.request.CreateVNPayUrlRequest;
 import com.tlaq.payment_service.dto.request.DepositRequest;
 import com.tlaq.payment_service.dto.request.OfflinePaymentRequest;
+import com.tlaq.payment_service.dto.response.PageResponse;
+import com.tlaq.payment_service.dto.response.PaymentManagementResponse;
 import com.tlaq.payment_service.dto.response.PaymentResponse;
 import com.tlaq.payment_service.dto.response.VNPayResponse;
 import com.tlaq.payment_service.entity.enums.PaymentMethod;
+import com.tlaq.payment_service.entity.enums.PaymentStatus;
 import com.tlaq.payment_service.entity.enums.TransactionType;
 import com.tlaq.payment_service.services.PaymentService;
 import com.tlaq.payment_service.services.VNPayService;
@@ -37,21 +40,6 @@ public class PaymentController {
         String ipAddress = VNPayUtils.getIpAddress(request);
         return ApiResponse.<VNPayResponse>builder()
                 .result(vnPayService.createPaymentUrl(createRequest.getOrderId(), ipAddress, createRequest.getType()))
-                .build();
-    }
-
-    @PostMapping("/staff/confirm-offline")
-    @PreAuthorize("hasRole('STAFF')")
-    public ApiResponse<PaymentResponse> confirmOffline(@RequestBody ConfirmPaymentRequest request) {
-        var result = paymentService.confirmOfflinePayment(request);
-        return ApiResponse.<PaymentResponse>builder().result(result).build();
-    }
-
-    @PreAuthorize("hasRole('STAFF')")
-    @PostMapping("/staff/create-payment")
-    public ApiResponse<PaymentResponse> createPayment(@RequestBody OfflinePaymentRequest request) {
-        return ApiResponse.<PaymentResponse>builder()
-                .result(paymentService.fullPayment(request))
                 .build();
     }
 

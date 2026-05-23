@@ -20,6 +20,9 @@ public class CarCategory {
     Long id;
     String name;
 
+    @Column(columnDefinition = "TEXT")
+    String description;
+
     @OneToMany(mappedBy = "category")
     List<CarModel> carModels;
 }

@@ -4,7 +4,6 @@ import lombok.*;
 import lombok.experimental.FieldDefaults;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -15,6 +14,7 @@ import java.util.List;
 public class CarResponse {
     String id;
     String name;
+    String thumbnail;
     BigDecimal price;
     int manufacturingYear;
     String fuelType;
@@ -25,4 +25,28 @@ public class CarResponse {
     String model3dUrl;
     List<String> imageUrls;
     boolean isUsed;
+    CarModelResponse carModel;
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class CarModelResponse {
+        Long id;
+        String name;
+        CarBranchResponse carBranch;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    @FieldDefaults(level = AccessLevel.PRIVATE)
+    public static class CarBranchResponse {
+        Long id;
+        String name;
+        String country;
+        String imageBranch;
+    }
 }

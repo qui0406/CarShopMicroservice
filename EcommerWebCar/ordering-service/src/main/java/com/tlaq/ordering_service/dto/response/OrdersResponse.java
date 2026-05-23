@@ -20,6 +20,9 @@ public class OrdersResponse {
     OrdersStatus status;
     OrdersType type;
 
+    String carName;
+    String carImage;
+
     BigDecimal baseAmount;      // Tổng giá gốc của các xe (chưa thuế phí lăn bánh)
     BigDecimal taxAmount;       // Tổng lệ phí trước bạ (10% - 12%)
     BigDecimal plateFeeAmount;  // Tổng phí cấp biển số (1tr hoặc 20tr)

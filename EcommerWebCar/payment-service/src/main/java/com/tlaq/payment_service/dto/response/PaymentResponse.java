@@ -17,6 +17,6 @@ public class PaymentResponse {
     BigDecimal totalAmount;
     BigDecimal paidAmount;
     BigDecimal remainAmount;
-    String status; // PENDING, PARTIALLY_PAID, COMPLETED
+    String status;
     List<PaymentTransactionResponse> transactions;
 }

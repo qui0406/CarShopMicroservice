@@ -11,4 +11,5 @@ import lombok.experimental.FieldDefaults;
 public class CarCategoryResponse {
     Long id;
     String name;
+    String description;
 }

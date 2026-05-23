@@ -19,7 +19,7 @@ public class InventoryResponse {
     String carName;        // Vd: Mazda 3 Premium
     String carThumbnail;   // Link ảnh đại diện xe
     String carSku;         // Mã SKU xe
-    Long carPrice;         // Giá bán để quản lý biết giá trị hàng tồn
+    java.math.BigDecimal carPrice;         // Giá bán để quản lý biết giá trị hàng tồn
 
     // --- Thông số kỹ thuật nhanh (Giúp nhân viên tư vấn) ---
     String color;          // Màu sắc

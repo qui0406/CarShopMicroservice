@@ -1,9 +1,5 @@
 package com.tlaq.payment_service.mapper;
 
-import com.tlaq.payment_service.dto.request.ConfirmPaymentRequest;
-import com.tlaq.payment_service.dto.request.OfflinePaymentRequest;
-import com.tlaq.payment_service.dto.response.PaymentTransactionResponse;
-import com.tlaq.payment_service.entity.PaymentTransaction;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -11,7 +7,8 @@ import org.mapstruct.Mapping;
 public interface PaymentTransactionMapper {
 
     // Chuyển đổi lịch sử giao dịch để hiển thị Timeline thanh toán
-    PaymentTransactionResponse toTransactionResponse(PaymentTransaction transaction);
+    @Mapping(target = "orderId", source = "payment.orderId")
+    com.tlaq.payment_service.dto.response.PaymentTransactionResponse toTransactionResponse(com.tlaq.payment_service.entity.PaymentTransaction transaction);
 
     // Dùng khi nhân viên xác nhận thu tiền mặt tại cửa hàng
     @Mapping(target = "id", ignore = true)
@@ -19,7 +16,7 @@ public interface PaymentTransactionMapper {
     @Mapping(target = "vnpTransactionNo", ignore = true)
     @Mapping(target = "status", expression = "java(com.tlaq.payment_service.entity.enums.TransactionStatus.SUCCESS)")
     @Mapping(target = "createdAt", ignore = true)
-    PaymentTransaction toEntity(OfflinePaymentRequest request);
+    com.tlaq.payment_service.entity.PaymentTransaction toEntity(com.tlaq.payment_service.dto.request.OfflinePaymentRequest request);
 
-    PaymentTransaction toConfirmPayment(ConfirmPaymentRequest request);
+    com.tlaq.payment_service.entity.PaymentTransaction toConfirmPayment(com.tlaq.payment_service.dto.request.ConfirmPaymentRequest request);
 }

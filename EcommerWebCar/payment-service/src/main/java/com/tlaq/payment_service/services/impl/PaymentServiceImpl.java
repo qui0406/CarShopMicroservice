@@ -19,6 +19,7 @@ import com.tlaq.payment_service.repository.PaymentRepository;
 import com.tlaq.payment_service.repository.PaymentTransactionRepository;
 import com.tlaq.payment_service.repository.httpClient.IdentityClient;
 import com.tlaq.payment_service.repository.httpClient.OrderingClient;
+import com.tlaq.payment_service.helper.PaymentHelper;
 import com.tlaq.payment_service.services.PaymentService;
 import jakarta.transaction.Transactional;
 import com.tlaq.event.dto.NotificationEvent;
@@ -27,12 +28,19 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import com.tlaq.payment_service.dto.response.PageResponse;
+import com.tlaq.payment_service.dto.response.PaymentManagementResponse;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Service
@@ -47,6 +55,7 @@ public class PaymentServiceImpl implements PaymentService {
     RabbitTemplate rabbitTemplate;
     IdentityClient identityClient;
     OrderingClient orderingClient; // Thêm Client để lấy chi tiết thuế phí
+    PaymentHelper paymentHelper;
 
     @Override
     public void initializePayment(PaymentRequest request) {
@@ -76,19 +85,23 @@ public class PaymentServiceImpl implements PaymentService {
         Payment payment = paymentRepository.findById(request.getPaymentId())
                 .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND));
 
-        if (!payment.getStatus().equals(PaymentStatus.PARTIALLY_PAID)) {
-            log.error("Đơn hàng {} chưa được đặt cọc (Trạng thái: {}). Không thể thanh toán nốt.",
+        if (!payment.getStatus().equals(PaymentStatus.PENDING) && !payment.getStatus().equals(PaymentStatus.PARTIALLY_PAID)) {
+            log.error("Trạng thái thanh toán của đơn hàng {} không hợp lệ để xác nhận (Trạng thái: {}).",
                     payment.getOrderId(), payment.getStatus());
             throw new AppException(ErrorCode.PAYMENT_STATUS_INVALID);
         }
 
-        BigDecimal expectedAmount = payment.getRemainAmount();
-        
-        // Remove amount spoofing check since client doesn't send amount anymore
-
-
-        // ← BỎ toàn bộ block: orderingClient.getOrder + payment.setDetail(...)
-        // PaymentDetails đã bị xóa, không cần fetch lại breakdown từ Orders
+        BigDecimal expectedAmount;
+        TransactionType txnType;
+        if (payment.getStatus().equals(PaymentStatus.PENDING)) {
+            // Xác nhận cọc offline (1% tổng giá trị xe)
+            expectedAmount = payment.getTotalAmount().multiply(new BigDecimal("0.01"));
+            txnType = TransactionType.DEPOSIT;
+        } else {
+            // Xác nhận thanh toán phần còn lại offline
+            expectedAmount = payment.getRemainAmount();
+            txnType = TransactionType.BALANCE;
+        }
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String staffId = identityClient.getProfileByUserKeycloakId(auth.getName()).getResult().getId();
@@ -98,8 +111,7 @@ public class PaymentServiceImpl implements PaymentService {
         transaction.setPayment(payment);
         transaction.setStaffId(staffId);
         transaction.setStatus(TransactionStatus.SUCCESS);
-        transaction.setType(payment.getPaidAmount().compareTo(BigDecimal.ZERO) == 0
-                ? TransactionType.FULL_PAYMENT : TransactionType.BALANCE);
+        transaction.setType(txnType);
 
         transactionRepository.save(transaction);
         
@@ -112,11 +124,18 @@ public class PaymentServiceImpl implements PaymentService {
                 RabbitMQConfig.ORDER_CONFIRM_RK,
                 confirmMsg
         );
-        log.info("Gửi lệnh xác nhận thanh toán nốt (offline) - OrderId: {}", payment.getOrderId());
+        log.info("Gửi lệnh xác nhận thanh toán (offline) - OrderId: {}, Loại: {}", payment.getOrderId(), txnType);
         
         sendSuccessNotification(payment.getOrderId(), transaction.getAmount(), null);
 
-        return updatePaymentProgress(payment, transaction.getAmount());
+        PaymentResponse result = updatePaymentProgress(payment, transaction.getAmount());
+
+        // Gửi thông báo xe đã bán khi thanh toán hoàn tất
+        if (payment.getStatus() == PaymentStatus.COMPLETED) {
+            paymentHelper.sendCarSoldUpdate(payment.getOrderId());
+        }
+
+        return result;
     }
 
 
@@ -173,8 +192,14 @@ public class PaymentServiceImpl implements PaymentService {
         
         sendSuccessNotification(request.getOrderId(), expectedAmount, orderInfo.getUserId());
 
-        return updatePaymentProgress(payment, expectedAmount);
+        PaymentResponse result = updatePaymentProgress(payment, expectedAmount);
+
+        // fullPayment luôn hoàn tất → gửi thông báo xe đã bán
+        paymentHelper.sendCarSoldUpdate(request.getOrderId());
+
+        return result;
     }
+
 
     @Override
     public PaymentResponse getPaymentStatusByOrder(String orderId) {
@@ -218,7 +243,7 @@ public class PaymentServiceImpl implements PaymentService {
         return payment.getPaidAmount().compareTo(minDeposit) >= 0;
     }
 
-    // Đã xóa hàm sendInventoryUpdate vì ordering-service tự lo trừ kho khi khởi tạo đơn.
+    // Đã thay thế sendInventoryUpdate bằng PaymentHelper.sendCarSoldUpdate
 
     private void sendSuccessNotification(String orderId, BigDecimal amount, String userId) {
         try {

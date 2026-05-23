@@ -15,8 +15,7 @@ import org.springframework.context.annotation.Configuration;
 public class RabbitMQConfig {
 
     public static final String EXCHANGE              = "x.order-exchange";
-    public static final String INVENTORY_QUEUE       = "q.inventory-update";
-    public static final String INVENTORY_ROUTING_KEY = "routing.inventory";
+    public static final String CAR_SOLD_RK           = "routing.car-sold";
     public static final String ORDER_CONFIRM_RK      = "routing.order.confirm";
     public static final String ORDER_CONFIRM_QUEUE   = "q.order-confirm";
 
@@ -27,16 +26,6 @@ public class RabbitMQConfig {
     @Bean
     public TopicExchange orderExchange() {
         return new TopicExchange(EXCHANGE);
-    }
-
-    @Bean
-    public Queue inventoryQueue() {
-        return new Queue(INVENTORY_QUEUE, true);
-    }
-
-    @Bean
-    public Binding inventoryBinding() {
-        return BindingBuilder.bind(inventoryQueue()).to(orderExchange()).with(INVENTORY_ROUTING_KEY);
     }
 
     @Bean

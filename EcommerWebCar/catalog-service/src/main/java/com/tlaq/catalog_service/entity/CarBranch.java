@@ -24,5 +24,5 @@ public class CarBranch {
     String imageBranch;
 
     @OneToMany(mappedBy = "carBranch")
-    private List<CarModel> carModels;
+    List<CarModel> carModels;
 }

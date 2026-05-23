@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Component
@@ -21,28 +22,34 @@ public class PaymentHelper {
     RabbitTemplate rabbitTemplate;
     OrderingClient orderingClient;
 
-    public void sendInventoryUpdate(String orderId) {
+    public void sendCarSoldUpdate(String orderId) {
         try {
-            log.info("🛒 Đang lấy thông tin đơn hàng {} để cập nhật kho...", orderId);
+            log.info("🚗 Đang gửi cập nhật xe ĐÃ BÁN cho đơn hàng {}...", orderId);
             var orderInfo = orderingClient.getOrder(orderId).getResult();
 
             if (orderInfo == null || orderInfo.getOrderItems() == null) return;
 
+            List<Map<String, Object>> items = new java.util.ArrayList<>();
             orderInfo.getOrderItems().forEach(item -> {
-                Map<String, Object> message = new HashMap<>();
-                message.put("carId", item.getCarId());
-                message.put("quantity", item.getQuantity());
-                message.put("type", "DECREASE");
-
-                rabbitTemplate.convertAndSend(
-                        RabbitMQConfig.EXCHANGE,
-                        RabbitMQConfig.INVENTORY_ROUTING_KEY,
-                        message
-                );
+                Map<String, Object> itemMap = new HashMap<>();
+                itemMap.put("carId", item.getCarId());
+                itemMap.put("quantity", item.getQuantity());
+                items.add(itemMap);
             });
-            log.info("✅ Đã gửi yêu cầu trừ kho thành công cho đơn hàng: {}", orderId);
+
+            Map<String, Object> soldMsg = new HashMap<>();
+            soldMsg.put("orderId", orderId);
+            soldMsg.put("type", "SOLD");
+            soldMsg.put("items", items);
+
+            rabbitTemplate.convertAndSend(
+                    RabbitMQConfig.EXCHANGE,
+                    RabbitMQConfig.CAR_SOLD_RK,
+                    soldMsg
+            );
+            log.info("✅ Đã gửi thông báo xe đã bán cho đơn hàng: {}", orderId);
         } catch (Exception e) {
-            log.error("❌ Lỗi khi tự động cập nhật kho cho đơn {}: {}", orderId, e.getMessage());
+            log.error("❌ Lỗi khi gửi thông báo xe đã bán cho đơn {}: {}", orderId, e.getMessage());
         }
     }
 

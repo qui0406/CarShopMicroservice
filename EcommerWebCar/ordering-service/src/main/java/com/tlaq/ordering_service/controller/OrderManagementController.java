@@ -2,21 +2,19 @@ package com.tlaq.ordering_service.controller;
 
 import com.tlaq.ordering_service.dto.ApiResponse;
 import com.tlaq.ordering_service.dto.PageResponse;
-import com.tlaq.ordering_service.dto.response.MonthlyRevenueResponse;
 import com.tlaq.ordering_service.dto.response.OrdersResponse;
+import com.tlaq.ordering_service.dto.response.RevenueReportResponse;
+import com.tlaq.ordering_service.dto.response.BrandSalesResponse;
 import com.tlaq.ordering_service.entity.enums.OrdersStatus;
 import com.tlaq.ordering_service.service.OrderManagementService;
+import com.tlaq.ordering_service.service.OrdersService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/staff/orders")
@@ -25,6 +23,7 @@ import java.util.Map;
 @PreAuthorize("hasRole('STAFF') or hasRole('ADMIN')")
 public class OrderManagementController {
     OrderManagementService orderManagementService;
+    OrdersService ordersService;
 
     @GetMapping(value="/all-orders")
     public ApiResponse<PageResponse<OrdersResponse>> getAllOrders(
@@ -46,28 +45,29 @@ public class OrderManagementController {
                 .build();
     }
 
-    @GetMapping("/revenue")
-    public ApiResponse<BigDecimal> getRevenue(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime start,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime end) {
-        return ApiResponse.<BigDecimal>builder()
-                .result(orderManagementService.calculateRevenue(start, end))
+    @PostMapping("/confirm-order/{id}")
+    public ApiResponse<String> confirmDelivery(@PathVariable String id) {
+        ordersService.confirmOrders(id);
+        return ApiResponse.<String>builder()
+                .result("Xác nhận đơn hàng thành công!")
                 .build();
     }
 
-    @GetMapping("/stats/status-count")
-    public ApiResponse<Map<OrdersStatus, Long>> getStatusCount() {
-        return ApiResponse.<Map<OrdersStatus, Long>>builder()
-                .result(orderManagementService.countOrdersByStatus())
+    @GetMapping("/stats/revenue")
+    public ApiResponse<List<RevenueReportResponse>> getRevenueReport(
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month) {
+        return ApiResponse.<List<RevenueReportResponse>>builder()
+                .result(orderManagementService.getRevenueReport(year, month))
                 .build();
     }
 
-    @GetMapping("/revenue/monthly")
-    public ApiResponse<List<MonthlyRevenueResponse>> getMonthlyRevenue(
-            @RequestParam(defaultValue = "2026") int year) {
-
-        return ApiResponse.<List<MonthlyRevenueResponse>>builder()
-                .result(orderManagementService.getYearlyRevenue(year))
+    @GetMapping("/stats/brands")
+    public ApiResponse<List<BrandSalesResponse>> getBrandSalesReport(
+            @RequestParam(required = false) Integer year,
+            @RequestParam(required = false) Integer month) {
+        return ApiResponse.<List<BrandSalesResponse>>builder()
+                .result(orderManagementService.getBrandSalesReport(year, month))
                 .build();
     }
 }

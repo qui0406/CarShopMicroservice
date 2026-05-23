@@ -5,8 +5,6 @@ import com.tlaq.payment_service.dto.request.OfflinePaymentRequest;
 import com.tlaq.payment_service.dto.request.PaymentRequest;
 import com.tlaq.payment_service.dto.response.PaymentResponse;
 import com.tlaq.payment_service.entity.Payment;
-import com.tlaq.payment_service.entity.enums.PaymentMethod;
-import com.tlaq.payment_service.entity.enums.TransactionType;
 
 import java.math.BigDecimal;
 

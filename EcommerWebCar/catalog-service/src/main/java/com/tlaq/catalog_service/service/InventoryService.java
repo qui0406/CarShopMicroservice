@@ -19,5 +19,18 @@ public interface InventoryService {
     Boolean checkStock(String carId, Integer quantity);
     void deduceStock(List<Map<String, Object>> items);
     void restoreInventory(List<Map<String, Object>> items);
+    void markAsSold(List<Map<String, Object>> items);
     PageResponse<InventoryResponse> getList(int page, int size);
+
+    /**
+     * Giữ chỗ xe ngay lập tức (đồng bộ) khi người dùng xác nhận đơn hàng.
+     * @return true nếu giữ chỗ thành công, false nếu xe đã bị đặt/bán/chưa sẵn sàng.
+     */
+    boolean reserveCar(String carId);
+
+    /**
+     * Hủy giữ chỗ xe (đồng bộ) khi đơn hàng bị hủy hoặc hết hạn.
+     * @return true nếu hủy thành công, false nếu xe chưa được giữ chỗ.
+     */
+    boolean unreserveCar(String carId);
 }
