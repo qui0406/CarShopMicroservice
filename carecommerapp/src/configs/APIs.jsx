@@ -1,7 +1,7 @@
 import axios from "axios";
 import cookie from "react-cookies";
 
-const BASE_URL = "https://39eb-2001-ee0-4fc0-70c0-88d6-248f-bd55-ef75.ngrok-free.app";
+const BASE_URL = "https://39eb-2001-ee0-4fc0-70c0-88d6-248f-bd55-ef75.ngrok-free.app/api/v1";
 export const CHAT_URL = "http://localhost:8099";
 // console.log("CHAT_URL initialized as:", CHAT_URL);
 
