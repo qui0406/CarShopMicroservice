@@ -33,7 +33,7 @@ export default function PaymentCompleted() {
         const oRes = await authApis().get(endpoints['get-order-by-id'](orderId));
         const order = oRes.data?.result || oRes.data;
         setOrderInfo(order);
-        const carId = order?.orderItems?.[0]?.carId;
+        const carId = order?.orderItem?.carId;
         if (carId) {
           const cRes = await axios.get(endpoints['get-car-by-id'](carId));
           setCarInfo(cRes.data?.result || cRes.data);
@@ -94,8 +94,8 @@ export default function PaymentCompleted() {
   const amountDisplay = vnp_Amount ? fmt(parseInt(vnp_Amount) / 100) : (orderInfo?.totalAmount ? fmt(orderInfo.totalAmount) : '—');
   const carImg = carInfo?.imageUrls?.[0] || carInfo?.carModel?.thumbnailImage
     || 'https://images.unsplash.com/photo-1503376713431-155e81fcae13?q=80&w=900&auto=format';
-  const carName = carInfo?.name || orderInfo?.orderItems?.[0]?.carId || 'Xe đặt cọc';
-  const buyer   = orderInfo?.orderItems?.[0]?.fullName || '';
+  const carName = carInfo?.name || orderInfo?.orderItem?.carId || 'Xe đặt cọc';
+  const buyer   = orderInfo?.orderItem?.fullName || '';
 
   return (
     <div style={s.page}>
@@ -127,19 +127,17 @@ export default function PaymentCompleted() {
             {carInfo?.vinNumber && <p style={s.carSub}>VIN: {carInfo.vinNumber}</p>}
           </div>
 
-          {/* Order items detail */}
-          {orderInfo?.orderItems?.length > 0 && (
+          {/* Order item detail */}
+          {orderInfo?.orderItem && (
             <div style={s.section}>
               <p style={s.sectionLabel}>THÔNG TIN NGƯỜI NHẬN XE</p>
-              {orderInfo.orderItems.map((item, i) => (
-                <div key={i} style={s.itemGrid}>
-                  {item.fullName   && <Row label="Họ tên"  value={item.fullName} />}
-                  {item.phoneNumber&& <Row label="SĐT"     value={item.phoneNumber} />}
-                  {item.cccd       && <Row label="CCCD"    value={item.cccd} />}
-                  {item.dob        && <Row label="Ngày sinh" value={item.dob} />}
-                  {item.address    && <Row label="Địa chỉ" value={item.address} span />}
-                </div>
-              ))}
+              <div style={s.itemGrid}>
+                {orderInfo.orderItem.fullName   && <Row label="Họ tên"  value={orderInfo.orderItem.fullName} />}
+                {orderInfo.orderItem.phoneNumber&& <Row label="SĐT"     value={orderInfo.orderItem.phoneNumber} />}
+                {orderInfo.orderItem.cccd       && <Row label="CCCD"    value={orderInfo.orderItem.cccd} />}
+                {orderInfo.orderItem.dob        && <Row label="Ngày sinh" value={orderInfo.orderItem.dob} />}
+                {orderInfo.orderItem.address    && <Row label="Địa chỉ" value={orderInfo.orderItem.address} span />}
+              </div>
             </div>
           )}
         </div>

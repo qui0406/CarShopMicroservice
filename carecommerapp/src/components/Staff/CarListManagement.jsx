@@ -94,7 +94,7 @@ export default function CarListManagement() {
           status: car.sold ? "Đã bán" : (car.deposited ? "Đã đặt cọc" : (car.isReady ? "Sẵn sàng" : "Chưa sẵn sàng")),
           statusDot: car.sold ? "#9ca3af" : (car.deposited ? "#eab308" : (car.isReady ? "#22c55e" : "#ef4444")),
           quantity: car.quantity || 0,
-          image: "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=120&q=80&fit=crop", // Backend should ideally provide thumbnail
+          image: car.images?.[0] || car.imageUrls?.[0] || car.thumbnail || car.imageUrl || car.image || "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?w=120&q=80&fit=crop",
         }));
 
         setCars(mappedCars);
@@ -348,7 +348,6 @@ export default function CarListManagement() {
                 <th className="px-4 py-3 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Tên xe</th>
                 <th className="px-4 py-3 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Năm</th>
                 <th className="px-4 py-3 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Giá niêm yết</th>
-                <th className="px-4 py-3 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Tồn kho</th>
                 <th className="px-4 py-3 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">Trạng thái</th>
                 <th className="px-4 py-3 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest text-center">Hành động</th>
               </tr>
@@ -364,14 +363,13 @@ export default function CarListManagement() {
                     <td className="px-4 py-4"><div className="h-3 bg-gray-100 rounded w-32" /></td>
                     <td className="px-4 py-4"><div className="h-3 bg-gray-100 rounded w-10" /></td>
                     <td className="px-4 py-4"><div className="h-3 bg-gray-100 rounded w-24" /></td>
-                    <td className="px-4 py-4"><div className="h-3 bg-gray-100 rounded w-10" /></td>
                     <td className="px-4 py-4"><div className="h-3 bg-gray-100 rounded w-20" /></td>
                     <td className="px-4 py-4"><div className="flex gap-2 justify-center"><div className="w-6 h-6 bg-gray-100 rounded" /><div className="w-6 h-6 bg-gray-100 rounded" /></div></td>
                   </tr>
                 ))
                 : filtered.length === 0
                   ? (
-                    <tr><td colSpan="9" className="py-16 text-center text-gray-400 font-medium">Không có xe nào khớp với bộ lọc của bạn.</td></tr>
+                    <tr><td colSpan="8" className="py-16 text-center text-gray-400 font-medium">Không có xe nào khớp với bộ lọc của bạn.</td></tr>
                   )
                   : filtered.map((car, idx) => (
                     <tr key={`${car.id}-${idx}`} className={`hover:bg-gray-50/60 transition-colors ${selected.includes(car.id) ? "bg-blue-50/40" : ""}`}>
@@ -398,7 +396,6 @@ export default function CarListManagement() {
                       </td>
                       <td className="px-4 py-4 font-mono text-gray-600">{car.year}</td>
                       <td className="px-4 py-4 font-black text-gray-900">{fmt(car.price)}</td>
-                      <td className="px-4 py-4 font-black text-blue-600 text-base">{car.quantity}</td>
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-1.5">
                           <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: car.statusDot }} />
@@ -416,10 +413,6 @@ export default function CarListManagement() {
                           <button onClick={() => navigate(`/staff/edit-car/${car.id}`)}
                             className="p-1.5 bg-green-50 text-green-600 rounded-lg hover:bg-green-600 hover:text-white transition-all shadow-sm" title="Sửa">
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-                          </button>
-                          <button onClick={() => handleManageStock(car)}
-                            className="p-1.5 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-600 hover:text-white transition-all shadow-sm" title="Quản lý kho">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" /></svg>
                           </button>
                           <button onClick={() => handleDeleteCar(car.id)}
                             className="p-1.5 bg-red-50 text-red-600 rounded-lg hover:bg-red-600 hover:text-white transition-all shadow-sm" title="Xóa">

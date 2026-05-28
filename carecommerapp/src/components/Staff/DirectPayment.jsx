@@ -46,7 +46,6 @@ export default function DirectPayment() {
     customerEmail: "",
     customerNote: "",
     paymentMethod: "BANK_TRANSFER",
-    quantity: 1,
   });
 
   const [errors, setErrors] = useState({});
@@ -56,7 +55,7 @@ export default function DirectPayment() {
   const [recentOrders, setRecentOrders] = useState([]);
 
   /* ── derived ── */
-  const basePrice = (selectedCar?.price || 0) * form.quantity;
+  const basePrice = selectedCar?.price || 0;
   const taxAmount = basePrice * TAX_RATE;
   const total = basePrice + taxAmount;
 
@@ -105,7 +104,6 @@ export default function DirectPayment() {
       carId: selectedCar.carId,
       carName: selectedCar.carName,
       price: total,
-      quantity: form.quantity,
       customerName: form.customerName,
       customerPhone: form.customerPhone,
       customerEmail: form.customerEmail,
@@ -144,7 +142,7 @@ export default function DirectPayment() {
   const resetForm = () => {
     setSelectedCar(null);
     setCarSearch("");
-    setForm({ customerName: "", customerPhone: "", customerEmail: "", customerNote: "", paymentMethod: "BANK_TRANSFER", quantity: 1 });
+    setForm({ customerName: "", customerPhone: "", customerEmail: "", customerNote: "", paymentMethod: "BANK_TRANSFER" });
     setErrors({});
   };
 
@@ -229,22 +227,7 @@ export default function DirectPayment() {
                     </div>
                   )}
 
-                  {/* Quantity */}
-                  <div className="mt-4">
-                    <Field label="Số lượng">
-                      <div className="flex items-center gap-3">
-                        <button type="button" onClick={() => setForm(f => ({ ...f, quantity: Math.max(1, f.quantity - 1) }))}
-                          className="w-9 h-9 rounded-lg border border-gray-200 bg-white flex items-center justify-center text-gray-700 hover:bg-gray-50 font-black text-lg">−</button>
-                        <input type="number" value={form.quantity} min={1} max={10}
-                          onChange={e => setForm(f => ({ ...f, quantity: Math.max(1, parseInt(e.target.value) || 1) }))}
-                          className="w-20 text-center px-3 py-2 text-sm border border-gray-200 rounded-lg bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 font-bold" />
-                        <button type="button" onClick={() => setForm(f => ({ ...f, quantity: Math.min(10, f.quantity + 1) }))}
-                          className="w-9 h-9 rounded-lg border border-gray-200 bg-white flex items-center justify-center text-gray-700 hover:bg-gray-50 font-black text-lg">+</button>
-                        <span className="text-xs text-gray-400 font-medium ml-2">chiếc</span>
-                      </div>
-                    </Field>
                   </div>
-                </div>
               </div>
 
               {/* Customer info */}
@@ -339,7 +322,7 @@ export default function DirectPayment() {
                   {["Tên Xe", "Số Lượng", "Đơn Giá", "Tạm Tính", "Thuế (10%)", "Phương Thức"].map((label, i) => {
                     const vals = [
                       selectedCar?.carName || "—",
-                      form.quantity + " chiếc",
+                      "1 chiếc",
                       selectedCar ? `${fmt(selectedCar.price)} VND` : "—",
                       selectedCar ? `${fmt(basePrice)} VND` : "—",
                       selectedCar ? `${fmt(taxAmount)} VND` : "—",

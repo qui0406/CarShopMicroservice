@@ -57,28 +57,30 @@ export default function HomeStaff() {
   const fetchStatusCount = async () => {
     try {
       const res = await authApis().get(endpoints["get-status-count"]);
-      const d = res.data?.result || res.data || {};
+      const d = res.data?.result || {};
       setStats({
-        pending: d.PENDING || d.pending || 0,
-        paid: d.PAID || d.paid || 0,
-        cancelled: d.CANCELLED || d.cancelled || 0,
-        totalOrders: (d.PENDING || 0) + (d.PAID || 0) + (d.CANCELLED || 0) + (d.CONFIRMED || 0),
+        totalOrders: (d.PENDING || 0) + (d.PAID || 0) + (d.CANCELLED || 0) + (d.CONFIRMED || 0) + (d.DEPOSITED || 0) + (d.WAITING_FOR_PAID || 0),
+        pending: d.PENDING || 0,
+        paid: (d.PAID || 0) + (d.CONFIRMED || 0),
+        cancelled: d.CANCELLED || 0,
       });
-    } catch { /* silently fail */ }
+    } catch {
+      setStats({ pending: 0, paid: 0, cancelled: 0, totalOrders: 0 });
+    }
   };
 
   const fetchMonthlyRevenue = async () => {
     try {
       const year = new Date().getFullYear();
-      const res = await authApis().get(endpoints["get-monthly-revenue"](year));
+      const res = await authApis().get(endpoints["get-stats-revenue"](year));
       const d = res.data?.result || res.data || [];
       const MONTHS = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"];
       // Backend may return array of {month, revenue} or object keyed by month
       let arr = [];
       if (Array.isArray(d)) {
         arr = d.map((item, i) => ({
-          month: MONTHS[item.month != null ? item.month - 1 : i] || MONTHS[i],
-          value: item.revenue || item.value || item.total || 0,
+          month: item.label || MONTHS[item.month != null ? item.month - 1 : i] || MONTHS[i],
+          value: item.totalRevenue || item.revenue || item.value || item.total || 0,
         }));
       } else {
         arr = Object.entries(d).map(([k, v]) => ({
@@ -285,8 +287,8 @@ export default function HomeStaff() {
                     return (
                       <tr key={o.id || i} className="hover:bg-gray-50/50 transition-colors cursor-pointer" onClick={() => navigate("/staff/home/cashier")}>
                         <td className="px-6 py-4 text-[11px] font-black text-blue-600">#{String(o.id || i + 1).slice(-6)}</td>
-                        <td className="px-6 py-4 font-medium text-gray-800">{o.orderItems?.[0]?.fullName || o.fullName || o.customerName || "—"}</td>
-                        <td className="px-6 py-4 text-gray-600">{o.orderItems?.[0]?.carName || o.orderItems?.[0]?.car?.name || o.orderItems?.[0]?.carModel?.name || o.carName || "—"}</td>
+                        <td className="px-6 py-4 font-medium text-gray-800">{o.orderItem?.fullName || o.fullName || o.customerName || "—"}</td>
+                        <td className="px-6 py-4 text-gray-600">{o.orderItem?.carName || o.orderItem?.car?.name || o.orderItem?.carModel?.name || o.carName || "—"}</td>
                         <td className="px-6 py-4 font-bold text-gray-800">{fmt(o.totalAmount || o.price)} đ</td>
                         <td className="px-6 py-4">
                           <span className="px-2.5 py-1 text-[10px] font-black rounded uppercase tracking-wider"

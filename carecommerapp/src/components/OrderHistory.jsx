@@ -112,7 +112,7 @@ export default function OrderHistory() {
     try {
       const res = await authApis().get(endpoints["get-order-by-id"](orderInfo.id));
       const orderData = res.data?.result || res.data;
-      const item = orderData.orderItems?.[0] || {};
+      const item = orderData.orderItem || {};
       
       setIsModalOpen(false);
       navigate('/deposit-confirm', {
@@ -304,12 +304,12 @@ export default function OrderHistory() {
                 <div style={s.modalBody}>
                   <div style={s.modalSection}>
                     <h4 style={s.sectionTitle}>Thông tin khách hàng</h4>
-                    {selectedOrder.orderItems && selectedOrder.orderItems.length > 0 ? (
+                    {selectedOrder.orderItem ? (
                       <div style={s.gridList}>
-                        <p><strong>Họ tên:</strong> {selectedOrder.orderItems[0].fullName || "N/A"}</p>
-                        <p><strong>Số điện thoại:</strong> {selectedOrder.orderItems[0].phoneNumber || "N/A"}</p>
-                        <p><strong>CCCD:</strong> {selectedOrder.orderItems[0].cccd || "N/A"}</p>
-                        <p style={{ gridColumn: "1 / -1" }}><strong>Địa chỉ:</strong> {selectedOrder.orderItems[0].address || "N/A"}</p>
+                        <p><strong>Họ tên:</strong> {selectedOrder.orderItem.fullName || "N/A"}</p>
+                        <p><strong>Số điện thoại:</strong> {selectedOrder.orderItem.phoneNumber || "N/A"}</p>
+                        <p><strong>CCCD:</strong> {selectedOrder.orderItem.cccd || "N/A"}</p>
+                        <p style={{ gridColumn: "1 / -1" }}><strong>Địa chỉ:</strong> {selectedOrder.orderItem.address || "N/A"}</p>
                       </div>
                     ) : (
                       <p>Không có thông tin khách hàng chi tiết.</p>

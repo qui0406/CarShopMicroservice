@@ -131,26 +131,6 @@ export default function DepositConfirm() {
             </div>
           </div>
 
-          {/* Payment Method */}
-          <div style={s.card}>
-            <div style={s.cardHeader}>
-              <div style={s.cardIconWrap}>💳</div>
-              <span style={s.cardTitle}>Phương thức thanh toán</span>
-            </div>
-            <div style={s.methodRow}>
-              {[
-                { key: 'vnpay-qr', label: 'VNPAY-QR', icon: '▦' },
-                { key: 'atm', label: 'Thẻ ATM', icon: '🏦' },
-                { key: 'intl', label: 'Thẻ Quốc tế', icon: '🌐' },
-              ].map(m => (
-                <div key={m.key} style={{ ...s.methodChip, ...(m.key === paymentMethod ? s.methodChipActive : {}) }}>
-                  <span style={{ fontSize: '1rem' }}>{m.icon}</span>
-                  <span style={{ fontSize: '0.75rem', fontWeight: 800 }}>{m.label}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-
         </div>
 
         {/* RIGHT: Car + Deposit */}

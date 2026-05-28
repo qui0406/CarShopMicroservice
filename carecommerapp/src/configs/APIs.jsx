@@ -82,7 +82,7 @@ export const endpoints = {
     "get-order-timeline": id => `/ordering/orders/history/${id}/timeline`,
 
     "get-all-orders-management": (page = 1, size = 10, status = "") => `/ordering/staff/orders/all-orders?page=${page}&size=${size}${status ? `&status=${status}` : ""}`,
-    "admin-cancel-order": (id, note = "") => `/ordering/staff/orders/cancel-order/${id}${note ? `?note=${encodeURIComponent(note)}` : ""}`,
+    "staff-update-order-status": (id, status, note = "") => `/ordering/staff/orders/cancel-order/${id}?status=${status}${note ? `&note=${encodeURIComponent(note)}` : ""}`,
     "get-revenue": (start, end) => `/ordering/staff/orders/revenue?start=${encodeURIComponent(start)}&end=${encodeURIComponent(end)}`,
     "get-status-count": "/ordering/staff/orders/stats/status-count",
     "get-monthly-revenue": (year = 2026) => `/ordering/staff/orders/revenue/monthly?year=${year}`,
@@ -102,9 +102,12 @@ export const endpoints = {
     // Payment Service
     "create-vnpay-url": "/payment/payments/create-vnpay-url",
     "confirm-offline": "/payment/payments/staff/confirm-offline",
+    "staff-approve-deposit": orderId => `/payment/payments/staff/approve-deposit/${orderId}`,
     "create-offline-payment": "/payment/payments/staff/create-payment",
     "get-payment-status": orderId => `/payment/payments/status/${orderId}`,
     "get-all-payments-management": (page = 1, size = 10, status = "PARTIALLY_PAID") => `/payment/payments/staff/all-payments?page=${page}&size=${size}&status=${status}`,
+    "cancel-payment": id => `/payment/payments/staff/cancel-payment/${id}`,
+    "get-payment-details": paymentId => `/payment/payments/staff/details/${paymentId}`,
 
     // Chat Service
     "create-message": "/chat/api/messages/create",

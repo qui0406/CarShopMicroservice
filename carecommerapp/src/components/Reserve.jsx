@@ -23,7 +23,6 @@ export default function Reserve() {
     phone: '',
     idNumber: '',
     dob: '',
-    quantity: 1,
     address: '',
     note: '',
   });
@@ -65,17 +64,14 @@ export default function Reserve() {
     try {
       const orderRes = await authApis().post(endpoints['create-order'], {
         note: form.note || '',
-        orderItems: [
-          {
-            carId: id,
-            fullName: form.fullName,
-            phoneNumber: form.phone,
-            address: form.address,
-            cccd: form.idNumber,
-            dob: form.dob,
-            quantity: Number(form.quantity) || 1
-          }
-        ]
+        orderItem: {
+          carId: id,
+          fullName: form.fullName,
+          phoneNumber: form.phone,
+          address: form.address,
+          cccd: form.idNumber,
+          dob: form.dob
+        }
       });
       const order = orderRes.data?.result || orderRes.data;
 
@@ -199,14 +195,6 @@ export default function Reserve() {
                   <span style={s.inputIcon}>📅</span>
                   <input style={{ ...s.input, color: form.dob ? '#111' : '#9ca3af' }} type="date" value={form.dob}
                     onChange={e => setForm(p => ({ ...p, dob: e.target.value }))} />
-                </div>
-              </div>
-              <div style={s.fieldWrap}>
-                <label style={s.label}>SỐ LƯỢNG XE</label>
-                <div style={s.inputWrap}>
-                  <span style={s.inputIcon}>🚗</span>
-                  <input style={s.input} type="number" min={1} max={10} value={form.quantity}
-                    onChange={e => setForm(p => ({ ...p, quantity: e.target.value }))} />
                 </div>
               </div>
             </div>
