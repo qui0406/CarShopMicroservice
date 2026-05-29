@@ -49,27 +49,17 @@ public class InventoryServiceImpl implements InventoryService {
     @Override
     @Transactional
     public InventoryResponse create(InventoryRequest request) {
-        // 1. Check Car
         Car car = carRepository.findById(request.getCarId())
                 .orElseThrow(() -> new AppException(ErrorCode.CAR_NOT_FOUND));
 
-        // 2. Check Showroom
         ShowRoom showRoom = showRoomRepository.findById(request.getShowRoomId())
                 .orElseThrow(() -> new AppException(ErrorCode.SHOWROOM_NOT_FOUND));
 
-        // 3. Set Showroom and status
         car.setShowRoom(showRoom);
         car.setReady(request.getQuantity() > 0);
 
         Car savedCar = carRepository.save(car);
         return inventoryMapper.toInventoryResponse(savedCar);
-    }
-
-    @Override
-    public Boolean checkStock(String carId, Integer quantity) {
-        return carRepository.findById(carId)
-                .map(car -> car.isReady() && !car.isDeleted() && !car.isDeposited() && !car.isSold() && quantity == 1)
-                .orElse(false);
     }
 
     @Override
@@ -97,13 +87,6 @@ public class InventoryServiceImpl implements InventoryService {
         carRepository.save(car);
     }
 
-    @Override
-    public InventoryResponse getInventoryByCarId(String carId) {
-        Car car = carRepository.findById(carId)
-                .orElseThrow(() -> new AppException(ErrorCode.CAR_NOT_FOUND));
-
-        return inventoryMapper.toInventoryResponse(car);
-    }
 
     @Override
     @Transactional
@@ -150,66 +133,5 @@ public class InventoryServiceImpl implements InventoryService {
             }
             log.info("Đã đánh dấu xe {} là ĐÃ BÁN (isSold = true)", carId);
         }
-    }
-
-    @Override
-    public PageResponse<InventoryResponse> getList(int page, int size) {
-        // 1. Phân trang và sắp xếp
-        Pageable pageable = PageRequest.of(page - 1, size,
-                Sort.by("updatedAt").descending());
-        Page<Car> carPage = carRepository.findAll(pageable);
-
-        // 2. Early Exit: Nếu trang không có dữ liệu, trả về Page rỗng ngay
-        if (carPage.isEmpty()) {
-            return PageResponse.<InventoryResponse>builder()
-                    .currentPage(page)
-                    .pageSize(size)
-                    .totalPages(carPage.getTotalPages())
-                    .totalElements(carPage.getTotalElements())
-                    .data(Collections.emptyList())
-                    .build();
-        }
-
-        // 3. Mapping sang DTO
-        List<InventoryResponse> responses = carPage.getContent().stream()
-                .map(inventoryMapper::toInventoryResponse)
-                .collect(Collectors.toList());
-
-        // 4. Build response
-        return PageResponse.<InventoryResponse>builder()
-                .currentPage(page)
-                .pageSize(size)
-                .totalPages(carPage.getTotalPages())
-                .totalElements(carPage.getTotalElements())
-                .data(responses)
-                .build();
-    }
-
-    // Các hàm này sẽ dùng khi Quí tích hợp với luồng Payment/Order
-    @Override public void updateInventoryAfterPay(String orderId) { }
-    @Override public void restoreInventory(String orderId) { }
-
-    @Override
-    @Transactional
-    public boolean reserveCar(String carId) {
-        int rowsUpdated = carRepository.markAsDeposited(carId);
-        if (rowsUpdated > 0) {
-            log.info("Đã giữ chỗ xe {} ngay lập tức (isDeposited = true)", carId);
-            return true;
-        }
-        log.warn("Không thể giữ chỗ xe {}. Xe đã được đặt cọc, đã bán, hoặc chưa sẵn sàng.", carId);
-        return false;
-    }
-
-    @Override
-    @Transactional
-    public boolean unreserveCar(String carId) {
-        int rowsUpdated = carRepository.unmarkDeposited(carId);
-        if (rowsUpdated > 0) {
-            log.info("Đã hủy giữ chỗ xe {} (isDeposited = false)", carId);
-            return true;
-        }
-        log.warn("Không thể hủy giữ chỗ xe {} (có thể xe chưa được giữ chỗ).", carId);
-        return false;
     }
 }

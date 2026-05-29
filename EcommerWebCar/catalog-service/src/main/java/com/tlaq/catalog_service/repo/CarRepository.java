@@ -28,15 +28,15 @@ public interface CarRepository extends JpaRepository<Car, String>, JpaSpecificat
     @Modifying(clearAutomatically = true)
     @Transactional
     @Query("UPDATE Car c SET c.deposited = true WHERE c.id = :carId AND c.deposited = false AND c.sold = false AND c.isReady = true AND c.deleted = false")
-    int markAsDeposited(String carId);
+    int markAsDeposited(@org.springframework.data.repository.query.Param("carId") String carId);
 
     @Modifying(clearAutomatically = true)
     @Transactional
     @Query("UPDATE Car c SET c.deposited = false WHERE c.id = :carId AND c.deposited = true")
-    int unmarkDeposited(String carId);
+    int unmarkDeposited(@org.springframework.data.repository.query.Param("carId") String carId);
 
     @Modifying(clearAutomatically = true)
     @Transactional
     @Query("UPDATE Car c SET c.sold = true WHERE c.id = :carId AND c.deposited = true AND c.sold = false")
-    int markAsSold(String carId);
+    int markAsSold(@org.springframework.data.repository.query.Param("carId") String carId);
 }

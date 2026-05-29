@@ -25,6 +25,7 @@ public class OrderConfirmListener {
     private final OrderHistoryService orderHistoryService;
     private final IdentityClient identityClient;
     private final RabbitTemplate rabbitTemplate;
+    private final com.tlaq.ordering_service.repo.httpClient.CatalogClient catalogClient;
 
     @RabbitListener(queues = RabbitMQConfig.ORDER_CONFIRM_QUEUE)
     @Transactional // Bắt buộc phải có để đảm bảo toàn vẹn dữ liệu
@@ -67,6 +68,15 @@ public class OrderConfirmListener {
             }
             order.setStatus(OrdersStatus.DEPOSITED);
             ordersRepository.save(order);
+
+            // Mark car as deposited
+            if (order.getOrderItem() != null && order.getOrderItem().getCarId() != null) {
+                try {
+                    catalogClient.markCarDeposited(order.getOrderItem().getCarId());
+                } catch (Exception e) {
+                    log.error("Lỗi khi cập nhật trạng thái đặt cọc cho xe {}: {}", order.getOrderItem().getCarId(), e.getMessage());
+                }
+            }
 
             orderHistoryService.saveHistory(
                     order,

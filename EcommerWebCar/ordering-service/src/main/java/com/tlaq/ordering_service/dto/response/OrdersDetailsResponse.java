@@ -20,7 +20,6 @@ public class OrdersDetailsResponse {
     String address;
     String cccd;
     LocalDate dob;
-    int quantity;
     BigDecimal unitPrice;
-    BigDecimal totalAmount; // computed: unitPrice × quantity
+    BigDecimal totalAmount; // computed: same as unitPrice now
 }

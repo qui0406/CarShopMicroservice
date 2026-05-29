@@ -2,7 +2,7 @@ import os
 import shutil
 from langchain_openai import OpenAIEmbeddings
 from langchain_chroma import Chroma
-from langchain_community.document_loaders import DirectoryLoader, TextLoader
+from langchain_community.document_loaders import DirectoryLoader, TextLoader, Docx2txtLoader
 from langchain_text_splitters import MarkdownHeaderTextSplitter, RecursiveCharacterTextSplitter
 import logging
 
@@ -72,9 +72,8 @@ class RAGEngine:
 
             loader = DirectoryLoader(
                 data_path,
-                glob="*.md",
-                loader_cls=TextLoader,
-                loader_kwargs={'encoding': 'utf-8'}
+                glob="*.docx",
+                loader_cls=Docx2txtLoader
             )
 
             docs = loader.load()

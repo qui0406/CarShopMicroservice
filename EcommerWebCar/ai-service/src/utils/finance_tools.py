@@ -7,7 +7,7 @@ from typing import Literal
 from src.utils.db_utils import _get_connection, _normalize_search_param
 
 
-def get_car_and_calculate_rolling(car_name: str, address: str, quantity: int = 1):
+def get_car_and_calculate_rolling(car_name: str, address: str, year: int | None = None, quantity: int = 1):
     conn = _get_connection()
     cursor = conn.cursor(dictionary=True)
 
@@ -18,16 +18,21 @@ def get_car_and_calculate_rolling(car_name: str, address: str, quantity: int = 1
 
         # Trích xuất năm sản xuất nếu có trong câu hỏi (ví dụ: 2018)
         year_match = re.search(r'\b(20\d{2})\b', car_name)
-        year_filter = None
-        if year_match:
+        year_filter = year
+        if year_match and not year_filter:
             year_filter = int(year_match.group(1))
-            # Loại bỏ năm ra khỏi tên xe để tìm kiếm model chính xác hơn
-            car_name = car_name.replace(year_match.group(0), "").strip()
+
+        # Loại bỏ năm và các dấu ngoặc đơn xung quanh nó nếu có
+        if year_match:
+            year_str = year_match.group(1)
+            car_name = re.sub(r'\s*\(\s*' + re.escape(year_str) + r'\s*\)\s*', ' ', car_name)
+            car_name = car_name.replace(year_str, "").strip()
+            car_name = re.sub(r'\s+', ' ', car_name).strip()
 
         words = car_name.split()
         short_name = " ".join(words[:2]) if len(words) >= 2 else car_name
 
-        conditions = []
+        conditions = ["c.is_deposited = 0", "c.is_sold = 0"]
         params = []
 
         # Điều kiện tìm theo tên xe/model
@@ -81,7 +86,9 @@ def get_car_and_calculate_rolling(car_name: str, address: str, quantity: int = 1
             "engine": car['engine']
         }
 
-        return result["summary"], data
+        car_full_name = f"{car['model_name']} ({car['year']})"
+        summary_with_name = f"Dưới đây là giá lăn bánh dự kiến cho xe **{car_full_name}**:\n\n{result['summary']}"
+        return summary_with_name, data
     finally:
         cursor.close()
         conn.close()

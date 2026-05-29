@@ -30,13 +30,10 @@ public class OrdersDetails {
     @Column(name = "unit_price", nullable = false)
     BigDecimal unitPrice;
 
-    @Column(nullable = false)
-    int quantity;
-
     @Column(name = "car_id", nullable = false)
     String carId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "order_id", nullable = false)
     Orders order;
 }

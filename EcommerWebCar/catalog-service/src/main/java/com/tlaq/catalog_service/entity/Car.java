@@ -80,6 +80,9 @@ public class Car {
     String model3dUrl;
     String thumbnail;
 
+    @Column(columnDefinition = "TEXT")
+    String description;
+
     @OneToMany(mappedBy = "car", cascade = CascadeType.ALL, orphanRemoval = true)
     List<CarImage> carImages;
 

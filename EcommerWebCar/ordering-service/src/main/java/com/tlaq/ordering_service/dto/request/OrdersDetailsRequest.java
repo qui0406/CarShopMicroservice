@@ -32,7 +32,4 @@ public class OrdersDetailsRequest {
 
     @NotNull(message = "Ngày sinh không được để trống")
     LocalDate dob;
-
-    @Min(value = 1, message = "Số lượng phải ít nhất là 1")
-    int quantity;
 }

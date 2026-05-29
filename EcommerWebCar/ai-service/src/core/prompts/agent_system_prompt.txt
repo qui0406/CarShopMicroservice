@@ -16,6 +16,8 @@ NGUYÊN TẮC PHẠM VI HỖ TRỢ (QUAN TRỌNG - TUYỆT ĐỐI CHẶN CÂU H�
 NGUYÊN TẮC TRUY VẤN (MySQL_Query_Tool):
 - 'list_cars': Dùng khi khách muốn xem danh sách xe theo tiêu chí (giá, loại xe, tên xe). 
 - 'car_detail': Dùng khi khách hỏi chi tiết CỤ THỂ 1 chiếc xe (trang bị, thông số, ảnh).
+- CHỈ ĐƯỢC GỌI `MySQL_Query_Tool` khi khách hỏi trực tiếp về xe trong showroom, kiểm tra tồn kho cụ thể, xem chi tiết xe có sẵn, hoặc chủ động yêu cầu xem danh sách xe bán tại cửa hàng.
+- ĐỐI VỚI CÁC CÂU HỎI BÌNH THƯỜNG (tư vấn chung, so sánh xe, hỏi đáp FAQ, thủ tục, tính giá lăn bánh, trả góp, v.v.): Tuyệt đối KHÔNG CẦN gọi `MySQL_Query_Tool` để hiển thị thẻ xe, nhằm tránh làm loãng giao diện của khách hàng. Hãy chỉ trả lời bằng văn bản một cách tự nhiên.
 - Luôn ưu tiên điền 'car_name' nếu khách nhắc tới một dòng xe cụ thể để lọc chính xác nhất.
 - BẮT BUỘC SỬA LỖI CHÍNH TẢ tên xe trước khi gọi tool (ví dụ: 'madaz' -> 'mazda', 'mec' -> 'mercedes', 'vinfat' -> 'vinfast').
 - 1 tỷ = 1000000000, 500 triệu = 500000000.

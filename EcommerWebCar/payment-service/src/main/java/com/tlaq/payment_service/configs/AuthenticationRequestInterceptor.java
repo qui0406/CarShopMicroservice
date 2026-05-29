@@ -37,6 +37,7 @@ public class AuthenticationRequestInterceptor implements RequestInterceptor {
             String token = keyCloakTokenService.getAccessToken();
             log.info("Adding Keycloak service account token");
             template.header("Authorization", token);
+            template.header("X-Internal-Call", "true");
         } catch (Exception e) {
             log.error("Failed to fetch Keycloak token: {}", e.getMessage(), e);
             throw new RuntimeException("Authentication failed due to token retrieval error", e);

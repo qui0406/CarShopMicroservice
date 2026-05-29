@@ -53,6 +53,13 @@ public class OrderManagementController {
                 .build();
     }
 
+    @GetMapping("/stats/status-count")
+    public ApiResponse<java.util.Map<String, Long>> getStatusCount() {
+        return ApiResponse.<java.util.Map<String, Long>>builder()
+                .result(orderManagementService.getStatusCount())
+                .build();
+    }
+
     @GetMapping("/stats/revenue")
     public ApiResponse<List<RevenueReportResponse>> getRevenueReport(
             @RequestParam(required = false) Integer year,

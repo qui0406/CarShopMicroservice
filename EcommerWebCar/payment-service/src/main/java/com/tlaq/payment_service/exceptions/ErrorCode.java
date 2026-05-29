@@ -48,6 +48,7 @@ public enum ErrorCode {
     INVALID_AMOUNT(1036, "Invalid amount", HttpStatus.BAD_REQUEST),
     PAYMENT_STATUS_INVALID(1037, "Payment status invalid", HttpStatus.BAD_REQUEST),
     SEND_FAIL_RABBITMQ(1038, "Send failed",  HttpStatus.BAD_REQUEST),
+    FEE_CONFIG_NOT_FOUND(1039, "Fee config not found", HttpStatus.NOT_FOUND),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

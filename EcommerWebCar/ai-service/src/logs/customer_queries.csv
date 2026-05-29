@@ -1,0 +1,55 @@
+Timestamp,Session ID,Query,Intent,Sentiment,Is Off-Topic
+2026-05-28 02:03:59,a3ce497a-d0a5-4c2a-a1a4-ddfb8e0c2b3a,hello,GENERAL_QA,NEUTRAL,FALSE
+2026-05-28 02:04:44,a3ce497a-d0a5-4c2a-a1a4-ddfb8e0c2b3a,bạn có dòng xe nào từ 500 đến 800 triệu không,list_cars,NEUTRAL,FALSE
+2026-05-28 02:05:16,a3ce497a-d0a5-4c2a-a1a4-ddfb8e0c2b3a,xe nào chạy bằng dầu không,list_cars,NEUTRAL,FALSE
+2026-05-28 02:06:51,a3ce497a-d0a5-4c2a-a1a4-ddfb8e0c2b3a,tình hình xe ô tô của châu âu rẻ hơn việt nam không,GENERAL_QA,NEUTRAL,FALSE
+2026-05-28 02:07:33,a3ce497a-d0a5-4c2a-a1a4-ddfb8e0c2b3a,chính sách mua ô tô như nào,GENERAL_QA,NEUTRAL,FALSE
+2026-05-28 02:08:29,a3ce497a-d0a5-4c2a-a1a4-ddfb8e0c2b3a,bạn có xe nào trong tầm giá 900 triệu không,list_cars,NEUTRAL,FALSE
+2026-05-28 02:08:51,a3ce497a-d0a5-4c2a-a1a4-ddfb8e0c2b3a,Ford Territory Titanium X 1.5 AT (2026) giá lăn bánh như thế nào,rolling_price,NEUTRAL,FALSE
+2026-05-28 23:55:56,3ddfa1eb-66ac-4f3e-a3e4-79cb99083dd4,quy trình mua xe tại showroom như thế nào,GENERAL_QA,NEUTRAL,FALSE
+2026-05-28 23:59:13,ccb7edc1-e3b5-4d58-a540-7d84a6ba4e22,bạn hãy tư vấn quy trình mua ô tô,GENERAL_QA,NEUTRAL,FALSE
+2026-05-28 23:59:58,b3e9cc1c-bc95-4068-9c31-2389d2a6fab7,quy trình mua ô tô bên shop như thế nào,GENERAL_QA,NEUTRAL,FALSE
+2026-05-29 00:01:16,06d4b122-845a-44b9-b23e-2a78845018f6,mình có tầm giá từ 600 đến 800 triệu bạn hãy giới thiệu những hãng xe gia đình cho mình,GENERAL_QA,NEUTRAL,FALSE
+2026-05-29 00:01:49,06d4b122-845a-44b9-b23e-2a78845018f6,tất cả,list_cars,NEUTRAL,FALSE
+2026-05-29 00:03:23,06d4b122-845a-44b9-b23e-2a78845018f6,mình muốn bạn tư vấn xe tầm giá 600 đến 800 triệu xe cho gia đình,GENERAL_QA,NEUTRAL,FALSE
+2026-05-29 00:03:56,06d4b122-845a-44b9-b23e-2a78845018f6,vậy có xe gì,list_cars,NEUTRAL,FALSE
+2026-05-29 00:05:36,9186cbfa-52a5-4233-ab29-174a5da3dffa,hiện tại mình muốn bạn tư vấn xe giá tầm 600 đến 800 triệu,list_cars,NEUTRAL,FALSE
+2026-05-29 00:06:11,9186cbfa-52a5-4233-ab29-174a5da3dffa,xe nào phù hợp cho gia đình trong đó,GENERAL_QA,NEUTRAL,FALSE
+2026-05-29 00:18:00,9186cbfa-52a5-4233-ab29-174a5da3dffa,bạn hãy tư vấn xe trong tầm giá 600 đến 800 triệu,list_cars,NEUTRAL,FALSE
+2026-05-29 00:18:25,9186cbfa-52a5-4233-ab29-174a5da3dffa,Gia đình mình có 5 người và hay đi du lịch thì nên chọn xe nào là tốt nhất,GENERAL_QA,NEUTRAL,FALSE
+2026-05-29 00:18:57,9186cbfa-52a5-4233-ab29-174a5da3dffa,vậy bạn hãy cho mình biết tất cả chi phí giá lăng bánh chiếc xe đó,rolling_price,NEUTRAL,FALSE
+2026-05-29 00:19:14,9186cbfa-52a5-4233-ab29-174a5da3dffa,có trong kho mà,rolling_price,NEUTRAL,FALSE
+2026-05-29 00:24:55,21f3485b-fdcb-4699-9dda-50b4bce6a221,mình muốn bạn tư vấn xe trong tầm giá 600 đến 800 triệu,list_cars,NEUTRAL,FALSE
+2026-05-29 00:25:18,21f3485b-fdcb-4699-9dda-50b4bce6a221,gia đình có 5 người thường xuyên đi du lịch chọn xe nào,GENERAL_QA,NEUTRAL,FALSE
+2026-05-29 00:26:01,21f3485b-fdcb-4699-9dda-50b4bce6a221,mình xin giá lăng bánh chiếc Hyundai Creta đi,rolling_price,NEUTRAL,FALSE
+2026-05-29 00:26:23,21f3485b-fdcb-4699-9dda-50b4bce6a221,Mitsubishi Xpander,rolling_price,NEUTRAL,FALSE
+2026-05-29 00:26:41,21f3485b-fdcb-4699-9dda-50b4bce6a221,Toyota Fortuner,rolling_price,NEUTRAL,FALSE
+2026-05-29 00:32:24,21f3485b-fdcb-4699-9dda-50b4bce6a221,tư vấn xe trong tầm giá 600 đến 800 triệu,list_cars,NEUTRAL,FALSE
+2026-05-29 00:32:43,21f3485b-fdcb-4699-9dda-50b4bce6a221,gia đình có 5 người và hay đi du lịch thì nên chọn chiếc nào,GENERAL_QA,NEUTRAL,FALSE
+2026-05-29 00:33:06,21f3485b-fdcb-4699-9dda-50b4bce6a221,Mitsubishi Xpander có giá lăng bánh là bao nhiêu,rolling_price,NEUTRAL,FALSE
+2026-05-29 00:33:25,21f3485b-fdcb-4699-9dda-50b4bce6a221,Mitsubishi Xpander 1.5 AT Premium có giá lăng bánh là bao nhiêu,rolling_price,NEUTRAL,FALSE
+2026-05-29 00:34:17,21f3485b-fdcb-4699-9dda-50b4bce6a221,còn mà kiểm lại đi,rolling_price,NEUTRAL,FALSE
+2026-05-29 00:38:20,21f3485b-fdcb-4699-9dda-50b4bce6a221,tư vấn xe 600 đến 800 triệu,list_cars,NEUTRAL,FALSE
+2026-05-29 00:38:37,21f3485b-fdcb-4699-9dda-50b4bce6a221,xe cho gia đình 5 người đi du lịch,GENERAL_QA,NEUTRAL,FALSE
+2026-05-29 00:39:10,21f3485b-fdcb-4699-9dda-50b4bce6a221,tư vấn rõ cho mình Mitsubishi Xpander,car_detail,NEUTRAL,FALSE
+2026-05-29 00:39:47,21f3485b-fdcb-4699-9dda-50b4bce6a221,xin giá lăng bánh,rolling_price,NEUTRAL,FALSE
+2026-05-29 00:40:23,21f3485b-fdcb-4699-9dda-50b4bce6a221,xin giá lăng bánh chiếc này Mitsubishi Xpander 1.5 AT Premium (2026),rolling_price,NEUTRAL,FALSE
+2026-05-29 00:46:34,8683b9d6-2dac-4bbd-b72a-c8710fb8e36a,tư vấn xe giá 600 đến 800 triệu,list_cars,NEUTRAL,FALSE
+2026-05-29 00:46:54,8683b9d6-2dac-4bbd-b72a-c8710fb8e36a,gia đình 5 người và hay đi du lịch thì đi xe nào,list_cars,NEUTRAL,FALSE
+2026-05-29 00:47:14,8683b9d6-2dac-4bbd-b72a-c8710fb8e36a,bạn cho mình xem chi tiết xe đó đi,car_detail,NEUTRAL,FALSE
+2026-05-29 00:47:31,8683b9d6-2dac-4bbd-b72a-c8710fb8e36a,ngoài ra còn chiếc xe nào phù hợp nữa không,GENERAL_QA,NEUTRAL,FALSE
+2026-05-29 00:47:44,8683b9d6-2dac-4bbd-b72a-c8710fb8e36a,có,list_cars,NEUTRAL,FALSE
+2026-05-29 00:48:17,63b6d88f-dd40-4fcf-a303-94a75ee90279,bạn hãy tư vấn xe giá từ 600 đến 800 triệu,list_cars,NEUTRAL,FALSE
+2026-05-29 00:48:40,63b6d88f-dd40-4fcf-a303-94a75ee90279,nếu gia đình có 5 người và thường xuyên đi du lịch thì nên chọn loại xe nào,GENERAL_QA,NEUTRAL,FALSE
+2026-05-29 00:49:12,63b6d88f-dd40-4fcf-a303-94a75ee90279,so sánh xe hyundai crete và toyota innova,list_cars,NEUTRAL,FALSE
+2026-05-29 00:52:15,63b6d88f-dd40-4fcf-a303-94a75ee90279,bạn hãy tư vấn xe từ 600 đến 800 triệu,list_cars,NEUTRAL,FALSE
+2026-05-29 00:52:37,63b6d88f-dd40-4fcf-a303-94a75ee90279,gia đình có 5 người và hay đi du lịch nên chọn mua loại xe nào,GENERAL_QA,NEUTRAL,FALSE
+2026-05-29 00:53:04,63b6d88f-dd40-4fcf-a303-94a75ee90279,so sánh toyota innova với mitsubishi xpander đi,GENERAL_QA,NEUTRAL,FALSE
+2026-05-29 00:53:49,63b6d88f-dd40-4fcf-a303-94a75ee90279,cho mình xem chi tiết chiếc mitsubishi xpander đó,car_detail,NEUTRAL,FALSE
+2026-05-29 00:54:10,63b6d88f-dd40-4fcf-a303-94a75ee90279,bạn hãy tính giá lăng bánh của nó,rolling_price,NEUTRAL,FALSE
+2026-05-29 00:54:39,63b6d88f-dd40-4fcf-a303-94a75ee90279,thị trường xe ô tô của châu âu hiện nay so với việt nam như thế nào,GENERAL_QA,NEUTRAL,FALSE
+2026-05-29 10:28:36,63b6d88f-dd40-4fcf-a303-94a75ee90279,tư vấn giá xe tầm 600 đến 800 triệu,list_cars,NEUTRAL,FALSE
+2026-05-29 10:29:18,63b6d88f-dd40-4fcf-a303-94a75ee90279,nếu gia đình có 5 người và thường xuyên đi du lijch chọn xe nào là tốt nhất,GENERAL_QA,NEUTRAL,FALSE
+2026-05-29 10:30:03,63b6d88f-dd40-4fcf-a303-94a75ee90279,hãy so sánh 2 dòng xe tốt nhất cho việc đi du lịch,GENERAL_QA,NEUTRAL,FALSE
+2026-05-29 10:30:58,63b6d88f-dd40-4fcf-a303-94a75ee90279,cho xin giá lăn bánh chiếc xe Mitsubishi xpander 1.5 AT Premium,rolling_price,NEUTRAL,FALSE
+2026-05-29 10:31:29,63b6d88f-dd40-4fcf-a303-94a75ee90279,tình hình về ô tô ở châu âu giá như nào,GENERAL_QA,NEUTRAL,FALSE

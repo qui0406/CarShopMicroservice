@@ -18,11 +18,14 @@ public interface PaymentService {
     // 3. Nhân viên xác nhận thu tiền mặt/chuyển khoản tại showroom
     PaymentResponse confirmOfflinePayment(ConfirmPaymentRequest request);
 
-    // 4. Lấy thông tin để hiển thị Progress Bar và 3D Model
+    // Lấy trạng thái thanh toán bằng orderId
     PaymentResponse getPaymentStatusByOrder(String orderId);
 
     PaymentResponse fullPayment(OfflinePaymentRequest request);
 
     // Kiểm tra xem đơn hàng này đã nộp đủ tiền cọc tối thiểu chưa
     boolean isDepositReached(String orderId);
+
+    // Hủy thanh toán
+    PaymentResponse cancelPayment(String orderId);
 }

@@ -3,6 +3,7 @@ package com.tlaq.payment_service.controllers;
 import com.tlaq.payment_service.dto.ApiResponse;
 import com.tlaq.payment_service.dto.request.ConfirmPaymentRequest;
 import com.tlaq.payment_service.dto.request.OfflinePaymentRequest;
+import com.tlaq.payment_service.dto.request.PaymentRequest;
 import com.tlaq.payment_service.dto.response.PageResponse;
 import com.tlaq.payment_service.dto.response.PaymentManagementResponse;
 import com.tlaq.payment_service.dto.response.PaymentResponse;
@@ -28,9 +29,9 @@ public class PaymentManagementController {
     public ApiResponse<PageResponse<PaymentManagementResponse>> getManagementPayments(
             @RequestParam(value = "page", required = false, defaultValue = "1") int page,
             @RequestParam(value = "size", required = false, defaultValue = "10") int size,
-            @RequestParam(value = "status", required = false, defaultValue = "PARTIALLY_PAID") PaymentStatus status
+            @RequestParam(value = "status", required = false, defaultValue = "DEPOSITED") PaymentStatus status
     ) {
-        return ApiResponse.<com.tlaq.payment_service.dto.response.PageResponse<com.tlaq.payment_service.dto.response.PaymentManagementResponse>>builder()
+        return ApiResponse.<PageResponse<PaymentManagementResponse>>builder()
                 .result(paymentManagementService.getAllPaymentsForManagement(page, size, status))
                 .build();
     }
@@ -46,5 +47,24 @@ public class PaymentManagementController {
         return ApiResponse.<PaymentResponse>builder()
                 .result(paymentService.fullPayment(request))
                 .build();
+    }
+
+    @PostMapping("/cancel-payment/{orderId}")
+    public ApiResponse<PaymentResponse> cancelPayment(@PathVariable String orderId) {
+        var result = paymentService.cancelPayment(orderId);
+        return ApiResponse.<PaymentResponse>builder().result(result).build();
+    }
+
+    @GetMapping("/details/{paymentId}")
+    public ApiResponse<com.tlaq.payment_service.dto.response.PaymentDetailsResponse> getPaymentDetails(@PathVariable String paymentId) {
+        return ApiResponse.<com.tlaq.payment_service.dto.response.PaymentDetailsResponse>builder()
+                .result(paymentManagementService.getPaymentDetails(paymentId))
+                .build();
+    }
+
+    @PatchMapping("/approve-deposit/{orderId}")
+    public ApiResponse<String> approveDeposit(@PathVariable String orderId) {
+        paymentManagementService.approveDeposit(orderId);
+        return ApiResponse.<String>builder().result("Thành công").build();
     }
 }

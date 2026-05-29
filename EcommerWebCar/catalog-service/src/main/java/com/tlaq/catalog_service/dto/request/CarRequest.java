@@ -22,6 +22,7 @@ public class CarRequest {
     String vinNumber;
     String color;
     String showRoomId;
+    String description;
 
     TechSpecRequest technicalSpec;
     EquipmentRequest equipment;

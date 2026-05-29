@@ -1,10 +1,10 @@
-package com.tlaq.ordering_service.service.impl;
+package com.tlaq.payment_service.services.impl;
 
-import com.tlaq.ordering_service.entity.FeeConfig;
-import com.tlaq.ordering_service.exceptions.AppException;
-import com.tlaq.ordering_service.exceptions.ErrorCode;
-import com.tlaq.ordering_service.repo.FeeConfigRepository;
-import com.tlaq.ordering_service.service.FeeConfigService;
+import com.tlaq.payment_service.entity.FeeConfig;
+import com.tlaq.payment_service.exceptions.AppException;
+import com.tlaq.payment_service.exceptions.ErrorCode;
+import com.tlaq.payment_service.repository.FeeConfigRepository;
+import com.tlaq.payment_service.services.FeeConfigService;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -68,9 +68,9 @@ public class FeeConfigServiceImpl implements FeeConfigService {
         return feeConfigRepository
                 .findByKeyAndRegionAndFuelTypeAndActiveTrue(KEY_TAX_RATE, region, FUEL_ALL)
                 .map(FeeConfig::getValue)
-                .orElseThrow(() -> {
-                    log.error("Registration tax rate not found: region={}, fuelType={}", region, fuelType);
-                    return new AppException(ErrorCode.FEE_CONFIG_NOT_FOUND);
+                .orElseGet(() -> {
+                    log.warn("Registration tax rate not found in DB: region={}, fuelType={}. Using standard fallback.", region, fuelType);
+                    return REGION_HANOI.equals(region) ? BigDecimal.valueOf(0.12) : BigDecimal.valueOf(0.10);
                 });
     }
 
@@ -79,9 +79,11 @@ public class FeeConfigServiceImpl implements FeeConfigService {
         return feeConfigRepository
                 .findByKeyAndRegionAndActiveTrue(KEY_PLATE_FEE, region)
                 .map(FeeConfig::getValue)
-                .orElseThrow(() -> {
-                    log.error("Plate fee not found: region={}", region);
-                    return new AppException(ErrorCode.FEE_CONFIG_NOT_FOUND);
+                .orElseGet(() -> {
+                    log.warn("Plate fee not found in DB for region {}. Using standard fallback.", region);
+                    return REGION_HANOI.equals(region) || REGION_HCM.equals(region) 
+                            ? BigDecimal.valueOf(20000000) 
+                            : BigDecimal.valueOf(1000000);
                 });
     }
 
@@ -90,7 +92,10 @@ public class FeeConfigServiceImpl implements FeeConfigService {
         return feeConfigRepository
                 .findByKeyAndRegionAndActiveTrue(KEY_INSPECTION, REGION_ALL)
                 .map(FeeConfig::getValue)
-                .orElseThrow(() -> new AppException(ErrorCode.FEE_CONFIG_NOT_FOUND));
+                .orElseGet(() -> {
+                    log.warn("Inspection fee not found in DB. Using standard fallback.");
+                    return BigDecimal.valueOf(340000);
+                });
     }
 
     /**

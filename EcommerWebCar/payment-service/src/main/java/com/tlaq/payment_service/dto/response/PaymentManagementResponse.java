@@ -16,6 +16,7 @@ public class PaymentManagementResponse {
     String id;
     String orderId;
     String customerName;
+    String carName;
     String address;
     String phone;
     BigDecimal totalAmount;

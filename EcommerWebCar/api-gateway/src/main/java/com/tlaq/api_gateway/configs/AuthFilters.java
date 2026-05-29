@@ -77,8 +77,6 @@ public class AuthFilters implements GlobalFilter, Ordered {
             return unauthenticated(exchange.getResponse());
 
         String token = authHeader.getFirst().replace("Bearer ", "");
-        log.info("Token: {}", token);
-
 
         return authService.introspect(token).flatMap(introspectResponse -> {
             if (introspectResponse.isActive())

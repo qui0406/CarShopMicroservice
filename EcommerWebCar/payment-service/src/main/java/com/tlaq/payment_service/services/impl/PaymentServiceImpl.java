@@ -42,6 +42,9 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import com.tlaq.payment_service.services.FeeConfigService;
+import com.tlaq.payment_service.repository.httpClient.CatalogClient;
+import com.tlaq.payment_service.dto.response.CarResponse;
 
 @Service
 @Slf4j
@@ -56,6 +59,8 @@ public class PaymentServiceImpl implements PaymentService {
     IdentityClient identityClient;
     OrderingClient orderingClient; // Thêm Client để lấy chi tiết thuế phí
     PaymentHelper paymentHelper;
+    FeeConfigService feeConfigService;
+    CatalogClient catalogClient;
 
     @Override
     public void initializePayment(PaymentRequest request) {
@@ -73,7 +78,13 @@ public class PaymentServiceImpl implements PaymentService {
         if (payment.getRemainAmount().compareTo(BigDecimal.ZERO) <= 0) {
             payment.setStatus(PaymentStatus.COMPLETED);
         } else {
-            payment.setStatus(PaymentStatus.PARTIALLY_PAID);
+            // Nếu tổng tiền thanh toán mới chỉ bằng 1% (tiền cọc) thì là DEPOSITED
+            BigDecimal depositThreshold = payment.getTotalAmount().multiply(new BigDecimal("0.01"));
+            if (totalPaid.compareTo(depositThreshold) <= 0) {
+                payment.setStatus(PaymentStatus.DEPOSITED);
+            } else {
+                payment.setStatus(PaymentStatus.PARTIALLY_PAID);
+            }
         }
 
         return paymentMapper.toPaymentResponse(paymentRepository.save(payment));
@@ -98,6 +109,9 @@ public class PaymentServiceImpl implements PaymentService {
             expectedAmount = payment.getTotalAmount().multiply(new BigDecimal("0.01"));
             txnType = TransactionType.DEPOSIT;
         } else {
+            // Tính phí lăn bánh nếu chưa tính
+            OrdersResponse orderInfo = orderingClient.getOrder(payment.getOrderId()).getResult();
+            applyTaxesAndFeesIfNeeded(payment, orderInfo);
             // Xác nhận thanh toán phần còn lại offline
             expectedAmount = payment.getRemainAmount();
             txnType = TransactionType.BALANCE;
@@ -150,13 +164,11 @@ public class PaymentServiceImpl implements PaymentService {
             throw new AppException(ErrorCode.ORDER_NOT_FOUND);
         }
 
-        BigDecimal expectedAmount = orderInfo.getTotalAmount();
-
         Payment payment = paymentRepository.findByOrderId(request.getOrderId())
                 .orElseGet(() -> paymentRepository.save(
                         Payment.builder()
                                 .orderId(request.getOrderId())
-                                .totalAmount(orderInfo.getTotalAmount()) // snapshot
+                                .totalAmount(orderInfo.getBaseAmount() != null ? orderInfo.getBaseAmount() : orderInfo.getTotalAmount()) // base amount
                                 .paidAmount(BigDecimal.ZERO)
                                 .status(PaymentStatus.PENDING)
                                 .build()
@@ -166,6 +178,10 @@ public class PaymentServiceImpl implements PaymentService {
             log.error("Đơn hàng {} đã được thanh toán một phần. Không thể dùng API fullPayment.", request.getOrderId());
             throw new AppException(ErrorCode.PAYMENT_STATUS_INVALID);
         }
+
+        // Áp dụng thuế và lệ phí
+        applyTaxesAndFeesIfNeeded(payment, orderInfo);
+        BigDecimal expectedAmount = payment.getTotalAmount();
 
         PaymentTransaction transaction = PaymentTransaction.builder()
                 .payment(payment)
@@ -279,5 +295,41 @@ public class PaymentServiceImpl implements PaymentService {
         } catch (Exception e) {
             log.error("Lỗi gửi thông báo thanh toán offline thành công: {}", e.getMessage());
         }
+    }
+
+    @Override
+    @Transactional
+    public PaymentResponse cancelPayment(String orderId) {
+        Payment payment = paymentRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND));
+
+        payment.setStatus(PaymentStatus.CANCELLED);
+        return paymentMapper.toPaymentResponse(paymentRepository.save(payment));
+    }
+
+    private void applyTaxesAndFeesIfNeeded(Payment payment, OrdersResponse orderInfo) {
+        // Nếu đã tính thuế (có baseAmount) thì bỏ qua
+        if (payment.getBaseAmount() != null && payment.getBaseAmount().compareTo(BigDecimal.ZERO) > 0) {
+            return;
+        }
+        
+        String carId = orderInfo.getOrderItem().getCarId();
+        CarResponse car = catalogClient.getProductById(carId).getResult();
+        if (car == null) throw new AppException(ErrorCode.CAR_NOT_FOUND);
+
+        String region = feeConfigService.resolveRegion(orderInfo.getOrderItem().getAddress());
+        String fuelType = car.getFuelType() != null ? car.getFuelType() : "GASOLINE";
+        BigDecimal base = payment.getTotalAmount(); // Lúc này totalAmount mới chỉ là base
+
+        BigDecimal taxRate = feeConfigService.getRegistrationTaxRate(region, fuelType);
+        BigDecimal tax = base.multiply(taxRate);
+        BigDecimal plate = feeConfigService.getPlateFee(region);
+        BigDecimal inspect = feeConfigService.getInspectionFee();
+
+        payment.setBaseAmount(base);
+        payment.setTaxAmount(tax);
+        payment.setPlateFeeAmount(plate);
+        payment.setInsuranceAmount(inspect);
+        payment.setTotalAmount(base.add(tax).add(plate).add(inspect));
     }
 }

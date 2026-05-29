@@ -1,9 +1,12 @@
 package com.tlaq.payment_service.services.impl;
 
 import com.tlaq.payment_service.dto.response.PageResponse;
+import com.tlaq.payment_service.dto.response.PaymentDetailsResponse;
 import com.tlaq.payment_service.dto.response.PaymentManagementResponse;
 import com.tlaq.payment_service.entity.Payment;
 import com.tlaq.payment_service.entity.enums.PaymentStatus;
+import com.tlaq.payment_service.exceptions.AppException;
+import com.tlaq.payment_service.exceptions.ErrorCode;
 import com.tlaq.payment_service.mapper.PaymentMapper;
 import com.tlaq.payment_service.repository.PaymentRepository;
 import com.tlaq.payment_service.repository.httpClient.OrderingClient;
@@ -18,6 +21,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -42,29 +46,12 @@ public class PaymentManagementServiceImpl implements PaymentManagementService {
             try {
                 // Lấy thông tin khách hàng từ Ordering Service qua orderId
                 var orderResult = orderingClient.getOrder(payment.getOrderId()).getResult();
-                if (orderResult != null && orderResult.getOrderItems() != null && !orderResult.getOrderItems().isEmpty()) {
-                    // Dùng Stream để kết hợp tên, SĐT và địa chỉ của tất cả items (tránh trùng lặp và hardcode get(0))
-                    String customerName = orderResult.getOrderItems().stream()
-                            .map(OrdersDetailsResponse::getFullName)
-                            .filter(name -> name != null && !name.trim().isEmpty())
-                            .distinct()
-                            .collect(Collectors.joining(", "));
-
-                    String phone = orderResult.getOrderItems().stream()
-                            .map(OrdersDetailsResponse::getPhoneNumber)
-                            .filter(p -> p != null && !p.trim().isEmpty())
-                            .distinct()
-                            .collect(Collectors.joining(", "));
-
-                    String address = orderResult.getOrderItems().stream()
-                            .map(OrdersDetailsResponse::getAddress)
-                            .filter(a -> a != null && !a.trim().isEmpty())
-                            .distinct()
-                            .collect(Collectors.joining(" | "));
-
-                    response.setCustomerName(customerName);
-                    response.setPhone(phone);
-                    response.setAddress(address);
+                if (orderResult != null && orderResult.getOrderItem() != null) {
+                    var item = orderResult.getOrderItem();
+                    response.setCustomerName(item.getFullName());
+                    response.setPhone(item.getPhoneNumber());
+                    response.setAddress(item.getAddress());
+                    response.setCarName(item.getCarName());
                 }
             } catch (Exception e) {
                 log.error("Failed to fetch order info for management: {}", payment.getOrderId());
@@ -80,5 +67,55 @@ public class PaymentManagementServiceImpl implements PaymentManagementService {
                 .totalPages(payments.getTotalPages())
                 .data(list)
                 .build();
+    }
+
+    @Override
+    public PaymentDetailsResponse getPaymentDetails(String paymentId) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new RuntimeException("Payment not found"));
+        
+        PaymentDetailsResponse.PaymentDetailsResponseBuilder builder =
+                com.tlaq.payment_service.dto.response.PaymentDetailsResponse.builder()
+                .paymentId(payment.getId())
+                .orderId(payment.getOrderId())
+                .paymentStatus(payment.getStatus())
+                .totalAmount(payment.getTotalAmount())
+                .paidAmount(payment.getPaidAmount())
+                .remainAmount(payment.getRemainAmount());
+
+        try {
+            var orderResult = orderingClient.getOrder(payment.getOrderId()).getResult();
+            if (orderResult != null && orderResult.getOrderItem() != null) {
+                var item = orderResult.getOrderItem();
+                
+                builder.customerDetails(com.tlaq.payment_service.dto.response.PaymentDetailsResponse.CustomerDetails.builder()
+                        .fullName(item.getFullName())
+                        .address(item.getAddress())
+                        .dob(item.getDob())
+                        .cccd(item.getCccd())
+                        .phoneNumber(item.getPhoneNumber())
+                        .build());
+
+                builder.orderDetails(com.tlaq.payment_service.dto.response.PaymentDetailsResponse.OrderDetails.builder()
+                        .carId(item.getCarId())
+                        .carName(item.getCarName())
+                        .build());
+            }
+        } catch (Exception e) {
+            log.error("Failed to fetch order info for payment details: {}", payment.getOrderId());
+        }
+
+        return builder.build();
+    }
+
+    @Override
+    @Transactional
+    public void approveDeposit(String orderId) {
+        Payment payment = paymentRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new AppException(ErrorCode.PAYMENT_NOT_FOUND));
+        if (payment.getStatus() == PaymentStatus.DEPOSITED) {
+            payment.setStatus(PaymentStatus.PARTIALLY_PAID);
+            paymentRepository.save(payment);
+        }
     }
 }

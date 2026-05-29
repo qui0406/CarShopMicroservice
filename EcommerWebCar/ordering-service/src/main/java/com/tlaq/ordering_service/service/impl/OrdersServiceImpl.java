@@ -25,7 +25,7 @@ import com.tlaq.ordering_service.repo.OrdersHistoryRepository;
 import com.tlaq.ordering_service.repo.OrdersRepository;
 import com.tlaq.ordering_service.repo.httpClient.IdentityClient;
 import com.tlaq.ordering_service.repo.httpClient.CatalogClient;
-import com.tlaq.ordering_service.service.FeeConfigService;
+
 import com.tlaq.ordering_service.service.OrdersService;
 import jakarta.transaction.Transactional;
 import lombok.AccessLevel;
@@ -41,6 +41,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
+import org.springframework.jdbc.core.JdbcTemplate;
+import jakarta.annotation.PostConstruct;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -60,7 +62,18 @@ public class OrdersServiceImpl implements OrdersService {
     CatalogClient catalogClient;
     IdentityClient identityClient;
     RabbitTemplate rabbitTemplate;
-    FeeConfigService feeConfigService;
+
+    JdbcTemplate jdbcTemplate;
+
+    @PostConstruct
+    public void init() {
+        try {
+            jdbcTemplate.execute("ALTER TABLE order_details DROP COLUMN quantity");
+            log.info("✅ Đã xóa cột 'quantity' khỏi bảng 'order_details' thành công.");
+        } catch (Exception e) {
+            log.warn("⚠️ Bỏ qua xóa cột quantity (có thể đã xóa rồi): {}", e.getMessage());
+        }
+    }
 
     @Override
     public Boolean checkOrderId(String orderId) {
@@ -88,12 +101,23 @@ public class OrdersServiceImpl implements OrdersService {
         // Điều kiện A: Là STAFF
         boolean isStaff = checkRoleStaff();
 
-        // Điều kiện B: Là chủ sở hữu đơn hàng
-        String userId = identityClient.getProfileByUserKeycloakId(userKeycloak).getResult().getId();
-        boolean isOwner = order.getUserId().equals(userId);
+        boolean isOwner = false;
+        if (!isStaff) {
+            try {
+                String userId = identityClient.getProfileByUserKeycloakId(userKeycloak).getResult().getId();
+                isOwner = order.getUserId().equals(userId);
+            } catch (Exception e) {
+                log.warn("Lỗi lấy thông tin profile: {}", e.getMessage());
+            }
+        }
 
-        // 3. Nếu KHÔNG PHẢI STAFF và CŨNG KHÔNG PHẢI CHỦ ĐƠN -> Chặn
-        if (!isStaff && !isOwner) {
+        // 3. Check for X-Internal-Call header
+        org.springframework.web.context.request.ServletRequestAttributes attrs = 
+            (org.springframework.web.context.request.ServletRequestAttributes) org.springframework.web.context.request.RequestContextHolder.getRequestAttributes();
+        boolean isInternalCall = attrs != null && "true".equals(attrs.getRequest().getHeader("X-Internal-Call"));
+
+        // 4. Nếu KHÔNG PHẢI STAFF, KHÔNG PHẢI CHỦ ĐƠN, VÀ KHÔNG PHẢI INTERNAL CALL -> Chặn
+        if (!isStaff && !isOwner && !isInternalCall) {
             log.warn("Cảnh báo: Người dùng {} (không phải STAFF) cố tình truy cập đơn hàng {} của người dùng {}",
                     userKeycloak, id, order.getUserId());
             throw new AppException(ErrorCode.UNAUTHORIZED);
@@ -117,22 +141,23 @@ public class OrdersServiceImpl implements OrdersService {
         if (profileRes == null) throw new AppException(ErrorCode.USER_NOT_EXISTED);
         String profileId = profileRes.getId();
 
-        // 2. Guard: danh sách sản phẩm không được rỗng
-        if (request.getOrderItems() == null || request.getOrderItems().isEmpty()) {
+        // 2. Guard: check if orderItem exists
+        if (request.getOrderItem() == null) {
             throw new AppException(ErrorCode.ORDER_IS_EMPTY);
         }
 
-        // 3. GIẢI QUYẾT N+1: Batch validate thông tin xe và tồn kho trong 1 lần gọi duy nhất
-        List<CarBatchItemRequest> batchRequests = request.getOrderItems().stream()
-                .map(item -> CarBatchItemRequest.builder()
-                        .carId(item.getCarId())
-                        .quantity(item.getQuantity())
-                        .build())
-                .toList();
+        // 3. GIẢI QUYẾT N+1: Validate thông tin xe và tồn kho
+        OrdersDetailsRequest itemDto = request.getOrderItem();
+        List<CarBatchItemRequest> batchRequests = List.of(
+                CarBatchItemRequest.builder()
+                        .carId(itemDto.getCarId())
+                        .quantity(1) // Always 1
+                        .build()
+        );
 
         var batchRes = catalogClient.validateBatch(batchRequests).getResult();
 
-        if (batchRes == null || batchRes.size() != request.getOrderItems().size()) {
+        if (batchRes == null || batchRes.isEmpty()) {
             throw new AppException(ErrorCode.CAR_NOT_FOUND);
         }
 
@@ -147,33 +172,12 @@ public class OrdersServiceImpl implements OrdersService {
                 })
                 .collect(Collectors.toMap(res -> res.getCarDetail().getId(), res -> res));
 
-        // ========================================================================
-        // 3.5. GIỮ CHỖ XE NGAY LẬP TỨC (đồng bộ) - isDeposited = true LUÔN
-        //      Đảm bảo chỉ 1 người có thể đặt cọc 1 chiếc xe tại bất kỳ thời điểm nào.
-        //      Nếu có ai khác đã giữ chỗ rồi → báo lỗi ngay, không tạo đơn hàng.
-        // ========================================================================
-        List<String> reservedCarIds = new ArrayList<>();
+        // 3.5. Giữ xe (Mark as deposited) ngay lúc tạo đơn hàng
         try {
-            for (OrdersDetailsRequest itemDto : request.getOrderItems()) {
-                var reserveRes = catalogClient.reserveCar(itemDto.getCarId());
-                if (reserveRes == null || !Boolean.TRUE.equals(reserveRes.getResult())) {
-                    log.warn("Xe {} đã được người khác giữ chỗ hoặc không khả dụng.", itemDto.getCarId());
-                    throw new AppException(ErrorCode.QUANTITY_NOT_ENOUGH);
-                }
-                reservedCarIds.add(itemDto.getCarId());
-                log.info("✅ Đã giữ chỗ xe {} thành công (isDeposited = true)", itemDto.getCarId());
-            }
+            catalogClient.markCarDeposited(itemDto.getCarId());
         } catch (Exception e) {
-            // COMPENSATION: Hủy giữ chỗ tất cả xe đã reserve thành công trước đó
-            for (String carId : reservedCarIds) {
-                try {
-                    catalogClient.unreserveCar(carId);
-                    log.info("↩️ Đã hủy giữ chỗ xe {} do lỗi tạo đơn.", carId);
-                } catch (Exception ex) {
-                    log.error("❌ Lỗi hủy giữ chỗ xe {}: {}", carId, ex.getMessage());
-                }
-            }
-            throw e;
+            log.error("Không thể giữ xe {}: {}", itemDto.getCarId(), e.getMessage());
+            throw new AppException(ErrorCode.QUANTITY_NOT_ENOUGH);
         }
 
         // 4. Khởi tạo Orders
@@ -182,17 +186,14 @@ public class OrdersServiceImpl implements OrdersService {
         order.setStatus(OrdersStatus.PENDING);
         order.setType(checkRoleStaff() ? OrdersType.PURCHASE : OrdersType.DEPOSIT);
 
-        // 5. Xử lý từng item: tính phí dựa trên dữ liệu đã batch validate
+        // 5. Xử lý item: tính phí dựa trên dữ liệu đã batch validate
         OrderTotals totals = new OrderTotals();
-        List<OrdersDetails> detailsEntities = new ArrayList<>();
-
-        for (OrdersDetailsRequest itemDto : request.getOrderItems()) {
-            CarBatchResponse validatedData = validationMap.get(itemDto.getCarId());
-            detailsEntities.add(processItem(itemDto, order, totals, validatedData));
-        }
+        
+        CarBatchResponse validatedData = validationMap.get(itemDto.getCarId());
+        OrdersDetails detailEntity = processItem(itemDto, order, totals, validatedData);
 
         // 6. Gán tổng vào order
-        order.setOrderItems(detailsEntities);
+        order.setOrderItem(detailEntity);
         order.setBaseAmount(totals.baseAmount);
         order.setTaxAmount(totals.taxAmount);
         order.setPlateFeeAmount(totals.plateFeeAmount);
@@ -231,33 +232,14 @@ public class OrdersServiceImpl implements OrdersService {
         if (!validatedData.isInStock()) throw new AppException(ErrorCode.QUANTITY_NOT_ENOUGH);
 
         CarResponse car = validatedData.getCarDetail();
+        BigDecimal base = car.getPrice();
 
-        // Tính các khoản phí
-        String region       = feeConfigService.resolveRegion(itemDto.getAddress());
-        // null-safe: technicalSpec có thể null nếu catalog trả về thiếu data
-        String fuelType     = (car.getFuelType() != null) ? car.getFuelType() : "GASOLINE";
-        BigDecimal qty      = BigDecimal.valueOf(itemDto.getQuantity());
-        BigDecimal base     = car.getPrice();
-        BigDecimal tax      = BigDecimal.ZERO;
-        BigDecimal plate    = BigDecimal.ZERO;
-        BigDecimal inspect  = BigDecimal.ZERO;
-
-        // Chỉ tính thuế phí nếu là thanh toán trực tiếp (PURCHASE)
-        if (order.getType() == com.tlaq.ordering_service.entity.enums.OrdersType.PURCHASE) {
-            BigDecimal taxRate  = feeConfigService.getRegistrationTaxRate(region, fuelType);
-            tax = base.multiply(taxRate);
-            plate = feeConfigService.getPlateFee(region);
-            inspect = feeConfigService.getInspectionFee();
-        }
-
-        BigDecimal rolling  = base.add(tax).add(plate).add(inspect); // giá lăn bánh/chiếc
-
-        // Cộng dồn vào tổng đơn
-        totals.baseAmount     = totals.baseAmount.add(base.multiply(qty));
-        totals.taxAmount      = totals.taxAmount.add(tax.multiply(qty));
-        totals.plateFeeAmount = totals.plateFeeAmount.add(plate.multiply(qty));
-        totals.insuranceAmount = totals.insuranceAmount.add(inspect.multiply(qty));
-        totals.totalAmount    = totals.totalAmount.add(rolling.multiply(qty));
+        // Cộng dồn vào tổng đơn (chỉ lưu giá gốc, thuế phí tính bên payment)
+        totals.baseAmount     = base;
+        totals.taxAmount      = BigDecimal.ZERO;
+        totals.plateFeeAmount = BigDecimal.ZERO;
+        totals.insuranceAmount = BigDecimal.ZERO;
+        totals.totalAmount    = base;
 
         return OrdersDetails.builder()
                 .carId(itemDto.getCarId())
@@ -266,20 +248,19 @@ public class OrdersServiceImpl implements OrdersService {
                 .address(itemDto.getAddress())
                 .cccd(itemDto.getCccd())
                 .dob(itemDto.getDob())
-                .quantity(itemDto.getQuantity())
-                .unitPrice(rolling)
+                .unitPrice(base)
                 .order(order)
                 .build();
     }
 
-    /** Build message trừ/hoàn kho type-safe (thay HashMap thô) */
+    /** Build message trừ/hoàn kho type-safe */
     private OrderInventoryMessage buildInventoryMessage(Orders order, boolean rollback) {
-        List<InventoryUpdateMessage> items = order.getOrderItems().stream()
-                .map(d -> InventoryUpdateMessage.builder()
-                        .carId(d.getCarId())
-                        .quantity(d.getQuantity())
-                        .build())
-                .toList();
+        List<InventoryUpdateMessage> items = List.of(
+                InventoryUpdateMessage.builder()
+                        .carId(order.getOrderItem().getCarId())
+                        .quantity(1) // Always 1
+                        .build()
+        );
         return OrderInventoryMessage.builder()
                 .orderId(order.getId())
                 .rollback(rollback)
@@ -461,19 +442,7 @@ public class OrdersServiceImpl implements OrdersService {
         saveHistory(order, OrdersStatus.CANCELLED, "Khách hàng chủ động hủy đơn. Lý do: " + reason, profile.getId());
 
         // --- CHUẨN BỊ DỮ LIỆU MESSAGE ---
-        // 1. Dữ liệu hoàn kho
-        Map<String, Object> rollbackMsg = new HashMap<>();
-        rollbackMsg.put("orderId", order.getId());
-        rollbackMsg.put("rollback", true);
-        List<Map<String, Object>> items = order.getOrderItems().stream().map(item -> {
-            Map<String, Object> i = new HashMap<>();
-            i.put("carId", item.getCarId());
-            i.put("quantity", item.getQuantity());
-            return i;
-        }).toList();
-        rollbackMsg.put("items", items);
-
-        // 2. Dữ liệu gửi Email
+        // 1. Dữ liệu gửi Email
         NotificationEvent cancelledEvent = null;
         if (profile.getEmail() != null) {
             Map<String, Object> notiParam = new HashMap<>();
@@ -500,12 +469,14 @@ public class OrdersServiceImpl implements OrdersService {
             @Override
             public void afterCommit() {
                 // Chỉ chạy vào đây khi Database đã lưu xong hoàn toàn trạng thái CANCELLED
-                log.info("Gửi lệnh hoàn kho (khách hủy) - OrderId: {}", order.getId());
-                rabbitTemplate.convertAndSend(
-                        RabbitMQConfig.EXCHANGE,
-                        RabbitMQConfig.INVENTORY_ROLLBACK_RK,
-                        rollbackMsg
-                );
+                log.info("Hủy giữ xe (khách hủy) - OrderId: {}", order.getId());
+                if (order.getOrderItem() != null && order.getOrderItem().getCarId() != null) {
+                    try {
+                        catalogClient.unmarkCarDeposited(order.getOrderItem().getCarId());
+                    } catch (Exception e) {
+                        log.error("Lỗi khi hủy giữ xe {}: {}", order.getOrderItem().getCarId(), e.getMessage());
+                    }
+                }
 
                 // 📧 Gửi Email xác nhận hủy đơn cho khách
                 if (finalCancelledEvent != null) {
@@ -542,24 +513,22 @@ public class OrdersServiceImpl implements OrdersService {
     }
 
     private void populateCarNames(OrdersResponse response) {
-        if (response.getOrderItems() != null && !response.getOrderItems().isEmpty()) {
-            response.getOrderItems().forEach(item -> {
-                try {
-                    var carRes = catalogClient.getProductById(item.getCarId());
-                    if (carRes != null && carRes.getResult() != null) {
-                        item.setCarName(carRes.getResult().getName());
-                        // Chỉ lấy ảnh từ trường thumbnail của catalog-service
-                        String imgUrl = carRes.getResult().getThumbnail();
-                        if (imgUrl != null && !imgUrl.isBlank() && response.getCarImage() == null) {
-                            response.setCarImage(imgUrl);
-                        }
+        if (response.getOrderItem() != null) {
+            try {
+                var carRes = catalogClient.getProductById(response.getOrderItem().getCarId());
+                if (carRes != null && carRes.getResult() != null) {
+                    response.getOrderItem().setCarName(carRes.getResult().getName());
+                    // Chỉ lấy ảnh từ trường thumbnail của catalog-service
+                    String imgUrl = carRes.getResult().getThumbnail();
+                    if (imgUrl != null && !imgUrl.isBlank() && response.getCarImage() == null) {
+                        response.setCarImage(imgUrl);
                     }
-                } catch (Exception e) {
-                    log.error("Error fetching car details for carId: {}. Error: {}", item.getCarId(), e.getMessage());
                 }
-            });
+            } catch (Exception e) {
+                log.error("Error fetching car details for carId: {}. Error: {}", response.getOrderItem().getCarId(), e.getMessage());
+            }
             // Set top-level carName for convenience
-            response.setCarName(response.getOrderItems().get(0).getCarName());
+            response.setCarName(response.getOrderItem().getCarName());
         }
     }
 }

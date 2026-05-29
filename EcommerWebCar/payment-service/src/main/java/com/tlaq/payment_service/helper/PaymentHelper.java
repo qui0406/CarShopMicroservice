@@ -27,15 +27,14 @@ public class PaymentHelper {
             log.info("🚗 Đang gửi cập nhật xe ĐÃ BÁN cho đơn hàng {}...", orderId);
             var orderInfo = orderingClient.getOrder(orderId).getResult();
 
-            if (orderInfo == null || orderInfo.getOrderItems() == null) return;
+            if (orderInfo == null || orderInfo.getOrderItem() == null) return;
 
             List<Map<String, Object>> items = new java.util.ArrayList<>();
-            orderInfo.getOrderItems().forEach(item -> {
-                Map<String, Object> itemMap = new HashMap<>();
-                itemMap.put("carId", item.getCarId());
-                itemMap.put("quantity", item.getQuantity());
-                items.add(itemMap);
-            });
+            var item = orderInfo.getOrderItem();
+            Map<String, Object> itemMap = new HashMap<>();
+            itemMap.put("carId", item.getCarId());
+            itemMap.put("quantity", item.getQuantity());
+            items.add(itemMap);
 
             Map<String, Object> soldMsg = new HashMap<>();
             soldMsg.put("orderId", orderId);

@@ -1,4 +1,4 @@
-package com.tlaq.ordering_service.entity;
+package com.tlaq.payment_service.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

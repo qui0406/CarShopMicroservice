@@ -28,7 +28,7 @@ public class OrdersResponse {
     BigDecimal depositAmount;
 
     String note;
-    List<OrdersDetailsResponse> orderItems;
+    OrdersDetailsResponse orderItem;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
 }

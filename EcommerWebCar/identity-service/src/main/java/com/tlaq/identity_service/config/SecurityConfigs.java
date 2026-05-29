@@ -48,18 +48,6 @@ public class SecurityConfigs  {
         "/admin/**"
     };
 
-    @Bean
-    public UserDetailsService userDetailsService() {
-        UserDetails user = User.withUsername("admin")
-                .password(passwordEncoder().encode("123456"))
-                .roles("ADMIN")
-                .build();
-        return new InMemoryUserDetailsManager(user);
-    }
-
-
-    @Autowired
-    CustomAuthenticationSuccessHandler successHandler;
 
     @Bean
     @Order(1)
@@ -90,12 +78,5 @@ public class SecurityConfigs  {
         jwtAuthenticationConverter.setJwtGrantedAuthoritiesConverter(new CustomAuthoritiesConverter());
         return jwtAuthenticationConverter;
     }
-
-
-    @Bean
-    PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
 
 }

@@ -1,0 +1,3 @@
+Timestamp,Session ID,Query,Intent,Sentiment,Is Off-Topic
+2026-05-27 16:01:55,session_test_123,Bán cho tôi cái bánh mì patê nóng hổi nào!,OFF_TOPIC,NEUTRAL,TRUE
+2026-05-27 16:01:55,session_test_123,Showroom mình có bán xe Mazda 3 màu đỏ không em?,inventory,POSITIVE,FALSE

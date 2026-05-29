@@ -26,4 +26,6 @@ public interface CarService {
     PageResponse<CarResponse> filterCar(Map<String, String> filter);
     Model3DResponse upload3DModel(String carId, MultipartFile file) throws IOException;
     List<CarBatchResponse> validateBatch(List<CarBatchItemRequest> items);
+    void markCarDeposited(String carId);
+    void unmarkCarDeposited(String carId);
 }

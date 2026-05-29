@@ -13,4 +13,5 @@ public interface OrderManagementService {
     OrdersResponse updateStatus(String orderId, OrdersStatus newStatus, String note); // Duyệt đơn
     List<RevenueReportResponse> getRevenueReport(Integer year, Integer month);
     List<BrandSalesResponse> getBrandSalesReport(Integer year, Integer month);
+    java.util.Map<String, Long> getStatusCount();
 }

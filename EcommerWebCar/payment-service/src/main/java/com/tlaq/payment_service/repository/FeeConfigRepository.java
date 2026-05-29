@@ -1,6 +1,6 @@
-package com.tlaq.ordering_service.repo;
+package com.tlaq.payment_service.repository;
 
-import com.tlaq.ordering_service.entity.FeeConfig;
+import com.tlaq.payment_service.entity.FeeConfig;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

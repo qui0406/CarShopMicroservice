@@ -12,10 +12,4 @@ import java.util.Set;
 @Repository
 public interface RoleRepository extends JpaRepository<Role, Long> {
     Optional<Role> findByName(String name);
-
-    @Query("SELECT p.roles FROM Profile p WHERE p.id = :id")
-    Set<Role> findRolesByProfileId(@Param("id") String id);
-
-    @Query("SELECT p.roles FROM Profile p WHERE p.userKeyCloakId = :userKeyCloakId")
-    Set<Role> findRolesByUserKeyCloakId(@Param("userKeyCloakId") String userKeyCloakId);
 }

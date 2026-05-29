@@ -32,6 +32,18 @@ public class Payment {
     BigDecimal totalAmount;
 
     @Column(precision = 19, scale = 2)
+    BigDecimal baseAmount;
+
+    @Column(precision = 19, scale = 2)
+    BigDecimal taxAmount;
+
+    @Column(precision = 19, scale = 2)
+    BigDecimal plateFeeAmount;
+
+    @Column(precision = 19, scale = 2)
+    BigDecimal insuranceAmount;
+
+    @Column(precision = 19, scale = 2)
     BigDecimal paidAmount;
 
     @Enumerated(EnumType.STRING)

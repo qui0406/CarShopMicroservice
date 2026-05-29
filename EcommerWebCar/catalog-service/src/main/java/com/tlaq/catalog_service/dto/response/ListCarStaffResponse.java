@@ -17,9 +17,9 @@ public class ListCarStaffResponse {
     String carName;
     String carBranch;
     String category;
+    String thumbnail;
     int year;
     BigDecimal price;
-    int quantity;
     @JsonProperty("isReady")
     boolean isReady;
 

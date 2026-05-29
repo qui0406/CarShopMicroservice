@@ -22,11 +22,11 @@ def _normalize_search_param(val: Optional[str]) -> Optional[str]:
     val = re.sub(r'(?i)madza', 'Mazda', val)
     val = re.sub(r'(?i)mazada', 'Mazda', val)
     val = re.sub(r'(?i)mitsubishi', 'Mitsubishi', val)
-    val = re.sub(r'(?i)mitsu', 'Mitsubishi', val)
+    val = re.sub(r'(?i)\bmitsu\b', 'Mitsubishi', val)
     val = re.sub(r'(?i)porsche', 'Porsche', val)
     val = re.sub(r'(?i)bmw', 'BMW', val)
     val = re.sub(r'(?i)mercedes', 'Mercedes', val)
-    val = re.sub(r'(?i)mec', 'Mercedes', val)
+    val = re.sub(r'(?i)\bmec\b', 'Mercedes', val)
     return val
 
 
@@ -92,7 +92,7 @@ def get_all_cars(
     car_name = _normalize_search_param(car_name)
     branch_name = _normalize_search_param(branch_name)
 
-    conditions = ["c.is_used = 0"]
+    conditions = ["c.is_used = 0", "c.is_deposited = 0", "c.is_sold = 0"]
     params: list = []
 
     if car_name:
@@ -100,7 +100,10 @@ def get_all_cars(
         match = re.search(r'\b(20\d{2})\b', car_name)
         if match:
             year = match.group(1)
-            clean_name = car_name.replace(year, "").strip()
+            # Loại bỏ năm và ngoặc đơn xung quanh nó nếu có
+            clean_name = re.sub(r'\s*\(\s*' + re.escape(year) + r'\s*\)\s*', ' ', car_name)
+            clean_name = clean_name.replace(year, "").strip()
+            clean_name = re.sub(r'\s+', ' ', clean_name).strip()
             if clean_name:
                 conditions.append("(cm.name LIKE %s AND c.manufacturing_year = %s)")
                 params.extend([f"%{clean_name}%", year])
@@ -148,6 +151,7 @@ def get_all_cars(
             cb.name                 AS branch_name,
             cat.name                AS category,
             ts.engine               AS engine,
+            c.description           AS description,
             (SELECT image FROM car_image WHERE car_id = c.id ORDER BY id ASC LIMIT 1) AS first_image
         FROM car c
         JOIN  car_model      cm  ON cm.id  = c.car_model_id
@@ -197,7 +201,7 @@ def get_car_detail(
     if not car_name and not car_id:
         return {"status": "error", "text": "Cần tên xe hoặc car_id.", "data": {}}
 
-    conditions = ["c.is_used = 0"]
+    conditions = ["c.is_used = 0", "c.is_deposited = 0", "c.is_sold = 0"]
     params: list = []
 
     if car_id:
@@ -208,7 +212,10 @@ def get_car_detail(
         match = re.search(r'\b(20\d{2})\b', car_name)
         if match:
             year = match.group(1)
-            clean_name = car_name.replace(year, "").strip()
+            # Loại bỏ năm và ngoặc đơn xung quanh nó nếu có
+            clean_name = re.sub(r'\s*\(\s*' + re.escape(year) + r'\s*\)\s*', ' ', car_name)
+            clean_name = clean_name.replace(year, "").strip()
+            clean_name = re.sub(r'\s+', ' ', clean_name).strip()
             if clean_name:
                 conditions.append("(cm.name LIKE %s AND c.manufacturing_year = %s)")
                 params.extend([f"%{clean_name}%", year])
@@ -232,6 +239,7 @@ def get_car_detail(
             cm.name                 AS model_name,
             cm.seat_capacity        AS seats,
             cm.description          AS model_description,
+            c.description           AS description,
             cm.thumbnail_image      AS thumbnail,
             cb.name                 AS branch_name,
             cat.name                AS category,
@@ -304,6 +312,10 @@ def get_car_detail(
         + (f" — {row['color']}" if row.get("color") else ""),
         f"Giá: {row.get('price_formatted', 'Liên hệ')}",
     ]
+    if row.get("description"):
+        text_parts.append(f"📝 Mô tả: {row['description']}")
+    elif row.get("model_description"):
+        text_parts.append(f"📝 Mô tả: {row['model_description']}")
     if row.get("body_type"):
         text_parts.append(f"Kiểu dáng: {row['body_type']} — {row.get('seats', '?')} chỗ")
     if row.get("trim_level"):
@@ -359,7 +371,7 @@ def get_inventory(
     car_name = _normalize_search_param(car_name)
     branch_name = _normalize_search_param(branch_name)
 
-    conditions = ["i.quantity > 0"]
+    conditions = ["c.is_ready = 1", "c.is_deleted = 0", "c.is_deposited = 0", "c.is_sold = 0"]
     params: list = []
 
     if car_name:
@@ -367,7 +379,10 @@ def get_inventory(
         match = re.search(r'\b(20\d{2})\b', car_name)
         if match:
             year = match.group(1)
-            clean_name = car_name.replace(year, "").strip()
+            # Loại bỏ năm và ngoặc đơn xung quanh nó nếu có
+            clean_name = re.sub(r'\s*\(\s*' + re.escape(year) + r'\s*\)\s*', ' ', car_name)
+            clean_name = clean_name.replace(year, "").strip()
+            clean_name = re.sub(r'\s+', ' ', clean_name).strip()
             if clean_name:
                 conditions.append("(cm.name LIKE %s AND c.manufacturing_year = %s)")
                 params.extend([f"%{clean_name}%", year])
@@ -388,7 +403,7 @@ def get_inventory(
             c.manufacturing_year AS year,
             c.price,
             cm.thumbnail_image   AS thumbnail,
-            i.quantity,
+            1                    AS quantity,
             ts.body_type         AS body_type,
             ts.fuel_type         AS fuel_type,
             sr.name              AS showroom_name,
@@ -397,15 +412,15 @@ def get_inventory(
             sr.zalo,
             cb.name              AS branch_name,
             ts.engine            AS engine,
+            c.description        AS description,
             (SELECT image FROM car_image WHERE car_id = c.id ORDER BY id ASC LIMIT 1) AS first_image
-        FROM inventory i
-        JOIN car        c   ON c.id   = i.car_id
+        FROM car c
         JOIN car_model  cm  ON cm.id  = c.car_model_id
         LEFT JOIN technical_spec ts  ON ts.id  = c.technical_spec_id
         LEFT JOIN car_branch     cb  ON cb.id  = cm.car_branch_id
-        LEFT JOIN show_room      sr  ON sr.id  = i.show_room_id
+        LEFT JOIN show_room      sr  ON sr.id  = c.show_room_id
         WHERE {' AND '.join(conditions)}
-        ORDER BY i.quantity DESC
+        ORDER BY c.price ASC
         LIMIT 50
     """
 

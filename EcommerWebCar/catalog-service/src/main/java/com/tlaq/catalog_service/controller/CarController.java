@@ -131,4 +131,19 @@ public class CarController {
                 .build();
     }
 
+    @PutMapping("/car/mark-deposited/{carId}")
+    public ApiResponse<Void> markCarDeposited(@PathVariable String carId) {
+        carDetailsService.markCarDeposited(carId);
+        return ApiResponse.<Void>builder()
+                .message("Đã cập nhật trạng thái đặt cọc xe thành công")
+                .build();
+    }
+
+    @PutMapping("/car/unmark-deposited/{carId}")
+    public ApiResponse<Void> unmarkCarDeposited(@PathVariable String carId) {
+        carDetailsService.unmarkCarDeposited(carId);
+        return ApiResponse.<Void>builder()
+                .message("Đã hủy trạng thái đặt cọc xe thành công")
+                .build();
+    }
 }

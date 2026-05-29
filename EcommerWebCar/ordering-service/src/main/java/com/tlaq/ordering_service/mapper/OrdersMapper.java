@@ -24,12 +24,12 @@ public interface OrdersMapper {
     @Mapping(target = "plateFeeAmount",  ignore = true)
     @Mapping(target = "insuranceAmount", ignore = true)
     @Mapping(target = "totalAmount",     ignore = true)
-    @Mapping(target = "orderItems",      ignore = true) // build thủ công trong service
+    @Mapping(target = "orderItem",       ignore = true) // build thủ công trong service
     @Mapping(target = "createdAt",       ignore = true)
     @Mapping(target = "updatedAt",       ignore = true)
     Orders toOrdersEntity(OrdersRequest request);
 
-    @Mapping(target = "orderItems", source = "orderItems")
+    @Mapping(target = "orderItem", source = "orderItem")
     @Mapping(target = "depositAmount", ignore = true)
     OrdersResponse toOrdersResponse(Orders orders);
 

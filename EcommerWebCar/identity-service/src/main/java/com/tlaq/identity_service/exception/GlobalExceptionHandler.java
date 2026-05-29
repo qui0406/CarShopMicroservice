@@ -21,7 +21,6 @@ public class GlobalExceptionHandler {
 
     private static final String MIN_ATTRIBUTE = "min";
 
-    // Đổi tên hàm, sửa tham số truyền vào thành Exception, trả về status 500
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<ApiResponse> handleGeneralException(Exception exception) {
         log.error("Exception: ", exception);
@@ -34,13 +33,10 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(apiResponse);
     }
 
-    // Đổi tên hàm, thêm tham số RuntimeException để bắt được lỗi
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ApiResponse> handleRuntimeException(RuntimeException exception) {
         log.error("RuntimeException: ", exception);
 
-        // Lưu ý: Việc gán cứng UNAUTHENTICATED cho mọi RuntimeException có thể không chính xác
-        // Bạn nên cân nhắc xem có thực sự muốn mọi RuntimeException đều trả về lỗi Unauthenticated không.
         ErrorCode errorCode = ErrorCode.UNAUTHENTICATED;
         ApiResponse apiResponse = new ApiResponse();
 
@@ -56,7 +52,6 @@ public class GlobalExceptionHandler {
         ApiResponse apiResponse = new ApiResponse();
         apiResponse.setCode(ErrorCode.UNCATEGORIZED_EXCEPTION.getCode());
 
-        // Sửa lỗi ghi đè message bằng cách set đúng biến message vừa khởi tạo
         String message = (ex.getCause() != null && ex.getCause() instanceof org.apache.tomcat.util.http.fileupload.impl.FileCountLimitExceededException)
                 ? "Upload quá số file cho phép. Tối đa là 10 file."
                 : "Lỗi upload file: " + ex.getMessage();

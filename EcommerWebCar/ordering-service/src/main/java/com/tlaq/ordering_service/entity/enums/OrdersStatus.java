@@ -5,6 +5,7 @@ public enum OrdersStatus {
     DEPOSITED,
     WAITING_FOR_PAID,
     PAID,
+    CONFIRMED,
     DELIVERED,
     CANCELLED
 }

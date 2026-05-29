@@ -7,5 +7,6 @@ public enum NotificationType {
     NEW_MESSAGE,
     SYSTEM,
     ORDER_SUCCESS,
-    ORDER_CREATED // <-- Quí thêm dòng này vào
+    ORDER_CREATED, // <-- Quí thêm dòng này vào
+    PAYMENT_SUCCESS
 }

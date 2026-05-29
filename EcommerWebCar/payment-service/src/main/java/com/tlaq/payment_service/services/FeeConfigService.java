@@ -1,4 +1,4 @@
-package com.tlaq.ordering_service.service;
+package com.tlaq.payment_service.services;
 
 import java.math.BigDecimal;
 

@@ -36,6 +36,7 @@ from src.core.agent import get_car_agent
 from src.core.rag_engine import RAGEngine
 from src.core.config import FAULT_KEYWORDS
 from src.utils.logger import get_logger
+from src.utils.query_logger import log_customer_query
 from src.utils.analysis import analyze_sentiment
 from src.utils.db_utils import get_inventory, get_last_result, reset_last_result
 from src.utils.card_helper import normalize_cards
@@ -67,6 +68,7 @@ vision_llm = ChatOpenAI(
     model="gpt-4o",
     api_key=os.getenv("OPEN_API_KEY"),
     temperature=0,
+    cache=False,
 )
 
 async def register_eureka():
@@ -177,6 +179,18 @@ def chat_endpoint(request: ChatRequest):
             history.add_ai_message(refusal_reply)
             
             logger.info(f"[LOCAL_INTENT_CLASSIFIER] Blocked off-topic query ({category}) from session {request.session_id}")
+            
+            try:
+                log_customer_query(
+                    session_id=request.session_id,
+                    query=request.message,
+                    intent=category or "OFF_TOPIC",
+                    sentiment="NEUTRAL",
+                    is_off_topic=True
+                )
+            except Exception as log_err:
+                logger.error(f"Error logging off-topic query: {log_err}")
+
             return {
                 "reply":      refusal_reply,
                 "session_id": request.session_id,
@@ -225,6 +239,18 @@ def chat_endpoint(request: ChatRequest):
             "intent":     last_intent,
         }
         logger.info(f"Final response for session {request.session_id} prepared.")
+
+        try:
+            log_customer_query(
+                session_id=request.session_id,
+                query=request.message,
+                intent=last_intent or "GENERAL_QA",
+                sentiment=sentiment,
+                is_off_topic=False
+            )
+        except Exception as log_err:
+            logger.error(f"Error logging customer query: {log_err}")
+
         return final_response
 
     except Exception as e:
@@ -426,16 +452,26 @@ async def predict_price_endpoint(
                     penalty_info += f"- {d['label']}: giảm {d['amount']} triệu VNĐ\n"
 
             prompt = (
-                f"Bạn là chuyên gia định giá ô tô cũ. Hãy viết một đoạn phân tích chi tiết (khoảng 4-5 câu) "
-                f"để giải thích và đánh giá tình trạng chiếc xe {brand_name} {model_name} {trim_name} đời {year}. "
-                f"Xe đã đi được {odo} km, xuất xứ {origin}, hộp số {gearbox}, màu {color}. "
-                f"Lịch sử bảo dưỡng: {'Đầy đủ hãng' if service_history_bool else 'Bảo dưỡng ngoài'}. "
-                f"Số đời chủ: {owner_count}. "
-                f"Mô tả từ người bán: {description}.\n"
-                f"Giá trị gốc AI đánh giá dựa trên thị trường: {raw_price} triệu VNĐ.\n"
+                f"Bạn là chuyên gia định giá ô tô cũ. Hãy viết một đoạn phân tích (khoảng 4-5 câu) "
+                f"để giải thích mức giá dự đoán của chiếc xe {brand_name} {model_name} {trim_name} đời {year}.\n\n"
+                f"THÔNG TIN XE (Bắt buộc phải tuân thủ chính xác, không tự bịa thêm hay thay đổi):\n"
+                f"- ODO (số km đã đi): {odo} km\n"
+                f"- Xuất xứ: {origin}\n"
+                f"- Hộp số: {gearbox}\n"
+                f"- Màu sắc: {color}\n"
+                f"- Lịch sử bảo dưỡng: {'Đầy đủ hãng' if service_history_bool else 'Bảo dưỡng ngoài'}\n"
+                f"- Số đời chủ: {owner_count}\n"
+                f"- Mô tả từ người bán: {description}\n\n"
+                f"ĐÁNH GIÁ GIÁ TRỊ (Bắt buộc phải sử dụng đúng các con số này, không làm tròn hay thay đổi):\n"
+                f"- Giá trị gốc (dựa trên thị trường): {raw_price} triệu VNĐ.\n"
                 f"{penalty_info}"
-                f"Mức giá dự kiến cuối cùng sau khi tính hao mòn là {final_price} triệu VNĐ.\n"
-                f"Hãy phân tích chi tiết vì sao có mức giá này. ĐẶC BIỆT, nếu xe có các khoản bị khấu trừ (như là xe công ty/dịch vụ, lỗi, trầy xước...), BẮT BUỘC phải giải thích rõ ràng lý do tại sao yếu tố đó lại làm mất giá trị của chiếc xe so với xe gia đình thông thường. Giọng văn khách quan, thuyết phục."
+                f"- MỨC GIÁ DỰ KIẾN CUỐI CÙNG (sau khi khấu trừ): {final_price} triệu VNĐ.\n\n"
+                f"YÊU CẦU:\n"
+                f"1. Phân tích chi tiết vì sao có mức giá {final_price} triệu VNĐ này.\n"
+                f"2. Nếu có các khoản bị khấu trừ, BẮT BUỘC phải giải thích rõ ràng tại sao yếu tố đó làm giảm giá.\n"
+                f"3. TUYỆT ĐỐI KHÔNG ĐƯỢC dự đoán một mức giá khác, phải khẳng định giá cuối cùng là {final_price} triệu VNĐ.\n"
+                f"4. TUYỆT ĐỐI KHÔNG ĐƯỢC sai lệch các thông số xe như ODO, số đời chủ, lịch sử bảo dưỡng đã cung cấp.\n"
+                f"5. Giọng văn khách quan, thuyết phục và chuyên nghiệp."
             )
             llm_response = await vision_llm.ainvoke(prompt, config={"cache": False})
             ai_explanation = llm_response.content

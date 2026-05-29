@@ -38,6 +38,7 @@ public class KeyCloakTokenService {
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        headers.setAccept(java.util.Collections.singletonList(MediaType.APPLICATION_JSON));
 
         MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "client_credentials");

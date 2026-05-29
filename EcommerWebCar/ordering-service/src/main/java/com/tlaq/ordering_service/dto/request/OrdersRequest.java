@@ -13,5 +13,5 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class OrdersRequest {
     String note;
-    List<OrdersDetailsRequest> orderItems;
+    OrdersDetailsRequest orderItem;
 }

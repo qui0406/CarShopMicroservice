@@ -55,12 +55,10 @@ public class OrderCleanupJob {
             Map<String, Object> rollbackMsg = new HashMap<>();
             rollbackMsg.put("orderId", order.getId());
             rollbackMsg.put("rollback", true);
-            List<Map<String, Object>> items = order.getOrderItems().stream().map(item -> {
-                Map<String, Object> i = new HashMap<>();
-                i.put("carId", item.getCarId());
-                i.put("quantity", item.getQuantity());
-                return i;
-            }).toList();
+            Map<String, Object> i = new HashMap<>();
+            i.put("carId", order.getOrderItem().getCarId());
+            i.put("quantity", 1);
+            List<Map<String, Object>> items = List.of(i);
             rollbackMsg.put("items", items);
 
             rabbitTemplate.convertAndSend(

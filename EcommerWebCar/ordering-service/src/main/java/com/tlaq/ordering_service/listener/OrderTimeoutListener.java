@@ -21,6 +21,7 @@ public class OrderTimeoutListener {
 
     private final OrdersRepository ordersRepository;
     private final RabbitTemplate rabbitTemplate;
+    private final com.tlaq.ordering_service.repo.httpClient.CatalogClient catalogClient;
 
     @RabbitListener(queues = RabbitMQConfig.ORDER_RESTORE_QUEUE)
     public void handleOrderTimeout(Map<String, Object> message) {
@@ -40,17 +41,15 @@ public class OrderTimeoutListener {
         // 1. Huỷ đơn hàng
         order.setStatus(OrdersStatus.CANCELLED);
         ordersRepository.save(order);
-        log.info("Đã huỷ đơn hàng: {}", orderId);
+        log.info("Đã huỷ đơn hàng do quá hạn: {}", orderId);
 
-        // 2. Gửi lệnh hoàn kho sang catalog-service
-        Map<String, Object> rollbackMsg = new HashMap<>(message);
-        rollbackMsg.put("rollback", true);
-
-        log.info("Gửi lệnh hoàn kho - OrderId: {}", orderId);
-        rabbitTemplate.convertAndSend(
-                RabbitMQConfig.EXCHANGE,
-                RabbitMQConfig.INVENTORY_ROLLBACK_RK,
-                rollbackMsg
-        );
+        // 2. Hủy giữ xe
+        if (order.getOrderItem() != null && order.getOrderItem().getCarId() != null) {
+            try {
+                catalogClient.unmarkCarDeposited(order.getOrderItem().getCarId());
+            } catch (Exception e) {
+                log.error("Lỗi khi hủy giữ xe {}: {}", order.getOrderItem().getCarId(), e.getMessage());
+            }
+        }
     }
 }

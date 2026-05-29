@@ -31,7 +31,7 @@ public class OrdersResponse {
     BigDecimal depositAmount;   // Số tiền cần đặt cọc (ví dụ: 1% của totalAmount)
 
     String note;
-    List<OrdersDetailsResponse> orderItems;
+    OrdersDetailsResponse orderItem;
     LocalDateTime createdAt;
     LocalDateTime updatedAt;
 }

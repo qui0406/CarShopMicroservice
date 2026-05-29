@@ -7,7 +7,7 @@ import com.tlaq.identity_service.dto.request.*;
 import com.tlaq.identity_service.dto.response.*;
 import com.tlaq.identity_service.entity.Profile;
 import com.tlaq.identity_service.entity.Role;
-import com.tlaq.identity_service.event.NotificationEvent;
+import com.tlaq.event.dto.NotificationEvent;
 import com.tlaq.identity_service.exception.AppException;
 import com.tlaq.identity_service.exception.ErrorCode;
 import com.tlaq.identity_service.exception.ErrorNormalizer;
@@ -37,42 +37,32 @@ import java.util.Set;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class AuthenticationServiceImpl implements AuthenticationService {
-    private static final String ROLE_USER              = "USER";
-    private static final String ROLE_STAFF             = "STAFF";
-    private static final String CREDENTIAL_TYPE        = "password";
-    private static final String GRANT_TYPE_PASSWORD    = "password";
-    private static final String GRANT_TYPE_REFRESH     = "refresh_token";
-    private static final String GRANT_TYPE_CREDENTIALS = "client_credentials";
-    private static final String SCOPE_OPENID           = "openid";
+    static String ROLE_USER              = "USER";
+    static String ROLE_STAFF             = "STAFF";
+    static String CREDENTIAL_TYPE        = "password";
+    static String GRANT_TYPE_PASSWORD    = "password";
+    static String GRANT_TYPE_REFRESH     = "refresh_token";
+    static String GRANT_TYPE_CREDENTIALS = "client_credentials";
+    static String SCOPE_OPENID           = "openid";
 
-    private final ProfileRepository profileRepository;
-    private final ProfileMapper     profileMapper;
-    private final KeyCloakClient    identityClient;
-    private final ErrorNormalizer   errorNormalizer;
-    private final Cloudinary        cloudinary;
-    private final RoleRepository    roleRepository;
-    private final RabbitTemplate    rabbitTemplate;
+    ProfileRepository profileRepository;
+    ProfileMapper     profileMapper;
+    KeyCloakClient    identityClient;
+    ErrorNormalizer   errorNormalizer;
+    Cloudinary        cloudinary;
+    RoleRepository    roleRepository;
+    RabbitTemplate    rabbitTemplate;
 
-    @Value("${idp.client-id}")     private String clientId;
-    @Value("${idp.client-secret}") private String clientSecret;
+    @NonFinal
+    @Value("${idp.client-id}")
+    String clientId;
 
-    public AuthenticationServiceImpl(
-            ProfileRepository profileRepository,
-            ProfileMapper profileMapper,
-            KeyCloakClient identityClient,
-            ErrorNormalizer errorNormalizer,
-            Cloudinary cloudinary,
-            RoleRepository roleRepository,
-            RabbitTemplate rabbitTemplate) {
-        this.profileRepository = profileRepository;
-        this.profileMapper = profileMapper;
-        this.identityClient = identityClient;
-        this.errorNormalizer = errorNormalizer;
-        this.cloudinary = cloudinary;
-        this.roleRepository = roleRepository;
-        this.rabbitTemplate = rabbitTemplate;
-    }
+    @NonFinal
+    @Value("${idp.client-secret}")
+    String clientSecret;
 
 
     @Override
@@ -95,7 +85,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
             ProfileResponse saved = profileMapper.toProfileResponse(profileRepository.save(profile));
 
-            // Publish sự kiện đăng ký tài khoản → notification-service sẽ gửi email chào mừng
             publishUserRegisteredEvent(userId, request.getEmail(), request.getUsername(),
                     request.getFirstName(), request.getLastName());
 
@@ -181,12 +170,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
 
-    // ── private helpers ──────────────────────────────────────────────────────
-
-    /**
-     * Publish NotificationEvent lên RabbitMQ để notification-service gửi email chào mừng.
-     * Lỗi publish KHÔNG được phép làm rollback transaction đăng ký.
-     */
     private void publishUserRegisteredEvent(String userId, String email,
                                             String username, String firstName, String lastName) {
         try {
@@ -211,10 +194,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                     RabbitMQConfig.USER_REGISTERED_ROUTING_KEY,
                     event
             );
-            log.info("📤 Đã publish UserRegisteredEvent cho user: {} ({})", userId, email);
         } catch (Exception e) {
-            // Không throw — tránh rollback transaction đăng ký khi Rabbit tạm thời lỗi
-            log.error("⚠️ Không thể publish UserRegisteredEvent cho user {}: {}", userId, e.getMessage());
+            log.error("Không thể publish UserRegisteredEvent cho user {}: {}", userId, e.getMessage());
         }
     }
 
@@ -243,27 +224,18 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return userId;
     }
 
-    /**
-     * Fetches the named Keycloak realm role and assigns it to the given user.
-     */
     private void assignKeycloakRole(String adminToken, String userId, String roleName) {
         RoleKeycloakResponse role = identityClient.getRoleByName(adminToken, roleName);
         identityClient.assignRole(adminToken, userId, List.of(role));
     }
 
-    /**
-     * Resolves a local DB role by name; throws if not found.
-     */
+
     private Set<Role> resolveRoles(String roleName) {
         Role role = roleRepository.findByName(roleName)
                 .orElseThrow(() -> new AppException(ErrorCode.ROLE_IS_NULL));
         return Set.of(role);
     }
 
-    /**
-     * Uploads an avatar to Cloudinary and sets the URL on the profile.
-     * Skips silently when {@code avatar} is null or empty.
-     */
     private void uploadAvatar(MultipartFile avatar, Profile profile) {
         if (avatar == null || avatar.isEmpty()) return;
         try {
@@ -275,9 +247,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         }
     }
 
-    /**
-     * Exchanges client credentials for an admin Bearer token.
-     */
     private String getAdminToken() {
         TokenExchangeResponse token = identityClient.exchangeToken(TokenExchangeParam.builder()
                 .grant_type(GRANT_TYPE_CREDENTIALS)
@@ -289,10 +258,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
 
-    /**
-     * Builds a param map pre-populated with client credentials.
-     * Extra entries are merged on top.
-     */
     private Map<String, String> buildClientParams(Map<String, String> extras) {
         Map<String, String> params = new HashMap<>();
         params.put("client_id", clientId);
@@ -301,9 +266,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return params;
     }
 
-    /**
-     * Extracts the Keycloak user ID from the {@code Location} header.
-     */
     private String extractUserId(ResponseEntity<?> response) {
         List<String> location = response.getHeaders().get("Location");
         if (location == null || location.isEmpty()) {

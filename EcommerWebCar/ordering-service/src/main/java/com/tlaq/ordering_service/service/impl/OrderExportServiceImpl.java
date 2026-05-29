@@ -52,22 +52,49 @@ public class OrderExportServiceImpl implements OrderExportService {
 
             java.text.NumberFormat currencyFormat = java.text.NumberFormat.getCurrencyInstance(new java.util.Locale("vi", "VN"));
 
-            for (com.tlaq.ordering_service.entity.OrdersDetails detail : order.getOrderItems()) {
+            if (order.getOrderItem() != null) {
+                com.tlaq.ordering_service.entity.OrdersDetails detail = order.getOrderItem();
                 addCell(table, detail.getCarId(), normalFont);
                 String fullName = detail.getFullName() != null ? detail.getFullName() : "N/A";
                 // Chuyển tiếng Việt có dấu thành không dấu để iText render font Helvetica không bị lỗi
                 addCell(table, java.text.Normalizer.normalize(fullName, java.text.Normalizer.Form.NFD).replaceAll("\\p{InCombiningDiacriticalMarks}+", ""), normalFont);
-                addCell(table, String.valueOf(detail.getQuantity()), normalFont);
+                addCell(table, "1", normalFont); // quantity is 1
                 addCell(table, currencyFormat.format(detail.getUnitPrice()), normalFont);
             }
             document.add(table);
 
-            document.add(new com.lowagie.text.Paragraph("Gia xe co ban: " + currencyFormat.format(order.getBaseAmount()), normalFont));
-            document.add(new com.lowagie.text.Paragraph("Thue truoc ba: " + currencyFormat.format(order.getTaxAmount()), normalFont));
-            document.add(new com.lowagie.text.Paragraph("Phi bien so: " + currencyFormat.format(order.getPlateFeeAmount()), normalFont));
-            document.add(new com.lowagie.text.Paragraph("Phi dang kiem: " + currencyFormat.format(order.getInsuranceAmount()), normalFont));
+            java.math.BigDecimal baseAmt = order.getBaseAmount();
+            if (baseAmt == null && order.getOrderItem() != null) {
+                baseAmt = order.getOrderItem().getUnitPrice();
+            }
+            if (baseAmt == null) baseAmt = java.math.BigDecimal.ZERO;
+
+            java.math.BigDecimal taxAmt = order.getTaxAmount();
+            if (taxAmt == null || taxAmt.compareTo(java.math.BigDecimal.ZERO) == 0) {
+                String address = "";
+                if (order.getOrderItem() != null && order.getOrderItem().getAddress() != null) {
+                    address = order.getOrderItem().getAddress().toLowerCase();
+                }
+                boolean isHanoi = address.contains("ha noi") || address.contains("hà nội");
+                java.math.BigDecimal taxRate = java.math.BigDecimal.valueOf(isHanoi ? 0.12 : 0.10);
+                taxAmt = baseAmt.multiply(taxRate);
+            }
+
+            java.math.BigDecimal plateFee = order.getPlateFeeAmount() != null ? order.getPlateFeeAmount() : java.math.BigDecimal.ZERO;
+            java.math.BigDecimal insurance = order.getInsuranceAmount() != null ? order.getInsuranceAmount() : java.math.BigDecimal.ZERO;
+
+            java.math.BigDecimal calcTotal = baseAmt.add(taxAmt).add(plateFee).add(insurance);
+            java.math.BigDecimal totalAmt = order.getTotalAmount();
+            if (totalAmt == null || totalAmt.compareTo(baseAmt) <= 0) {
+                totalAmt = calcTotal;
+            }
+
+            document.add(new com.lowagie.text.Paragraph("Gia xe co ban: " + currencyFormat.format(baseAmt), normalFont));
+            document.add(new com.lowagie.text.Paragraph("Thue truoc ba: " + currencyFormat.format(taxAmt), normalFont));
+            document.add(new com.lowagie.text.Paragraph("Phi bien so: " + currencyFormat.format(plateFee), normalFont));
+            document.add(new com.lowagie.text.Paragraph("Phi dang kiem: " + currencyFormat.format(insurance), normalFont));
             
-            com.lowagie.text.Paragraph total = new com.lowagie.text.Paragraph("TONG CONG (TOTAL): " + currencyFormat.format(order.getTotalAmount()), titleFont);
+            com.lowagie.text.Paragraph total = new com.lowagie.text.Paragraph("TONG CONG (TOTAL): " + currencyFormat.format(totalAmt), titleFont);
             total.setSpacingBefore(10f);
             document.add(total);
 

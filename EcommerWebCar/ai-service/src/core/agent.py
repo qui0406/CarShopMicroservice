@@ -47,6 +47,7 @@ class MySQLQueryInput(BaseModel):
 class RollingPriceInput(BaseModel):
     car_name: str = Field(description="Tên xe cần tính giá lăn bánh. VD: 'Mazda 3', 'CX-5'")
     address: str = Field(default="HCM", description="Tỉnh thành đăng ký xe. VD: 'Hà Nội', 'HCM', 'Đà Nẵng'")
+    year: int | None = Field(default=None, description="Năm sản xuất của xe (nếu khách hàng chỉ định hoặc đang thảo luận về đời xe cụ thể). VD: 2026, 2023")
     quantity: str | int = Field(default=1, description="Số lượng xe mua.")
 
 
@@ -68,12 +69,17 @@ def get_car_agent():
         max_tokens=1000,
     )
 
-    def rolling_price_logic(car_name: str, address: str, quantity: str | int = 1) -> str:
-        summary, data = get_car_and_calculate_rolling(car_name, address, quantity)
+    def rolling_price_logic(car_name: str, address: str, year: int | None = None, quantity: str | int = 1) -> str:
+        summary, data = get_car_and_calculate_rolling(
+            car_name=car_name,
+            address=address,
+            year=year,
+            quantity=quantity
+        )
         if data:
             set_last_result("rolling_price", data)
         else:
-            set_last_result("rolling_price", {"car_name": car_name, "address": address})
+            set_last_result("rolling_price", {"car_name": car_name, "address": address, "year": year})
         return summary
 
     retriever = RAGEngine().get_retriever(use_threshold=False)
@@ -164,7 +170,7 @@ def get_car_agent():
             description=(
                 "Tim kiem trong tai lieu FAQ noi bo. "
                 "Dung khi khach hoi so sanh xe, quy trinh mua, bao hanh, hoac hoi y kien tu van chung chung. "
-                "QUAN TRONG: Neu sau khi tim FAQ, ban quyet dinh de xuat 1 dong xe cu the (VD: Hyundai Creta), BAN PHAI goi tiep tool MySQL_Query_Tool de lay the san pham (cards) tu database ra cho khach xem!"
+                "LUU Y: Doi voi cac cau hoi tu van/FAQ thong thuong, KHONG CAN goi MySQL_Query_Tool de hien thi the xe, tru khi khach hang chu dong yeu cau tim xe co san trong showroom hoac muon xem chi tiet xe ban."
             ),
             args_schema=CarFAQInput,
             return_direct=False,

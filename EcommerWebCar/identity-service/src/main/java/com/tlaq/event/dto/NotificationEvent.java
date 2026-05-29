@@ -1,4 +1,4 @@
-package com.tlaq.identity_service.event;
+package com.tlaq.event.dto;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;

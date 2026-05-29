@@ -37,19 +37,6 @@ public class WebClientConfiguration {
         return httpServiceProxyFactory.createClient(AuthClient.class);
     }
 
-//    @Bean
-//    public CorsWebFilter corsWebFilter(){
-//        CorsConfiguration corsConfiguration = new CorsConfiguration();
-//        corsConfiguration.setAllowedOrigins(List.of("https://anhquicarshop.com", "http://localhost:3000", "http://localhost:8888"));
-//        corsConfiguration.setAllowedHeaders(List.of("*"));
-//        corsConfiguration.setAllowedMethods(List.of("*"));
-//        corsConfiguration.setAllowCredentials(true);
-//
-//        UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
-//        urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
-//
-//        return new CorsWebFilter(urlBasedCorsConfigurationSource);
-//    }
 
     @Bean
     public org.springframework.web.server.WebFilter privateNetworkAccessFilter() {

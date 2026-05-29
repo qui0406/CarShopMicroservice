@@ -24,6 +24,7 @@ public class CarResponse {
     BigDecimal price;
     int manufacturingYear;
     String fuelType;
+    String description;
 
     // Dành cho xe cũ
     boolean isUsed;

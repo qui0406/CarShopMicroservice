@@ -21,17 +21,11 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
+@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 public class ProfileServiceImpl implements ProfileService {
-
-    private final ProfileRepository profileRepository;
-    private final ProfileMapper profileMapper;
-
-    public ProfileServiceImpl(ProfileRepository profileRepository, ProfileMapper profileMapper) {
-        this.profileRepository = profileRepository;
-        this.profileMapper = profileMapper;
-    }
-
-    // Đã xóa clientId, clientSecret và RoleRepository vì không thực sự cần thiết nếu thiết kế DB chuẩn
+    ProfileRepository profileRepository;
+    ProfileMapper profileMapper;
 
     @Override
     public ProfileResponse getMyProfile() {
@@ -43,7 +37,6 @@ public class ProfileServiceImpl implements ProfileService {
 
         ProfileResponse profileResponse = profileMapper.toProfileResponse(profile);
 
-        // Nếu Entity Profile của bạn đã định nghĩa Set<Role> roles, hãy lấy trực tiếp:
         if (profile.getRoles() != null) {
             profileResponse.setRoles(
                     profile.getRoles().stream()
@@ -81,11 +74,6 @@ public class ProfileServiceImpl implements ProfileService {
         return profileMapper.toProfileResponse(profile);
     }
 
-    /**
-     * Hàm dùng chung để kiểm tra quyền truy cập (DRY principle).
-     * Tuy nhiên, Khuyến khích dùng @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF') or #userId == authentication.name")
-     * trên tầng Controller thay vì viết hàm này.
-     */
     private void verifyAccessPermission(String targetUserId) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String currentUserId = authentication.getName();
@@ -95,8 +83,7 @@ public class ProfileServiceImpl implements ProfileService {
                 .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_STAFF"));
 
         if (!isOwner && !isAdminOrStaff) {
-            // Ném lỗi ACCESS_DENIED (403) thay vì UNAUTHORIZED (401)
-            throw new AppException(ErrorCode.UNAUTHORIZED); // Chỗ này bạn tự định nghĩa thêm ErrorCode.ACCESS_DENIED nhé
+            throw new AppException(ErrorCode.UNAUTHORIZED);
         }
     }
 }

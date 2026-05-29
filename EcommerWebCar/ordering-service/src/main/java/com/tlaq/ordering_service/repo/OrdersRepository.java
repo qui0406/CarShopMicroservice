@@ -15,20 +15,23 @@ import java.util.List;
 @Repository
 public interface OrdersRepository extends JpaRepository<Orders, String>, JpaSpecificationExecutor<Orders> {
 
-    @EntityGraph(attributePaths = {"orderItems"})
+    @EntityGraph(attributePaths = {"orderItem"})
     Page<Orders> findByStatus(OrdersStatus status, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"orderItems"})
+    @EntityGraph(attributePaths = {"orderItem"})
     @Override
     Page<Orders> findAll(Pageable pageable);
 
-    @EntityGraph(attributePaths = {"orderItems"})
+    @EntityGraph(attributePaths = {"orderItem"})
     List<Orders> findByUserIdOrderByCreatedAtDesc(String userId);
 
-    @EntityGraph(attributePaths = {"orderItems"})
+    @EntityGraph(attributePaths = {"orderItem"})
     List<Orders> findByStatusInAndCreatedAtBetween(List<OrdersStatus> statuses, LocalDateTime start, LocalDateTime end);
 
     List<Orders> findByStatusAndTypeAndUpdatedAtBefore(OrdersStatus status, com.tlaq.ordering_service.entity.enums.OrdersType type, LocalDateTime time);
 
     boolean existsById(String id);
+
+    @org.springframework.data.jpa.repository.Query("SELECT o.status, COUNT(o) FROM Orders o GROUP BY o.status")
+    List<Object[]> countByStatus();
 }

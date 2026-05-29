@@ -5,10 +5,7 @@ import com.cloudinary.utils.ObjectUtils;
 import com.tlaq.catalog_service.dto.PageResponse;
 import com.tlaq.catalog_service.dto.request.CarBatchItemRequest;
 import com.tlaq.catalog_service.dto.request.CarRequest;
-import com.tlaq.catalog_service.dto.response.CarBatchResponse;
-import com.tlaq.catalog_service.dto.response.CarResponse;
-import com.tlaq.catalog_service.dto.response.CarSummaryResponse;
-import com.tlaq.catalog_service.dto.response.Model3DResponse;
+import com.tlaq.catalog_service.dto.response.*;
 import com.tlaq.catalog_service.entity.*;
 import com.tlaq.catalog_service.exceptions.AppException;
 import com.tlaq.catalog_service.exceptions.ErrorCode;
@@ -56,11 +53,9 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public PageResponse<CarSummaryResponse> getCars(boolean isReady, boolean isUsed, int page, int size) {
-        log.info("Fetching cars: isReady={}, page={}, size={}", isReady, page, size);
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable pageable = PageRequest.of(page - 1, size, sort);
         var pageData = carRepository.findByIsReadyAndIsUsed(isReady, isUsed, pageable);
-        log.info("Found {} cars", pageData.getTotalElements());
         return PageResponse.<CarSummaryResponse>builder()
                 .currentPage(page)
                 .pageSize(pageData.getSize())
@@ -72,11 +67,9 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public PageResponse<CarSummaryResponse> getStaffCars(int page, int size) {
-        log.info("Fetching all cars for staff: page={}, size={}", page, size);
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable pageable = PageRequest.of(page - 1, size, sort);
         Page<Car> pageData = carRepository.findAll(pageable);
-        log.info("Found {} cars", pageData.getTotalElements());
 
         List<CarSummaryResponse> responses = pageData.getContent().stream().map(car -> {
             CarSummaryResponse res = carMapper.toCarSummaryResponse(car);
@@ -94,16 +87,13 @@ public class CarServiceImpl implements CarService {
     }
 
     @Override
-    public PageResponse<com.tlaq.catalog_service.dto.response.ListCarStaffResponse> getStaffManagementCars(int page, int size) {
-        log.info("Fetching all cars for management: page={}, size={}", page, size);
+    public PageResponse<ListCarStaffResponse> getStaffManagementCars(int page, int size) {
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable pageable = PageRequest.of(page - 1, size, sort);
         Page<Car> pageData = carRepository.findAll(pageable);
-        log.info("Found {} cars", pageData.getTotalElements());
 
-        List<com.tlaq.catalog_service.dto.response.ListCarStaffResponse> responses = pageData.getContent().stream().map(car -> {
-            com.tlaq.catalog_service.dto.response.ListCarStaffResponse res = carMapper.toListCarStaffResponse(car);
-            res.setQuantity(car.isReady() ? 1 : 0);
+        List<ListCarStaffResponse> responses = pageData.getContent().stream().map(car -> {
+            ListCarStaffResponse res = carMapper.toListCarStaffResponse(car);
             return res;
         }).toList();
 
@@ -134,13 +124,11 @@ public class CarServiceImpl implements CarService {
     @Override
     @Transactional
     public CarResponse createCarDetail(CarRequest request, List<MultipartFile> images) {
-        // 1. Tìm CarModel đã tồn tại trong hệ thống (Model này đã có sẵn Spec và Equipment)
         CarModel model = carModelRepository.findById(request.getCarModelId())
                 .orElseThrow(() -> new AppException(ErrorCode.MODEL_NOT_FOUND));
 
-        // 2. Map thông tin cơ bản của chiếc xe (Màu sắc, số VIN, giá, odo...)
         Car car = carMapper.toCar(request);
-        car.setCarModel(model); // Gán "bố" cho chiếc xe
+        car.setCarModel(model);
 
         if (request.getShowRoomId() != null && !request.getShowRoomId().isEmpty()) {
             ShowRoom showRoom = showRoomRepository.findById(request.getShowRoomId())
@@ -155,7 +143,6 @@ public class CarServiceImpl implements CarService {
             car.setEquipment(equipmentMapper.toEntity(request.getEquipment()));
         }
 
-        // 3. Xử lý ảnh thực tế cho chiếc xe
         if (images != null && !images.isEmpty()) {
             List<CarImage> carImages = new ArrayList<>();
             for (MultipartFile img : images) {
@@ -164,20 +151,17 @@ public class CarServiceImpl implements CarService {
                             ObjectUtils.asMap("resource_type", "auto"));
                     String url = uploadResult.get("secure_url").toString();
 
-                    // Lưu ý: Trường trong Entity của Quí là 'image'
                     carImages.add(CarImage.builder()
                             .image(url)
                             .car(car)
                             .build());
                 } catch (IOException ex) {
-                    log.error("Cloudinary upload failed: {}", ex.getMessage());
                     throw new AppException(ErrorCode.UPLOAD_IMAGE_ERROR);
                 }
             }
             car.setCarImages(carImages);
         }
 
-        // 4. Lưu vào DB và trả về Response
         Car savedCar = carRepository.save(car);
         return carMapper.toCarResponse(savedCar);
     }
@@ -185,21 +169,17 @@ public class CarServiceImpl implements CarService {
     @Override
     @Transactional
     public CarResponse updateCarDetail(String carId, CarRequest request, List<MultipartFile> images) {
-        // 1. Tìm xe hiện tại
         Car car = carRepository.findById(carId)
                 .orElseThrow(() -> new AppException(ErrorCode.CAR_NOT_FOUND));
 
-        // 2. Cập nhật các thông tin cơ bản
         carMapper.updateCar(car, request);
 
-        // 3. Cập nhật Model nếu có thay đổi carModelId
         if (request.getCarModelId() != null) {
             CarModel model = carModelRepository.findById(request.getCarModelId())
                     .orElseThrow(() -> new AppException(ErrorCode.MODEL_NOT_FOUND));
             car.setCarModel(model);
         }
 
-        // Cập nhật ShowRoom nếu có thay đổi showRoomId
         if (request.getShowRoomId() != null) {
             if (request.getShowRoomId().isEmpty()) {
                 car.setShowRoom(null);
@@ -210,7 +190,6 @@ public class CarServiceImpl implements CarService {
             }
         }
 
-        // 3.1. Cập nhật TechnicalSpec
         if (request.getTechnicalSpec() != null) {
             if (car.getTechnicalSpec() == null) {
                 car.setTechnicalSpec(techSpecMapper.toEntity(request.getTechnicalSpec()));
@@ -219,7 +198,6 @@ public class CarServiceImpl implements CarService {
             }
         }
 
-        // 3.2. Cập nhật Equipment
         if (request.getEquipment() != null) {
             if (car.getEquipment() == null) {
                 car.setEquipment(equipmentMapper.toEntity(request.getEquipment()));
@@ -228,9 +206,7 @@ public class CarServiceImpl implements CarService {
             }
         }
 
-        // 4. Nếu có ảnh mới, ghi đè hoặc bổ sung (ở đây tôi chọn ghi đè cho đơn giản và sạch)
         if (images != null && !images.isEmpty()) {
-            // Xóa ảnh cũ trên Cloudinary có thể làm sau, tạm thời xóa list cũ trong DB
             car.getCarImages().clear();
             
             for (MultipartFile img : images) {
@@ -244,7 +220,6 @@ public class CarServiceImpl implements CarService {
                             .car(car)
                             .build());
                 } catch (IOException ex) {
-                    log.error("Cloudinary upload failed: {}", ex.getMessage());
                     throw new AppException(ErrorCode.UPLOAD_IMAGE_ERROR);
                 }
             }
@@ -264,7 +239,6 @@ public class CarServiceImpl implements CarService {
 
     @Override
     public PageResponse<CarResponse> filterCar(Map<String, String> filter) {
-        // Mặc định chỉ lấy xe đã sẵn sàng (isReady = true)
         Specification<Car> spec = Specification.where(CarSpecification.isReady());
 
         if (filter.get("carBranch") != null)
@@ -284,13 +258,11 @@ public class CarServiceImpl implements CarService {
         if (filter.get("isUsed") != null)
             spec = spec.and(CarSpecification.hasCondition(Boolean.valueOf(filter.get("isUsed"))));
 
-        // Xử lý Phân trang và Sắp xếp [cite: 2026-02-25]
         int page = Integer.parseInt(filter.getOrDefault("page", "1"));
         int size = Integer.parseInt(filter.getOrDefault("size", "10"));
         Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
         Pageable pageable = PageRequest.of(page - 1, size, sort);
 
-        // Sau khi thêm JpaSpecificationExecutor, dòng này sẽ hết lỗi [cite: 2026-02-25]
         var pageData = carRepository.findAll(spec, pageable);
 
         return PageResponse.<CarResponse>builder()
@@ -305,36 +277,30 @@ public class CarServiceImpl implements CarService {
     @Override
     @Transactional
     public Model3DResponse upload3DModel(String carId, MultipartFile file) throws IOException {
-        // 1. Kiểm tra file rỗng
         if (file == null || file.isEmpty()) {
-            throw new AppException(ErrorCode.FILE_IS_EMPTY); // Quí tự thêm ErrorCode tương ứng nhé
+            throw new AppException(ErrorCode.FILE_IS_EMPTY);
         }
 
-        // 2. Kiểm tra kích thước file (Ví dụ: Giới hạn tối đa 50MB cho mô hình 3D)
         long MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 
         if (file.getSize() > MAX_FILE_SIZE) {
             throw new AppException(ErrorCode.FILE_TOO_LARGE);
         }
 
-        // 3. Kiểm tra định dạng file (Chỉ cho phép các file 3D thông dụng)
         String originalFilename = file.getOriginalFilename();
         if (originalFilename == null || !originalFilename.contains(".")) {
             throw new AppException(ErrorCode.INVALID_FILE_FORMAT);
         }
 
         String extension = originalFilename.substring(originalFilename.lastIndexOf(".") + 1).toLowerCase();
-        List<String> allowedExtensions = Arrays.asList("glb", "gltf", "obj", "fbx"); // Thêm bớt đuôi file tùy nhu cầu
-
+        List<String> allowedExtensions = Arrays.asList("glb", "gltf", "obj", "fbx");
         if (!allowedExtensions.contains(extension)) {
             throw new AppException(ErrorCode.INVALID_FILE_FORMAT);
         }
 
-        // 4. Lấy thông tin xe TRƯỚC KHI upload. (Tránh upload rác lên Cloudinary nếu carId sai)
         Car car = carRepository.findById(carId)
                 .orElseThrow(() -> new AppException(ErrorCode.CAR_NOT_FOUND));
 
-        // 5. Tiến hành upload lên Cloudinary
         Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap(
                 "resource_type", "raw",
                 "public_id", "car_models/" + System.currentTimeMillis() + "_" + originalFilename, // Thêm timestamp để tránh trùng tên file
@@ -343,7 +309,6 @@ public class CarServiceImpl implements CarService {
 
         String url = uploadResult.get("secure_url").toString();
 
-        // 6. Cập nhật vào Database
         car.setModel3dUrl(url);
         carRepository.save(car);
 
@@ -373,5 +338,28 @@ public class CarServiceImpl implements CarService {
                     .inStock(inStock)
                     .build();
         }).toList();
+    }
+
+    @Override
+    @Transactional
+    public void markCarDeposited(String carId) {
+        int rowsUpdated = carRepository.markAsDeposited(carId);
+        if (rowsUpdated > 0) {
+            log.info("Đã đánh dấu xe {} đang đặt cọc (isDeposited = true)", carId);
+        } else {
+            log.warn("Không thể đánh dấu đặt cọc cho xe {}", carId);
+            throw new AppException(ErrorCode.QUANTITY_NOT_ENOUGH);
+        }
+    }
+
+    @Override
+    @Transactional
+    public void unmarkCarDeposited(String carId) {
+        int rowsUpdated = carRepository.unmarkDeposited(carId);
+        if (rowsUpdated > 0) {
+            log.info("Đã hủy đánh dấu đặt cọc cho xe {} (isDeposited = false)", carId);
+        } else {
+            log.warn("Không thể hủy đánh dấu đặt cọc cho xe {}", carId);
+        }
     }
 }

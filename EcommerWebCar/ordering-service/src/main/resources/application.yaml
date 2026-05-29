@@ -35,7 +35,7 @@ cloudinary:
   api-secret: ${CLOUDINARY_API_SECRET}
 
 idp:
-  url: ${KEYCLOAK_URL:http://${PUBLIC_IP:localhost}:8180}
+  url: ${KEYCLOAK_URL:http://${PUBLIC_IP:localhost}:8180}/realms/anhqui/protocol/openid-connect/token
   client-id: ${KEYCLOAK_CLIENT_ID:ecommer-app}
   client-secret: ${KEYCLOAK_CLIENT_SECRET}
 

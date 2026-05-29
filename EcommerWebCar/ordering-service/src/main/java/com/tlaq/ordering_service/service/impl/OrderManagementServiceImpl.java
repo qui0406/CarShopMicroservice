@@ -53,25 +53,16 @@ public class OrderManagementServiceImpl implements OrderManagementService {
         // Kiểm tra hợp lệ State Machine
         validateStateTransition(order.getStatus(), newStatus);
 
-        // 1. CHỈ GỬI LỆNH HOÀN KHO NẾU NHÂN VIÊN CHỌN HỦY ĐƠN (CANCELLED)
+        // 1. HỦY GIỮ XE NẾU NHÂN VIÊN CHỌN HỦY ĐƠN (CANCELLED)
         if (newStatus == OrdersStatus.CANCELLED) {
-            Map<String, Object> rollbackMsg = new HashMap<>();
-            rollbackMsg.put("orderId", order.getId());
-            rollbackMsg.put("rollback", true);
-            List<Map<String, Object>> items = order.getOrderItems().stream().map(item -> {
-                Map<String, Object> i = new HashMap<>();
-                i.put("carId", item.getCarId());
-                i.put("quantity", item.getQuantity());
-                return i;
-            }).toList();
-            rollbackMsg.put("items", items);
-
-            rabbitTemplate.convertAndSend(
-                    RabbitMQConfig.EXCHANGE,
-                    RabbitMQConfig.INVENTORY_ROLLBACK_RK,
-                    rollbackMsg
-            );
-            log.info("♻️ [RabbitMQ] Đã gửi yêu cầu hoàn kho (nhân viên hủy) cho đơn: {}", order.getId());
+            if (order.getOrderItem() != null && order.getOrderItem().getCarId() != null) {
+                try {
+                    catalogClient.unmarkCarDeposited(order.getOrderItem().getCarId());
+                    log.info("♻️ Đã hủy giữ xe (nhân viên hủy) cho đơn: {}, xe: {}", order.getId(), order.getOrderItem().getCarId());
+                } catch (Exception e) {
+                    log.error("Lỗi khi hủy giữ xe {}: {}", order.getOrderItem().getCarId(), e.getMessage());
+                }
+            }
         }
 
         // 2. Cập nhật đúng trạng thái (newStatus) được truyền vào từ Controller
@@ -146,19 +137,17 @@ public class OrderManagementServiceImpl implements OrderManagementService {
     }
 
     private void populateCarNames(OrdersResponse response) {
-        if (response.getOrderItems() != null && !response.getOrderItems().isEmpty()) {
-            response.getOrderItems().forEach(item -> {
-                try {
-                    var carRes = catalogClient.getProductById(item.getCarId());
-                    if (carRes != null && carRes.getResult() != null) {
-                        item.setCarName(carRes.getResult().getName());
-                    }
-                } catch (Exception e) {
-                    log.error("Error fetching car name for carId: {}. Error: {}", item.getCarId(), e.getMessage());
+        if (response.getOrderItem() != null) {
+            try {
+                var carRes = catalogClient.getProductById(response.getOrderItem().getCarId());
+                if (carRes != null && carRes.getResult() != null) {
+                    response.getOrderItem().setCarName(carRes.getResult().getName());
                 }
-            });
+            } catch (Exception e) {
+                log.error("Error fetching car name for carId: {}. Error: {}", response.getOrderItem().getCarId(), e.getMessage());
+            }
             // Set top-level carName for convenience in UI tables
-            response.setCarName(response.getOrderItems().get(0).getCarName());
+            response.setCarName(response.getOrderItem().getCarName());
         }
     }
 
@@ -169,6 +158,18 @@ public class OrderManagementServiceImpl implements OrderManagementService {
             log.error("Invalid status provided: {}", status);
             throw new AppException(ErrorCode.INVALID_STATUS);
         }
+    }
+
+    @Override
+    public java.util.Map<String, Long> getStatusCount() {
+        List<Object[]> results = ordersRepository.countByStatus();
+        Map<String, Long> map = new HashMap<>();
+        for (Object[] row : results) {
+            OrdersStatus status = (OrdersStatus) row[0];
+            Long count = (Long) row[1];
+            map.put(status.name(), count);
+        }
+        return map;
     }
 
     @Override
@@ -212,7 +213,8 @@ public class OrderManagementServiceImpl implements OrderManagementService {
                 RevenueReportResponse report = dayMap.get(day);
                 if (report != null) {
                     report.setTotalOrders(report.getTotalOrders() + 1);
-                    report.setTotalRevenue(report.getTotalRevenue().add(o.getTotalAmount()));
+                    java.math.BigDecimal amount = o.getTotalAmount() != null ? o.getTotalAmount() : java.math.BigDecimal.ZERO;
+                    report.setTotalRevenue(report.getTotalRevenue().add(amount));
                 }
             }
 
@@ -235,7 +237,8 @@ public class OrderManagementServiceImpl implements OrderManagementService {
                 RevenueReportResponse report = monthMap.get(m);
                 if (report != null) {
                     report.setTotalOrders(report.getTotalOrders() + 1);
-                    report.setTotalRevenue(report.getTotalRevenue().add(o.getTotalAmount()));
+                    java.math.BigDecimal amount = o.getTotalAmount() != null ? o.getTotalAmount() : java.math.BigDecimal.ZERO;
+                    report.setTotalRevenue(report.getTotalRevenue().add(amount));
                 }
             }
 
@@ -274,42 +277,41 @@ public class OrderManagementServiceImpl implements OrderManagementService {
         Map<String, BrandSalesResponse> brandMap = new HashMap<>();
 
         for (Orders o : orders) {
-            if (o.getOrderItems() != null) {
-                for (com.tlaq.ordering_service.entity.OrdersDetails item : o.getOrderItems()) {
-                    String carId = item.getCarId();
-                    com.tlaq.ordering_service.dto.response.CarResponse car = carCache.computeIfAbsent(carId, id -> {
-                        try {
-                            var carRes = catalogClient.getProductById(id);
-                            if (carRes != null) {
-                                return carRes.getResult();
-                            }
-                        } catch (Exception e) {
-                            log.error("Failed to fetch car details for carId: {}", id, e);
+            if (o.getOrderItem() != null) {
+                com.tlaq.ordering_service.entity.OrdersDetails item = o.getOrderItem();
+                String carId = item.getCarId();
+                com.tlaq.ordering_service.dto.response.CarResponse car = carCache.computeIfAbsent(carId, id -> {
+                    try {
+                        var carRes = catalogClient.getProductById(id);
+                        if (carRes != null) {
+                            return carRes.getResult();
                         }
-                        return null;
-                    });
-
-                    String brandName = "Khác";
-                    String logoUrlVal = "";
-                    if (car != null && car.getCarModel() != null && car.getCarModel().getCarBranch() != null) {
-                        brandName = car.getCarModel().getCarBranch().getName();
-                        logoUrlVal = car.getCarModel().getCarBranch().getImageBranch();
+                    } catch (Exception e) {
+                        log.error("Failed to fetch car details for carId: {}", id, e);
                     }
-                    final String logoUrl = logoUrlVal;
+                    return null;
+                });
 
-                    BrandSalesResponse brandSales = brandMap.computeIfAbsent(brandName, b -> 
-                        BrandSalesResponse.builder()
-                                .brandName(b)
-                                .quantitySold(0L)
-                                .totalRevenue(java.math.BigDecimal.ZERO)
-                                .logoUrl(logoUrl)
-                                .build()
-                    );
-
-                    brandSales.setQuantitySold(brandSales.getQuantitySold() + item.getQuantity());
-                    java.math.BigDecimal itemRevenue = item.getUnitPrice().multiply(java.math.BigDecimal.valueOf(item.getQuantity()));
-                    brandSales.setTotalRevenue(brandSales.getTotalRevenue().add(itemRevenue));
+                String brandName = "Khác";
+                String logoUrlVal = "";
+                if (car != null && car.getCarModel() != null && car.getCarModel().getCarBranch() != null) {
+                    brandName = car.getCarModel().getCarBranch().getName();
+                    logoUrlVal = car.getCarModel().getCarBranch().getImageBranch();
                 }
+                final String logoUrl = logoUrlVal;
+
+                BrandSalesResponse brandSales = brandMap.computeIfAbsent(brandName, b -> 
+                    BrandSalesResponse.builder()
+                            .brandName(b)
+                            .quantitySold(0L)
+                            .totalRevenue(java.math.BigDecimal.ZERO)
+                            .logoUrl(logoUrl)
+                            .build()
+                );
+
+                brandSales.setQuantitySold(brandSales.getQuantitySold() + 1);
+                java.math.BigDecimal itemRevenue = item.getUnitPrice(); // quantity is 1
+                brandSales.setTotalRevenue(brandSales.getTotalRevenue().add(itemRevenue));
             }
         }
 

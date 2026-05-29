@@ -20,8 +20,8 @@ def preprocess_image(image_bytes: bytes) -> Tuple[Optional[np.ndarray], Optional
     img_rgb = cv2.cvtColor(img_bgr, cv2.COLOR_BGR2RGB)
     img_resized = cv2.resize(img_rgb, (224, 224))
     
-    img_in = img_resized.astype("float32")
-    img_in = tf.keras.applications.efficientnet.preprocess_input(img_in)
+    # Chuẩn hóa ảnh về khoảng [0, 1] giống y hệt khi huấn luyện model
+    img_in = img_resized.astype("float32") / 255.0
     img_in = np.expand_dims(img_in, axis=0)
     
     return img_bgr, img_in
@@ -65,7 +65,9 @@ def preprocess_tabular(
 ) -> Tuple[Optional[np.ndarray], str]:
     full_name = f"{model_name} {trim_name}".strip()
 
-    car_age = max(0, datetime.now().year - year)
+    # Đồng bộ năm neo giữ làm CURRENT_YEAR là 2025 giống hệt khi huấn luyện và fit scaler
+    CURRENT_YEAR = 2025
+    car_age = max(0, CURRENT_YEAR - year)
     
     num_s = model_loader.scaler.transform([[year, odo, car_age]])
     
@@ -114,12 +116,8 @@ def preprocess_text(
         f"{baoduong}. {description}"
     )
 
-    vec          = model_loader.tfidf.transform([text]).toarray().astype("float32")
-    expected_dim = model_loader.price_model.input_shape[2][1]
-    text_in      = np.zeros((1, expected_dim), dtype="float32")
-    dim          = min(vec.shape[1], expected_dim)
-    text_in[:, :dim] = vec[:, :dim]
-    return text_in
+    vec = model_loader.tfidf.transform([text]).toarray().astype("float32")
+    return vec
 
 
 def predict_price(img_in: np.ndarray, meta_in: np.ndarray, text_in: np.ndarray) -> float:

@@ -28,15 +28,11 @@ public interface CatalogClient {
     ApiResponse<List<com.tlaq.ordering_service.dto.response.CarBatchResponse>> validateBatch(
             @org.springframework.web.bind.annotation.RequestBody List<CarBatchItemRequest> request);
 
-    /**
-     * Giữ chỗ xe đồng bộ - gọi khi tạo đơn hàng để set isDeposited = true ngay lập tức.
-     */
-    @org.springframework.web.bind.annotation.PostMapping("/catalog/api/inventory/reserve/{carId}")
-    ApiResponse<Boolean> reserveCar(@PathVariable String carId);
+    @org.springframework.web.bind.annotation.PutMapping("/catalog/api/car/mark-deposited/{carId}")
+    ApiResponse<Void> markCarDeposited(@PathVariable("carId") String carId);
 
-    /**
-     * Hủy giữ chỗ xe đồng bộ - gọi khi cần rollback reservation (lỗi tạo đơn).
-     */
-    @org.springframework.web.bind.annotation.PostMapping("/catalog/api/inventory/unreserve/{carId}")
-    ApiResponse<Boolean> unreserveCar(@PathVariable String carId);
+    @org.springframework.web.bind.annotation.PutMapping("/catalog/api/car/unmark-deposited/{carId}")
+    ApiResponse<Void> unmarkCarDeposited(@PathVariable("carId") String carId);
+
+
 }
