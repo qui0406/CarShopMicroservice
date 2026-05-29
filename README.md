@@ -10,63 +10,8 @@ Nền tảng này cho phép người dùng tìm kiếm, xem chi tiết, đặt c
 
 Dưới đây là sơ đồ chi tiết kiến trúc của hệ thống EcommerCar, bao gồm luồng đi của dữ liệu từ Client qua lớp Reverse Proxy, Gateway bảo mật, hệ thống Service Registry, các Microservices nghiệp vụ giao tiếp hướng sự kiện qua Message Broker, và dịch vụ AI tích hợp:
 
-```mermaid
-graph TD
-    %% Clients & Gateways
-    Client["🌐 Trình duyệt / Mobile Client"] -->|HTTP/Websocket| Nginx["⚙️ Reverse Proxy (Nginx) <br> Cổng: 3000"]
-    Nginx -->|React App| ReactApp["⚛️ React Frontend <br> (carecommerapp)"]
-    Nginx -->|API Requests| Gateway["🔀 API Gateway <br> (Spring Cloud Gateway) <br> Cổng: 8888"]
-    
-    %% Gateway Security & Registry
-    Gateway -->|Xác thực & Ủy quyền| Keycloak["🔑 Keycloak (SSO / IAM) <br> Cổng: 8180"]
-    Gateway -->|Định tuyến dịch vụ| Eureka["🔍 Discovery Service <br> (Eureka Server) <br> Cổng: 8761"]
-    
-    %% Microservices Routing
-    Gateway -->|Proxy| IdentityService["👤 Identity Service <br> (Quản lý User & Quyền) <br> Cổng: 8080 / 8081"]
-    Gateway -->|Proxy| CatalogService["🚘 Catalog Service <br> (Kho xe & Danh mục) <br> Cổng: 8081 / 8082"]
-    Gateway -->|Proxy| OrderingService["📦 Ordering Service <br> (Giỏ hàng & Đơn hàng) <br> Cổng: 8082 / 8083"]
-    Gateway -->|Proxy| PaymentService["💳 Payment Service <br> (Xử lý thanh toán) <br> Cổng: 8083 / 8084"]
-    Gateway -->|Proxy| NotificationService["🔔 Notification Service <br> (Gửi Mail thông báo) <br> Cổng: 8085 / 8088"]
-    Gateway -->|Proxy| ChatService["💬 Chat Service <br> (Chat hỗ trợ trực tiếp) <br> Cổng: 8084 / 8085"]
-    Gateway -->|Proxy| AIService["🤖 AI Service <br> (Tư vấn viên AI & Báo giá) <br> Cổng: 8000"]
+<img width="1880" height="1204" alt="image" src="https://github.com/user-attachments/assets/4e1e5c1c-ae21-4d28-85f0-86b5b35822f7" />
 
-    %% Databases & Storages
-    IdentityService -->|R/W| MySQL[("🛢️ MySQL Database <br> Cổng: 3307")]
-    CatalogService -->|R/W| MySQL
-    OrderingService -->|R/W| MySQL
-    PaymentService -->|R/W| MySQL
-    
-    NotificationService -->|R/W| MongoDB[("🍃 MongoDB Database <br> Cổng: 27017")]
-    ChatService -->|R/W| MongoDB
-    
-    AIService -->|Semantic Cache| Redis[("⚡ Redis Stack DB <br> Cổng: 6379")]
-    AIService -->|Vector Storage| ChromaDB["📚 Chroma Vector DB"]
-    AIService -->|LLM Engine| LLM["🧠 OpenAI GPT / Google Gemini API"]
-
-    %% External Services
-    CatalogService -->|Lưu trữ ảnh xe| Cloudinary["☁️ Cloudinary Cloud Storage"]
-    IdentityService -->|Ảnh đại diện User| Cloudinary
-    PaymentService -->|Cổng thanh toán| VNPay["💳 VNPay Sandbox Gateway"]
-    NotificationService -->|Gửi Email tự động| SendGrid["📧 SendGrid Mail Service"]
-
-    %% Event Broker
-    OrderingService <-->|Publish/Subscribe| RabbitMQ{{"🐇 RabbitMQ Message Broker <br> Cổng: 5672 / 15672"}}
-    PaymentService <-->|Publish/Subscribe| RabbitMQ
-    CatalogService <-->|Publish/Subscribe| RabbitMQ
-    NotificationService <-->|Publish/Subscribe| RabbitMQ
-    ChatService <-->|Publish/Subscribe| RabbitMQ
-
-    %% Styling
-    classDef infra fill:#f9f,stroke:#333,stroke-width:2px;
-    classDef service fill:#bbf,stroke:#333,stroke-width:1px;
-    classDef db fill:#bfb,stroke:#333,stroke-width:1px;
-    classDef external fill:#fbb,stroke:#333,stroke-width:1px;
-    
-    class Keycloak,Eureka,RabbitMQ,Nginx infra;
-    class IdentityService,CatalogService,OrderingService,PaymentService,NotificationService,ChatService,AIService service;
-    class MySQL,MongoDB,Redis,ChromaDB db;
-    class Cloudinary,VNPay,SendGrid,LLM external;
-```
 
 ---
 
