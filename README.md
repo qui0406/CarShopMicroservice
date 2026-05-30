@@ -10,7 +10,7 @@ Nền tảng này cho phép người dùng tìm kiếm, xem chi tiết, đặt c
 
 Dưới đây là sơ đồ chi tiết kiến trúc của hệ thống EcommerCar, bao gồm luồng đi của dữ liệu từ Client qua lớp Reverse Proxy, Gateway bảo mật, hệ thống Service Registry, các Microservices nghiệp vụ giao tiếp hướng sự kiện qua Message Broker, và dịch vụ AI tích hợp:
 
-<img width="1880" height="1204" alt="image" src="https://github.com/user-attachments/assets/4e1e5c1c-ae21-4d28-85f0-86b5b35822f7" />
+<img width="1880" height="1298" alt="image" src="https://github.com/user-attachments/assets/3982835f-a218-40df-bd9a-074c6f4ce8b1" />
 
 
 ---
