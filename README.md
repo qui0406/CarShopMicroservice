@@ -22,12 +22,12 @@ The system is divided into independent services to increase scalability and faul
 | :--- | :--- | :---: | :---: | :--- | :--- |
 | **Eureka Server** | Java, Spring Cloud Eureka | `8761` | `8761` | None | Manages service registration and discovery (Service Registry & Discovery). |
 | **API Gateway** | Java, Spring Cloud Gateway | `8888` | `8888` | Keycloak SSO | Single entry point, responsible for routing and security checks (JWT). |
-| **Identity Service** | Java, Spring Boot, Spring Security | `8080` | `8081` | MySQL, Keycloak, Cloudinary | Manages users, permissions, personal profile and avatar updates. |
-| **Catalog Service** | Java, Spring Boot, JPA | `8081` | `8082` | MySQL, Cloudinary, RabbitMQ | Manages car information, brand catalogs, retail prices, deposit/sale status. |
-| **Ordering Service** | Java, Spring Boot | `8082` | `8083` | MySQL, RabbitMQ | Handles the cart, deposit reservations, order creation, and order status management. |
-| **Payment Service** | Java, Spring Boot | `8083` | `8084` | MySQL, VNPay Sandbox, RabbitMQ | Processes deposit payments via the VNPay gateway and reconciles transaction status. |
-| **Chat Service** | Java, Spring Boot, WebSocket | `8084` | `8085` | MongoDB, RabbitMQ | Real-time online chat channel between customers and sales consultants. |
-| **Notification Service**| Java, Spring Boot | `8085` | `8088` | MongoDB, SendGrid API, RabbitMQ | Automatically sends invoice emails and deposit confirmation notifications. |
+| **Identity Service** | Java, Spring Boot, Spring Security | `8081` | `8081` | MySQL, Keycloak, Cloudinary | Manages users, permissions, personal profile and avatar updates. |
+| **Catalog Service** | Java, Spring Boot, JPA | `8082` | `8082` | MySQL, Cloudinary, RabbitMQ | Manages car information, brand catalogs, retail prices, deposit/sale status. |
+| **Ordering Service** | Java, Spring Boot | `8083` | `8083` | MySQL, RabbitMQ | Handles the cart, deposit reservations, order creation, and order status management. |
+| **Payment Service** | Java, Spring Boot | `8084` | `8084` | MySQL, VNPay Sandbox, RabbitMQ | Processes deposit payments via the VNPay gateway and reconciles transaction status. |
+| **Chat Service** | Java, Spring Boot, WebSocket | `8085` | `8085` | MongoDB, RabbitMQ | Real-time online chat channel between customers and sales consultants. |
+| **Notification Service**| Java, Spring Boot | `8088` | `8088` | MongoDB, SendGrid API, RabbitMQ | Automatically sends invoice emails and deposit confirmation notifications. |
 | **AI Service** | Python, FastAPI, LangChain | `8000` | `8000` (Local) | Redis Search, ChromaDB, Gemini/OpenAI | Smart car consulting virtual assistant, real on-road price calculation, car recommendations, and Semantic Search. |
 | **React Frontend** | ReactJS, TailwindCSS | `3000` | `3000` | Nginx | Customer-facing interface: browse cars, compare, deposit, live chat, and ask the AI. |
 
